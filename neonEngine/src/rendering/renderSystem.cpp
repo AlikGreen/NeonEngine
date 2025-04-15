@@ -13,7 +13,7 @@ namespace Neon
 
     void RenderSystem::startup()
     {
-        window = std::make_unique<Window>(windowOptions);
+
 
     }
 

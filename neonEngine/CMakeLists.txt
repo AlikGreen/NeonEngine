@@ -23,6 +23,11 @@ add_library(neonEngine SHARED
         src/rendering/renderSystem.h
         src/rendering/messageCallback.h)
 
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(glfw)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 
 set(NVRHI_WITH_DX11 ON CACHE BOOL "Enable DX11 backend")
 set(NVRHI_WITH_DX12 OFF CACHE BOOL "Disable DX12 backend")
