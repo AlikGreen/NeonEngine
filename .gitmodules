@@ -1,0 +1,6 @@
+[submodule "neonEngine/nvrhi"]
+	path = neonEngine/nvrhi
+	url = https://github.com/NVIDIA-RTX/NVRHI.git
+[submodule "neonEngine/dependencies/nvrhi"]
+	path = neonEngine/dependencies/nvrhi
+	url = https://github.com/NVIDIA-RTX/NVRHI.git
