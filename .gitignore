@@ -1,0 +1,11 @@
+# Ignore build directories
+sandboxApp/cmake-build-debug/
+sandboxApp/neonEngine/
+neonEngine/cmake-build-debug/
+
+# Ignore object files and executables
+*.o
+*.obj
+*.exe
+*.dll
+*.so
