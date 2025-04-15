@@ -6,9 +6,12 @@
 
 namespace Neon
 {
+    Engine* Engine::instance = nullptr;
+
     Engine::Engine(const EngineConfig &config)
     {
         this->config = config;
+        instance = this;
     }
 
     void Engine::startup()
@@ -32,6 +35,11 @@ namespace Neon
     void Engine::exit()
     {
         running = false;
+    }
+
+    Engine* Engine::getInstance()
+    {
+        return instance;
     }
 
     void Engine::run()

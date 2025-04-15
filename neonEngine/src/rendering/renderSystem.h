@@ -6,7 +6,11 @@
 #include "window.h"
 #include "../core/system.h"
 #include "nvrhi/nvrhi.h"
-#include "GL"
+#define GLFW_EXPOSE_NATIVE_WIN32
+#define GLFW_EXPOSE_NATIVE_WGL
+#include <windows.h>
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 
 namespace Neon
 {
@@ -26,6 +30,6 @@ namespace Neon
         nvrhi::DeviceHandle renderDevice;
 
         WindowOptions windowOptions;
-        std::unique_ptr<Window> window{};
+        // std::unique_ptr<Window> window{};
     };
 }

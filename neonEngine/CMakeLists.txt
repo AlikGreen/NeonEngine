@@ -12,6 +12,14 @@ include_directories(BEFORE SYSTEM "${WINDOWS_SDK_PATH}/shared")
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
+set(NVRHI_WITH_DX11 ON CACHE BOOL "Enable DX11 backend")
+set(NVRHI_WITH_DX12 OFF CACHE BOOL "Disable DX12 backend")
+set(NVRHI_WITH_VULKAN OFF BOOL "Disable Vulkan backend")
+
+add_subdirectory(dependencies/nvrhi)
+
+add_subdirectory(dependencies/glfw)
+
 add_library(neonEngine SHARED
         src/neonEngine.cpp
         src/neonEngine.h
@@ -23,17 +31,9 @@ add_library(neonEngine SHARED
         src/rendering/renderSystem.h
         src/rendering/messageCallback.h)
 
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(glfw)
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
-
-set(NVRHI_WITH_DX11 ON CACHE BOOL "Enable DX11 backend")
-set(NVRHI_WITH_DX12 OFF CACHE BOOL "Disable DX12 backend")
-set(NVRHI_WITH_VULKAN OFF BOOL "Disable Vulkan backend")
-
-add_subdirectory(dependencies/nvrhi)
 
 target_link_libraries(neonEngine PRIVATE nvrhi nvrhi_d3d11 d3d11)
 #target_include_directories(neonEngine PRIVATE "dependencies/nvrhi/include")
+
+target_link_libraries(neonEngine PRIVATE glfw)
+target_include_directories(neonEngine PRIVATE "dependencies/glfw/include")

@@ -22,7 +22,6 @@ namespace Neon
 
         void exit();
 
-
         // TODO wait for safe time to add systems
         template <typename T, typename... Args>
         void registerSystem(Args&&... args)
@@ -30,10 +29,14 @@ namespace Neon
             T* system = new T(std::forward<Args>(args)...);
             registeredSystems.push_back(system);
         }
+
+        static Engine* getInstance();
     private:
         std::vector<System*> registeredSystems;
         EngineConfig config;
 
         bool running = true;
+
+        static Engine* instance;
     };
 }
