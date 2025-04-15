@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include "window.h"
 #include "../core/system.h"
 
@@ -14,6 +16,6 @@ namespace Neon
         void render() override;
     private:
         WindowOptions windowOptions;
-        Window window;
+        std::unique_ptr<Window> window{};
     };
 }

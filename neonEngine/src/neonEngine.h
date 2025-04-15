@@ -27,7 +27,8 @@ namespace Neon
         template <typename T, typename... Args>
         void registerSystem(Args&&... args)
         {
-            registeredSystems.emplace_back<T>(std::forward<Args>(args)...);
+            T* system = new T(std::forward<Args>(args)...);
+            registeredSystems.push_back(system);
         }
     private:
         std::vector<System*> registeredSystems;

@@ -9,7 +9,7 @@ int main()
     config.windowOptions.title = "Sandbox App";
 
     auto engine = Neon::Engine(config);
-    
+
     engine.registerSystem<GameSystem>();
 
     engine.startup();

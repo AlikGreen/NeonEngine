@@ -3,7 +3,8 @@ project(neonEngine)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_library(neonEngine SHARED src/neonEngine.cpp
+add_library(neonEngine SHARED
+        src/neonEngine.cpp
         src/neonEngine.h
         src/rendering/window.cpp
         src/rendering/window.h
@@ -11,3 +12,7 @@ add_library(neonEngine SHARED src/neonEngine.cpp
         src/core/event.h
         src/rendering/renderSystem.cpp
         src/rendering/renderSystem.h)
+
+add_subdirectory(dependencies/nvrhi)
+target_link_libraries(neonEngine PRIVATE nvrhi)
+target_include_directories(neonEngine PRIVATE "dependencies/nvrhi")
