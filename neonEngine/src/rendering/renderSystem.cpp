@@ -1,5 +1,9 @@
 #include "renderSystem.h"
 
+
+
+#include "messageCallback.h"
+
 namespace Neon
 {
     RenderSystem::RenderSystem(const WindowOptions &windowOptions)
@@ -10,6 +14,7 @@ namespace Neon
     void RenderSystem::startup()
     {
         window = std::make_unique<Window>(windowOptions);
+
     }
 
     void RenderSystem::shutdown()

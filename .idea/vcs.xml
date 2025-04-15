@@ -2,5 +2,8 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/nvrhi" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/nvrhi/rtxmu" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/nvrhi/thirdparty/Vulkan-Headers" vcs="Git" />
   </component>
 </project>

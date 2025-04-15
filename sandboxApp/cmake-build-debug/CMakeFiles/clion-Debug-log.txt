@@ -1,0 +1,10 @@
+"C:\Program Files\JetBrains\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=C:/Program Files/JetBrains/CLion 2024.2.2/bin/ninja/win/x64/ninja.exe" -G Ninja -S C:\Users\alikg\CLionProjects\neonEngine\sandboxApp -B C:\Users\alikg\CLionProjects\neonEngine\sandboxApp\cmake-build-debug
+CMake Error at CopyFile.cmake:3 (message):
+  Source file
+  'C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/../neonEngine/cmake-build-debug/libNeonEngine.dll'
+  does not exist!
+Call Stack (most recent call first):
+  CMakeLists.txt:16 (copy_to_build_dir)
+
+
+-- Configuring incomplete, errors occurred!

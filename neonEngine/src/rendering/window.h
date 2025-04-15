@@ -7,7 +7,7 @@ namespace  Neon
     class Window
     {
     public:
-        Window(WindowOptions options);
+        explicit Window(WindowOptions options);
     };
 
     struct WindowOptions
