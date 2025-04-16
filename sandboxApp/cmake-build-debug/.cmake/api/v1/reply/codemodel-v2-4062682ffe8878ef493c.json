@@ -1,0 +1,162 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.29"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						4
+					]
+				},
+				{
+					"build" : "neonEngine",
+					"childIndexes" : 
+					[
+						2
+					],
+					"jsonFile" : "directory-neonEngine-Debug-0372d00482196b8be649.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.29"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "C:/Users/alikg/CLionProjects/neonEngine/neonEngine",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "neonEngine/dependencies/SDL3",
+					"jsonFile" : "directory-neonEngine.dependencies.SDL3-Debug-e7057ae84bf4ceda74bc.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 2,
+					"source" : "C:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "sandboxApp",
+					"targetIndexes" : 
+					[
+						4
+					]
+				},
+				{
+					"childIndexes" : 
+					[
+						2
+					],
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "neonEngine",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "SDL3",
+					"parentIndex" : 1,
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 2,
+					"id" : "SDL3-shared::@8a3d44bd79bd3d307375",
+					"jsonFile" : "target-SDL3-shared-Debug-fe2dcdce39fb3ba41145.json",
+					"name" : "SDL3-shared",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "SDL3_test::@8a3d44bd79bd3d307375",
+					"jsonFile" : "target-SDL3_test-Debug-3404dc2c175e59fda47f.json",
+					"name" : "SDL3_test",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "SDL_uclibc::@8a3d44bd79bd3d307375",
+					"jsonFile" : "target-SDL_uclibc-Debug-873f6eabedd42d248d0c.json",
+					"name" : "SDL_uclibc",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "neonEngine::@f245adc22688a19edbf5",
+					"jsonFile" : "target-neonEngine-Debug-b4dbbd36ec096ed835d8.json",
+					"name" : "neonEngine",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "sandboxApp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-sandboxApp-Debug-4505307f964c62105dfb.json",
+					"name" : "sandboxApp",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug",
+		"source" : "C:/Users/alikg/CLionProjects/neonEngine/sandboxApp"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

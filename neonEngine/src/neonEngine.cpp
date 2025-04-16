@@ -20,6 +20,7 @@ namespace Neon
 
         for (const auto system: registeredSystems)
         {
+            std::cout << "START" << std::endl;
             system->startup();
         }
     }

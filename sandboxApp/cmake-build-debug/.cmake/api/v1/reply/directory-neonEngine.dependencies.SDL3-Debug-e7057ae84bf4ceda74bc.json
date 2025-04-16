@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "neonEngine/dependencies/SDL3",
+		"source" : "C:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3"
+	}
+}

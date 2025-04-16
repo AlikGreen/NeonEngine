@@ -1,13 +1,13 @@
-function(copy_to_build_dir SRC_FILE DEST_NAME)
-    if(NOT EXISTS ${SRC_FILE})
-        message(FATAL_ERROR "Source file '${SRC_FILE}' does not exist!")
+function(copy_to_build SOURCE_PATH DEST_PATH)
+    if(EXISTS "${SOURCE_PATH}")
+        if(IS_DIRECTORY "${SOURCE_PATH}")
+            # Copy an entire directory.
+            file(COPY "${SOURCE_PATH}" DESTINATION "${DEST_PATH}")
+        else()
+            # Copy a single file.
+            configure_file("${SOURCE_PATH}" "${DEST_PATH}" COPYONLY)
+        endif()
+    else()
+        message(FATAL_ERROR "The source path '${SOURCE_PATH}' does not exist!")
     endif()
-
-    # Define the destination path in the build directory
-    set(DEST_FILE "${CMAKE_BINARY_DIR}/${DEST_NAME}")
-
-    # Copy the file at CMake configure time
-    configure_file(${SRC_FILE} ${DEST_FILE} COPYONLY)
-
-    message(STATUS "Copied ${SRC_FILE} to ${DEST_FILE}")
 endfunction()

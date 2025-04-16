@@ -1,9 +1,6 @@
 [submodule "neonEngine/nvrhi"]
 	path = neonEngine/nvrhi
 	url = https://github.com/NVIDIA-RTX/NVRHI.git
-[submodule "neonEngine/dependencies/nvrhi"]
-	path = neonEngine/dependencies/nvrhi
-	url = https://github.com/NVIDIA-RTX/NVRHI.git
-[submodule "neonEngine/dependencies/glfw"]
-	path = neonEngine/dependencies/glfw
-	url = https://github.com/glfw/glfw.git
+[submodule "neonEngine/dependencies/SDL3"]
+	path = neonEngine/dependencies/SDL3
+	url = https://github.com/libsdl-org/SDL.git

@@ -12,5 +12,9 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/../neonEngine ${CMAKE_BINARY_DIR}/neonEngin
 target_link_libraries(sandboxApp PRIVATE neonEngine)
 target_include_directories(sandboxApp PRIVATE "${CMAKE_SOURCE_DIR}/../neonEngine/src")
 
-include(CopyFile.cmake)
-copy_to_build_dir("${CMAKE_SOURCE_DIR}/cmake-build-debug-visual-studio/neonEngine/Debug/neonEngine.dll" "Debug/neonEngine.dll")
+add_custom_command(TARGET sandboxApp POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:neonEngine>"
+        "${CMAKE_BINARY_DIR}/libneonEngine.dll"
+        COMMENT "Copying DLL to the build directory as neonEngine.dll"
+)

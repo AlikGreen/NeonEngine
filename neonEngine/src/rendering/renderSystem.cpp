@@ -1,10 +1,8 @@
 #include "renderSystem.h"
 
+#include <iostream>
 
-
-#include "messageCallback.h"
 #include "../neonEngine.h"
-#include "nvrhi/d3d11.h"
 
 namespace Neon
 {
@@ -15,87 +13,80 @@ namespace Neon
 
     void RenderSystem::startup()
     {
-        if (!glfwInit())
-            return;
-
-        // Ensure GLFW does not create an OpenGL context.
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-        // Create the window.
-        window = glfwCreateWindow(1280, 720, "RenderSystem Window", nullptr, nullptr);
-        if (!window) {
-            glfwTerminate();
-            return;
-        }
-
-        // Obtain the native window handle (HWND) for Direct3D initialization.
-        HWND hwnd = glfwGetWin32Window(window);
-
-        // Setup the swap chain description.
-        DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
-        swapChainDesc.BufferCount = 1;
-        swapChainDesc.BufferDesc.Width = 1280;
-        swapChainDesc.BufferDesc.Height = 720;
-        swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapChainDesc.OutputWindow = hwnd;
-        swapChainDesc.SampleDesc.Count = 1;
-        swapChainDesc.Windowed = TRUE;
-
-        // Create the Direct3D 11 device, device context, and swap chain.
-        D3D_FEATURE_LEVEL featureLevels[] = { D3D_FEATURE_LEVEL_11_0 };
-        D3D_FEATURE_LEVEL obtainedFeatureLevel;
-        HRESULT hr = D3D11CreateDeviceAndSwapChain(
-            nullptr,
-            D3D_DRIVER_TYPE_HARDWARE,
-            nullptr,
-            0,
-            featureLevels,
-            1,
-            D3D11_SDK_VERSION,
-            &swapChainDesc,
-            &swapChain,
-            &device,
-            &obtainedFeatureLevel,
-            &context
-        );
-        if (FAILED(hr)) {
-            glfwTerminate();
-            return;
-        }
-
-        // Create an NVRHI device with the D3D11 device.
-        nvrhi::d3d11::DeviceDesc nvrhiDesc = {};
-        nvrhiDesc.context = context;
-        renderDevice = nvrhi::d3d11::createDevice(nvrhiDesc);
-    }
-
-    void RenderSystem::render()
-    {
-        glfwPollEvents();
-        if (glfwWindowShouldClose(window))
+        std::cout << "START Render" << std::endl;
+        if (!SDL_Init(SDL_INIT_VIDEO))
         {
-            Engine::getInstance()->exit();
+            printf("SDL_Init Error: %s\n", SDL_GetError());
+            // If SDL_GetError() returns empty, try printing the return value
+            printf("SDL_Init Return Code: %d\n", SDL_Init(SDL_INIT_VIDEO));
+            return;
         }
 
-        // Place your rendering code here.
-        // For instance, you could clear the render target and issue drawing commands via renderDevice.
+        // Create the window (using SDL_WINDOW_OPENGL flag for GPU rendering)
+        window = SDL_CreateWindow("SDL 3 Triangle Example", 800, 600,
+                         SDL_WINDOW_RESIZABLE);
+        if (!window) {
+            SDL_Log("Failed to create window: %s", SDL_GetError());
+            return;
+        }
 
-        // Present the swap chain.
-        if (swapChain)
-            swapChain->Present(1, 0);
+        // Create a hardware-accelerated renderer
+        renderer = SDL_CreateRenderer(window, "vulkan");
+        if (!renderer) {
+            SDL_Log("Failed to create renderer: %s", SDL_GetError());
+            return;
+        }
     }
 
-    void RenderSystem::shutdown()
-    {
-        if (swapChain) { swapChain->Release(); swapChain = nullptr; }
-        if (context) { context->Release(); context = nullptr; }
-        if (device) { device->Release(); device = nullptr; }
+    void RenderSystem::render() {
+        // Clear the screen with a black color
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+        // Define three vertices for the triangle using SDL_Vertex.
+        SDL_Vertex vertices[3];
+
+        // Vertex 0 (Red)
+        vertices[0].position.x = 400;
+        vertices[0].position.y = 100;
+        vertices[0].color = {255, 0, 0, 255};
+        vertices[0].tex_coord.x = 0.0f;
+        vertices[0].tex_coord.y = 0.0f;
+
+        // Vertex 1 (Green)
+        vertices[1].position.x = 100;
+        vertices[1].position.y = 500;
+        vertices[1].color = {0, 255, 0, 255};
+        vertices[1].tex_coord.x = 0.0f;
+        vertices[1].tex_coord.y = 0.0f;
+
+        // Vertex 2 (Blue)
+        vertices[2].position.x = 700;
+        vertices[2].position.y = 500;
+        vertices[2].color = {0, 0, 255, 255};
+        vertices[2].tex_coord.x = 0.0f;
+        vertices[2].tex_coord.y = 0.0f;
+
+        // Render the triangle. Since we are not applying any texture, we pass NULL as texture.
+        // SDL_RenderGeometry will treat consecutive vertices as a triangle.
+        SDL_RenderGeometry(renderer, nullptr, vertices, 3, nullptr, 0);
+
+        // Present the rendered frame on screen
+        SDL_RenderPresent(renderer);
+    }
+
+    void RenderSystem::shutdown() {
+        // Clean up renderer and window, then quit SDL
+        if (renderer) {
+            SDL_DestroyRenderer(renderer);
+            renderer = nullptr;
+        }
 
         if (window) {
-            glfwDestroyWindow(window);
+            SDL_DestroyWindow(window);
             window = nullptr;
         }
-        glfwTerminate();
+
+        SDL_Quit();
     }
 }
