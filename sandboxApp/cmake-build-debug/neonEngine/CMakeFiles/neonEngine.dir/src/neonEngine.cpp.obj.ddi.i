@@ -80365,7 +80365,7 @@ namespace Neon
         void run();
         void shutdown();
 
-        void exit();
+        void quit();
 
 
         template <typename T, typename... Args>
@@ -89952,11 +89952,6 @@ extern const char * SDL_GetRevision(void);
 
 namespace Neon
 {
-    struct Vertex {
-        float position[3];
-        float texCoord[2];
-    };
-
     class RenderSystem final : public System
     {
     public:
@@ -89969,7 +89964,9 @@ namespace Neon
         WindowOptions windowOptions;
 
         SDL_Window* window = nullptr;
-        SDL_Renderer* renderer = nullptr;
+        SDL_GPUDevice* device = nullptr;
+        SDL_GPUGraphicsPipeline* pipeline = nullptr;
+        SDL_GPUBuffer* vertexBuffer = nullptr;
     };
 }
 # 6 "C:/Users/alikg/CLionProjects/neonEngine/neonEngine/src/neonEngine.cpp" 2
@@ -89990,7 +89987,6 @@ namespace Neon
 
         for (const auto system: registeredSystems)
         {
-            std::cout << "START" << std::endl;
             system->startup();
         }
     }
@@ -90003,7 +89999,7 @@ namespace Neon
         }
     }
 
-    void Engine::exit()
+    void Engine::quit()
     {
         running = false;
     }

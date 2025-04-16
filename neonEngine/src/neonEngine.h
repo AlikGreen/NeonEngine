@@ -20,7 +20,7 @@ namespace Neon
         void run();
         void shutdown();
 
-        void exit();
+        void quit();
 
         // TODO wait for safe time to add systems
         template <typename T, typename... Args>

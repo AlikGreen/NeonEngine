@@ -9,6 +9,7 @@ include_directories(BEFORE SYSTEM "${WINDOWS_SDK_PATH}/um")
 include_directories(BEFORE SYSTEM "${WINDOWS_SDK_PATH}/shared")
 
 add_subdirectory(dependencies/SDL3)
+add_subdirectory(dependencies/glm)
 
 add_library(neonEngine SHARED
         src/neonEngine.cpp
@@ -21,4 +22,4 @@ add_library(neonEngine SHARED
         src/rendering/renderSystem.h)
 
 
-target_link_libraries(neonEngine PUBLIC SDL3::SDL3)
+target_link_libraries(neonEngine PUBLIC SDL3::SDL3 glm::glm)

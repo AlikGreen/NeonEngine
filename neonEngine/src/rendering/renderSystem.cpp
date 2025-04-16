@@ -2,10 +2,58 @@
 
 #include <iostream>
 
+
 #include "../neonEngine.h"
+#include "glm/glm.hpp"
 
 namespace Neon
 {
+    SDL_GPUShader* LoadShader(
+	SDL_GPUDevice* device,
+	SDL_GPUShaderStage stage,
+	const char* shaderFilename,
+	Uint32 samplerCount,
+	Uint32 uniformBufferCount,
+	Uint32 storageBufferCount,
+	Uint32 storageTextureCount
+) {
+	size_t codeSize;
+	void* code = SDL_LoadFile(shaderFilename, &codeSize);
+	if (code == nullptr)
+	{
+		SDL_Log("Failed to load shader from disk! %s", shaderFilename);
+		return nullptr;
+	}
+
+	SDL_GPUShaderCreateInfo shaderInfo;
+	shaderInfo.code = static_cast<const Uint8 *>(code);
+	shaderInfo.code_size = codeSize;
+	shaderInfo.entrypoint = "main";
+	shaderInfo.format = SDL_GPU_SHADERFORMAT_SPIRV;
+	shaderInfo.stage = stage;
+	shaderInfo.num_samplers = samplerCount;
+	shaderInfo.num_uniform_buffers = uniformBufferCount;
+	shaderInfo.num_storage_buffers = storageBufferCount;
+	shaderInfo.num_storage_textures = storageTextureCount;
+
+	SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);
+	if (shader == nullptr)
+	{
+		SDL_Log("Failed to create shader!");
+		SDL_free(code);
+		return nullptr;
+	}
+
+	SDL_free(code);
+	return shader;
+}
+
+	struct Vertex
+    {
+	    glm::vec2 position;
+    	glm::vec3 color;
+    };
+
     RenderSystem::RenderSystem(const WindowOptions &windowOptions)
     {
         this->windowOptions = windowOptions;
@@ -13,74 +61,171 @@ namespace Neon
 
     void RenderSystem::startup()
     {
-        std::cout << "START Render" << std::endl;
         if (!SDL_Init(SDL_INIT_VIDEO))
-        {
-            printf("SDL_Init Error: %s\n", SDL_GetError());
-            // If SDL_GetError() returns empty, try printing the return value
-            printf("SDL_Init Return Code: %d\n", SDL_Init(SDL_INIT_VIDEO));
-            return;
-        }
+            throw std::runtime_error("Failed to initialize SDL");
 
         // Create the window (using SDL_WINDOW_OPENGL flag for GPU rendering)
-        window = SDL_CreateWindow("SDL 3 Triangle Example", 800, 600,
-                         SDL_WINDOW_RESIZABLE);
-        if (!window) {
-            SDL_Log("Failed to create window: %s", SDL_GetError());
-            return;
-        }
+        window = SDL_CreateWindow("SDL 3 Triangle Example", 800, 600, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
+        if (!window)
+            throw std::runtime_error("Failed to create SDL window");
 
-        // Create a hardware-accelerated renderer
-        renderer = SDL_CreateRenderer(window, "vulkan");
-        if (!renderer) {
-            SDL_Log("Failed to create renderer: %s", SDL_GetError());
-            return;
-        }
+        device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, true, nullptr);
+    	//  | SDL_GPU_SHADERFORMAT_MSL | SDL_GPU_SHADERFORMAT_DXIL
+        if(!device)
+            throw std::runtime_error("Failed to create GPU device");
+
+        if(!SDL_ClaimWindowForGPUDevice(device, window))
+            throw std::runtime_error("Failed to claim SDL window for gpu");
+
+    	SDL_GPUShader* vertexShader = LoadShader(device, SDL_GPU_SHADERSTAGE_VERTEX, "C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/simpleVert.spv", 0, 0, 0, 0);
+		if(!vertexShader)
+			throw std::runtime_error("Failed to load vertex shader");
+
+    	SDL_GPUShader* fragmentShader = LoadShader(device, SDL_GPU_SHADERSTAGE_FRAGMENT, "C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/simpleFrag.spv", 0, 0, 0, 0);
+		if(!fragmentShader)
+			throw std::runtime_error("Failed to load fragment shader");
+
+    	SDL_GPUColorTargetDescription colorTargetDesc{};
+    	colorTargetDesc.format = SDL_GetGPUSwapchainTextureFormat(device, window);
+        const std::vector colorTargets = {colorTargetDesc};
+
+    	std::vector<SDL_GPUVertexAttribute> vertexAttributes =
+    	{
+    		SDL_GPUVertexAttribute(0, 0, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2, 0),
+    		SDL_GPUVertexAttribute(1, 0, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3, sizeof(glm::vec2))
+    	};
+
+    	std::vector<SDL_GPUVertexBufferDescription> vertexBufferDescriptions =
+    	{
+    		SDL_GPUVertexBufferDescription(0, sizeof(Vertex))
+    	};
+
+    	SDL_GPUVertexInputState vertexInputState{};
+    	vertexInputState.vertex_attributes = vertexAttributes.data();
+    	vertexInputState.num_vertex_attributes = vertexAttributes.size();
+    	vertexInputState.vertex_buffer_descriptions = vertexBufferDescriptions.data();
+    	vertexInputState.num_vertex_buffers = vertexBufferDescriptions.size();
+
+    	SDL_GPUGraphicsPipelineCreateInfo pipelineDesc{};
+    	pipelineDesc.vertex_shader = vertexShader;
+    	pipelineDesc.fragment_shader = fragmentShader;
+    	pipelineDesc.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
+    	pipelineDesc.rasterizer_state.fill_mode = SDL_GPU_FILLMODE_FILL;
+    	pipelineDesc.rasterizer_state.cull_mode = SDL_GPU_CULLMODE_BACK;
+    	pipelineDesc.target_info.color_target_descriptions = colorTargets.data();
+    	pipelineDesc.target_info.num_color_targets = colorTargets.size();
+    	pipelineDesc.vertex_input_state = vertexInputState;
+
+
+    	pipeline = SDL_CreateGPUGraphicsPipeline(device, &pipelineDesc);
+    	if(!pipeline)
+    		throw std::runtime_error("Failed to create graphics pipeline");
+
+    	SDL_ReleaseGPUShader(device, vertexShader);
+    	SDL_ReleaseGPUShader(device, fragmentShader);
+
+    	std::vector<Vertex> vertices =
+    	{
+    		{{-0.5, -0.5}, {1, 0, 0}},
+			{{0.5, -0.5}, {0, 1, 0}},
+			{{0, 0.5}, {0, 0, 1}}
+    	};
+
+    	SDL_GPUBufferCreateInfo vertexBufferDesc{};
+    	vertexBufferDesc.size = vertices.size() * sizeof(Vertex);
+    	vertexBufferDesc.usage = SDL_GPU_BUFFERUSAGE_VERTEX;
+    	vertexBuffer = SDL_CreateGPUBuffer(device, &vertexBufferDesc);
+    	if(!vertexBuffer)
+    		throw std::runtime_error("Failed to create vertex buffer");
+
+		SDL_GPUTransferBufferCreateInfo transferBufferDesc{};
+    	transferBufferDesc.size = vertices.size() * sizeof(Vertex);
+    	vertexBufferDesc.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+    	auto transferBuffer = SDL_CreateGPUTransferBuffer(device, &transferBufferDesc);
+    	if(!transferBuffer)
+    		throw std::runtime_error("Failed to create transfer buffer");
+
+    	Vertex* transferBufferData = static_cast<Vertex *>(SDL_MapGPUTransferBuffer(device, transferBuffer, false));
+		std::ranges::copy(vertices, transferBufferData);
+
+    	SDL_UnmapGPUTransferBuffer(device, transferBuffer);
+
+    	SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(device);
+		if(!commandBuffer)
+			throw std::runtime_error("Failed to acquire command buffer");
+    	SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
+
+    	SDL_GPUTransferBufferLocation transferBufferLocation{};
+    	transferBufferLocation.transfer_buffer = transferBuffer;
+    	transferBufferLocation.offset = 0;
+
+    	SDL_GPUBufferRegion bufferRegion{};
+    	bufferRegion.buffer = vertexBuffer;
+    	bufferRegion.offset = 0;
+    	bufferRegion.size = vertexBufferDesc.size;
+
+    	SDL_UploadToGPUBuffer(copyPass, &transferBufferLocation, &bufferRegion, false);
+    	SDL_EndGPUCopyPass(copyPass);
+
+    	if(!SDL_SubmitGPUCommandBuffer(commandBuffer))
+    		throw std::runtime_error("Failed to submit command buffer");
+
+    	SDL_ReleaseGPUTransferBuffer(device, transferBuffer);
+
+    	SDL_ShowWindow(window);
     }
 
-    void RenderSystem::render() {
-        // Clear the screen with a black color
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
+    void RenderSystem::render()
+    {
+        SDL_Event event;
+        while(SDL_PollEvent(&event))
+        {
+            switch(event.type)
+            {
+                case SDL_EVENT_QUIT:
+                    Engine::getInstance()->quit();
+                default:
+                    break;
+            }
+        }
 
-        // Define three vertices for the triangle using SDL_Vertex.
-        SDL_Vertex vertices[3];
+        SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(device);
+        if(!commandBuffer)
+            throw std::runtime_error("Failed to acquire GPU command buffer");
 
-        // Vertex 0 (Red)
-        vertices[0].position.x = 400;
-        vertices[0].position.y = 100;
-        vertices[0].color = {255, 0, 0, 255};
-        vertices[0].tex_coord.x = 0.0f;
-        vertices[0].tex_coord.y = 0.0f;
+        SDL_GPUTexture* swapChainTexture;
+        SDL_WaitAndAcquireGPUSwapchainTexture(commandBuffer, window, &swapChainTexture, nullptr, nullptr);
+        if(!swapChainTexture)
+            return;
+            // throw std::runtime_error("Failed to acquire swap chain texture");
 
-        // Vertex 1 (Green)
-        vertices[1].position.x = 100;
-        vertices[1].position.y = 500;
-        vertices[1].color = {0, 255, 0, 255};
-        vertices[1].tex_coord.x = 0.0f;
-        vertices[1].tex_coord.y = 0.0f;
+        SDL_GPUColorTargetInfo colorTarget{};
+        colorTarget.texture = swapChainTexture;
+        colorTarget.store_op = SDL_GPU_STOREOP_STORE;
+        colorTarget.load_op = SDL_GPU_LOADOP_CLEAR;
+        colorTarget.clear_color = {0, 0.6 ,0 ,1};
 
-        // Vertex 2 (Blue)
-        vertices[2].position.x = 700;
-        vertices[2].position.y = 500;
-        vertices[2].color = {0, 0, 255, 255};
-        vertices[2].tex_coord.x = 0.0f;
-        vertices[2].tex_coord.y = 0.0f;
+        std::vector colorTargets{colorTarget};
 
-        // Render the triangle. Since we are not applying any texture, we pass NULL as texture.
-        // SDL_RenderGeometry will treat consecutive vertices as a triangle.
-        SDL_RenderGeometry(renderer, nullptr, vertices, 3, nullptr, 0);
+        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(commandBuffer, colorTargets.data(), colorTargets.size(), nullptr);
+    	SDL_BindGPUGraphicsPipeline(renderPass, pipeline);
 
-        // Present the rendered frame on screen
-        SDL_RenderPresent(renderer);
+        const std::vector<SDL_GPUBufferBinding> bufferBindings =
+    	{
+    		{ vertexBuffer, 0 }
+    	};
+
+    	SDL_BindGPUVertexBuffers(renderPass, 0, bufferBindings.data(), bufferBindings.size());
+    	SDL_DrawGPUPrimitives(renderPass, 3, 1, 0, 0);
+
+        SDL_EndGPURenderPass(renderPass);
+
+        if(!SDL_SubmitGPUCommandBuffer(commandBuffer))
+            throw std::runtime_error("Failed to submit command buffer to GPU");
     }
 
-    void RenderSystem::shutdown() {
-        // Clean up renderer and window, then quit SDL
-        if (renderer) {
-            SDL_DestroyRenderer(renderer);
-            renderer = nullptr;
-        }
+    void RenderSystem::shutdown()
+    {
 
         if (window) {
             SDL_DestroyWindow(window);

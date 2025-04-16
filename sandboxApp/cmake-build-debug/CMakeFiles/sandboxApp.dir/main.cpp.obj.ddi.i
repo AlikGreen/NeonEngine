@@ -82059,7 +82059,7 @@ namespace Neon
         void run();
         void shutdown();
 
-        void exit();
+        void quit();
 
 
         template <typename T, typename... Args>

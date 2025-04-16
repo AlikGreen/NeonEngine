@@ -7,11 +7,6 @@
 
 namespace Neon
 {
-    struct Vertex {
-        float position[3];
-        float texCoord[2];
-    };
-
     class RenderSystem final : public System
     {
     public:
@@ -24,6 +19,8 @@ namespace Neon
         WindowOptions windowOptions;
 
         SDL_Window* window = nullptr;
-        SDL_Renderer* renderer = nullptr;
+        SDL_GPUDevice* device = nullptr;
+        SDL_GPUGraphicsPipeline* pipeline = nullptr;
+        SDL_GPUBuffer* vertexBuffer = nullptr;
     };
 }

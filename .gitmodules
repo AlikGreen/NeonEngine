@@ -4,3 +4,6 @@
 [submodule "neonEngine/dependencies/SDL3"]
 	path = neonEngine/dependencies/SDL3
 	url = https://github.com/libsdl-org/SDL.git
+[submodule "neonEngine/dependencies/glm"]
+	path = neonEngine/dependencies/glm
+	url = https://github.com/g-truc/glm.git

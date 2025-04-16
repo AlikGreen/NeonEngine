@@ -47,13 +47,13 @@ cmake_ninja_workdir = C$:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-
 #############################################
 # Order-only phony target for sandboxApp
 
-build cmake_object_order_depends_target_sandboxApp: phony || cmake_object_order_depends_target_SDL3-shared cmake_object_order_depends_target_neonEngine
+build cmake_object_order_depends_target_sandboxApp: phony || cmake_object_order_depends_target_SDL3-shared cmake_object_order_depends_target_glm cmake_object_order_depends_target_neonEngine
 
 build CMakeFiles/sandboxApp.dir/main.cpp.obj.ddi: CXX_SCAN__sandboxApp_Debug C$:/Users/alikg/CLionProjects/neonEngine/sandboxApp/main.cpp || cmake_object_order_depends_target_sandboxApp
   DEP_FILE = CMakeFiles\sandboxApp.dir\main.cpp.obj.ddi.d
   DYNDEP_INTERMEDIATE_FILE = CMakeFiles\sandboxApp.dir\main.cpp.obj.ddi
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/../neonEngine/src -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include
+  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/../neonEngine/src -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm
   OBJ_FILE = CMakeFiles\sandboxApp.dir\main.cpp.obj
   PREPROCESSED_OUTPUT_FILE = CMakeFiles\sandboxApp.dir\main.cpp.obj.ddi.i
 
@@ -61,7 +61,7 @@ build CMakeFiles/sandboxApp.dir/main.cpp.obj: CXX_COMPILER__sandboxApp_scanned_D
   DEP_FILE = CMakeFiles\sandboxApp.dir\main.cpp.obj.d
   DYNDEP_MODULE_MAP_FILE = CMakeFiles\sandboxApp.dir\main.cpp.obj.modmap
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/../neonEngine/src -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include
+  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/../neonEngine/src -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm
   OBJECT_DIR = CMakeFiles\sandboxApp.dir
   OBJECT_FILE_DIR = CMakeFiles\sandboxApp.dir
   dyndep = CMakeFiles/sandboxApp.dir/CXX.dd
@@ -70,7 +70,7 @@ build CMakeFiles/sandboxApp.dir/gameSystem.cpp.obj.ddi: CXX_SCAN__sandboxApp_Deb
   DEP_FILE = CMakeFiles\sandboxApp.dir\gameSystem.cpp.obj.ddi.d
   DYNDEP_INTERMEDIATE_FILE = CMakeFiles\sandboxApp.dir\gameSystem.cpp.obj.ddi
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/../neonEngine/src -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include
+  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/../neonEngine/src -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm
   OBJ_FILE = CMakeFiles\sandboxApp.dir\gameSystem.cpp.obj
   PREPROCESSED_OUTPUT_FILE = CMakeFiles\sandboxApp.dir\gameSystem.cpp.obj.ddi.i
 
@@ -78,7 +78,7 @@ build CMakeFiles/sandboxApp.dir/gameSystem.cpp.obj: CXX_COMPILER__sandboxApp_sca
   DEP_FILE = CMakeFiles\sandboxApp.dir\gameSystem.cpp.obj.d
   DYNDEP_MODULE_MAP_FILE = CMakeFiles\sandboxApp.dir\gameSystem.cpp.obj.modmap
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/../neonEngine/src -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include
+  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/../neonEngine/src -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm
   OBJECT_DIR = CMakeFiles\sandboxApp.dir
   OBJECT_FILE_DIR = CMakeFiles\sandboxApp.dir
   dyndep = CMakeFiles/sandboxApp.dir/CXX.dd
@@ -93,9 +93,9 @@ build CMakeFiles/sandboxApp.dir/CXX.dd | C$:/Users/alikg/CLionProjects/neonEngin
 #############################################
 # Link the executable sandboxApp.exe
 
-build sandboxApp.exe: CXX_EXECUTABLE_LINKER__sandboxApp_Debug CMakeFiles/sandboxApp.dir/main.cpp.obj CMakeFiles/sandboxApp.dir/gameSystem.cpp.obj | neonEngine/libneonEngine.dll.a neonEngine/dependencies/SDL3/libSDL3.dll.a C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/src/dynapi/SDL_dynapi.sym || neonEngine/dependencies/SDL3/SDL3.dll neonEngine/libneonEngine.dll
+build sandboxApp.exe: CXX_EXECUTABLE_LINKER__sandboxApp_Debug CMakeFiles/sandboxApp.dir/main.cpp.obj CMakeFiles/sandboxApp.dir/gameSystem.cpp.obj | neonEngine/libneonEngine.dll.a neonEngine/dependencies/SDL3/libSDL3.dll.a neonEngine/dependencies/glm/glm/libglm.a C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/src/dynapi/SDL_dynapi.sym || neonEngine/dependencies/SDL3/SDL3.dll neonEngine/dependencies/glm/glm/libglm.a neonEngine/libneonEngine.dll
   FLAGS = -g
-  LINK_LIBRARIES = neonEngine/libneonEngine.dll.a  neonEngine/dependencies/SDL3/libSDL3.dll.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  LINK_LIBRARIES = neonEngine/libneonEngine.dll.a  neonEngine/dependencies/SDL3/libSDL3.dll.a  neonEngine/dependencies/glm/glm/libglm.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\sandboxApp.dir
   POST_BUILD = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\alikg\CLionProjects\neonEngine\sandboxApp\cmake-build-debug && "C:\Program Files\JetBrains\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" -E copy_if_different C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/libneonEngine.dll C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/libneonEngine.dll"
   PRE_LINK = cd .
@@ -138,14 +138,14 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 #############################################
 # Order-only phony target for neonEngine
 
-build cmake_object_order_depends_target_neonEngine: phony || cmake_object_order_depends_target_SDL3-shared
+build cmake_object_order_depends_target_neonEngine: phony || cmake_object_order_depends_target_SDL3-shared cmake_object_order_depends_target_glm
 
 build neonEngine/CMakeFiles/neonEngine.dir/src/neonEngine.cpp.obj.ddi: CXX_SCAN__neonEngine_Debug C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/src/neonEngine.cpp || cmake_object_order_depends_target_neonEngine
   DEFINES = -DneonEngine_EXPORTS
   DEP_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\neonEngine.cpp.obj.ddi.d
   DYNDEP_INTERMEDIATE_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\neonEngine.cpp.obj.ddi
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -isystem /shared -isystem /um
+  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm -isystem /shared -isystem /um
   OBJ_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\neonEngine.cpp.obj
   PREPROCESSED_OUTPUT_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\neonEngine.cpp.obj.ddi.i
 
@@ -154,7 +154,7 @@ build neonEngine/CMakeFiles/neonEngine.dir/src/neonEngine.cpp.obj: CXX_COMPILER_
   DEP_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\neonEngine.cpp.obj.d
   DYNDEP_MODULE_MAP_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\neonEngine.cpp.obj.modmap
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -isystem /shared -isystem /um
+  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm -isystem /shared -isystem /um
   OBJECT_DIR = neonEngine\CMakeFiles\neonEngine.dir
   OBJECT_FILE_DIR = neonEngine\CMakeFiles\neonEngine.dir\src
   dyndep = neonEngine/CMakeFiles/neonEngine.dir/CXX.dd
@@ -164,7 +164,7 @@ build neonEngine/CMakeFiles/neonEngine.dir/src/rendering/window.cpp.obj.ddi: CXX
   DEP_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\rendering\window.cpp.obj.ddi.d
   DYNDEP_INTERMEDIATE_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\rendering\window.cpp.obj.ddi
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -isystem /shared -isystem /um
+  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm -isystem /shared -isystem /um
   OBJ_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\rendering\window.cpp.obj
   PREPROCESSED_OUTPUT_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\rendering\window.cpp.obj.ddi.i
 
@@ -173,7 +173,7 @@ build neonEngine/CMakeFiles/neonEngine.dir/src/rendering/window.cpp.obj: CXX_COM
   DEP_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\rendering\window.cpp.obj.d
   DYNDEP_MODULE_MAP_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\rendering\window.cpp.obj.modmap
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -isystem /shared -isystem /um
+  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm -isystem /shared -isystem /um
   OBJECT_DIR = neonEngine\CMakeFiles\neonEngine.dir
   OBJECT_FILE_DIR = neonEngine\CMakeFiles\neonEngine.dir\src\rendering
   dyndep = neonEngine/CMakeFiles/neonEngine.dir/CXX.dd
@@ -183,7 +183,7 @@ build neonEngine/CMakeFiles/neonEngine.dir/src/rendering/renderSystem.cpp.obj.dd
   DEP_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\rendering\renderSystem.cpp.obj.ddi.d
   DYNDEP_INTERMEDIATE_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\rendering\renderSystem.cpp.obj.ddi
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -isystem /shared -isystem /um
+  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm -isystem /shared -isystem /um
   OBJ_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\rendering\renderSystem.cpp.obj
   PREPROCESSED_OUTPUT_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\rendering\renderSystem.cpp.obj.ddi.i
 
@@ -192,7 +192,7 @@ build neonEngine/CMakeFiles/neonEngine.dir/src/rendering/renderSystem.cpp.obj: C
   DEP_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\rendering\renderSystem.cpp.obj.d
   DYNDEP_MODULE_MAP_FILE = neonEngine\CMakeFiles\neonEngine.dir\src\rendering\renderSystem.cpp.obj.modmap
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -isystem /shared -isystem /um
+  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/include-revision -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm -isystem /shared -isystem /um
   OBJECT_DIR = neonEngine\CMakeFiles\neonEngine.dir
   OBJECT_FILE_DIR = neonEngine\CMakeFiles\neonEngine.dir\src\rendering
   dyndep = neonEngine/CMakeFiles/neonEngine.dir/CXX.dd
@@ -207,9 +207,9 @@ build neonEngine/CMakeFiles/neonEngine.dir/CXX.dd | C$:/Users/alikg/CLionProject
 #############################################
 # Link the shared library neonEngine\libneonEngine.dll
 
-build neonEngine/libneonEngine.dll neonEngine/libneonEngine.dll.a: CXX_SHARED_LIBRARY_LINKER__neonEngine_Debug neonEngine/CMakeFiles/neonEngine.dir/src/neonEngine.cpp.obj neonEngine/CMakeFiles/neonEngine.dir/src/rendering/window.cpp.obj neonEngine/CMakeFiles/neonEngine.dir/src/rendering/renderSystem.cpp.obj | neonEngine/dependencies/SDL3/libSDL3.dll.a C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/src/dynapi/SDL_dynapi.sym || neonEngine/dependencies/SDL3/SDL3.dll
+build neonEngine/libneonEngine.dll neonEngine/libneonEngine.dll.a: CXX_SHARED_LIBRARY_LINKER__neonEngine_Debug neonEngine/CMakeFiles/neonEngine.dir/src/neonEngine.cpp.obj neonEngine/CMakeFiles/neonEngine.dir/src/rendering/window.cpp.obj neonEngine/CMakeFiles/neonEngine.dir/src/rendering/renderSystem.cpp.obj | neonEngine/dependencies/SDL3/libSDL3.dll.a neonEngine/dependencies/glm/glm/libglm.a C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/src/dynapi/SDL_dynapi.sym || neonEngine/dependencies/SDL3/SDL3.dll neonEngine/dependencies/glm/glm/libglm.a
   LANGUAGE_COMPILE_FLAGS = -g
-  LINK_LIBRARIES = neonEngine/dependencies/SDL3/libSDL3.dll.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  LINK_LIBRARIES = neonEngine/dependencies/SDL3/libSDL3.dll.a  neonEngine/dependencies/glm/glm/libglm.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = neonEngine\CMakeFiles\neonEngine.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
@@ -2507,6 +2507,94 @@ build neonEngine/dependencies/SDL3/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
 build neonEngine/dependencies/SDL3/rebuild_cache: phony neonEngine/dependencies/SDL3/CMakeFiles/rebuild_cache.util
 
 # =============================================================================
+# Write statements declared in CMakeLists.txt:
+# C:/Users/alikg/CLionProjects/neonEngine/neonEngine/CMakeLists.txt
+# =============================================================================
+
+
+#############################################
+# Utility command for edit_cache
+
+build neonEngine/dependencies/glm/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\alikg\CLionProjects\neonEngine\sandboxApp\cmake-build-debug\neonEngine\dependencies\glm && "C:\Program Files\JetBrains\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" -E echo "No interactive CMake dialog available.""
+  DESC = No interactive CMake dialog available...
+  restat = 1
+
+build neonEngine/dependencies/glm/edit_cache: phony neonEngine/dependencies/glm/CMakeFiles/edit_cache.util
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build neonEngine/dependencies/glm/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\alikg\CLionProjects\neonEngine\sandboxApp\cmake-build-debug\neonEngine\dependencies\glm && "C:\Program Files\JetBrains\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" --regenerate-during-build -SC:\Users\alikg\CLionProjects\neonEngine\sandboxApp -BC:\Users\alikg\CLionProjects\neonEngine\sandboxApp\cmake-build-debug"
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+
+build neonEngine/dependencies/glm/rebuild_cache: phony neonEngine/dependencies/glm/CMakeFiles/rebuild_cache.util
+
+# =============================================================================
+# Write statements declared in CMakeLists.txt:
+# C:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm/CMakeLists.txt
+# =============================================================================
+
+# =============================================================================
+# Object build statements for STATIC_LIBRARY target glm
+
+
+#############################################
+# Order-only phony target for glm
+
+build cmake_object_order_depends_target_glm: phony || .
+
+build neonEngine/dependencies/glm/glm/CMakeFiles/glm.dir/detail/glm.cpp.obj: CXX_COMPILER__glm_unscanned_Debug C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm/glm/detail/glm.cpp || cmake_object_order_depends_target_glm
+  DEP_FILE = neonEngine\dependencies\glm\glm\CMakeFiles\glm.dir\detail\glm.cpp.obj.d
+  FLAGS = -g -std=c++23 -fdiagnostics-color=always
+  INCLUDES = -IC:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm -isystem /shared -isystem /um
+  OBJECT_DIR = neonEngine\dependencies\glm\glm\CMakeFiles\glm.dir
+  OBJECT_FILE_DIR = neonEngine\dependencies\glm\glm\CMakeFiles\glm.dir\detail
+
+
+# =============================================================================
+# Link build statements for STATIC_LIBRARY target glm
+
+
+#############################################
+# Link the static library neonEngine\dependencies\glm\glm\libglm.a
+
+build neonEngine/dependencies/glm/glm/libglm.a: CXX_STATIC_LIBRARY_LINKER__glm_Debug neonEngine/dependencies/glm/glm/CMakeFiles/glm.dir/detail/glm.cpp.obj
+  LANGUAGE_COMPILE_FLAGS = -g
+  OBJECT_DIR = neonEngine\dependencies\glm\glm\CMakeFiles\glm.dir
+  POST_BUILD = cd .
+  PRE_LINK = cd .
+  TARGET_FILE = neonEngine\dependencies\glm\glm\libglm.a
+  TARGET_PDB = glm.a.dbg
+
+
+#############################################
+# Utility command for edit_cache
+
+build neonEngine/dependencies/glm/glm/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\alikg\CLionProjects\neonEngine\sandboxApp\cmake-build-debug\neonEngine\dependencies\glm\glm && "C:\Program Files\JetBrains\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" -E echo "No interactive CMake dialog available.""
+  DESC = No interactive CMake dialog available...
+  restat = 1
+
+build neonEngine/dependencies/glm/glm/edit_cache: phony neonEngine/dependencies/glm/glm/CMakeFiles/edit_cache.util
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build neonEngine/dependencies/glm/glm/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\alikg\CLionProjects\neonEngine\sandboxApp\cmake-build-debug\neonEngine\dependencies\glm\glm && "C:\Program Files\JetBrains\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" --regenerate-during-build -SC:\Users\alikg\CLionProjects\neonEngine\sandboxApp -BC:\Users\alikg\CLionProjects\neonEngine\sandboxApp\cmake-build-debug"
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+
+build neonEngine/dependencies/glm/glm/rebuild_cache: phony neonEngine/dependencies/glm/glm/CMakeFiles/rebuild_cache.util
+
+# =============================================================================
 # Target aliases.
 
 build SDL3-shared: phony neonEngine/dependencies/SDL3/SDL3.dll
@@ -2517,9 +2605,13 @@ build SDL3_test: phony neonEngine/dependencies/SDL3/libSDL3_test.a
 
 build SDL_uclibc: phony neonEngine/dependencies/SDL3/libSDL_uclibc.a
 
+build glm: phony neonEngine/dependencies/glm/glm/libglm.a
+
 build libSDL3_test.a: phony neonEngine/dependencies/SDL3/libSDL3_test.a
 
 build libSDL_uclibc.a: phony neonEngine/dependencies/SDL3/libSDL_uclibc.a
+
+build libglm.a: phony neonEngine/dependencies/glm/glm/libglm.a
 
 build libneonEngine.dll: phony neonEngine/libneonEngine.dll
 
@@ -2542,7 +2634,7 @@ build all: phony sandboxApp.exe neonEngine/all
 #############################################
 # Folder: C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine
 
-build neonEngine/all: phony neonEngine/libneonEngine.dll neonEngine/dependencies/SDL3/all
+build neonEngine/all: phony neonEngine/libneonEngine.dll neonEngine/dependencies/SDL3/all neonEngine/dependencies/glm/all
 
 # =============================================================================
 
@@ -2552,20 +2644,34 @@ build neonEngine/all: phony neonEngine/libneonEngine.dll neonEngine/dependencies
 build neonEngine/dependencies/SDL3/all: phony neonEngine/dependencies/SDL3/SDL3.dll neonEngine/dependencies/SDL3/libSDL3_test.a neonEngine/dependencies/SDL3/libSDL_uclibc.a
 
 # =============================================================================
+
+#############################################
+# Folder: C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/glm
+
+build neonEngine/dependencies/glm/all: phony neonEngine/dependencies/glm/glm/all
+
+# =============================================================================
+
+#############################################
+# Folder: C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/glm/glm
+
+build neonEngine/dependencies/glm/glm/all: phony neonEngine/dependencies/glm/glm/libglm.a
+
+# =============================================================================
 # Built-in targets
 
 
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/BasicConfigVersion-AnyNewerVersion.cmake.in C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeDependentOption.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakePackageConfigHelpers.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeParseArguments.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakePushCheckState.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeRCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCCompilerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCSourceRuns.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCXXCompilerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCXXSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckIncludeFile.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckLanguage.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckLibraryExists.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckLinkerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckStructHasMember.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckSymbolExists.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindGit.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindPackageHandleStandardArgs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindPackageMessage.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindPkgConfig.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/GNUInstallDirs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckCompilerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckFlagCommonConfig.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckLinkerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckSourceRuns.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/WriteBasicConfigVersionFile.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/CMakeLists.txt C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/CMakeLists.txt C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/3rdparty.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/FindLibUSB.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/GetGitRevisionDescription.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/PreseedEmscriptenCache.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/PreseedMSVCCache.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/SDL3Config.cmake.in C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/macros.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlchecks.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlcommands.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlcompilers.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlcpu.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlmanpages.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlplatform.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include/build_config/SDL_build_config.h.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include/build_config/SDL_revision.h.cmake C$:/Users/alikg/CLionProjects/neonEngine/sandboxApp/CMakeLists.txt CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeRCCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake neonEngine/dependencies/SDL3/CMakeFiles/SDL_build_config.h.intermediate
+build build.ninja: RERUN_CMAKE | C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/BasicConfigVersion-AnyNewerVersion.cmake.in C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeDependentOption.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakePackageConfigHelpers.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeParseArguments.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakePushCheckState.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeRCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCCompilerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCSourceRuns.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCXXCompilerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCXXSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckIncludeFile.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckLanguage.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckLibraryExists.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckLinkerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckStructHasMember.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckSymbolExists.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindGit.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindPackageHandleStandardArgs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindPackageMessage.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindPkgConfig.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/GNUInstallDirs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckCompilerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckFlagCommonConfig.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckLinkerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckSourceRuns.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/WriteBasicConfigVersionFile.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/CMakeLists.txt C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/CMakeLists.txt C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/3rdparty.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/FindLibUSB.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/GetGitRevisionDescription.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/PreseedEmscriptenCache.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/PreseedMSVCCache.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/SDL3Config.cmake.in C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/macros.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlchecks.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlcommands.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlcompilers.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlcpu.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlmanpages.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlplatform.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include/build_config/SDL_build_config.h.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include/build_config/SDL_revision.h.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm/CMakeLists.txt C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm/glm/CMakeLists.txt C$:/Users/alikg/CLionProjects/neonEngine/sandboxApp/CMakeLists.txt CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeRCCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake neonEngine/dependencies/SDL3/CMakeFiles/SDL_build_config.h.intermediate
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/BasicConfigVersion-AnyNewerVersion.cmake.in C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeDependentOption.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakePackageConfigHelpers.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeParseArguments.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakePushCheckState.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeRCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCCompilerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCSourceRuns.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCXXCompilerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCXXSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckIncludeFile.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckLanguage.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckLibraryExists.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckLinkerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckStructHasMember.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckSymbolExists.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindGit.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindPackageHandleStandardArgs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindPackageMessage.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindPkgConfig.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/GNUInstallDirs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckCompilerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckFlagCommonConfig.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckLinkerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckSourceRuns.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/WriteBasicConfigVersionFile.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/CMakeLists.txt C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/CMakeLists.txt C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/3rdparty.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/FindLibUSB.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/GetGitRevisionDescription.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/PreseedEmscriptenCache.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/PreseedMSVCCache.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/SDL3Config.cmake.in C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/macros.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlchecks.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlcommands.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlcompilers.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlcpu.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlmanpages.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlplatform.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include/build_config/SDL_build_config.h.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include/build_config/SDL_revision.h.cmake C$:/Users/alikg/CLionProjects/neonEngine/sandboxApp/CMakeLists.txt CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeRCCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake neonEngine/dependencies/SDL3/CMakeFiles/SDL_build_config.h.intermediate: phony
+build C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/BasicConfigVersion-AnyNewerVersion.cmake.in C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeDependentOption.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakePackageConfigHelpers.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeParseArguments.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakePushCheckState.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeRCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCCompilerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCSourceRuns.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCXXCompilerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckCXXSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckIncludeFile.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckLanguage.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckLibraryExists.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckLinkerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckStructHasMember.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CheckSymbolExists.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindGit.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindPackageHandleStandardArgs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindPackageMessage.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/FindPkgConfig.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/GNUInstallDirs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckCompilerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckFlagCommonConfig.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckLinkerFlag.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Internal/CheckSourceRuns.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2.2/bin/cmake/win/x64/share/cmake-3.29/Modules/WriteBasicConfigVersionFile.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/CMakeLists.txt C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/CMakeLists.txt C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/3rdparty.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/FindLibUSB.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/GetGitRevisionDescription.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/PreseedEmscriptenCache.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/PreseedMSVCCache.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/SDL3Config.cmake.in C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/macros.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlchecks.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlcommands.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlcompilers.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlcpu.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlmanpages.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/cmake/sdlplatform.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include/build_config/SDL_build_config.h.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/SDL3/include/build_config/SDL_revision.h.cmake C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm/CMakeLists.txt C$:/Users/alikg/CLionProjects/neonEngine/neonEngine/dependencies/glm/glm/CMakeLists.txt C$:/Users/alikg/CLionProjects/neonEngine/sandboxApp/CMakeLists.txt CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeRCCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake neonEngine/dependencies/SDL3/CMakeFiles/SDL_build_config.h.intermediate: phony
 
 
 #############################################

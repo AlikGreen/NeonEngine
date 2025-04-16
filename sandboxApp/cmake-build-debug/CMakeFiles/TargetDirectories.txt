@@ -9,3 +9,8 @@ C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/
 C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/CMakeFiles/SDL_uclibc.dir
 C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/CMakeFiles/edit_cache.dir
 C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/SDL3/CMakeFiles/rebuild_cache.dir
+C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/glm/CMakeFiles/edit_cache.dir
+C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/glm/CMakeFiles/rebuild_cache.dir
+C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/glm/glm/CMakeFiles/glm.dir
+C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/glm/glm/CMakeFiles/edit_cache.dir
+C:/Users/alikg/CLionProjects/neonEngine/sandboxApp/cmake-build-debug/neonEngine/dependencies/glm/glm/CMakeFiles/rebuild_cache.dir

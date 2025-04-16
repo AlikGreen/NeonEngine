@@ -15,7 +15,8 @@
 	[
 		"C:\\Users\\alikg\\CLionProjects\\neonEngine\\sandboxApp\\..\\neonEngine\\src",
 		"neonEngine\\dependencies\\SDL3\\include-revision",
-		"C:\\Users\\alikg\\CLionProjects\\neonEngine\\neonEngine\\dependencies\\SDL3\\include"
+		"C:\\Users\\alikg\\CLionProjects\\neonEngine\\neonEngine\\dependencies\\SDL3\\include",
+		"C:\\Users\\alikg\\CLionProjects\\neonEngine\\neonEngine\\dependencies\\glm"
 	],
 	"language" : "CXX",
 	"linked-target-dirs" : [],
