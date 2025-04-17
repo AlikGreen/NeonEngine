@@ -1,7 +1,0 @@
-ninja_dyndep_version = 1.0
-build neonEngine/CMakeFiles/neonEngine.dir/src/neonEngine.cpp.obj: dyndep
-
-build neonEngine/CMakeFiles/neonEngine.dir/src/rendering/window.cpp.obj: dyndep
-
-build neonEngine/CMakeFiles/neonEngine.dir/src/rendering/renderSystem.cpp.obj: dyndep
-
