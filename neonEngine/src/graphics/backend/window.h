@@ -17,11 +17,14 @@ namespace  Neon
     class Window
     {
     public:
-        explicit Window(WindowOptions options);
+        explicit Window(const WindowOptions &options);
 
         void run();
-        void close(bool deinitSDL = true);
+        void close(bool deinitSDL = true) const;
+        void show() const;
+
         operator SDL_Window*() const;
+        [[nodiscard]] SDL_Window* getHandle() const;
 
     private:
         static bool glfwInitialized;

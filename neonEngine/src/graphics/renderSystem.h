@@ -2,6 +2,9 @@
 
 #include "SDL3/SDL.h"
 #include "../core/system.h"
+#include "backend/backendAPIEnum.h"
+#include "backend/graphicsPipeline.h"
+#include "backend/physicalDevice.h"
 #include "backend/window.h"
 
 
@@ -16,11 +19,14 @@ namespace Neon
         void shutdown() override;
         void render() override;
 
-        SDL_GPUDevice* getDevice();
+        [[nodiscard]] PhysicalDevice* getDevice() const;
+        [[nodiscard]] Window* getWindow() const;
     private:
         Window* window = nullptr;
-        SDL_GPUDevice* device = nullptr;
-        SDL_GPUGraphicsPipeline* pipeline = nullptr;
+        PhysicalDevice* physicalDevice = nullptr;
+        GraphicsPipeline* pipeline = nullptr;
+
         SDL_GPUBuffer* vertexBuffer = nullptr;
+
     };
 }

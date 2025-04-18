@@ -25,7 +25,14 @@ add_library(neonEngine SHARED
         src/graphics/backend/shader.cpp
         src/graphics/backend/shader.h
         src/util/file.cpp
-        src/util/file.cpp)
+        src/util/file.cpp
+        src/graphics/backend/BackendAPIEnum.h
+        src/graphics/backend/physicalDevice.cpp
+        src/graphics/backend/physicalDevice.h
+        src/graphics/backend/graphicsPipeline.cpp
+        src/graphics/backend/graphicsPipeline.h
+        src/graphics/backend/vertexInputState.cpp
+        src/graphics/backend/vertexInputState.h)
 
 target_include_directories(neonEngine PRIVATE "${CMAKE_SOURCE_DIR}/src")
 target_link_libraries(neonEngine PUBLIC SDL3::SDL3 glm::glm shaderc spirv-cross-c)

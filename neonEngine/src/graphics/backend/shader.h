@@ -4,6 +4,7 @@
 
 #include <SDL3/SDL.h>
 
+#include "backendAPIEnum.h"
 #include "shaderc/shaderc.hpp"
 
 namespace Neon
@@ -11,12 +12,14 @@ namespace Neon
 class Shader
 {
 public:
-    Shader(std::string filePath);
+    explicit Shader(const std::string &filePath);
     void compile();
+    void dispose() const;
 
-    SDL_GPUShader* vertexShader = nullptr;
-    SDL_GPUShader* fragmentShader = nullptr;
+
 private:
+    friend class GraphicsPipeline;
+
     struct ShaderData
     {
         std::string filePath;
@@ -33,8 +36,16 @@ private:
         uint32_t storageTextures   = 0;
     };
 
-    static SDL_GPUShader* compileShader(const ShaderData &shaderData);
-    static DescriptorCounts reflectDescriptorCounts(const std::vector<uint32_t>& spirvBytes);
+    static std::vector<uint32_t> compileShaderToSpirv(const std::string &source, shaderc_shader_kind kind, const std::string &debugFileName = "shader.glsl");
+    static std::vector<uint8_t> compileShaderForBackend( std::vector<uint32_t> spirv, BackendAPI backend);
+    static SDL_GPUShader* compileSDLShader(const ShaderData &shaderData);
+    static DescriptorCounts reflectDescriptorCounts(const std::vector<uint32_t>& spirv);
+
+    [[nodiscard]] SDL_GPUShader* getVertexShader() const;
+    [[nodiscard]] SDL_GPUShader* getFragmentShader() const;
+
+    SDL_GPUShader* vertexShader = nullptr;
+    SDL_GPUShader* fragmentShader = nullptr;
 
     std::vector<ShaderData> shadersData;
 

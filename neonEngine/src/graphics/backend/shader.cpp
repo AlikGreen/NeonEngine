@@ -7,13 +7,15 @@
 #include <spirv_cross.hpp>
 #include <spirv_glsl.hpp>
 
+#include "spirv_hlsl.hpp"
+#include "spirv_msl.hpp"
 #include "../../neonEngine.h"
 #include "../../util/file.h"
 #include "../renderSystem.h"
 
 namespace Neon
 {
-    Shader::Shader(std::string filePath)
+    Shader::Shader(const std::string &filePath)
     {
         std::string fullSource = File::readFileText(filePath.c_str());
 
@@ -39,8 +41,6 @@ namespace Neon
 
         for (const auto&[type, src]: result)
         {
-            std::cout << src << std::endl;
-
             if(type == "fragment" || type == "pixel")
                 shadersData.push_back(ShaderData{filePath, src, shaderc_fragment_shader, SDL_GPU_SHADERFORMAT_SPIRV });
             else if(type == "vertex")
@@ -48,26 +48,90 @@ namespace Neon
         }
     }
 
-    SDL_GPUShader* Shader::compileShader(const ShaderData &shaderData)
+    std::vector<uint32_t> Shader::compileShaderToSpirv(const std::string &source, const shaderc_shader_kind kind, const std::string &debugFileName)
     {
-        shaderc::Compiler compiler;
+        const shaderc::Compiler glslCompiler;
         shaderc::CompileOptions options;
-        options.SetOptimizationLevel(shaderc_optimization_level_performance);
-        options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1); // Explicit Vulkan 1.3
+
+        // Essential options for Vulkan
+        options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
         options.SetTargetSpirv(shaderc_spirv_version_1_3);
+        options.SetOptimizationLevel(shaderc_optimization_level_performance);
 
-        shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(shaderData.source, shaderData.shaderStage, shaderData.filePath.c_str(), options);
+        const shaderc::SpvCompilationResult spvResult = glslCompiler.CompileGlslToSpv(
+            source, kind, debugFileName.c_str(), options
+        );
 
-        if (module.GetCompilationStatus() != shaderc_compilation_status_success)
-        {
-            std::cerr << "GLSL→SPIR‑V error: " << module.GetErrorMessage() << "\n";
+        if (spvResult.GetCompilationStatus() != shaderc_compilation_status_success) {
+            throw std::runtime_error("GLSL→SPIR-V failed: " + spvResult.GetErrorMessage());
         }
 
-        std::vector<Uint8> spirv(module.cbegin(), module.cend());
-        std::vector<uint32_t> spirvWords(module.cbegin(), module.cend());
-        std::ofstream out("shader.spv", std::ios::binary);
-        out.write(reinterpret_cast<const char*>(spirvWords.data()), spirvWords.size() * sizeof(uint32_t));
-        out.close();
+        std::vector spirv(spvResult.cbegin(), spvResult.cend());
+        return spirv;
+    }
+
+    std::vector<uint8_t> Shader::compileShaderForBackend(std::vector<uint32_t> spirv, BackendAPI backend)
+    {
+        switch (backend)
+        {
+            case BackendAPI::Vulkan:
+            {
+                const uint8_t* bytePtr = reinterpret_cast<const uint8_t*>(spirv.data());
+                return {bytePtr, bytePtr + spirv.size() * sizeof(uint32_t)};
+            }
+
+            case BackendAPI::Directx11:
+            case BackendAPI::Directx12:
+            {
+                spirv_cross::CompilerHLSL hlslCompiler(spirv);
+                spirv_cross::CompilerHLSL::Options hlslOptions;
+
+                // Configure HLSL version
+                hlslOptions.shader_model = (backend == BackendAPI::Directx12) ? 60 : 50;
+                hlslCompiler.set_hlsl_options(hlslOptions);
+
+                // Remap resources for HLSL
+                spirv_cross::ShaderResources resources = hlslCompiler.get_shader_resources();
+                for (auto& resource : resources.sampled_images) {
+                    hlslCompiler.set_decoration(resource.id, spv::DecorationBinding, 0);
+                }
+
+                std::string hlsl = hlslCompiler.compile();
+                return {hlsl.begin(), hlsl.end()};
+            }
+
+            case BackendAPI::Metal:
+            {
+                spirv_cross::CompilerMSL mslCompiler(spirv);
+                spirv_cross::CompilerMSL::Options mslOptions;
+
+                // Configure Metal version
+                mslOptions.msl_version = spirv_cross::CompilerMSL::Options::make_msl_version(2, 3);
+                mslCompiler.set_msl_options(mslOptions);
+
+                // Set up resource bindings
+                spirv_cross::ShaderResources resources = mslCompiler.get_shader_resources();
+                for (auto& resource : resources.sampled_images)
+                    {
+                    uint32_t binding = mslCompiler.get_decoration(resource.id, spv::DecorationBinding);
+                    mslCompiler.set_decoration(resource.id, spv::DecorationBinding, binding);
+                }
+
+                std::string msl = mslCompiler.compile();
+                return {msl.begin(), msl.end()};
+            }
+
+            default:
+                throw std::runtime_error("Unsupported backend API");
+        }
+    }
+
+    SDL_GPUShader* Shader::compileSDLShader(const ShaderData &shaderData)
+    {
+        auto* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
+
+        std::vector<uint32_t> spirv = compileShaderToSpirv(shaderData.source, shaderData.shaderStage, shaderData.filePath);
+        std::vector<uint8_t> shaderCode = compileShaderForBackend(spirv, renderSystem->getDevice()->getBackendApi());
 
         SDL_GPUShaderStage sdlStage;
 
@@ -83,11 +147,11 @@ namespace Neon
                 return nullptr;
         }
 
-        DescriptorCounts descriptorCounts = reflectDescriptorCounts(spirvWords); // Error in this function
+        const DescriptorCounts descriptorCounts = reflectDescriptorCounts(spirv); // Error in this function
 
         SDL_GPUShaderCreateInfo shaderInfo;
-        shaderInfo.code = reinterpret_cast<const Uint8 *>(spirvWords.data());
-        shaderInfo.code_size = spirvWords.size() * sizeof(uint32_t);
+        shaderInfo.code = shaderCode.data();
+        shaderInfo.code_size = shaderCode.size();
         shaderInfo.entrypoint = "main";
         shaderInfo.format = shaderData.shaderFormat;
         shaderInfo.stage = sdlStage;
@@ -96,24 +160,22 @@ namespace Neon
         shaderInfo.num_storage_buffers = descriptorCounts.storageBuffers;
         shaderInfo.num_storage_textures = descriptorCounts.storageTextures;
 
-        RenderSystem* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
-        SDL_GPUShader* shader = SDL_CreateGPUShader(renderSystem->getDevice(), &shaderInfo);
+        SDL_GPUShader* shader = SDL_CreateGPUShader(*renderSystem->getDevice(), &shaderInfo);
+        spirv.clear();
 
         if (shader == nullptr)
         {
-            SDL_Log("Failed to create shader!");
-            spirv.clear();
+            throw std::runtime_error("Failed to create shader shader");
             return nullptr;
         }
 
-        spirv.clear();
         return shader;
     }
 
-    Shader::DescriptorCounts Shader::reflectDescriptorCounts(const std::vector<uint32_t> &spirvWords)
+    Shader::DescriptorCounts Shader::reflectDescriptorCounts(const std::vector<uint32_t> &spirv)
     {
         // Create a GLSL compiler just to reflect
-        spirv_cross::CompilerGLSL compiler(spirvWords.data(), spirvWords.size());
+        spirv_cross::CompilerGLSL compiler(spirv.data(), spirv.size());
 
         // Query all descriptor resources
         auto resources = compiler.get_shader_resources();
@@ -140,14 +202,35 @@ namespace Neon
         return counts;
     }
 
+    SDL_GPUShader * Shader::getVertexShader() const
+    {
+        return vertexShader;
+    }
+
+    SDL_GPUShader * Shader::getFragmentShader() const
+    {
+        return fragmentShader;
+    }
+
     void Shader::compile()
     {
         for (const auto& shaderData: shadersData)
         {
             if(shaderData.shaderStage == shaderc_glsl_vertex_shader)
-                vertexShader = compileShader(shaderData);
+                vertexShader = compileSDLShader(shaderData);
             if(shaderData.shaderStage == shaderc_glsl_fragment_shader)
-                fragmentShader = compileShader(shaderData);
+                fragmentShader = compileSDLShader(shaderData);
         }
+    }
+
+    void Shader::dispose() const
+    {
+        const auto* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
+
+        if(fragmentShader != nullptr)
+            SDL_ReleaseGPUShader(*renderSystem->getDevice(), fragmentShader);
+
+        if(vertexShader != nullptr)
+            SDL_ReleaseGPUShader(*renderSystem->getDevice(), vertexShader);
     }
 }

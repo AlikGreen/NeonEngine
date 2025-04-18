@@ -4,11 +4,14 @@
 #include <ostream>
 #include <stdexcept>
 
+#include "../renderSystem.h"
+#include "../../neonEngine.h"
+
 namespace  Neon
 {
     bool Window::glfwInitialized = false;
 
-    Window::Window(WindowOptions options)
+    Window::Window(const WindowOptions &options)
     {
         this->options = options;
         if (!glfwInitialized && !SDL_Init(SDL_INIT_VIDEO))
@@ -49,10 +52,12 @@ namespace  Neon
         if (!handle)
             throw std::runtime_error("Failed to create SDL window");
 
+        const RenderSystem* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
+        SDL_ClaimWindowForGPUDevice(*renderSystem->getDevice(), handle);
         SDL_ShowWindow(handle);
     }
 
-    void Window::close(bool deinitSDL)
+    void Window::close(const bool deinitSDL) const
     {
         if(handle)
             SDL_DestroyWindow(handle);
@@ -60,7 +65,13 @@ namespace  Neon
         if(deinitSDL) SDL_Quit();
     }
 
+
     Window::operator SDL_Window*() const
+    {
+        return handle;
+    }
+
+    SDL_Window * Window::getHandle() const
     {
         return handle;
     }
