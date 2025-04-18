@@ -12,17 +12,31 @@ class Shader
 {
 public:
     Shader(std::string filePath);
-
-private:
-    void createShader(std::string source, SDL_GPUShaderStage stage);
-
     void compile();
-
-    std::vector<char> fragmentShaderCode;
-    std::vector<char> vertexShaderCode;
 
     SDL_GPUShader* vertexShader = nullptr;
     SDL_GPUShader* fragmentShader = nullptr;
+private:
+    struct ShaderData
+    {
+        std::string filePath;
+        std::string source;
+        shaderc_shader_kind shaderStage;
+        SDL_GPUShaderFormat shaderFormat;
+    };
+
+    struct DescriptorCounts
+    {
+        uint32_t samplers          = 0;
+        uint32_t uniformBuffers    = 0;
+        uint32_t storageBuffers    = 0;
+        uint32_t storageTextures   = 0;
+    };
+
+    static SDL_GPUShader* compileShader(const ShaderData &shaderData);
+    static DescriptorCounts reflectDescriptorCounts(const std::vector<uint32_t>& spirvBytes);
+
+    std::vector<ShaderData> shadersData;
 
     shaderc::Compiler compiler;
 };

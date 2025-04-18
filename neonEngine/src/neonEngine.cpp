@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "rendering/renderSystem.h"
+#include "graphics/renderSystem.h"
 
 namespace Neon
 {

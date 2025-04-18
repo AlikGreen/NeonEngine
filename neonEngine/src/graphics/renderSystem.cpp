@@ -4,6 +4,7 @@
 
 
 #include "../neonEngine.h"
+#include "backend/shader.h"
 #include "glm/glm.hpp"
 
 namespace Neon
@@ -69,28 +70,22 @@ namespace Neon
         if(!device)
             throw std::runtime_error("Failed to create GPU device");
 
-        if(!SDL_ClaimWindowForGPUDevice(device, *window))
-            throw std::runtime_error("Failed to claim SDL window for gpu");
 
-    	SDL_GPUShader* vertexShader = LoadShader(device, SDL_GPU_SHADERSTAGE_VERTEX, "C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/simpleVert.spv", 0, 0, 0, 0);
-		if(!vertexShader)
-			throw std::runtime_error("Failed to load vertex shader");
+    	std::cout << SDL_GetGPUDeviceDriver(device) << std::endl;
 
-    	SDL_GPUShader* fragmentShader = LoadShader(device, SDL_GPU_SHADERSTAGE_FRAGMENT, "C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/simpleFrag.spv", 0, 0, 0, 0);
-		if(!fragmentShader)
-			throw std::runtime_error("Failed to load fragment shader");
+    	Shader shader = Shader("C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/triangle.glsl");
 
     	SDL_GPUColorTargetDescription colorTargetDesc{};
     	colorTargetDesc.format = SDL_GetGPUSwapchainTextureFormat(device, *window);
         const std::vector colorTargets = {colorTargetDesc};
 
-    	std::vector<SDL_GPUVertexAttribute> vertexAttributes =
+    	std::vector vertexAttributes =
     	{
     		SDL_GPUVertexAttribute(0, 0, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2, 0),
     		SDL_GPUVertexAttribute(1, 0, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3, sizeof(glm::vec2))
     	};
 
-    	std::vector<SDL_GPUVertexBufferDescription> vertexBufferDescriptions =
+    	std::vector vertexBufferDescriptions =
     	{
     		SDL_GPUVertexBufferDescription(0, sizeof(Vertex))
     	};
@@ -102,8 +97,8 @@ namespace Neon
     	vertexInputState.num_vertex_buffers = vertexBufferDescriptions.size();
 
     	SDL_GPUGraphicsPipelineCreateInfo pipelineDesc{};
-    	pipelineDesc.vertex_shader = vertexShader;
-    	pipelineDesc.fragment_shader = fragmentShader;
+    	pipelineDesc.vertex_shader = shader.vertexShader;
+    	pipelineDesc.fragment_shader = shader.fragmentShader;
     	pipelineDesc.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
     	pipelineDesc.rasterizer_state.fill_mode = SDL_GPU_FILLMODE_FILL;
     	pipelineDesc.rasterizer_state.cull_mode = SDL_GPU_CULLMODE_BACK;
@@ -116,8 +111,7 @@ namespace Neon
     	if(!pipeline)
     		throw std::runtime_error("Failed to create graphics pipeline");
 
-    	SDL_ReleaseGPUShader(device, vertexShader);
-    	SDL_ReleaseGPUShader(device, fragmentShader);
+    	shader.release();
 
     	std::vector<Vertex> vertices =
     	{
@@ -217,6 +211,11 @@ namespace Neon
 
         if(!SDL_SubmitGPUCommandBuffer(commandBuffer))
             throw std::runtime_error("Failed to submit command buffer to GPU");
+    }
+
+    SDL_GPUDevice * RenderSystem::getDevice()
+    {
+    	return device;
     }
 
     void RenderSystem::shutdown()

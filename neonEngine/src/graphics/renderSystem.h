@@ -15,6 +15,8 @@ namespace Neon
         void startup() override;
         void shutdown() override;
         void render() override;
+
+        SDL_GPUDevice* getDevice();
     private:
         Window* window = nullptr;
         SDL_GPUDevice* device = nullptr;

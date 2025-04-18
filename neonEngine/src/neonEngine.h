@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "core/system.h"
-#include "rendering/window.h"
+#include "graphics/backend/window.h"
 
 namespace Neon
 {
@@ -31,6 +31,19 @@ namespace Neon
         }
 
         static Engine* getInstance();
+
+        template <typename T>
+        T* getSystem()
+        {
+            for (System* system : registeredSystems)
+            {
+                if (system && typeid(*system) == typeid(T))
+                {
+                    return static_cast<T*>(system);
+                }
+            }
+            return nullptr;
+        }
     private:
         std::vector<System*> registeredSystems;
         EngineConfig config;
