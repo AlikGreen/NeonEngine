@@ -1,8 +1,6 @@
 #pragma once
 
-#include "SDL3/SDL.h"
 #include "../core/system.h"
-#include "backend/backendAPIEnum.h"
 #include "backend/graphicsPipeline.h"
 #include "backend/physicalDevice.h"
 #include "backend/window.h"
@@ -10,6 +8,15 @@
 
 namespace Neon
 {
+    struct Vertex
+    {
+        glm::vec2 position;
+        glm::vec3 color;
+    };
+
+    template<typename T>
+    class VertexBuffer;
+
     class RenderSystem final : public System
     {
     public:
@@ -25,8 +32,6 @@ namespace Neon
         Window* window = nullptr;
         PhysicalDevice* physicalDevice = nullptr;
         GraphicsPipeline* pipeline = nullptr;
-
-        SDL_GPUBuffer* vertexBuffer = nullptr;
-
+        VertexBuffer<Vertex>* vertexBuffer = nullptr;
     };
 }

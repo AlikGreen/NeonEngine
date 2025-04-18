@@ -53,7 +53,6 @@ namespace  Neon
             throw std::runtime_error("Failed to create SDL window");
 
         const RenderSystem* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
-        SDL_ClaimWindowForGPUDevice(*renderSystem->getDevice(), handle);
         SDL_ShowWindow(handle);
     }
 

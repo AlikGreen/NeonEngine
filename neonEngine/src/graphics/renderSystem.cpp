@@ -1,20 +1,13 @@
 #include "renderSystem.h"
 
-#include <iostream>
-
 
 #include "../neonEngine.h"
 #include "backend/shader.h"
+#include "backend/buffers/vertexBuffer.h"
 #include "glm/glm.hpp"
 
 namespace Neon
 {
-	struct Vertex
-    {
-	    glm::vec2 position;
-    	glm::vec3 color;
-    };
-
     RenderSystem::RenderSystem(const WindowOptions &windowOptions)
     {
     	window = new Window(windowOptions);
@@ -23,7 +16,7 @@ namespace Neon
     void RenderSystem::startup()
     {
     	window->run();
-    	physicalDevice = new PhysicalDevice();
+    	physicalDevice = new PhysicalDevice(window);
 
     	auto shader = new Shader("C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/triangle.glsl");
     	shader->compile();
@@ -43,53 +36,14 @@ namespace Neon
 
     	shader->dispose();
 
-    	std::vector<Vertex> vertices =
+	    const std::vector<Vertex> vertices =
     	{
     		{{-0.5, -0.5}, {1, 0, 0}},
 			{{0.5, -0.5}, {0, 1, 0}},
 			{{0, 0.5}, {0, 0, 1}}
     	};
 
-    	SDL_GPUBufferCreateInfo vertexBufferDesc{};
-    	vertexBufferDesc.size = vertices.size() * sizeof(Vertex);
-    	vertexBufferDesc.usage = SDL_GPU_BUFFERUSAGE_VERTEX;
-    	vertexBuffer = SDL_CreateGPUBuffer(*physicalDevice, &vertexBufferDesc);
-    	if(!vertexBuffer)
-    		throw std::runtime_error("Failed to create vertex buffer");
-
-		SDL_GPUTransferBufferCreateInfo transferBufferDesc{};
-    	transferBufferDesc.size = vertices.size() * sizeof(Vertex);
-    	vertexBufferDesc.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
-    	auto transferBuffer = SDL_CreateGPUTransferBuffer(*physicalDevice, &transferBufferDesc);
-    	if(!transferBuffer)
-    		throw std::runtime_error("Failed to create transfer buffer");
-
-    	Vertex* transferBufferData = static_cast<Vertex *>(SDL_MapGPUTransferBuffer(*physicalDevice, transferBuffer, false));
-		std::ranges::copy(vertices, transferBufferData);
-
-    	SDL_UnmapGPUTransferBuffer(*physicalDevice, transferBuffer);
-
-    	SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(*physicalDevice);
-		if(!commandBuffer)
-			throw std::runtime_error("Failed to acquire command buffer");
-    	SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
-
-    	SDL_GPUTransferBufferLocation transferBufferLocation{};
-    	transferBufferLocation.transfer_buffer = transferBuffer;
-    	transferBufferLocation.offset = 0;
-
-    	SDL_GPUBufferRegion bufferRegion{};
-    	bufferRegion.buffer = vertexBuffer;
-    	bufferRegion.offset = 0;
-    	bufferRegion.size = vertexBufferDesc.size;
-
-    	SDL_UploadToGPUBuffer(copyPass, &transferBufferLocation, &bufferRegion, false);
-    	SDL_EndGPUCopyPass(copyPass);
-
-    	if(!SDL_SubmitGPUCommandBuffer(commandBuffer))
-    		throw std::runtime_error("Failed to submit command buffer");
-
-    	SDL_ReleaseGPUTransferBuffer(*physicalDevice, transferBuffer);
+    	vertexBuffer = new VertexBuffer(vertices);
     }
 
     void RenderSystem::render()
@@ -129,7 +83,7 @@ namespace Neon
 
         const std::vector<SDL_GPUBufferBinding> bufferBindings =
     	{
-    		{ vertexBuffer, 0 }
+    		{ *vertexBuffer, 0 }
     	};
 
     	SDL_BindGPUVertexBuffers(renderPass, 0, bufferBindings.data(), bufferBindings.size());

@@ -21,7 +21,6 @@ namespace  Neon
 
         void run();
         void close(bool deinitSDL = true) const;
-        void show() const;
 
         operator SDL_Window*() const;
         [[nodiscard]] SDL_Window* getHandle() const;

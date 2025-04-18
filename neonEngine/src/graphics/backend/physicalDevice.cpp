@@ -6,7 +6,7 @@
 
 namespace Neon
 {
-    PhysicalDevice::PhysicalDevice()
+    PhysicalDevice::PhysicalDevice(Window* window)
     {
         handle = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_MSL | SDL_GPU_SHADERFORMAT_DXIL, true, nullptr);
         if(!handle)
@@ -28,6 +28,7 @@ namespace Neon
         else
             throw std::runtime_error("Unknown backend API");
 
+        SDL_ClaimWindowForGPUDevice(handle, *window);
     }
 
     PhysicalDevice::operator SDL_GPUDevice*() const
