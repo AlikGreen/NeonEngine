@@ -2,6 +2,7 @@
 
 
 #include "../neonEngine.h"
+#include "backend/commandBuffer.h"
 #include "backend/shader.h"
 #include "backend/buffers/vertexBuffer.h"
 #include "glm/glm.hpp"
@@ -60,15 +61,9 @@ namespace Neon
             }
         }
 
-        SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(*physicalDevice);
-        if(!commandBuffer)
-            throw std::runtime_error("Failed to acquire GPU command buffer");
+    	CommandBuffer commandBuffer;
 
-        SDL_GPUTexture* swapChainTexture;
-        SDL_WaitAndAcquireGPUSwapchainTexture(commandBuffer, *window, &swapChainTexture, nullptr, nullptr);
-        if(!swapChainTexture)
-            return;
-            // throw std::runtime_error("Failed to acquire swap chain texture");
+        SDL_GPUTexture* swapChainTexture = commandBuffer.waitForSwapChainTexture();
 
         SDL_GPUColorTargetInfo colorTarget{};
         colorTarget.texture = swapChainTexture;
@@ -78,21 +73,20 @@ namespace Neon
 
         const std::vector colorTargets{colorTarget};
 
-        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(commandBuffer, colorTargets.data(), colorTargets.size(), nullptr);
-    	SDL_BindGPUGraphicsPipeline(renderPass, *pipeline);
+        RenderPass renderPass = commandBuffer.beginRenderPass(colorTargets);
+    	renderPass.bindPipeline(pipeline);
 
         const std::vector<SDL_GPUBufferBinding> bufferBindings =
     	{
     		{ *vertexBuffer, 0 }
     	};
 
-    	SDL_BindGPUVertexBuffers(renderPass, 0, bufferBindings.data(), bufferBindings.size());
-    	SDL_DrawGPUPrimitives(renderPass, 3, 1, 0, 0);
+    	renderPass.bindVertexBuffers(0, bufferBindings);
+    	renderPass.draw(3, 1);
 
-        SDL_EndGPURenderPass(renderPass);
+        renderPass.end();
 
-        if(!SDL_SubmitGPUCommandBuffer(commandBuffer))
-            throw std::runtime_error("Failed to submit command buffer to GPU");
+        commandBuffer.submit();
     }
 
 

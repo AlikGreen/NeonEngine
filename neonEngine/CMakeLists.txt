@@ -35,7 +35,11 @@ add_library(neonEngine SHARED
         src/graphics/backend/vertexInputState.h
         src/graphics/backend/buffers/vertexBuffer.h
         src/graphics/backend/buffers/transferBuffer.h
-        src/graphics/backend/buffers/transferBuffer.cpp)
+        src/graphics/backend/buffers/transferBuffer.cpp
+        src/graphics/backend/commandBuffer.cpp
+        src/graphics/backend/commandBuffer.h
+        src/graphics/backend/renderPass.cpp
+        src/graphics/backend/renderPass.h)
 
 target_include_directories(neonEngine PRIVATE "${CMAKE_SOURCE_DIR}/src")
 target_link_libraries(neonEngine PUBLIC SDL3::SDL3 glm::glm shaderc spirv-cross-c)
