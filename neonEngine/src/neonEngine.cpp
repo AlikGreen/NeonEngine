@@ -11,6 +11,7 @@ namespace Neon
     Engine::Engine(const EngineConfig &config)
     {
         this->config = config;
+        this->eventManager = new EventManager();
         instance = this;
     }
 
@@ -37,9 +38,19 @@ namespace Neon
         running = false;
     }
 
+    EventManager* Engine::getEventManager() const
+    {
+        return eventManager;
+    }
+
     Engine* Engine::getInstance()
     {
         return instance;
+    }
+
+    std::vector<System *> Engine::getSystems()
+    {
+        return registeredSystems;
     }
 
     void Engine::run()
@@ -51,30 +62,42 @@ namespace Neon
                 system->preUpdate();
             }
 
+            eventManager->handleEvents();
+
             for (const auto system: registeredSystems)
             {
                 system->update();
             }
+
+            eventManager->handleEvents();
 
             for (const auto system: registeredSystems)
             {
                 system->postUpdate();
             }
 
+            eventManager->handleEvents();
+
             for (const auto system: registeredSystems)
             {
                 system->preRender();
             }
+
+            eventManager->handleEvents();
 
             for (const auto system: registeredSystems)
             {
                 system->render();
             }
 
+            eventManager->handleEvents();
+
             for (const auto system: registeredSystems)
             {
                 system->postRender();
             }
+
+            eventManager->handleEvents();
         }
     }
 }

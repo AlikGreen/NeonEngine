@@ -2,8 +2,10 @@
 
 
 #include "../neonEngine.h"
+#include "backend/colorTarget.h"
 #include "backend/commandBuffer.h"
 #include "backend/shader.h"
+#include "backend/texture.h"
 #include "backend/buffers/vertexBuffer.h"
 #include "glm/glm.hpp"
 
@@ -49,31 +51,14 @@ namespace Neon
 
     void RenderSystem::render()
     {
-        SDL_Event event;
-        while(SDL_PollEvent(&event))
-        {
-            switch(event.type)
-            {
-                case SDL_EVENT_QUIT:
-                    Engine::getInstance()->quit();
-                default:
-                    break;
-            }
-        }
+	    const CommandBuffer commandBuffer = physicalDevice->acquireCommandBuffer();
 
-    	CommandBuffer commandBuffer;
+	    const Texture swapChainTexture = commandBuffer.waitForSwapChainTexture();
 
-        SDL_GPUTexture* swapChainTexture = commandBuffer.waitForSwapChainTexture();
+    	auto colorTarget = ColorTarget(swapChainTexture);
+    	colorTarget.clearColor = {0.0f, 0.6f, 0.0f ,1.0f};
 
-        SDL_GPUColorTargetInfo colorTarget{};
-        colorTarget.texture = swapChainTexture;
-        colorTarget.store_op = SDL_GPU_STOREOP_STORE;
-        colorTarget.load_op = SDL_GPU_LOADOP_CLEAR;
-        colorTarget.clear_color = {0, 0.6 ,0 ,1};
-
-        const std::vector colorTargets{colorTarget};
-
-        RenderPass renderPass = commandBuffer.beginRenderPass(colorTargets);
+        RenderPass renderPass = commandBuffer.beginRenderPass({colorTarget});
     	renderPass.bindPipeline(pipeline);
 
         const std::vector<SDL_GPUBufferBinding> bufferBindings =
@@ -87,6 +72,8 @@ namespace Neon
         renderPass.end();
 
         commandBuffer.submit();
+
+    	window->pollEvents();
     }
 
 

@@ -1,4 +1,5 @@
 #pragma once
+#include <concepts>
 
 namespace Neon
 {
@@ -19,4 +20,7 @@ namespace Neon
     private:
         bool canceled = false;
     };
+
+    template <typename T>
+    concept DerivedFromEvent = std::derived_from<T, Event>;
 }

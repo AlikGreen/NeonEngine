@@ -4,8 +4,14 @@
 #include <ostream>
 #include <stdexcept>
 
-#include "../renderSystem.h"
-#include "../../neonEngine.h"
+#include "graphics/renderSystem.h"
+#include "neonEngine.h"
+#include "input/keyCodes.h"
+#include "input/events/keyDownEvent.h"
+#include "input/events/keyUpEvent.h"
+#include "input/events/mouseButtonDownEvent.h"
+#include "input/events/mouseButtonUpEvent.h"
+#include "input/events/textInputEvent.h"
 
 namespace  Neon
 {
@@ -54,6 +60,7 @@ namespace  Neon
 
         const RenderSystem* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
         SDL_ShowWindow(handle);
+        SDL_StartTextInput(handle);
     }
 
     void Window::close(const bool deinitSDL) const
@@ -62,6 +69,37 @@ namespace  Neon
             SDL_DestroyWindow(handle);
 
         if(deinitSDL) SDL_Quit();
+    }
+
+    void Window::pollEvents()
+    {
+        SDL_Event event;
+        while(SDL_PollEvent(&event))
+        {
+            switch(event.type)
+            {
+                case SDL_EVENT_QUIT:
+                    Engine::getInstance()->quit();
+                    break;
+                case SDL_EVENT_KEY_DOWN:
+                    Engine::getInstance()->getEventManager()->queueEvent(new KeyDownEvent(static_cast<KeyCode>(event.key.key), static_cast<KeyMod>(event.key.mod)));
+                    break;
+                case SDL_EVENT_KEY_UP:
+                    Engine::getInstance()->getEventManager()->queueEvent(new KeyUpEvent(static_cast<KeyCode>(event.key.key), static_cast<KeyMod>(event.key.mod)));
+                    break;
+                case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                    Engine::getInstance()->getEventManager()->queueEvent(new MouseButtonDownEvent(static_cast<MouseButton>(event.button.button)));
+                    break;
+                case SDL_EVENT_MOUSE_BUTTON_UP:
+                    Engine::getInstance()->getEventManager()->queueEvent(new MouseButtonUpEvent(static_cast<MouseButton>(event.button.button)));
+                    break;
+                case SDL_EVENT_TEXT_INPUT:
+                    Engine::getInstance()->getEventManager()->queueEvent(new TextInputEvent(event.text.text));
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
 

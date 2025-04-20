@@ -4,6 +4,7 @@
 
 #include "core/system.h"
 #include "graphics/backend/window.h"
+#include "core/eventManager.h"
 
 namespace Neon
 {
@@ -21,6 +22,8 @@ namespace Neon
         void shutdown();
 
         void quit();
+
+        [[nodiscard]] EventManager* getEventManager() const;
 
         // TODO wait for safe time to add systems
         template <typename T, typename... Args>
@@ -44,7 +47,10 @@ namespace Neon
             }
             return nullptr;
         }
+
+        std::vector<System*> getSystems();
     private:
+        EventManager* eventManager;
         std::vector<System*> registeredSystems;
         EngineConfig config;
 

@@ -41,6 +41,14 @@ namespace Neon
         return backendAPI;
     }
 
+    CommandBuffer PhysicalDevice::acquireCommandBuffer() const
+    {
+        SDL_GPUCommandBuffer* commandBufferHandle = SDL_AcquireGPUCommandBuffer(handle);
+        if(!commandBufferHandle)
+            throw std::runtime_error("Failed to acquire GPU command buffer");
+        return CommandBuffer(commandBufferHandle);
+    }
+
     SDL_GPUDevice * PhysicalDevice::getHandle() const
     {
         return handle;

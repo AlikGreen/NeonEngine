@@ -39,7 +39,19 @@ add_library(neonEngine SHARED
         src/graphics/backend/commandBuffer.cpp
         src/graphics/backend/commandBuffer.h
         src/graphics/backend/renderPass.cpp
-        src/graphics/backend/renderPass.h)
+        src/graphics/backend/renderPass.h
+        src/core/eventManager.cpp
+        src/core/eventManager.h
+        src/graphics/backend/colorTarget.cpp
+        src/graphics/backend/colorTarget.h
+        src/input/keyCodes.h
+        src/input/events/keyDownEvent.h
+        src/input/events/keyUpEvent.h
+        src/input/events/mouseButtonUpEvent.h
+        src/input/events/mouseButtonDownEvent.h
+        src/input/events/textInputEvent.h
+        src/graphics/backend/texture.cpp
+        src/graphics/backend/texture.h)
 
-target_include_directories(neonEngine PRIVATE "${CMAKE_SOURCE_DIR}/src")
+target_include_directories(neonEngine PUBLIC src/)
 target_link_libraries(neonEngine PUBLIC SDL3::SDL3 glm::glm shaderc spirv-cross-c)
