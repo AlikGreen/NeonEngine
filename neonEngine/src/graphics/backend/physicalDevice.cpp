@@ -29,6 +29,16 @@ namespace Neon
             throw std::runtime_error("Unknown backend API");
 
         SDL_ClaimWindowForGPUDevice(handle, *window);
+
+        // DISABLE VSYNC
+        // if (SDL_WindowSupportsGPUPresentMode(handle, *window, SDL_GPU_PRESENTMODE_IMMEDIATE)) {
+        //     SDL_SetGPUSwapchainParameters(
+        //         handle,
+        //         *window,
+        //         SDL_GPU_SWAPCHAINCOMPOSITION_SDR,
+        //         SDL_GPU_PRESENTMODE_IMMEDIATE
+        //     );
+        // }
     }
 
     PhysicalDevice::operator SDL_GPUDevice*() const

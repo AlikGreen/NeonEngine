@@ -51,7 +51,15 @@ add_library(neonEngine SHARED
         src/input/events/mouseButtonDownEvent.h
         src/input/events/textInputEvent.h
         src/graphics/backend/texture.cpp
-        src/graphics/backend/texture.h)
+        src/graphics/backend/texture.h
+        src/core/ecs/world.cpp
+        src/core/ecs/world.h
+        src/core/ecs/ecsSystem.cpp
+        src/core/ecs/ecsSystem.h
+        src/core/ecs/component.h
+        src/core/ecs/componentList.cpp
+        src/core/ecs/componentList.h
+        src/core/ecs/entity.h)
 
 target_include_directories(neonEngine PUBLIC src/)
 target_link_libraries(neonEngine PUBLIC SDL3::SDL3 glm::glm shaderc spirv-cross-c)

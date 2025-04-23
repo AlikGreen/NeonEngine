@@ -7,6 +7,7 @@ int main()
 {
     Neon::EngineConfig config;
     config.windowOptions.title = "Sandbox App";
+    config.windowOptions.vsync = false;
 
     auto engine = Neon::Engine(config);
 
