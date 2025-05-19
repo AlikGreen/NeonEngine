@@ -9,9 +9,9 @@
 
 #include "spirv_hlsl.hpp"
 #include "spirv_msl.hpp"
-#include "../../neonEngine.h"
-#include "../../util/file.h"
-#include "../renderSystem.h"
+#include "core/engine.h"
+#include "util/file.h"
+#include "graphics/renderSystem.h"
 
 namespace Neon
 {

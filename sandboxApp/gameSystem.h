@@ -2,17 +2,11 @@
 #include <chrono>
 
 #include "core/system.h"
-#include "core/ecs/component.h"
-
-struct Transform : public Neon::Component
-{
-    double x{};
-};
 
 class GameSystem final : public Neon::System
 {
 public:
-    void startup() override;
+    void postStartup() override;
     void update() override;
     void event(Neon::Event *event) override;
 

@@ -3,19 +3,27 @@ project(neonEngine)
 
 set(CMAKE_CXX_STANDARD 23)
 
-
-# Include Windows SDK headers before MinGW's headers
-include_directories(BEFORE SYSTEM "${WINDOWS_SDK_PATH}/um")
-include_directories(BEFORE SYSTEM "${WINDOWS_SDK_PATH}/shared")
-
 add_subdirectory(dependencies/SDL3)
+set(SDL_SHARED_DEFAULT OFF FORCE)
+set(SDL_STATIC_DEFAULT ON FORCE)
+set(SDL_SHARED OFF CACHE BOOL "Build a shared version of the library" FORCE)
+set(SDL_STATIC ON CACHE BOOL "Build a static version of the library" FORCE)
+set(SDL_SHARED_ENABLED_BY_DEFAULT OFF CACHE BOOL "Enable shared library by default" FORCE)
+set(SDL_STATIC_ENABLED_BY_DEFAULT ON CACHE BOOL "Enable static library by default" FORCE)
+set(SDL_SHARED_DEPEXPORT OFF CACHE BOOL "Disable export dependency" FORCE)
+set(SDL_FORCE_STATIC_VCRT ON CACHE BOOL "Force static Visual C runtime" FORCE)
+
 add_subdirectory(dependencies/glm)
 add_subdirectory(dependencies/shaderc)
 add_subdirectory(dependencies/spirv-cross)
+add_subdirectory(dependencies/flecs)
 
-add_library(neonEngine SHARED
-        src/neonEngine.cpp
-        src/neonEngine.h
+set(TINYGLTF_HEADER_ONLY OFF CACHE BOOL "Build tinygltf as a library" FORCE)
+add_subdirectory(dependencies/tinygltf)
+
+add_library(neonEngine STATIC
+        src/core/engine.cpp
+        src/core/engine.h
         src/graphics/backend/window.cpp
         src/graphics/backend/window.h
         src/core/system.h
@@ -24,7 +32,6 @@ add_library(neonEngine SHARED
         src/graphics/renderSystem.h
         src/graphics/backend/shader.cpp
         src/graphics/backend/shader.h
-        src/util/file.cpp
         src/util/file.cpp
         src/graphics/backend/BackendAPIEnum.h
         src/graphics/backend/physicalDevice.cpp
@@ -52,14 +59,35 @@ add_library(neonEngine SHARED
         src/input/events/textInputEvent.h
         src/graphics/backend/texture.cpp
         src/graphics/backend/texture.h
-        src/core/ecs/world.cpp
-        src/core/ecs/world.h
-        src/core/ecs/ecsSystem.cpp
-        src/core/ecs/ecsSystem.h
-        src/core/ecs/component.h
-        src/core/ecs/componentList.cpp
-        src/core/ecs/componentList.h
-        src/core/ecs/entity.h)
+        src/ecs/world.cpp
+        src/ecs/world.h
+        src/ecs/ecsSystem.cpp
+        src/ecs/ecsSystem.h
+        src/ecs/entity.h
+        src/graphics/components/meshRenderer.h
+        src/graphics/mesh.cpp
+        src/graphics/mesh.h
+        src/asset/assetManager.cpp
+        src/asset/assetManager.h
+        src/asset/asset.h
+        src/asset/streams/assetStream.h
+        src/graphics/backend/depthState.cpp
+        src/graphics/backend/depthState.h
+        src/graphics/backend/depthStencilTarget.cpp
+        src/graphics/backend/depthStencilTarget.h
+        src/graphics/backend/convertSDL.cpp
+        src/graphics/backend/convertSDL.h
+        src/graphics/backend/renderTargetsDescription.h
+        src/ecs/components/transformComponent.h
+        src/ecs/components/tagComponent.h
+        src/ecs/entity.h
+        src/ecs/entity.cpp
+        src/ecs/componentList.h
+        src/ecs/typeSet.h
+        src/common.h)
+
+set(CMAKE_PCH_INSTANTIATE_TEMPLATES ON)
+target_precompile_headers(neonEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/common.h")
 
 target_include_directories(neonEngine PUBLIC src/)
-target_link_libraries(neonEngine PUBLIC SDL3::SDL3 glm::glm shaderc spirv-cross-c)
+target_link_libraries(neonEngine PUBLIC tinygltf SDL3::SDL3 glm::glm shaderc spirv-cross-c flecs)

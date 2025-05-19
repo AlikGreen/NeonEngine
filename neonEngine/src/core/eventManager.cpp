@@ -1,6 +1,6 @@
 #include "eventManager.h"
 
-#include "../neonEngine.h"
+#include "core/engine.h"
 
 namespace Neon
 {

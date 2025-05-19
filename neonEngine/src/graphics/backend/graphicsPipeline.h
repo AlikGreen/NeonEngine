@@ -1,4 +1,6 @@
 #pragma once
+#include "depthState.h"
+#include "RenderTargetsDescription.h"
 #include "shader.h"
 #include "vertexInputState.h"
 
@@ -28,17 +30,19 @@ namespace Neon
 
     struct GraphicsPipelineDescription
     {
-        Shader* shader= nullptr;
+        Shader* shader = nullptr;
         PrimitiveType primitiveType = PrimitiveType::TriangleList;
         FillMode fillMode = FillMode::Fill;
         CullMode cullMode = CullMode::None;
-        VertexInputState vertexInputState;
+        VertexInputState vertexInputState{};
+        DepthState depthState{};
+        RenderTargetsDescription targetsDescription{};
     };
 
     class GraphicsPipeline
     {
     public:
-        GraphicsPipeline(GraphicsPipelineDescription description);
+        explicit GraphicsPipeline(GraphicsPipelineDescription description);
 
         operator SDL_GPUGraphicsPipeline*() const;
         [[nodiscard]] SDL_GPUGraphicsPipeline* getHandle() const;

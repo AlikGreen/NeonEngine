@@ -1,10 +1,11 @@
 #include "commandBuffer.h"
 
 #include "colorTarget.h"
+#include "depthStencilTarget.h"
 #include "renderPass.h"
 #include "texture.h"
 #include "../renderSystem.h"
-#include "../../neonEngine.h"
+#include "core/engine.h"
 
 namespace Neon
 {
@@ -30,18 +31,38 @@ namespace Neon
         return Texture(swapChainTexture);
     }
 
-    RenderPass CommandBuffer::beginRenderPass(const std::vector<ColorTarget> &colorTargets) const
+    RenderPass CommandBuffer::beginRenderPass(const std::vector<ColorTarget>& colorTargets, const DepthStencilTarget* depthStencil) const
     {
         std::vector<SDL_GPUColorTargetInfo> sdlColorTargets;
         sdlColorTargets.reserve(colorTargets.size());
 
-        for (auto& target : colorTargets)
+        for (const auto& target : colorTargets)
         {
             sdlColorTargets.push_back(target);
         }
 
+        if (depthStencil)
+        {
+            // Convert and call in the same scope so there's no dangling pointer
+            const auto sdlDepth = static_cast<SDL_GPUDepthStencilTargetInfo>(*depthStencil);
 
-        return RenderPass(SDL_BeginGPURenderPass(handle, sdlColorTargets.data(), sdlColorTargets.size(), nullptr));
+            const auto rawPass = SDL_BeginGPURenderPass(
+                handle,
+                sdlColorTargets.data(),
+                sdlColorTargets.size(),
+                &sdlDepth
+            );
+            return RenderPass(rawPass);
+        }
+
+        // No depth/stencil case
+        const auto rawPass = SDL_BeginGPURenderPass(
+            handle,
+            sdlColorTargets.data(),
+            sdlColorTargets.size(),
+            nullptr
+        );
+        return RenderPass(rawPass);
     }
 
     CommandBuffer::operator SDL_GPUCommandBuffer*() const

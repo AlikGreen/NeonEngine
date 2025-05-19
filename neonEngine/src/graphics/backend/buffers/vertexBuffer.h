@@ -8,7 +8,7 @@
 
 #include "transferBuffer.h"
 #include "../../renderSystem.h"
-#include "../../../neonEngine.h"
+#include "core/engine.h"
 
 
 namespace Neon

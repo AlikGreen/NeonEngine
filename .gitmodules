@@ -10,3 +10,9 @@
 [submodule "neonEngine/dependencies/spirv-cross"]
 	path = neonEngine/dependencies/spirv-cross
 	url = https://github.com/KhronosGroup/SPIRV-Cross.git
+[submodule "neonEngine/dependencies/tinygltf"]
+	path = neonEngine/dependencies/tinygltf
+	url = https://github.com/syoyo/tinygltf.git
+[submodule "neonEngine/dependencies/flecs"]
+	path = neonEngine/dependencies/flecs
+	url = https://github.com/SanderMertens/flecs.git

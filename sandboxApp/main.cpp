@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "gameSystem.h"
-#include "neonEngine.h"
+#include "core/engine.h"
 
 int main()
 {

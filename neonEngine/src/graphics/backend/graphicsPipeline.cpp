@@ -1,7 +1,7 @@
 #include "graphicsPipeline.h"
 
 #include "../renderSystem.h"
-#include "../../neonEngine.h"
+#include "core/engine.h"
 
 namespace Neon
 {
@@ -17,21 +17,43 @@ namespace Neon
 
         const auto* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
 
-        SDL_GPUColorTargetDescription colorTargetDesc{};
-        colorTargetDesc.format = SDL_GetGPUSwapchainTextureFormat(*renderSystem->getDevice(), *renderSystem->getWindow());
-        const std::vector colorTargets = {colorTargetDesc};
+
+        SDL_GPUColorTargetDescription depthTargetDesc{};
+        // depthTargetDesc.format = SDL_GPU_TEXTUREFORMAT_D24_UNORM_S8_UINT;
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineDesc{};
+
+        // Shaders
         pipelineDesc.vertex_shader = description.shader->getVertexShader();
         pipelineDesc.fragment_shader = description.shader->getFragmentShader();
+
+        // Raster
         pipelineDesc.primitive_type = primitiveTypeToSDL(description.primitiveType);
         pipelineDesc.rasterizer_state.fill_mode = fillModeToSDL(description.fillMode);
         pipelineDesc.rasterizer_state.cull_mode = cullModeToSDL(description.cullMode);
 
-        pipelineDesc.target_info.color_target_descriptions = colorTargets.data();
-        pipelineDesc.target_info.num_color_targets = colorTargets.size();
-
+        // Input State
         pipelineDesc.vertex_input_state = vertexInputState;
+
+        // Targets
+        std::vector<SDL_GPUColorTargetDescription> colorTargetDescriptions{};
+
+        for (const auto& colorTargetFormat : description.targetsDescription.colorTargetFormats)
+        {
+            SDL_GPUColorTargetDescription desc{};
+            desc.format = ConvertSDL::textureFormatToSDL(colorTargetFormat);
+            colorTargetDescriptions.push_back(desc);
+        }
+
+        pipelineDesc.target_info.color_target_descriptions = colorTargetDescriptions.data();
+        pipelineDesc.target_info.num_color_targets = colorTargetDescriptions.size();
+
+        pipelineDesc.target_info.depth_stencil_format = ConvertSDL::textureFormatToSDL(description.targetsDescription.depthTargetFormat);
+
+        pipelineDesc.target_info.has_depth_stencil_target = description.depthState.hasDepthTarget;
+
+        pipelineDesc.depth_stencil_state.enable_depth_test = description.depthState.enableDepthTest;
+        pipelineDesc.depth_stencil_state.compare_op = SDL_GPU_COMPAREOP_LESS;
 
         handle = SDL_CreateGPUGraphicsPipeline(*renderSystem->getDevice(), &pipelineDesc);
         if(!handle)

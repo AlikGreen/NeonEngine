@@ -8,7 +8,10 @@ namespace Neon
     public:
         virtual ~System() = default;
 
+        virtual void preStartup() { }
         virtual void startup() { }
+        virtual void postStartup() { }
+
         virtual void shutdown() { }
 
         virtual void preRender() { }

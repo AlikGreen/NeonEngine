@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #include "graphics/renderSystem.h"
-#include "neonEngine.h"
+#include "core/engine.h"
 #include "input/keyCodes.h"
 #include "input/events/keyDownEvent.h"
 #include "input/events/keyUpEvent.h"
@@ -100,6 +100,20 @@ namespace  Neon
                     break;
             }
         }
+    }
+
+    int Window::getWidth() const
+    {
+        int width = 0;
+        SDL_GetWindowSize(handle, &width, nullptr);
+        return width;
+    }
+
+    int Window::getHeight() const
+    {
+        int height = 0;
+        SDL_GetWindowSize(handle, nullptr, &height);
+        return height;
     }
 
 

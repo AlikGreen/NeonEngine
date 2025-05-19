@@ -23,6 +23,9 @@ namespace  Neon
         void close(bool deinitSDL = true) const;
         void pollEvents();
 
+        [[nodiscard]] int getWidth() const;
+        [[nodiscard]] int getHeight() const;
+
         operator SDL_Window*() const;
         [[nodiscard]] SDL_Window* getHandle() const;
 

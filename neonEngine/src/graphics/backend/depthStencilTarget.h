@@ -1,22 +1,21 @@
 #pragma once
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_gpu.h>
 
 #include "convertSDL.h"
 #include "texture.h"
-#include "glm/vec4.hpp"
 
 namespace Neon
 {
-class ColorTarget
+class DepthStencilTarget
 {
 public:
-    explicit ColorTarget(Texture texture);
+    explicit DepthStencilTarget(Texture texture);
 
-    operator SDL_GPUColorTargetInfo() const;
+    operator SDL_GPUDepthStencilTargetInfo() const;
 
     LoadOperation loadOperation = LoadOperation::Clear;
     StoreOperation storeOperation = StoreOperation::Store;
-    glm::vec4 clearColor = glm::vec4(1, 1, 1, 1);
+    float clearDepth = 1.0f;
     Texture texture;
 };
 }

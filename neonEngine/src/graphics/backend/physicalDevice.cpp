@@ -4,9 +4,12 @@
 #include <ostream>
 #include <stdexcept>
 
+#include "core/engine.h"
+#include "graphics/renderSystem.h"
+
 namespace Neon
 {
-    PhysicalDevice::PhysicalDevice(Window* window)
+    PhysicalDevice::PhysicalDevice(const Window* window)
     {
         handle = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_MSL | SDL_GPU_SHADERFORMAT_DXIL, true, nullptr);
         if(!handle)
@@ -29,16 +32,6 @@ namespace Neon
             throw std::runtime_error("Unknown backend API");
 
         SDL_ClaimWindowForGPUDevice(handle, *window);
-
-        // DISABLE VSYNC
-        // if (SDL_WindowSupportsGPUPresentMode(handle, *window, SDL_GPU_PRESENTMODE_IMMEDIATE)) {
-        //     SDL_SetGPUSwapchainParameters(
-        //         handle,
-        //         *window,
-        //         SDL_GPU_SWAPCHAINCOMPOSITION_SDR,
-        //         SDL_GPU_PRESENTMODE_IMMEDIATE
-        //     );
-        // }
     }
 
     PhysicalDevice::operator SDL_GPUDevice*() const
@@ -57,6 +50,13 @@ namespace Neon
         if(!commandBufferHandle)
             throw std::runtime_error("Failed to acquire GPU command buffer");
         return CommandBuffer(commandBufferHandle);
+    }
+
+    TextureFormat PhysicalDevice::getSwapchainTextureFormat() const
+    {
+        const auto* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
+        const auto format = SDL_GetGPUSwapchainTextureFormat(handle, *renderSystem->getWindow());
+        return ConvertSDL::SDLToTextureFormat(format);
     }
 
     SDL_GPUDevice * PhysicalDevice::getHandle() const

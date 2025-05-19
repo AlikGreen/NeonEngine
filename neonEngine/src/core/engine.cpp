@@ -1,8 +1,8 @@
-#include "neonEngine.h"
+#include "engine.h"
 
 #include <iostream>
 
-#include "core/ecs/ecsSystem.h"
+#include "ecs/ecsSystem.h"
 #include "graphics/renderSystem.h"
 
 namespace Neon
@@ -23,7 +23,17 @@ namespace Neon
 
         for (const auto system: registeredSystems)
         {
+            system->preStartup();
+        }
+
+        for (const auto system: registeredSystems)
+        {
             system->startup();
+        }
+
+        for (const auto system: registeredSystems)
+        {
+            system->postStartup();
         }
     }
 
