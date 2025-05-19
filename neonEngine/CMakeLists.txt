@@ -84,7 +84,15 @@ add_library(neonEngine STATIC
         src/ecs/entity.cpp
         src/ecs/componentList.h
         src/ecs/typeSet.h
-        src/common.h)
+        src/common.h
+        src/debug/logger.cpp
+        src/debug/logger.h
+        src/debug/logLevel.h
+        src/debug/scopeTimer.cpp
+        src/debug/scopeTimer.h
+        src/debug/assert.cpp
+        src/debug/assert.h
+        src/debug/assertAction.h)
 
 set(CMAKE_PCH_INSTANTIATE_TEMPLATES ON)
 target_precompile_headers(neonEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/common.h")
