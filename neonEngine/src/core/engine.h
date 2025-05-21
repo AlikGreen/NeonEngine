@@ -10,6 +10,8 @@ namespace Neon
 {
     struct EngineConfig
     {
+        std::string engineResourcesPath;
+        std::string gameResourcesPath;
         WindowOptions windowOptions;
     };
 
@@ -48,6 +50,7 @@ namespace Neon
             return nullptr;
         }
 
+        EngineConfig getConfig();
         std::vector<System*> getSystems();
     private:
         EventManager* eventManager;

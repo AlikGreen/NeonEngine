@@ -76,7 +76,7 @@ namespace Neon
     	auto* ecsSystem = Engine::getInstance()->getSystem<ECSSystem>();
     	auto components = ecsSystem->getWorld()->getComponents<MeshRenderer, Transform>();
 
-    	glm::vec4 tintColor = {0.0f, 0.5f, 0.2f, 1.0f};
+    	glm::vec4 tintColor = {0.8f, 0.3f, 0.2f, 1.0f};
     	commandBuffer.pushFragmentUniformData(tintColor, 0);
 
     	for (auto[entity, meshRenderer, transform] : components)
@@ -104,16 +104,17 @@ namespace Neon
 
     void RenderSystem::renderMesh(const MeshRenderer& meshRenderer, const RenderPass renderPass, const CommandBuffer &commandBuffer)
     {
-    	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.4f, 0.0f, 0.0f));
+    	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.2f));
     	commandBuffer.pushVertexUniformData(model, 0);
+
 
     	const std::vector<SDL_GPUBufferBinding> bufferBindings =
 		{
-    		{ *meshRenderer.mesh.vertexBuffer, 0 }
+    		{ *meshRenderer.mesh->vertexBuffer, 0 }
 		};
 
     	renderPass.bindVertexBuffers(0, bufferBindings);
-    	renderPass.draw(3, 1);
+    	renderPass.draw(static_cast<int>(meshRenderer.mesh->indices.size()), 1);
     }
 
     void RenderSystem::shutdown()

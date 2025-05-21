@@ -60,6 +60,11 @@ namespace Neon
         return instance;
     }
 
+    EngineConfig Engine::getConfig()
+    {
+        return config;
+    }
+
     std::vector<System *> Engine::getSystems()
     {
         return registeredSystems;

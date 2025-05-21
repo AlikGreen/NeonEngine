@@ -4,6 +4,7 @@
 namespace Neon
 {
 struct MeshRenderer
-{Mesh mesh;
+{
+    Ref<Mesh> mesh;
 };
 }

@@ -6,20 +6,19 @@ set(CMAKE_CXX_STANDARD 23)
 add_subdirectory(dependencies/SDL3)
 set(SDL_SHARED_DEFAULT OFF FORCE)
 set(SDL_STATIC_DEFAULT ON FORCE)
-set(SDL_SHARED OFF CACHE BOOL "Build a shared version of the library" FORCE)
-set(SDL_STATIC ON CACHE BOOL "Build a static version of the library" FORCE)
-set(SDL_SHARED_ENABLED_BY_DEFAULT OFF CACHE BOOL "Enable shared library by default" FORCE)
-set(SDL_STATIC_ENABLED_BY_DEFAULT ON CACHE BOOL "Enable static library by default" FORCE)
-set(SDL_SHARED_DEPEXPORT OFF CACHE BOOL "Disable export dependency" FORCE)
-set(SDL_FORCE_STATIC_VCRT ON CACHE BOOL "Force static Visual C runtime" FORCE)
 
 add_subdirectory(dependencies/glm)
 add_subdirectory(dependencies/shaderc)
 add_subdirectory(dependencies/spirv-cross)
+
+set(FLECS_SHARED OFF FORCE)
+set(FLECS_STATIC ON FORCE)
 add_subdirectory(dependencies/flecs)
 
 set(TINYGLTF_HEADER_ONLY OFF CACHE BOOL "Build tinygltf as a library" FORCE)
 add_subdirectory(dependencies/tinygltf)
+
+add_subdirectory(dependencies/miniaudio)
 
 add_library(neonEngine STATIC
         src/core/engine.cpp
@@ -92,10 +91,21 @@ add_library(neonEngine STATIC
         src/debug/scopeTimer.h
         src/debug/assert.cpp
         src/debug/assert.h
-        src/debug/assertAction.h)
+        src/debug/assertAction.h
+        src/asset/assetHandle.h
+        src/asset/assetHandle.h
+        src/audio/audioManager.cpp
+        src/audio/audioManager.h)
+
+target_link_options(neonEngine
+        INTERFACE
+        -static
+        -static-libgcc
+        -static-libstdc++
+)
 
 set(CMAKE_PCH_INSTANTIATE_TEMPLATES ON)
 target_precompile_headers(neonEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/common.h")
 
 target_include_directories(neonEngine PUBLIC src/)
-target_link_libraries(neonEngine PUBLIC tinygltf SDL3::SDL3 glm::glm shaderc spirv-cross-c flecs)
+target_link_libraries(neonEngine PUBLIC tinygltf SDL3::SDL3 glm::glm shaderc spirv-cross-c flecs_static miniaudio)

@@ -16,3 +16,6 @@
 [submodule "neonEngine/dependencies/flecs"]
 	path = neonEngine/dependencies/flecs
 	url = https://github.com/SanderMertens/flecs.git
+[submodule "neonEngine/dependencies/miniaudio"]
+	path = neonEngine/dependencies/miniaudio
+	url = https://github.com/mackron/miniaudio.git

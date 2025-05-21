@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include "asset/assetHandle.h"
+#include "asset/assetManager.h"
+#include "audio/audioManager.h"
 #include "core/engine.h"
 #include "ecs/ecsSystem.h"
 #include "graphics/components/meshRenderer.h"
@@ -17,19 +20,22 @@ void GameSystem::postStartup()
     entity.addComponent<Neon::MeshRenderer>();
     auto& meshRenderer = entity.getComponent<Neon::MeshRenderer>();
 
-    meshRenderer.mesh = Neon::Mesh();
-    meshRenderer.mesh.vertices =
-    {
-        {{-0.5, -0.5, 0.1}, {1, 0, 0}, {-0.5, -0.5}},
-        {{0.5, -0.5, 0.1}, {0, 1, 0}, {0.5, -0.5}},
-        {{0, 0.5, 0.1}, {0, 0, 1}, {0, 0.5}}
-    };
+    // meshRenderer.mesh = Neon::makeRef<Neon::Mesh>();
+    // meshRenderer.mesh->vertices =
+    // {
+    //     {{-0.5, -0.5, 0.1}, {1, 0, 0}, {-0.5, -0.5}},
+    //     {{0.5, -0.5, 0.1}, {0, 1, 0}, {0.5, -0.5}},
+    //     {{0, 0.5, 0.1}, {0, 0, 1}, {0, 0.5}}
+    // };
+    //
+    // meshRenderer.mesh->indices = { 0, 1, 2 };
 
-    meshRenderer.mesh.indices = { 0, 1, 2 };
+    const Neon::AssetHandle meshHandle = Neon::AssetManager::loadAsset<Neon::Mesh>("models/cube.glb");
+    meshRenderer.mesh = Neon::AssetManager::getAsset<Neon::Mesh>(meshHandle);
 
-    // meshRenderer->mesh.load("C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/models/sphere.glb");
+    meshRenderer.mesh->apply();
 
-    meshRenderer.mesh.apply();
+    Neon::AudioManager::playSound(R"(C:\Users\alikg\CLionProjects\neonEngine\sandboxApp\resources\city-bgm-336601.mp3)");
 }
 
 void GameSystem::update()

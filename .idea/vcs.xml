@@ -13,6 +13,7 @@
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/shaderc/third_party/re2" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/shaderc/third_party/spirv-headers" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/shaderc/third_party/spirv-tools" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/soloud" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/spirv-cross" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/tinygltf" vcs="Git" />
   </component>

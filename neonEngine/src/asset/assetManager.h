@@ -1,7 +1,8 @@
 #pragma once
-#include <unordered_set>
 
 #include "asset.h"
+#include "assetHandle.h"
+#include <filesystem>
 
 namespace Neon
 {
@@ -9,16 +10,27 @@ class AssetManager
 {
 public:
     template<DerivesAsset T>
-    Ref<T> loadAsset(const std::string& filePath)
+    static AssetHandle loadAsset(const std::string& filePath)
     {
+        const std::filesystem::path fullPath = getFullPath(filePath);
+
         Ref<Asset> asset = makeRef<T>();
-        asset->load(filePath);
+        asset->load(fullPath.string());
 
-        assets.insert(asset);
+        AssetHandle handle;
+        assets.emplace(handle, asset);
 
-        return asset;
+        return handle;
+    }
+
+    template<DerivesAsset T>
+    static Ref<T> getAsset(const AssetHandle& assetHandle)
+    {
+        return std::static_pointer_cast<T>(assets.at(assetHandle));
     }
 private:
-    std::unordered_set<Ref<Asset>> assets;
+    static std::unordered_map<AssetHandle, Ref<Asset>> assets;
+
+    static std::string getFullPath(const std::string& filePath);
 };
 }
