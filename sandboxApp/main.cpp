@@ -12,11 +12,11 @@ int main()
     config.engineResourcesPath = R"(C:\Users\alikg\CLionProjects\neonEngine\neonEngine\resources)";
     config.gameResourcesPath = R"(C:\Users\alikg\CLionProjects\neonEngine\sandboxApp\resources)";
 
-    auto engine = Neon::Engine(config);
+    Neon::Engine::initialize(config);
 
-    engine.registerSystem<GameSystem>();
+    Neon::Engine::registerSystem<GameSystem>();
 
-    engine.startup();
-    engine.run();
-    engine.shutdown();
+    Neon::Engine::startup();
+    Neon::Engine::run();
+    Neon::Engine::shutdown();
 }

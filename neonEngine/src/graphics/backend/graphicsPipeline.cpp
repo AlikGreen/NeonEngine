@@ -15,7 +15,7 @@ namespace Neon
         vertexInputState.vertex_buffer_descriptions = vertexBuffers.data();
         vertexInputState.num_vertex_buffers = vertexBuffers.size();
 
-        const auto* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
+        const auto* renderSystem = Engine::getSystem<RenderSystem>();
 
 
         SDL_GPUColorTargetDescription depthTargetDesc{};

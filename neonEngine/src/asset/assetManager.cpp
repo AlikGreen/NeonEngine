@@ -1,17 +1,16 @@
 #include "assetManager.h"
 
 #include "core/engine.h"
+#include "debug/logger.h"
 
 namespace Neon
 {
-    std::unordered_map<AssetHandle, Ref<Asset>> AssetManager::assets;
-
     std::string AssetManager::getFullPath(const std::string &filePath)
     {
         const std::array possiblePaths =
         {
-            std::filesystem::path(Engine::getInstance()->getConfig().gameResourcesPath)/filePath,
-            std::filesystem::path(Engine::getInstance()->getConfig().engineResourcesPath)/filePath,
+            std::filesystem::path(Engine::getConfig().gameResourcesPath)/filePath,
+            std::filesystem::path(Engine::getConfig().engineResourcesPath)/filePath,
         };
 
         for (const auto& path: possiblePaths)
@@ -21,7 +20,6 @@ namespace Neon
                 return path.string();
             }
         }
-
         return filePath;
     }
 }

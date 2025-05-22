@@ -7,13 +7,20 @@
 
 namespace Neon
 {
-    Engine* Engine::instance = nullptr;
+    Scope<EventManager> Engine::eventManager;
+    Scope<AssetManager> Engine::assetManager;
+    Scope<AudioManager> Engine::audioManager;
 
-    Engine::Engine(const EngineConfig &config)
+    bool Engine::running = false;
+    std::vector<System*> Engine::registeredSystems = std::vector<System*>();
+    EngineConfig Engine::config;
+
+    void Engine::initialize(const EngineConfig &config)
     {
-        this->config = config;
-        this->eventManager = new EventManager();
-        instance = this;
+        Engine::config = config;
+        eventManager = makeScope<EventManager>();
+        assetManager = makeScope<AssetManager>();
+        audioManager = makeScope<AudioManager>();
     }
 
     void Engine::startup()
@@ -50,15 +57,6 @@ namespace Neon
         running = false;
     }
 
-    EventManager* Engine::getEventManager() const
-    {
-        return eventManager;
-    }
-
-    Engine* Engine::getInstance()
-    {
-        return instance;
-    }
 
     EngineConfig Engine::getConfig()
     {
@@ -70,8 +68,24 @@ namespace Neon
         return registeredSystems;
     }
 
+    EventManager* Engine::getEventManager()
+    {
+        return eventManager.get();
+    }
+
+    AssetManager * Engine::getAssetManager()
+    {
+        return assetManager.get();
+    }
+
+    AudioManager * Engine::getAudioManager()
+    {
+        return audioManager.get();
+    }
+
     void Engine::run()
     {
+        running = true;
         while (running)
         {
             for (const auto system: registeredSystems)

@@ -8,7 +8,7 @@ namespace Neon
 {
     Texture::Texture(const TextureType type, const TextureFormat format, const int width, const int height, TextureUsage usage)
     {
-        const RenderSystem* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
+        const RenderSystem* renderSystem = Engine::getSystem<RenderSystem>();
         device = renderSystem->getDevice();
 
         SDL_GPUTextureCreateInfo createInfo{};
@@ -25,7 +25,7 @@ namespace Neon
 
     Texture::Texture(SDL_GPUTexture *existing) : handle(existing)
     {
-        device = Engine::getInstance()->getSystem<RenderSystem>()->getDevice();
+        device = Engine::getSystem<RenderSystem>()->getDevice();
     }
 
     Texture::operator SDL_GPUTexture*() const

@@ -8,7 +8,7 @@ namespace Neon
     {
         for(const auto event : events)
         {
-            for(const auto system : Engine::getInstance()->getSystems())
+            for(const auto system : Engine::getSystems())
             {
                 system->event(event);
 

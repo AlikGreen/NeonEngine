@@ -19,7 +19,7 @@ namespace Neon
     public:
         explicit VertexBuffer(const uint32_t size)
         {
-            const auto* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
+            const auto* renderSystem = Engine::getSystem<RenderSystem>();
             const PhysicalDevice* device = renderSystem->getDevice();
             SDL_GPUBufferCreateInfo vertexBufferDesc{};
             vertexBufferDesc.size = size*sizeof(T);
@@ -32,7 +32,7 @@ namespace Neon
 
         explicit VertexBuffer(std::vector<T> data)
         {
-            const auto* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
+            const auto* renderSystem = Engine::getSystem<RenderSystem>();
             const PhysicalDevice* device = renderSystem->getDevice();
             SDL_GPUBufferCreateInfo vertexBufferDesc{};
             vertexBufferDesc.size = data.size()*sizeof(T);

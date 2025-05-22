@@ -11,7 +11,7 @@ namespace Neon
 {
     CommandBuffer::CommandBuffer(SDL_GPUCommandBuffer *handle) : handle(handle)
     {
-        const RenderSystem* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
+        const RenderSystem* renderSystem = Engine::getSystem<RenderSystem>();
         device = renderSystem->getDevice();
         window = renderSystem->getWindow();
     }

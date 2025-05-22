@@ -128,7 +128,7 @@ namespace Neon
 
     SDL_GPUShader* Shader::compileSDLShader(const ShaderData &shaderData)
     {
-        auto* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
+        auto* renderSystem = Engine::getSystem<RenderSystem>();
 
         std::vector<uint32_t> spirv = compileShaderToSpirv(shaderData.source, shaderData.shaderStage, shaderData.filePath);
         std::vector<uint8_t> shaderCode = compileShaderForBackend(spirv, renderSystem->getDevice()->getBackendApi());
@@ -225,7 +225,7 @@ namespace Neon
 
     void Shader::dispose() const
     {
-        const auto* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
+        const auto* renderSystem = Engine::getSystem<RenderSystem>();
 
         if(fragmentShader != nullptr)
             SDL_ReleaseGPUShader(*renderSystem->getDevice(), fragmentShader);

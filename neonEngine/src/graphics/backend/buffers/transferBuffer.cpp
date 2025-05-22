@@ -5,7 +5,7 @@
 
 namespace Neon
 {
-    TransferBuffer::TransferBuffer(const size_t size, const SDL_GPUTransferBufferUsage usage) : device(Engine::getInstance()->getSystem<RenderSystem>()->getDevice()), transferBuffer(nullptr), size(size), mapped(false)
+    TransferBuffer::TransferBuffer(const size_t size, const SDL_GPUTransferBufferUsage usage) : device(Engine::getSystem<RenderSystem>()->getDevice()), transferBuffer(nullptr), size(size), mapped(false)
     {
         SDL_GPUTransferBufferCreateInfo transferBufferDesc{};
         transferBufferDesc.size = size;

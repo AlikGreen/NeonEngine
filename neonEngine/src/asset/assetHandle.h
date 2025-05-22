@@ -20,20 +20,19 @@ namespace Neon
             return !(*this == other);
         }
 
-        size_t hash() const
+        explicit operator uint64_t() const
         {
-            return std::hash<size_t>{}(handle);
+            return handle;
         }
-
     private:
-        size_t handle;
+        uint64_t handle;
 
         // Static member to generate a random size_t
-        static size_t generateRandomHandle()
+        static uint64_t generateRandomHandle()
         {
             static std::random_device rd;
             static std::mt19937 gen(rd());
-            static std::uniform_int_distribution<size_t> distrib(1, std::numeric_limits<size_t>::max());
+            static std::uniform_int_distribution<uint64_t> distrib(1, std::numeric_limits<uint64_t>::max());
             return distrib(gen);
         }
     };
@@ -46,7 +45,7 @@ namespace std
     {
         std::size_t operator()(const Neon::AssetHandle& handle) const noexcept
         {
-            return handle.hash();
+            return static_cast<std::size_t>(handle);
         }
     };
 }

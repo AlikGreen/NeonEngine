@@ -95,7 +95,14 @@ add_library(neonEngine STATIC
         src/asset/assetHandle.h
         src/asset/assetHandle.h
         src/audio/audioManager.cpp
-        src/audio/audioManager.h)
+        src/audio/audioManager.h
+        src/audio/audioClip.cpp
+        src/audio/audioClip.h
+        src/audio/soundHandle.cpp
+        src/audio/soundHandle.h
+        src/audio/audioSystem.cpp
+        src/audio/audioSystem.h
+        src/audio/audioCommand.h)
 
 target_link_options(neonEngine
         INTERFACE

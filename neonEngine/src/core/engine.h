@@ -2,6 +2,8 @@
 #include <memory>
 #include <vector>
 
+#include "asset/assetManager.h"
+#include "audio/audioManager.h"
 #include "core/system.h"
 #include "graphics/backend/window.h"
 #include "core/eventManager.h"
@@ -18,27 +20,22 @@ namespace Neon
     class Engine
     {
     public:
-        explicit Engine(const EngineConfig &config);
-        void startup();
-        void run();
-        void shutdown();
+        static void initialize(const EngineConfig &config);
+        static void startup();
+        static void run();
+        static void shutdown();
 
-        void quit();
+        static void quit();
 
-        [[nodiscard]] EventManager* getEventManager() const;
-
-        // TODO wait for safe time to add systems
         template <typename T, typename... Args>
-        void registerSystem(Args&&... args)
+        static void registerSystem(Args&&... args)
         {
             T* system = new T(std::forward<Args>(args)...);
             registeredSystems.push_back(system);
         }
 
-        static Engine* getInstance();
-
         template <typename T>
-        T* getSystem()
+        static T* getSystem()
         {
             for (System* system : registeredSystems)
             {
@@ -50,15 +47,20 @@ namespace Neon
             return nullptr;
         }
 
-        EngineConfig getConfig();
-        std::vector<System*> getSystems();
+        static EngineConfig getConfig();
+        static std::vector<System*> getSystems();
+
+        static EventManager* getEventManager();
+        static AssetManager* getAssetManager();
+        static AudioManager* getAudioManager();
     private:
-        EventManager* eventManager;
-        std::vector<System*> registeredSystems;
-        EngineConfig config;
+        static Scope<EventManager> eventManager;
+        static Scope<AssetManager> assetManager;
+        static Scope<AudioManager> audioManager;
 
-        bool running = true;
+        static std::vector<System*> registeredSystems;
+        static EngineConfig config;
 
-        static Engine* instance;
+        static bool running;
     };
 }

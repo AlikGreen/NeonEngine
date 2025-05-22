@@ -6,6 +6,7 @@
 #include "asset/assetManager.h"
 #include "audio/audioManager.h"
 #include "core/engine.h"
+#include "debug/logger.h"
 #include "ecs/ecsSystem.h"
 #include "graphics/components/meshRenderer.h"
 #include "input/events/keyDownEvent.h"
@@ -14,7 +15,7 @@
 
 void GameSystem::postStartup()
 {
-    auto* ecsSystem = Neon::Engine::getInstance()->getSystem<Neon::ECSSystem>();
+    auto* ecsSystem = Neon::Engine::getSystem<Neon::ECSSystem>();
     const auto world = ecsSystem->getWorld();
     Neon::Entity entity = world->createEntity();
     entity.addComponent<Neon::MeshRenderer>();
@@ -30,12 +31,19 @@ void GameSystem::postStartup()
     //
     // meshRenderer.mesh->indices = { 0, 1, 2 };
 
-    const Neon::AssetHandle meshHandle = Neon::AssetManager::loadAsset<Neon::Mesh>("models/cube.glb");
-    meshRenderer.mesh = Neon::AssetManager::getAsset<Neon::Mesh>(meshHandle);
-
+    Neon::AssetManager* assetManager = Neon::Engine::getAssetManager();
+    const Neon::AssetHandle meshHandle = assetManager->loadAsset<Neon::Mesh>("models/cube.glb");
+    meshRenderer.mesh = Neon::Engine::getAssetManager()->getAsset<Neon::Mesh>(meshHandle);
     meshRenderer.mesh->apply();
 
-    Neon::AudioManager::playSound(R"(C:\Users\alikg\CLionProjects\neonEngine\sandboxApp\resources\city-bgm-336601.mp3)");
+    Neon::AssetHandle songHandle = assetManager->loadAsset<Neon::AudioClip>("city-bgm-336601.mp3");
+    Neon::Ref<Neon::AudioClip> song = assetManager->getAsset<Neon::AudioClip>(songHandle);
+
+    Neon::Engine::getAudioManager()->playSound(song);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    Neon::Engine::getAudioManager()->playSound(song);
+    // std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    // Neon::Engine::getAudioManager()->playSound(song);
 }
 
 void GameSystem::update()
@@ -44,7 +52,7 @@ void GameSystem::update()
     auto end = std::chrono::high_resolution_clock::now();
     if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 1000)
     {
-        std::cout << frameCount << std::endl;
+        Neon::Logger::info("GameSystem", "frames per second: "+frameCount);
         start = std::chrono::high_resolution_clock::now();
         frameCount = 0;
     }

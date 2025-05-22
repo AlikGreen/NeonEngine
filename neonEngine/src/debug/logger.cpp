@@ -27,11 +27,11 @@ namespace Neon
 
         std::lock_guard lock(mutex);
 
-        const auto now = std::chrono::system_clock::now();
-        const auto time = std::chrono::system_clock::to_time_t(now);
+        const std::time_t now = std::time(nullptr);
+        const std::tm* tm = std::localtime(&now);
 
         std::stringstream ss;
-        ss << "[" << std::ctime(&time) << "] ";
+        ss << "[" << std::put_time(tm, "%d-%m-%Y %H:%M:%S") << "] ";
 
         switch (level)
         {
@@ -46,12 +46,12 @@ namespace Neon
         ss << "[" << component << "] " << message;
 
         if (logFile.is_open()) {
-            logFile << ss.str() << std::endl;
+            logFile << ss.str() << "\n";
             logFile.flush();
         }
 
         if (consoleOutput) {
-            std::cout << ss.str() << std::endl;
+            std::cout << ss.str() << "\n";
         }
     }
 

@@ -10,7 +10,7 @@ class AssetManager
 {
 public:
     template<DerivesAsset T>
-    static AssetHandle loadAsset(const std::string& filePath)
+    AssetHandle loadAsset(const std::string& filePath)
     {
         const std::filesystem::path fullPath = getFullPath(filePath);
 
@@ -24,12 +24,12 @@ public:
     }
 
     template<DerivesAsset T>
-    static Ref<T> getAsset(const AssetHandle& assetHandle)
+    Ref<T> getAsset(const AssetHandle& assetHandle)
     {
         return std::static_pointer_cast<T>(assets.at(assetHandle));
     }
 private:
-    static std::unordered_map<AssetHandle, Ref<Asset>> assets;
+    std::unordered_map<AssetHandle, Ref<Asset>> assets;
 
     static std::string getFullPath(const std::string& filePath);
 };

@@ -58,7 +58,6 @@ namespace  Neon
         if (!handle)
             throw std::runtime_error("Failed to create SDL window");
 
-        const RenderSystem* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
         SDL_ShowWindow(handle);
         SDL_StartTextInput(handle);
     }
@@ -79,22 +78,22 @@ namespace  Neon
             switch(event.type)
             {
                 case SDL_EVENT_QUIT:
-                    Engine::getInstance()->quit();
+                    Engine::quit();
                     break;
                 case SDL_EVENT_KEY_DOWN:
-                    Engine::getInstance()->getEventManager()->queueEvent(new KeyDownEvent(static_cast<KeyCode>(event.key.key), static_cast<KeyMod>(event.key.mod)));
+                    Engine::getEventManager()->queueEvent(new KeyDownEvent(static_cast<KeyCode>(event.key.key), static_cast<KeyMod>(event.key.mod)));
                     break;
                 case SDL_EVENT_KEY_UP:
-                    Engine::getInstance()->getEventManager()->queueEvent(new KeyUpEvent(static_cast<KeyCode>(event.key.key), static_cast<KeyMod>(event.key.mod)));
+                    Engine::getEventManager()->queueEvent(new KeyUpEvent(static_cast<KeyCode>(event.key.key), static_cast<KeyMod>(event.key.mod)));
                     break;
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                    Engine::getInstance()->getEventManager()->queueEvent(new MouseButtonDownEvent(static_cast<MouseButton>(event.button.button)));
+                    Engine::getEventManager()->queueEvent(new MouseButtonDownEvent(static_cast<MouseButton>(event.button.button)));
                     break;
                 case SDL_EVENT_MOUSE_BUTTON_UP:
-                    Engine::getInstance()->getEventManager()->queueEvent(new MouseButtonUpEvent(static_cast<MouseButton>(event.button.button)));
+                    Engine::getEventManager()->queueEvent(new MouseButtonUpEvent(static_cast<MouseButton>(event.button.button)));
                     break;
                 case SDL_EVENT_TEXT_INPUT:
-                    Engine::getInstance()->getEventManager()->queueEvent(new TextInputEvent(event.text.text));
+                    Engine::getEventManager()->queueEvent(new TextInputEvent(event.text.text));
                     break;
                 default:
                     break;

@@ -73,7 +73,7 @@ namespace Neon
         RenderPass renderPass = commandBuffer.beginRenderPass({colorTarget}, depthTarget);
     	renderPass.bindPipeline(pipeline);
 
-    	auto* ecsSystem = Engine::getInstance()->getSystem<ECSSystem>();
+    	auto* ecsSystem = Engine::getSystem<ECSSystem>();
     	auto components = ecsSystem->getWorld()->getComponents<MeshRenderer, Transform>();
 
     	glm::vec4 tintColor = {0.8f, 0.3f, 0.2f, 1.0f};

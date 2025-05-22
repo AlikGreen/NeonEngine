@@ -54,7 +54,7 @@ namespace Neon
 
     TextureFormat PhysicalDevice::getSwapchainTextureFormat() const
     {
-        const auto* renderSystem = Engine::getInstance()->getSystem<RenderSystem>();
+        const auto* renderSystem = Engine::getSystem<RenderSystem>();
         const auto format = SDL_GetGPUSwapchainTextureFormat(handle, *renderSystem->getWindow());
         return ConvertSDL::SDLToTextureFormat(format);
     }
