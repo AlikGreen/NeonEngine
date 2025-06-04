@@ -5,8 +5,8 @@
 #include "asset/assetManager.h"
 #include "audio/audioManager.h"
 #include "core/system.h"
-#include "graphics/backend/window.h"
 #include "core/eventManager.h"
+#include "graphics/api/descriptions/windowCreationOptions.h"
 
 namespace Neon
 {
@@ -14,7 +14,7 @@ namespace Neon
     {
         std::string engineResourcesPath;
         std::string gameResourcesPath;
-        WindowOptions windowOptions;
+        WindowCreationOptions windowOptions;
     };
 
     class Engine

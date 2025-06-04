@@ -1,8 +1,9 @@
 #pragma once
 #include <vector>
 
+#include "api/buffers/indexBuffer.h"
+#include "api/buffers/vertexBuffer.h"
 #include "asset/asset.h"
-#include "backend/buffers/vertexBuffer.h"
 #include "glm/glm.hpp"
 
 namespace Neon
@@ -29,6 +30,7 @@ namespace Neon
         std::vector<Vertex> vertices{};
         std::vector<uint32_t> indices{};
 
-        VertexBuffer<Vertex>* vertexBuffer = nullptr;
+        Ref<VertexBuffer> vertexBuffer = nullptr;
+        Ref<IndexBuffer> indexBuffer = nullptr;
     };
 }

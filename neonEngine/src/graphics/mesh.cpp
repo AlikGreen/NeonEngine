@@ -2,11 +2,16 @@
 
 #include <tiny_gltf.h>
 
+#include "renderSystem.h"
+#include "core/engine.h"
+
 namespace Neon
 {
     void Mesh::apply()
     {
-        vertexBuffer = new VertexBuffer(vertices);
+        const auto device = Engine::getSystem<RenderSystem>()->getDevice();
+        vertexBuffer = device->createVertexBuffer(vertices);
+        indexBuffer = device->createIndexBuffer(indices);
     }
 
     void Mesh::load(const std::string &filePath)
@@ -35,7 +40,7 @@ namespace Neon
             if (it == prim.attributes.end())    return;
             const Accessor& acc = model.accessors[it->second];
             const BufferView& bv = model.bufferViews[acc.bufferView];
-            const Buffer& buf = model.buffers[bv.buffer];
+            const tinygltf::Buffer& buf = model.buffers[bv.buffer];
             size_t count = acc.count;
             vertices.resize(count);
 
@@ -58,7 +63,7 @@ namespace Neon
             if (it != prim.attributes.end()) {
                 const Accessor& acc = model.accessors[it->second];
                 const BufferView& bv = model.bufferViews[acc.bufferView];
-                const Buffer& buf = model.buffers[bv.buffer];
+                const tinygltf::Buffer& buf = model.buffers[bv.buffer];
                 const float* dataPtr = reinterpret_cast<const float*>(
                     buf.data.data() + bv.byteOffset + acc.byteOffset);
 
@@ -101,7 +106,7 @@ namespace Neon
             if (prim.indices < 0) return;
             const Accessor& acc = model.accessors[prim.indices];
             const BufferView& bv = model.bufferViews[acc.bufferView];
-            const Buffer& buf = model.buffers[bv.buffer];
+            const tinygltf::Buffer& buf = model.buffers[bv.buffer];
 
             size_t count = acc.count;
             indices.resize(count);

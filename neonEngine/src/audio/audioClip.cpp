@@ -20,9 +20,4 @@ namespace Neon
     {
         throw std::runtime_error("Not implemented");
     }
-
-    ma_decoder AudioClip::getDecoder() const
-    {
-        return decoder;
-    }
 }

@@ -1,4 +1,7 @@
-#include "logger.h"
+#include "Logger.h"
+#include <iostream>
+#include <iomanip>
+#include <ctime>
 
 namespace Neon
 {
@@ -6,10 +9,8 @@ namespace Neon
     LogLevel Logger::minLevel = LogLevel::INFO;
 
     std::mutex Logger::mutex;
-    // should open file in init and close in shutdown
     std::ofstream Logger::logFile;
     std::unordered_map<std::string, std::chrono::time_point<std::chrono::high_resolution_clock>> Logger::timers;
-
 
     void Logger::setLogLevel(const LogLevel level)
     {
@@ -95,7 +96,7 @@ namespace Neon
         const auto endTime = std::chrono::high_resolution_clock::now();
 
         if (!timers.contains(name)) {
-            warning("Profiler", "Attempted to end timer '" + name + "' that wasn't started");
+            warning("Profiler", "Attempted to end timer '{}' that wasn't started", name);
             return 0.0f;
         }
 
@@ -104,7 +105,7 @@ namespace Neon
 
         if (logResult)
         {
-            debug("Profiler", name + " took " + std::to_string(duration) + " ms");
+            debug("Profiler", "{} took {} ms", name, duration);
         }
 
         timers.erase(name);

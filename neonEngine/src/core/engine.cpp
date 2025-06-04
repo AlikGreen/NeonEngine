@@ -1,7 +1,6 @@
 #include "engine.h"
 
-#include <iostream>
-
+#include "coreSystem.h"
 #include "ecs/ecsSystem.h"
 #include "graphics/renderSystem.h"
 
@@ -25,9 +24,6 @@ namespace Neon
 
     void Engine::startup()
     {
-        registerSystem<RenderSystem>(config.windowOptions);
-        registerSystem<ECSSystem>();
-
         for (const auto system: registeredSystems)
         {
             system->preStartup();

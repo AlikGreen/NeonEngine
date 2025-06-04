@@ -2,14 +2,13 @@
 
 
 #include "mesh.h"
+#include "api/commandList.h"
+#include "api/window.h"
+#include "api/descriptions/windowCreationOptions.h"
+#include "api/enums/shaderType.h"
 #include "core/engine.h"
 #include "components/meshRenderer.h"
-#include "backend/colorTarget.h"
-#include "backend/commandBuffer.h"
-#include "backend/depthStencilTarget.h"
-#include "backend/shader.h"
-#include "backend/texture.h"
-#include "backend/buffers/vertexBuffer.h"
+#include "debug/logger.h"
 #include "ecs/ECSSystem.h"
 #include "ecs/components/transformComponent.h"
 #include "glm/glm.hpp"
@@ -17,17 +16,17 @@
 
 namespace Neon
 {
-    RenderSystem::RenderSystem(const WindowOptions &windowOptions)
+    RenderSystem::RenderSystem(const WindowCreationOptions &windowOptions)
     {
-    	window = new Window(windowOptions);
+    	window = Window::createWindow(windowOptions);
     }
 
     void RenderSystem::preStartup()
     {
     	window->run();
-    	physicalDevice = new PhysicalDevice(window);
+    	device = window->createDevice();
 
-    	auto shader = new Shader("C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/triangle.glsl");
+	    const auto shader = device->createShaderFromPath("C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/triangle.glsl");
     	shader->compile();
 
     	VertexInputState vertexInputState{};
@@ -40,9 +39,7 @@ namespace Neon
     	depthState.hasDepthTarget = true;
     	depthState.enableDepthTest = true;
 
-    	RenderTargetsDescription targetsDesc{};
-    	targetsDesc.colorTargetFormats = {physicalDevice->getSwapchainTextureFormat()};
-    	targetsDesc.depthTargetFormat = TextureFormat::D32Float;
+	    const RenderTargetsDescription targetsDesc{};
 
     	GraphicsPipelineDescription pipelineDescription{};
     	pipelineDescription.shader = shader;
@@ -51,70 +48,67 @@ namespace Neon
     	pipelineDescription.targetsDescription = targetsDesc;
     	pipelineDescription.depthState = depthState;
 
+    	pipeline = device->createGraphicsPipeline(pipelineDescription);
 
-    	pipeline = new GraphicsPipeline(pipelineDescription);
+    	depthTexture = device->createTexture2D(window->getWidth(), window->getHeight(), TextureUsage::DepthStencilTarget, TextureFormat::D32Float);
 
-    	shader->dispose();
+    	commandList = device->createCommandList();
 
-    	depthTexture = new Texture(TextureType::Texture2D, TextureFormat::D32Float, 1920, 1080, TextureUsage::DepthStencilTarget);
+    	glm::vec4 tintColor = {0.8f, 0.3f, 0.2f, 1.0f};
+    	tintColorUniformBuffer = device->createUniformBuffer<glm::vec4>(tintColor);
+    	glm::vec4 model = glm::vec4(0.0f, 0.5f, 0.0f, 0.0f);
+    	mpvUniformBuffer = device->createUniformBuffer<glm::vec4>(model);
     }
 
     void RenderSystem::render()
     {
-    	const CommandBuffer commandBuffer = physicalDevice->acquireCommandBuffer();
+    	commandList->begin();
 
-	    const Texture swapChainTexture = commandBuffer.waitForSwapChainTexture();
+    	commandList->setFrameBuffer(device->getSwapChainFrameBuffer());
+        commandList->setPipeline(pipeline);
 
-    	auto colorTarget = ColorTarget(swapChainTexture);
-    	colorTarget.clearColor = {0.0f, 0.6f, 0.0f ,1.0f};
+    	commandList->clearColorTarget(0, {0.0f, 0.6f, 0.0f, 1.0f});
+    	commandList->clearDepthStencil(1.0f);
 
-	    const auto depthTarget = new DepthStencilTarget(*depthTexture);
+     	auto* ecsSystem = Engine::getSystem<ECSSystem>();
+     	auto components = ecsSystem->getWorld()->getComponents<MeshRenderer, Transform>();
 
-        RenderPass renderPass = commandBuffer.beginRenderPass({colorTarget}, depthTarget);
-    	renderPass.bindPipeline(pipeline);
+     	commandList->setUniformBuffer(1, ShaderType::Fragment, tintColorUniformBuffer);
 
-    	auto* ecsSystem = Engine::getSystem<ECSSystem>();
-    	auto components = ecsSystem->getWorld()->getComponents<MeshRenderer, Transform>();
+     	for (auto[entity, meshRenderer, transform] : components)
+     	{
+			 renderMesh(meshRenderer);
+     	}
 
-    	glm::vec4 tintColor = {0.8f, 0.3f, 0.2f, 1.0f};
-    	commandBuffer.pushFragmentUniformData(tintColor, 0);
-
-    	for (auto[entity, meshRenderer, transform] : components)
-    	{
-			renderMesh(meshRenderer, renderPass, commandBuffer);
-    	}
-
-        renderPass.end();
-
-		commandBuffer.submit();
+        device->submitCommandList(commandList);
+    	device->swapBuffers();
 
     	window->pollEvents();
     }
 
 
-    PhysicalDevice* RenderSystem::getDevice() const
+    Ref<Device> RenderSystem::getDevice() const
     {
-    	return physicalDevice;
+    	return device;
     }
 
-    Window * RenderSystem::getWindow() const
+    Ref<Window> RenderSystem::getWindow() const
     {
     	return window;
     }
 
-    void RenderSystem::renderMesh(const MeshRenderer& meshRenderer, const RenderPass renderPass, const CommandBuffer &commandBuffer)
+    void RenderSystem::renderMesh(const MeshRenderer& meshRenderer) const
     {
-    	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.2f));
-    	commandBuffer.pushVertexUniformData(model, 0);
+    	static float x = 0.0f;
+    	x+= 0.0001f;
+    	float model[] = {x, 0.5f, 0.0f, 0.0f};
 
+    	commandList->updateBuffer<float[4]>(mpvUniformBuffer, model);
+    	commandList->setUniformBuffer(0, ShaderType::Vertex, mpvUniformBuffer);
 
-    	const std::vector<SDL_GPUBufferBinding> bufferBindings =
-		{
-    		{ *meshRenderer.mesh->vertexBuffer, 0 }
-		};
-
-    	renderPass.bindVertexBuffers(0, bufferBindings);
-    	renderPass.draw(static_cast<int>(meshRenderer.mesh->indices.size()), 1);
+    	commandList->setVertexBuffer(0, meshRenderer.mesh->vertexBuffer);
+    	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer, IndexFormat::UInt32);
+    	commandList->drawIndexed(meshRenderer.mesh->indices.size());
     }
 
     void RenderSystem::shutdown()

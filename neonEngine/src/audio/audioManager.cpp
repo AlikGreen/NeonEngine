@@ -2,6 +2,7 @@
 
 #include "AudioManager.h"
 #include <filesystem>
+#include <ranges>
 
 #include "miniaudio.h"
 #include "debug/assert.h"
@@ -71,18 +72,12 @@ namespace Neon
     void AudioManager::mixClips(float* pOutF32, ma_uint32 frameCount)
     {
         // zero out buffer
-        std::fill(pOutF32, pOutF32 + frameCount * 2, 0.0f);
+        std::fill_n(pOutF32, frameCount * 2, 0.0f);
 
         std::lock_guard vlock(audioClipMutex);
-        for (const auto&[k, v] : audioClipsMap)
+        for (const auto& clip : std::ranges::views::values(audioClipsMap))
         {
-            // if (!it->playing)
-            // {
-            //     it = voices.erase(it);
-            //     continue;
-            // }
-            // read each voice into a temporary buffer and accumulate:
-            ma_decoder_read_pcm_frames(&v->decoder, pOutF32, frameCount, nullptr);
+            //ma_decoder_read_pcm_frames(&clip->decoder, pOutF32, frameCount, nullptr);
         }
     }
 }

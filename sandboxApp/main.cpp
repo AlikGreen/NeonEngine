@@ -1,7 +1,10 @@
 #include <iostream>
 
 #include "gameSystem.h"
+#include "core/coreSystem.h"
 #include "core/engine.h"
+#include "ecs/ecsSystem.h"
+#include "graphics/renderSystem.h"
 
 int main()
 {
@@ -14,6 +17,9 @@ int main()
 
     Neon::Engine::initialize(config);
 
+    Neon::Engine::registerSystem<Neon::CoreSystem>();
+    Neon::Engine::registerSystem<Neon::RenderSystem>(config.windowOptions);
+    Neon::Engine::registerSystem<Neon::ECSSystem>();
     Neon::Engine::registerSystem<GameSystem>();
 
     Neon::Engine::startup();

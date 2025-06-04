@@ -1,9 +1,8 @@
 #pragma once
 
-#include "../core/system.h"
-#include "backend/graphicsPipeline.h"
-#include "backend/physicalDevice.h"
-#include "backend/window.h"
+#include "core/system.h"
+#include "api/device.h"
+#include "api/window.h"
 
 namespace Neon
 {
@@ -12,20 +11,23 @@ namespace Neon
     class RenderSystem final : public System
     {
     public:
-        explicit RenderSystem(const WindowOptions &windowOptions);
+        explicit RenderSystem(const WindowCreationOptions &windowOptions);
 
         void preStartup() override;
         void shutdown() override;
         void render() override;
 
-        [[nodiscard]] PhysicalDevice* getDevice() const;
-        [[nodiscard]] Window* getWindow() const;
+        [[nodiscard]] Ref<Device> getDevice() const;
+        [[nodiscard]] Ref<Window> getWindow() const;
     private:
-        static void renderMesh(const MeshRenderer& meshRenderer, RenderPass renderPass, const CommandBuffer &commandBuffer);
+        void renderMesh(const MeshRenderer& meshRenderer) const;
 
-        Window* window = nullptr;
-        PhysicalDevice* physicalDevice = nullptr;
-        GraphicsPipeline* pipeline = nullptr;
-        Texture* depthTexture = nullptr;
+        Ref<Window> window{};
+        Ref<Device> device{};
+        Ref<GraphicsPipeline> pipeline{};
+        Ref<Texture2D> depthTexture{};
+        Ref<CommandList> commandList{};
+        Ref<UniformBuffer> tintColorUniformBuffer{};
+        Ref<UniformBuffer> mpvUniformBuffer{};
     };
 }

@@ -11,8 +11,8 @@ public:
    void serialize(AssetStream &stream) override;
    void deserialize(AssetStream &stream) override;
 
-   [[nodiscard]] ma_decoder getDecoder() const;
-
+private:
+   friend class AudioManager;
    ma_decoder decoder = {};
 };
 }

@@ -21,29 +21,26 @@ void GameSystem::postStartup()
     entity.addComponent<Neon::MeshRenderer>();
     auto& meshRenderer = entity.getComponent<Neon::MeshRenderer>();
 
-    // meshRenderer.mesh = Neon::makeRef<Neon::Mesh>();
-    // meshRenderer.mesh->vertices =
-    // {
-    //     {{-0.5, -0.5, 0.1}, {1, 0, 0}, {-0.5, -0.5}},
-    //     {{0.5, -0.5, 0.1}, {0, 1, 0}, {0.5, -0.5}},
-    //     {{0, 0.5, 0.1}, {0, 0, 1}, {0, 0.5}}
-    // };
-    //
-    // meshRenderer.mesh->indices = { 0, 1, 2 };
+    meshRenderer.mesh = Neon::makeRef<Neon::Mesh>();
+    meshRenderer.mesh->vertices =
+    {
+        {{-0.5, -0.5, 0.1}, {1, 0, 0}, {-0.5, -0.5}},
+        {{0.5, -0.5, 0.1}, {0, 1, 0}, {0.5, -0.5}},
+        {{0.5, 0.5, 0.1}, {0, 0, 1}, {0, 0.5}},
+        {{-0.5, 0.5, 0.1}, {0, 0, 1}, {0, 0.5}}
+    };
+
+    meshRenderer.mesh->indices = { 0, 1, 2, 0, 2, 3 };
 
     Neon::AssetManager* assetManager = Neon::Engine::getAssetManager();
-    const Neon::AssetHandle meshHandle = assetManager->loadAsset<Neon::Mesh>("models/cube.glb");
-    meshRenderer.mesh = Neon::Engine::getAssetManager()->getAsset<Neon::Mesh>(meshHandle);
+    // const Neon::AssetHandle meshHandle = assetManager->loadAsset<Neon::Mesh>("models/cube.glb");
+    // meshRenderer.mesh = Neon::Engine::getAssetManager()->getAsset<Neon::Mesh>(meshHandle);
     meshRenderer.mesh->apply();
 
-    Neon::AssetHandle songHandle = assetManager->loadAsset<Neon::AudioClip>("city-bgm-336601.mp3");
-    Neon::Ref<Neon::AudioClip> song = assetManager->getAsset<Neon::AudioClip>(songHandle);
+    const Neon::AssetHandle songHandle = assetManager->loadAsset<Neon::AudioClip>("city-bgm-336601.mp3");
+    const Neon::Ref<Neon::AudioClip> song = assetManager->getAsset<Neon::AudioClip>(songHandle);
 
     Neon::Engine::getAudioManager()->playSound(song);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    Neon::Engine::getAudioManager()->playSound(song);
-    // std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    // Neon::Engine::getAudioManager()->playSound(song);
 }
 
 void GameSystem::update()
@@ -52,7 +49,7 @@ void GameSystem::update()
     auto end = std::chrono::high_resolution_clock::now();
     if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 1000)
     {
-        Neon::Logger::info("GameSystem", "frames per second: "+frameCount);
+        // Neon::Logger::info("GameSystem", "frames per second: "+frameCount);
         start = std::chrono::high_resolution_clock::now();
         frameCount = 0;
     }
