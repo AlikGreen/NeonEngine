@@ -30,5 +30,8 @@ public:
 
   virtual std::string getTitle() = 0;
   virtual void setTitle(std::string title) = 0;
+
+  virtual void setCursorLocked(bool locked) = 0;
+  virtual void setCursorVisible(bool visible) = 0;
 };
 }

@@ -7,7 +7,7 @@ namespace Neon
 struct AudioCommand
 {
     enum Type { Play, Stop } type;
-    Ref<AudioClip> clip;
+    AudioClip* clip{};
     SoundHandle handle;
     float speed = 1.0f;
     float volume = 1.0f;

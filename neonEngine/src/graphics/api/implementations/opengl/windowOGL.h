@@ -26,8 +26,15 @@ public:
     void setTitle(std::string title) override;
 
     void swapBuffers() const;
+
+    void setCursorLocked(bool locked) override;
+    void setCursorVisible(bool visible) override;
 private:
     WindowCreationOptions creationOptions;
     SDL_Window* handle{};
+    bool cursorVisible = false;
+    bool cursorLocked = false;
+
+    void updateCursorState() const;
 };
 }

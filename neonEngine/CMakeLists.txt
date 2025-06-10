@@ -29,10 +29,9 @@ file(GLOB_RECURSE
 )
 
 add_library(neonEngine STATIC ${SRC_FILES}
-        src/input/events/mouseMoveEvent.h
-        src/graphics/events/windowResizeEvent.h
-        src/core/coreSystem.cpp
-        src/core/coreSystem.h)
+        src/asset/assetSerializer.h
+        src/graphics/MeshSerializerGLB.cpp
+        src/graphics/MeshSerializerGLB.h)
 
 target_link_options(neonEngine
         INTERFACE

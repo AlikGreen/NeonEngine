@@ -64,19 +64,19 @@ namespace Neon
         return registeredSystems;
     }
 
-    EventManager* Engine::getEventManager()
+    EventManager& Engine::getEventManager()
     {
-        return eventManager.get();
+        return *eventManager;
     }
 
-    AssetManager * Engine::getAssetManager()
+    AssetManager& Engine::getAssetManager()
     {
-        return assetManager.get();
+        return *assetManager;
     }
 
-    AudioManager * Engine::getAudioManager()
+    AudioManager& Engine::getAudioManager()
     {
-        return audioManager.get();
+        return *audioManager;
     }
 
     void Engine::run()

@@ -1,18 +1,19 @@
 #include "renderSystem.h"
 
+#include <tiny_gltf.h>
+
 
 #include "mesh.h"
 #include "api/commandList.h"
 #include "api/window.h"
 #include "api/descriptions/windowCreationOptions.h"
 #include "api/enums/shaderType.h"
+#include "components/camera.h"
 #include "core/engine.h"
-#include "components/meshRenderer.h"
 #include "debug/logger.h"
-#include "ecs/ECSSystem.h"
+#include "ecs/ecsSystem.h"
 #include "ecs/components/transformComponent.h"
 #include "glm/glm.hpp"
-#include "glm/ext/matrix_transform.hpp"
 
 namespace Neon
 {
@@ -54,36 +55,80 @@ namespace Neon
 
     	commandList = device->createCommandList();
 
-    	glm::vec4 tintColor = {0.8f, 0.3f, 0.2f, 1.0f};
-    	tintColorUniformBuffer = device->createUniformBuffer<glm::vec4>(tintColor);
-    	glm::vec4 model = glm::vec4(0.0f, 0.5f, 0.0f, 0.0f);
-    	mpvUniformBuffer = device->createUniformBuffer<glm::vec4>(model);
+    	cameraUniformBuffer = device->createUniformBuffer<CameraUniforms>();
+    	modelUniformBuffer = device->createUniformBuffer<ModelUniforms>();
+    	materialUniformBuffer = device->createUniformBuffer<MaterialUniforms>();
+    	pointLightsUniformBuffer = device->createUniformBuffer<PointLightUniforms>();
+
+    	DebugUniforms debugUniforms{};
+    	debugUniforms.debugUvs = false;
+    	debugUniforms.debugNormals = false;
+
+    	debugUniformBuffer = device->createUniformBuffer<DebugUniforms>(debugUniforms);
     }
 
     void RenderSystem::render()
     {
+    	const auto world = Engine::getSystem<ECSSystem>()->getWorld();
+
+	    const auto cameras = world->getComponents<Camera, Transform>();
+    	if(cameras.size() < 1) return;
+
+    	auto [camEntity, camera, camTransform] = cameras[0];
+
     	commandList->begin();
 
     	commandList->setFrameBuffer(device->getSwapChainFrameBuffer());
         commandList->setPipeline(pipeline);
 
-    	commandList->clearColorTarget(0, {0.0f, 0.6f, 0.0f, 1.0f});
+    	commandList->clearColorTarget(0, camera.bgColor);
     	commandList->clearDepthStencil(1.0f);
 
-     	auto* ecsSystem = Engine::getSystem<ECSSystem>();
-     	auto components = ecsSystem->getWorld()->getComponents<MeshRenderer, Transform>();
+	    const glm::mat4 flip = glm::scale(glm::mat4(1.0f),glm::vec3(1, 1, -1));
+	    const glm::mat4 viewMatrix = glm::inverse(camTransform.getMatrix() * flip);
 
-     	commandList->setUniformBuffer(1, ShaderType::Fragment, tintColorUniformBuffer);
+    	CameraUniforms cameraMatrices =
+		{
+    		viewMatrix,
+			camera.getProjectionMatrix(),
+		};
 
-     	for (auto[entity, meshRenderer, transform] : components)
+		commandList->updateBuffer(cameraUniformBuffer, cameraMatrices);
+     	commandList->setUniformBuffer(0, ShaderType::Vertex, cameraUniformBuffer);
+
+    	commandList->setUniformBuffer(4, ShaderType::Vertex, debugUniformBuffer);
+
+    	auto meshRenderers = world->getComponents<MeshRenderer, Transform>();
+    	auto pointLights = world->getComponents<PointLight, Transform>();
+
+    	PointLightUniforms pointLightUniforms{};
+
+    	int i = 0;
+    	for (auto[entity, pointLight, transform] : pointLights)
+    	{
+    		pointLightUniforms.pointLights[i] =
+			{
+    			transform.getPosition(),
+    			pointLight.power,
+    			pointLight.color,
+			};
+
+    		i++;
+    		if(i >= 32) return;
+    	}
+
+    	pointLightUniforms.pointLightsCount = i;
+
+    	commandList->updateBuffer(pointLightsUniformBuffer, pointLightUniforms);
+    	commandList->setUniformBuffer(3, ShaderType::Fragment, pointLightsUniformBuffer);
+
+     	for (auto[entity, meshRenderer, transform] : meshRenderers)
      	{
-			 renderMesh(meshRenderer);
+			 renderMesh(meshRenderer, transform);
      	}
 
         device->submitCommandList(commandList);
     	device->swapBuffers();
-
-    	window->pollEvents();
     }
 
 
@@ -97,14 +142,27 @@ namespace Neon
     	return window;
     }
 
-    void RenderSystem::renderMesh(const MeshRenderer& meshRenderer) const
+    void RenderSystem::renderMesh(const MeshRenderer& meshRenderer, const Transform& transform) const
     {
-    	static float x = 0.0f;
-    	x+= 0.0001f;
-    	float model[] = {x, 0.5f, 0.0f, 0.0f};
+    	if(meshRenderer.mesh == nullptr) return;
 
-    	commandList->updateBuffer<float[4]>(mpvUniformBuffer, model);
-    	commandList->setUniformBuffer(0, ShaderType::Vertex, mpvUniformBuffer);
+    	ModelUniforms modelUniforms =
+		{
+    		transform.getMatrix(),
+		};
+
+    	commandList->updateBuffer(modelUniformBuffer, modelUniforms);
+    	commandList->setUniformBuffer(1, ShaderType::Vertex, modelUniformBuffer);
+
+    	MaterialUniforms materialUniforms =
+    	{
+    		meshRenderer.material->roughness,
+    		meshRenderer.material->metalness,
+    		meshRenderer.material->albedo
+    	};
+
+    	commandList->updateBuffer(materialUniformBuffer, materialUniforms);
+    	commandList->setUniformBuffer(2, ShaderType::Vertex, materialUniformBuffer);
 
     	commandList->setVertexBuffer(0, meshRenderer.mesh->vertexBuffer);
     	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer, IndexFormat::UInt32);
@@ -114,5 +172,10 @@ namespace Neon
     void RenderSystem::shutdown()
     {
         window->close();
+    }
+
+    void RenderSystem::preUpdate()
+    {
+	    window->pollEvents();
     }
 }

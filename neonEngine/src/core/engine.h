@@ -50,9 +50,9 @@ namespace Neon
         static EngineConfig getConfig();
         static std::vector<System*> getSystems();
 
-        static EventManager* getEventManager();
-        static AssetManager* getAssetManager();
-        static AudioManager* getAudioManager();
+        static EventManager& getEventManager();
+        static AssetManager& getAssetManager();
+        static AudioManager& getAudioManager();
     private:
         static Scope<EventManager> eventManager;
         static Scope<AssetManager> assetManager;

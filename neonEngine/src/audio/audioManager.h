@@ -13,7 +13,7 @@ class AudioManager
 {
 public:
     AudioManager();
-    SoundHandle playSound(const Ref<AudioClip>& clip, SoundHandle soundHandle = SoundHandle());
+    SoundHandle playSound(AudioClip* clip, SoundHandle soundHandle = SoundHandle());
     void stopSound(SoundHandle soundHandle);
 private:
     std::thread audioThread;

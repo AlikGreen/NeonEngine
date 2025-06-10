@@ -7,7 +7,7 @@
 
 namespace Neon
 {
-    Entity World::createEntity()
+    Entity World::createEntity() const
     {
         Entity ent = ecs.entity();
         ent.addComponent<Transform>();
@@ -15,7 +15,7 @@ namespace Neon
         return ent;
     }
 
-    Entity World::createEmptyEntity()
+    Entity World::createEmptyEntity() const
     {
         return  ecs.entity();
     }

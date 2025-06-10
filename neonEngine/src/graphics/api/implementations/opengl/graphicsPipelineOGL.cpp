@@ -35,8 +35,14 @@ namespace Neon
         return vertexAttributesOGL;
     }
 
-    Ref<ShaderOGL> GraphicsPipelineOGL::getShader() const
+    void GraphicsPipelineOGL::bind() const
     {
-        return shader;
+        glBindVertexArray( vao);
+        shader->bind();
+
+        if(description.depthState.enableDepthTest)
+            glEnable(GL_DEPTH_TEST);
+        else
+            glDisable(GL_DEPTH_TEST);
     }
 }

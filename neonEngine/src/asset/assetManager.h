@@ -4,6 +4,8 @@
 #include "assetHandle.h"
 #include <filesystem>
 
+#include "assetSerializer.h"
+
 namespace Neon
 {
 class AssetManager
@@ -14,22 +16,33 @@ public:
     {
         const std::filesystem::path fullPath = getFullPath(filePath);
 
-        Ref<Asset> asset = makeRef<T>();
-        asset->load(fullPath.string());
+        const std::string fileExtension = fullPath.extension().string();
+        if(!serializers.contains(fileExtension)) return 0;
+
+        const auto assetSerializer = serializers.at(fileExtension).get();
+        Asset* asset = assetSerializer->load(fullPath.string());
 
         AssetHandle handle;
-        assets.emplace(handle, asset);
+        assets.emplace(handle, Scope<Asset>(asset));
 
         return handle;
     }
 
     template<DerivesAsset T>
-    Ref<T> getAsset(const AssetHandle& assetHandle)
+    T* getAsset(const AssetHandle& assetHandle)
     {
-        return std::static_pointer_cast<T>(assets.at(assetHandle));
+        if(!assetHandle.isValid()) return nullptr;
+        return dynamic_cast<T*>(assets.at(assetHandle).get());
+    }
+
+    template<typename T, typename... Args>
+    void registerSerializer(const std::string& extension, Args&&... args)
+    {
+        serializers[extension] = makeScope<T>(std::forward<Args>(args)...);
     }
 private:
-    std::unordered_map<AssetHandle, Ref<Asset>> assets;
+    std::unordered_map<std::string, Scope<AssetSerializer>> serializers;
+    std::unordered_map<AssetHandle, Scope<Asset>> assets;
 
     static std::string getFullPath(const std::string& filePath);
 };

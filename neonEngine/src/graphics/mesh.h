@@ -22,11 +22,6 @@ namespace Neon
 
         void apply();
 
-        void load(const std::string &filePath) override;
-
-        void serialize(AssetStream &stream) override;
-        void deserialize(AssetStream &stream) override;
-
         std::vector<Vertex> vertices{};
         std::vector<uint32_t> indices{};
 

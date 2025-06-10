@@ -94,8 +94,7 @@ namespace Neon
         commands.emplace_back([this, pipeline]
         {
             this->pipeline = dynamic_cast<GraphicsPipelineOGL*>(pipeline.get());
-            glBindVertexArray(this->pipeline->vao);
-            this->pipeline->getShader()->bind();
+            this->pipeline->bind();
         });
     }
 

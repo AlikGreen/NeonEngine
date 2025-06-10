@@ -8,7 +8,8 @@ namespace Neon
     {
     public:
         AssetHandle() : handle(generateRandomHandle()) {}
-        AssetHandle(const AssetHandle& other) : handle(other.handle) {}
+        AssetHandle(const uint64_t handle) : handle(handle) {}
+        AssetHandle(const AssetHandle& other) = default;
 
         bool operator==(const AssetHandle& other) const
         {
@@ -23,6 +24,11 @@ namespace Neon
         explicit operator uint64_t() const
         {
             return handle;
+        }
+
+        [[nodiscard]] bool isValid() const
+        {
+            return handle != 0;
         }
     private:
         uint64_t handle;

@@ -10,11 +10,6 @@ namespace Neon
     {
     public:
         virtual ~Asset() = default;
-
-        virtual void load(const std::string& filePath) = 0;
-
-        virtual void serialize(AssetStream& stream) = 0;
-        virtual void deserialize(AssetStream& stream) = 0;
     };
 
     template <class T>

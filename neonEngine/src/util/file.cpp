@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 
 namespace Neon
 {
@@ -11,5 +12,10 @@ namespace Neon
         std::stringstream buffer;
         buffer << file.rdbuf();
         return buffer.str();
+    }
+
+    std::string File::getFileExtension(const std::string &filePath)
+    {
+        return std::filesystem::path(filePath).extension().string();
     }
 }

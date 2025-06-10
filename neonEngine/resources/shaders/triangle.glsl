@@ -5,35 +5,92 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inUV;
 
-layout(std140, binding = 0) uniform VertexUniforms
+layout(std140, binding = 0) uniform CameraUniforms
 {
-    vec4 uModelMatrix;
+    mat4 uViewMatrix;
+    mat4 uProjMatrix;
 };
 
-layout(location = 0) out vec3 outNormal;
-layout(location = 1) out vec2 outUV;
+layout(std140, binding = 1) uniform ModelUniforms
+{
+    mat4 uModelMatrix;
+};
+
+layout(location = 0) out vec3 vNormal;
+layout(location = 1) out vec2 vUV;
+layout(location = 2) out vec3 vFragPos;
 
 void main()
 {
-    outNormal = inNormal;
-    outUV = inUV;
-    gl_Position = vec4(inPosition, 1.0)+uModelMatrix;
+    vNormal = inNormal;
+    vUV = inUV;
+    vec4 fragPos = uModelMatrix*vec4(inPosition, 1.0);
+    vFragPos = fragPos.xyz;
+    vec4 camPos = uProjMatrix*uViewMatrix*fragPos;
+    gl_Position = camPos;
 }
 
 #type fragment
 layout(location = 0) out vec4 outColor;
 
-layout(std140, binding = 1) uniform FragmentUniforms
+layout(std140, binding = 2) uniform MaterialUniforms
 {
-    vec4 uTintColor;
+    float uRoughness;
+    float uMetanless;
+    vec4 uAlbedo;
 };
 
-layout(location = 0) in vec3 outNormal;
-layout(location = 1) in vec2 outUV;
+struct PointLight
+{
+    vec3 position;
+    float power;
+    vec3 color;
+};
 
+layout(std140, binding = 3) uniform PointLightUniforms
+{
+    int pointLightsCount;
+    PointLight[32] pointLights;
+};
+
+layout(std140, binding = 4) uniform DebugUniforms
+{
+    bool uDebugUVs;
+    bool uDebugNormals;
+};
+
+layout(location = 0) in vec3 vNormal;
+layout(location = 1) in vec2 vUV;
+layout(location = 2) in vec3 vFragPos;
 
 void main()
 {
-    outColor = uTintColor;
-}
+    if(uDebugUVs)
+    {
+        outColor = vec4(vUV, 0.0f, 1.0f);
+        return;
+    }
 
+    if(uDebugNormals)
+    {
+        outColor = vec4(vNormal * 0.5 + 0.5, 1.0f); // Map normal from [-1,1] to [0,1]
+        return;
+    }
+
+    vec3 diffuseLight = vec3(0.0);
+
+    for(int i = 0; i < pointLightsCount; i++)
+    {
+        vec3 lightPosition = pointLights[i].position;
+        float dist = length(vFragPos - lightPosition);
+        vec3 lightDir = lightPosition-vFragPos;
+
+        diffuseLight += pointLights[i].color*(1/dist)*pointLights[i].power*dot(lightDir, vNormal);
+    }
+
+    diffuseLight = max(diffuseLight, vec3(0.02));
+
+    outColor = uAlbedo*vec4(diffuseLight, 0.0);
+
+    //outColor = uAlbedo;
+}

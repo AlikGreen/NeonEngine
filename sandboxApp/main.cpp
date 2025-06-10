@@ -4,7 +4,9 @@
 #include "core/coreSystem.h"
 #include "core/engine.h"
 #include "ecs/ecsSystem.h"
+#include "graphics/MeshSerializerGLB.h"
 #include "graphics/renderSystem.h"
+#include "input/inputSystem.h"
 
 int main()
 {
@@ -21,6 +23,9 @@ int main()
     Neon::Engine::registerSystem<Neon::RenderSystem>(config.windowOptions);
     Neon::Engine::registerSystem<Neon::ECSSystem>();
     Neon::Engine::registerSystem<GameSystem>();
+    Neon::Engine::registerSystem<Neon::InputSystem>();
+
+    Neon::Engine::getAssetManager().registerSerializer<Neon::MeshSerializerGLB>(".glb");
 
     Neon::Engine::startup();
     Neon::Engine::run();

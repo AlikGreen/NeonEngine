@@ -20,7 +20,8 @@ public:
     explicit GraphicsPipelineOGL(GraphicsPipelineDescription &description);
 
     [[nodiscard]] std::vector<VertexAttributeOGL> getVertexAttributes() const;
-    [[nodiscard]] Ref<ShaderOGL> getShader() const;
+
+    void bind() const;
 
     GLuint vao{};
 private:

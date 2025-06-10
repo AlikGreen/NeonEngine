@@ -15,7 +15,7 @@ namespace Neon
         audioThread = std::thread(&AudioManager::audioThreadLoop, this);
     }
 
-    SoundHandle AudioManager::playSound(const Ref<AudioClip>& clip, SoundHandle soundHandle)
+    SoundHandle AudioManager::playSound(AudioClip* clip, SoundHandle soundHandle)
     {
         std::lock_guard lock(commandQueueMutex);
         commandQueue.push({ AudioCommand::Play, clip, soundHandle });

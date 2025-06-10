@@ -1,6 +1,7 @@
 #include "gameSystem.h"
 
 #include <iostream>
+#include <tiny_gltf.h>
 
 #include "asset/assetHandle.h"
 #include "asset/assetManager.h"
@@ -8,66 +9,77 @@
 #include "core/engine.h"
 #include "debug/logger.h"
 #include "ecs/ecsSystem.h"
+#include "ecs/components/transformComponent.h"
+#include "graphics/components/camera.h"
 #include "graphics/components/meshRenderer.h"
+#include "graphics/components/pointLight.h"
+#include "input/input.h"
 #include "input/events/keyDownEvent.h"
-#include "input/events/mouseButtonDownEvent.h"
 #include "input/events/textInputEvent.h"
 
 void GameSystem::postStartup()
 {
     auto* ecsSystem = Neon::Engine::getSystem<Neon::ECSSystem>();
     const auto world = ecsSystem->getWorld();
+
+    // Cube entity
     Neon::Entity entity = world->createEntity();
     entity.addComponent<Neon::MeshRenderer>();
     auto& meshRenderer = entity.getComponent<Neon::MeshRenderer>();
 
-    meshRenderer.mesh = Neon::makeRef<Neon::Mesh>();
-    meshRenderer.mesh->vertices =
-    {
-        {{-0.5, -0.5, 0.1}, {1, 0, 0}, {-0.5, -0.5}},
-        {{0.5, -0.5, 0.1}, {0, 1, 0}, {0.5, -0.5}},
-        {{0.5, 0.5, 0.1}, {0, 0, 1}, {0, 0.5}},
-        {{-0.5, 0.5, 0.1}, {0, 0, 1}, {0, 0.5}}
-    };
+    meshRenderer.material = new Neon::Material();
+    meshRenderer.material->albedo = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    meshRenderer.material->roughness = 0.5f;
 
-    meshRenderer.mesh->indices = { 0, 1, 2, 0, 2, 3 };
+    Neon::AssetManager& assetManager = Neon::Engine::getAssetManager();
+    const Neon::AssetHandle meshHandle = assetManager.loadAsset<Neon::Mesh>("models/sphere.glb");
+    meshRenderer.mesh = meshHandle;
 
-    Neon::AssetManager* assetManager = Neon::Engine::getAssetManager();
-    // const Neon::AssetHandle meshHandle = assetManager->loadAsset<Neon::Mesh>("models/cube.glb");
-    // meshRenderer.mesh = Neon::Engine::getAssetManager()->getAsset<Neon::Mesh>(meshHandle);
-    meshRenderer.mesh->apply();
+    // Player/Camera entity
+    Neon::Entity cameraEntity = world->createEntity();
+    cameraEntity.addComponent<Neon::Camera>();
+    auto& camTransform = cameraEntity.getComponent<Neon::Transform>();
+    camTransform.setPosition({0, 0, -5});
 
-    const Neon::AssetHandle songHandle = assetManager->loadAsset<Neon::AudioClip>("city-bgm-336601.mp3");
-    const Neon::Ref<Neon::AudioClip> song = assetManager->getAsset<Neon::AudioClip>(songHandle);
+    // Light entity
+    Neon::Entity lightEntity = world->createEntity();
+    auto& lightTransform = lightEntity.getComponent<Neon::Transform>();
+    lightTransform.setPosition({2, 5, 0});
 
-    Neon::Engine::getAudioManager()->playSound(song);
+    lightEntity.addComponent<Neon::PointLight>();
+    auto& pointLight = lightEntity.getComponent<Neon::PointLight>();
+    pointLight.power = 1.0f;
+
+    // const Neon::AssetHandle songHandle = assetManager->loadAsset<Neon::AudioClip>("city-bgm-336601.mp3");
+    // auto *song = assetManager->getAsset<Neon::AudioClip>(songHandle);
+    // Neon::Engine::getAudioManager()->playSound(song);
+
+    Neon::Input::setCursorLocked(true);
+    Neon::Input::setCursorVisible(false);
 }
 
 void GameSystem::update()
 {
-    frameCount++;
-    auto end = std::chrono::high_resolution_clock::now();
-    if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 1000)
-    {
-        // Neon::Logger::info("GameSystem", "frames per second: "+frameCount);
-        start = std::chrono::high_resolution_clock::now();
-        frameCount = 0;
-    }
+    const auto world = Neon::Engine::getSystem<Neon::ECSSystem>()->getWorld();
+
+    const auto cameras = world->getComponents<Neon::Camera, Neon::Transform>();
+    if(cameras.size() < 1) return;
+    auto [camEntity, camera, camTransform] = cameras[0];
+
+    constexpr float cameraSpeed = 0.0005f;
+
+    if(Neon::Input::isKeyHeld(KeyCode::W)) { camTransform.translate(camTransform.forward()*cameraSpeed); }
+    if(Neon::Input::isKeyHeld(KeyCode::A)) { camTransform.translate(camTransform.left()*cameraSpeed); }
+    if(Neon::Input::isKeyHeld(KeyCode::S)) { camTransform.translate(camTransform.backward()*cameraSpeed); }
+    if(Neon::Input::isKeyHeld(KeyCode::D)) { camTransform.translate(camTransform.right()*cameraSpeed); }
+    if(Neon::Input::isKeyHeld(KeyCode::Space)) { camTransform.translate(camTransform.up()*cameraSpeed); }
+    if(Neon::Input::isKeyHeld(KeyCode::LShift)) { camTransform.translate(camTransform.down()*cameraSpeed); }
+
+    constexpr float cameraSens = 0.0005f;
+    camTransform.rotate(glm::vec3(Neon::Input::getMouseDelta().y, Neon::Input::getMouseDelta().x, 0)*cameraSens);
 }
 
 void GameSystem::event(Neon::Event *event)
 {
-    if(const auto keyDownEvent = dynamic_cast<Neon::KeyDownEvent*>(event))
-    {
-        std::cout << std::to_string(static_cast<uint32_t>(keyDownEvent->getKeycode())) << std::endl;
-    }
-    else if(const auto mouseDownEvent = dynamic_cast<Neon::MouseButtonDownEvent*>(event))
-    {
-        std::cout << std::to_string(static_cast<uint32_t>(mouseDownEvent->getButton())) << std::endl;
-    }
 
-    if(const auto textInputEvent = dynamic_cast<Neon::TextInputEvent*>(event))
-    {
-        std::cout << textInputEvent->getText() << std::endl;
-    }
 }

@@ -4,24 +4,22 @@
 #include "componentList.h"
 #include "entity.h"
 #include "flecs.h"
+#include "asset/asset.h"
 
 namespace Neon
 {
-class World
+class World : public Asset
 {
 public:
     template<typename... Types>
     ComponentList<Types...> getComponents()
     {
-        // ecs.query<>() is a const method on flecs::world, so this is fine.
         flecs::query<Types...> q = ecs.query<Types...>();
-        // 'ecs' is the flecs::world member of Neon::World.
-        // It's passed as a non-const reference to ComponentList.
         return ComponentList<Types...>(ecs, std::move(q));
     }
 
-    Entity createEntity();
-    Entity createEmptyEntity();
+    Entity createEntity() const;
+    Entity createEmptyEntity() const;
 private:
     flecs::world ecs;
 };

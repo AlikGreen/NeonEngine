@@ -1,10 +1,13 @@
 #pragma once
+#include "material.h"
+#include "asset/assetRef.h"
 #include "graphics/mesh.h"
 
 namespace Neon
 {
 struct MeshRenderer
 {
-    Ref<Mesh> mesh;
+    AssetRef<Material> material = new Material();
+    AssetRef<Mesh> mesh{};
 };
 }

@@ -78,32 +78,32 @@ namespace Neon
 
     void WindowOGL::pollEvents()
     {
-        EventManager* eventManager = Engine::getEventManager();
+        EventManager& eventManager = Engine::getEventManager();
         SDL_Event event;
         while(SDL_PollEvent(&event))
         {
             switch(event.type)
             {
                 case SDL_EVENT_QUIT:
-                    eventManager->queueEvent(new QuitEvent());
+                    eventManager.queueEvent(new QuitEvent());
                     break;
                 case SDL_EVENT_KEY_DOWN:
-                    eventManager->queueEvent(new KeyDownEvent(ConvertOGL::keyCodeFromSDL(event.key.key), ConvertOGL::keyModFromSDL(event.key.mod)));
+                    eventManager.queueEvent(new KeyDownEvent(ConvertOGL::keyCodeFromSDL(event.key.key), ConvertOGL::keyModFromSDL(event.key.mod)));
                     break;
                 case SDL_EVENT_KEY_UP:
-                    eventManager->queueEvent(new KeyUpEvent(ConvertOGL::keyCodeFromSDL(event.key.key), ConvertOGL::keyModFromSDL(event.key.mod)));
+                    eventManager.queueEvent(new KeyUpEvent(ConvertOGL::keyCodeFromSDL(event.key.key), ConvertOGL::keyModFromSDL(event.key.mod)));
                     break;
                 case SDL_EVENT_MOUSE_MOTION:
-                    eventManager->queueEvent(new MouseMoveEvent(event.motion.x, event.motion.y));
+                    eventManager.queueEvent(new MouseMoveEvent(event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel));
                     break;
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                    eventManager->queueEvent(new MouseButtonDownEvent(ConvertOGL::mouseButtonFromSDL(event.button.button)));
+                    eventManager.queueEvent(new MouseButtonDownEvent(ConvertOGL::mouseButtonFromSDL(event.button.button)));
                     break;
                 case SDL_EVENT_MOUSE_BUTTON_UP:
-                    eventManager->queueEvent(new MouseButtonUpEvent(ConvertOGL::mouseButtonFromSDL(event.button.button)));
+                    eventManager.queueEvent(new MouseButtonUpEvent(ConvertOGL::mouseButtonFromSDL(event.button.button)));
                     break;
                 case SDL_EVENT_WINDOW_RESIZED:
-                    eventManager->queueEvent(new WindowResizeEvent(event.window.data1, event.window.data2));
+                    eventManager.queueEvent(new WindowResizeEvent(event.window.data1, event.window.data2));
                     break;
                 default:
                     break;
@@ -156,5 +156,30 @@ namespace Neon
     void WindowOGL::swapBuffers() const
     {
         SDL_GL_SwapWindow(handle);
+    }
+
+    void WindowOGL::setCursorLocked(const bool locked)
+    {
+        cursorLocked = locked;
+        updateCursorState();
+    }
+
+    void WindowOGL::setCursorVisible(const bool visible)
+    {
+        cursorVisible = visible;
+        updateCursorState();
+    }
+
+    void WindowOGL::updateCursorState() const
+    {
+        if(cursorVisible)
+            SDL_ShowCursor();
+        else
+            SDL_HideCursor();
+
+        if(cursorLocked && cursorVisible)
+            SDL_SetWindowMouseGrab(handle, cursorLocked);
+        else if(cursorLocked)
+            SDL_SetWindowRelativeMouseMode(handle, cursorLocked);
     }
 }
