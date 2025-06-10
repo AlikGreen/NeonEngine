@@ -1,7 +1,7 @@
 #pragma once
-#include <SDL3/SDL.h>
 
-#include "../../core/event.h"
+#include "core/event.h"
+
 namespace Neon
 {
     class KeyUpEvent final : public Event

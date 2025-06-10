@@ -3,13 +3,11 @@ project(neonEngine)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_subdirectory(dependencies/SDL3)
-set(SDL_SHARED_DEFAULT OFF FORCE)
-set(SDL_STATIC_DEFAULT ON FORCE)
-
 add_subdirectory(dependencies/glm)
 add_subdirectory(dependencies/shaderc)
 add_subdirectory(dependencies/spirv-cross)
+
+add_subdirectory(dependencies/glfw)
 
 set(FLECS_SHARED OFF FORCE)
 set(FLECS_STATIC ON FORCE)
@@ -40,8 +38,10 @@ target_link_options(neonEngine
         -static-libstdc++
 )
 
+target_compile_definitions(neonEngine PRIVATE GLFW_INCLUDE_NONE)
+
 set(CMAKE_PCH_INSTANTIATE_TEMPLATES ON)
 target_precompile_headers(neonEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/common.h")
 
 target_include_directories(neonEngine PUBLIC src/)
-target_link_libraries(neonEngine PUBLIC tinygltf SDL3::SDL3 glm::glm shaderc spirv-cross-c flecs_static miniaudio glad)
+target_link_libraries(neonEngine PUBLIC glfw tinygltf glm::glm shaderc spirv-cross-c flecs_static miniaudio glad)

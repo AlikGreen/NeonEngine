@@ -19,3 +19,6 @@
 [submodule "neonEngine/dependencies/miniaudio"]
 	path = neonEngine/dependencies/miniaudio
 	url = https://github.com/mackron/miniaudio.git
+[submodule "neonEngine/dependencies/glfw"]
+	path = neonEngine/dependencies/glfw
+	url = https://github.com/glfw/glfw.git

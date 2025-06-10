@@ -21,8 +21,9 @@ namespace Neon
             Input::keyStates[keyUpEvent->getKeycode()].released = true;
         }else if(const auto* mouseMoveEvent = dynamic_cast<MouseMoveEvent*>(event))
         {
-            Input::mouseDelta += glm::vec2(mouseMoveEvent->getDeltaX(), mouseMoveEvent->getDeltaY());
-            Input::mousePosition = {mouseMoveEvent->getX(), mouseMoveEvent->getY()};
+            const glm::vec2 newPos = {mouseMoveEvent->getX(), mouseMoveEvent->getY()};
+            Input::mouseDelta += newPos-Input::mousePosition;
+            Input::mousePosition = newPos;
         }
     }
 

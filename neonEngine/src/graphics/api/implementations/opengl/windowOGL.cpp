@@ -1,7 +1,7 @@
 #include "windowOGL.h"
 
 #include <glad/glad.h>
-#include <SDL3/SDL.h>
+#include <GLFW/glfw3.h>
 
 #include "convertOGL.h"
 #include "deviceOGL.h"
@@ -19,6 +19,46 @@
 
 namespace Neon
 {
+    void WindowOGL::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+    {
+        EventManager& eventManager = Engine::getEventManager();
+
+        if (action == GLFW_PRESS || action == GLFW_REPEAT)
+            eventManager.queueEvent(new KeyDownEvent(ConvertOGL::keyCodeFromGLFW(key), ConvertOGL::keyModFromGLFW(mods)));
+        else if (action == GLFW_RELEASE)
+            eventManager.queueEvent(new KeyUpEvent(ConvertOGL::keyCodeFromGLFW(key), ConvertOGL::keyModFromGLFW(mods)));
+
+    }
+
+    void WindowOGL::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+    {
+        EventManager& eventManager = Engine::getEventManager();
+
+        if (action == GLFW_PRESS)
+            eventManager.queueEvent(new MouseButtonDownEvent(ConvertOGL::mouseButtonFromGLFW(button)));
+        else if (action == GLFW_RELEASE)
+            eventManager.queueEvent(new MouseButtonUpEvent(ConvertOGL::mouseButtonFromGLFW(button)));
+    }
+
+    void WindowOGL::cursorPosCallback(GLFWwindow* window, const double xPos, const double yPos)
+    {
+        EventManager& eventManager = Engine::getEventManager();
+        eventManager.queueEvent(new MouseMoveEvent(static_cast<float>(xPos), static_cast<float>(yPos)));
+    }
+
+    void WindowOGL::windowSizeCallback(GLFWwindow* window, const int width, const int height)
+    {
+        EventManager& eventManager = Engine::getEventManager();
+        eventManager.queueEvent(new WindowResizeEvent(width, height));
+        glViewport(0, 0, width, height);
+    }
+
+    void WindowOGL::windowCloseCallback(GLFWwindow* window)
+    {
+        EventManager& eventManager = Engine::getEventManager();
+        eventManager.queueEvent(new QuitEvent());
+    }
+
     WindowOGL::WindowOGL(const WindowCreationOptions &creationOptions) : creationOptions(creationOptions) { }
 
     Ref<Device> WindowOGL::createDevice()
@@ -28,87 +68,66 @@ namespace Neon
 
     void WindowOGL::run()
     {
-        Assert::check(SDL_Init(SDL_INIT_VIDEO), "Failed to initialize SDL video subsystem");
+        Assert::check(glfwInit(), "Failed to initialize GLFW");
 
-        SDL_WindowFlags windowFlags = SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL;
-        if(creationOptions.resizable) windowFlags |= SDL_WINDOW_RESIZABLE;
-        if(creationOptions.fullscreen) windowFlags |= SDL_WINDOW_FULLSCREEN;
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+        glfwWindowHint(GLFW_RESIZABLE, creationOptions.resizable ? GLFW_TRUE : GLFW_FALSE);
 
         int width = creationOptions.width;
         int height = creationOptions.height;
 
-        int displaysCount;
-        const SDL_DisplayID *displays = SDL_GetDisplays(&displaysCount);
+        GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+        Assert::check(primaryMonitor != nullptr, "Failed to get primary monitor");
 
-        Assert::check(displaysCount >= 1, "Failed to retrieve displays");
-
-        const SDL_DisplayMode *dm = SDL_GetCurrentDisplayMode(displays[0]);
-        Assert::check(dm != nullptr, "Couldn't get current display mode");
+        const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+        Assert::check(mode != nullptr, "Couldn't get video mode");
 
         if(width <= 0)
-            width = static_cast<int>(dm->w*0.75);
+            width = static_cast<int>(mode->width * 0.75);
 
         if(height <= 0)
-            height = static_cast<int>(dm->h*0.75);
+            height = static_cast<int>(mode->height * 0.75);
 
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        GLFWmonitor* monitor = creationOptions.fullscreen ? primaryMonitor : nullptr;
+        handle = glfwCreateWindow(width, height, creationOptions.title, monitor, nullptr);
+        Assert::check(handle != nullptr, "Failed to create GLFW window");
 
-        handle = SDL_CreateWindow(creationOptions.title, width, height, windowFlags);
-        Assert::check(handle != nullptr, "Failed to create SDL window");
+        glfwSetWindowUserPointer(handle, this);
 
-        SDL_ShowWindow(handle);
-        SDL_StartTextInput(handle);
+        glfwSetKeyCallback(handle, keyCallback);
+        glfwSetMouseButtonCallback(handle, mouseButtonCallback);
+        glfwSetCursorPosCallback(handle, cursorPosCallback);
+        glfwSetWindowSizeCallback(handle, windowSizeCallback);
+        glfwSetWindowCloseCallback(handle, windowCloseCallback);
 
-        SDL_GL_CreateContext(handle);
+        glfwMakeContextCurrent(handle);
 
-        Assert::check(gladLoadGLLoader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress)), "Failed to initialize GLAD");
+        Assert::check(gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)), "Failed to initialize GLAD");
 
         glViewport(0, 0, width, height);
+
+        if(creationOptions.vsync)
+            glfwSwapInterval(1);
+        else
+            glfwSwapInterval(0);
     }
 
     void WindowOGL::close()
     {
         if(handle)
-            SDL_DestroyWindow(handle);
-
-        SDL_Quit();
+            {
+            glfwDestroyWindow(handle);
+            handle = nullptr;
+        }
+        glfwTerminate();
     }
 
     void WindowOGL::pollEvents()
     {
-        EventManager& eventManager = Engine::getEventManager();
-        SDL_Event event;
-        while(SDL_PollEvent(&event))
-        {
-            switch(event.type)
-            {
-                case SDL_EVENT_QUIT:
-                    eventManager.queueEvent(new QuitEvent());
-                    break;
-                case SDL_EVENT_KEY_DOWN:
-                    eventManager.queueEvent(new KeyDownEvent(ConvertOGL::keyCodeFromSDL(event.key.key), ConvertOGL::keyModFromSDL(event.key.mod)));
-                    break;
-                case SDL_EVENT_KEY_UP:
-                    eventManager.queueEvent(new KeyUpEvent(ConvertOGL::keyCodeFromSDL(event.key.key), ConvertOGL::keyModFromSDL(event.key.mod)));
-                    break;
-                case SDL_EVENT_MOUSE_MOTION:
-                    eventManager.queueEvent(new MouseMoveEvent(event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel));
-                    break;
-                case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                    eventManager.queueEvent(new MouseButtonDownEvent(ConvertOGL::mouseButtonFromSDL(event.button.button)));
-                    break;
-                case SDL_EVENT_MOUSE_BUTTON_UP:
-                    eventManager.queueEvent(new MouseButtonUpEvent(ConvertOGL::mouseButtonFromSDL(event.button.button)));
-                    break;
-                case SDL_EVENT_WINDOW_RESIZED:
-                    eventManager.queueEvent(new WindowResizeEvent(event.window.data1, event.window.data2));
-                    break;
-                default:
-                    break;
-            }
-        }
+        glfwPollEvents();
     }
 
     uint32_t WindowOGL::getWidth()
@@ -124,38 +143,38 @@ namespace Neon
     glm::ivec2 WindowOGL::getSize()
     {
         glm::ivec2 size;
-        SDL_GetWindowSize(handle, &size.x, &size.y);
+        glfwGetWindowSize(handle, &size.x, &size.y);
         return size;
     }
 
     void WindowOGL::setWidth(const uint32_t width)
     {
-        SDL_SetWindowSize(handle, static_cast<int>(width), static_cast<int>(getHeight()));
+        glfwSetWindowSize(handle, static_cast<int>(width), static_cast<int>(getHeight()));
     }
 
     void WindowOGL::setHeight(const uint32_t height)
     {
-        SDL_SetWindowSize(handle, static_cast<int>(getWidth()), static_cast<int>(height));
+        glfwSetWindowSize(handle, static_cast<int>(getWidth()), static_cast<int>(height));
     }
 
     void WindowOGL::setSize(const glm::ivec2 size)
     {
-        SDL_SetWindowSize(handle, size.x, size.y);
+        glfwSetWindowSize(handle, size.x, size.y);
     }
 
     std::string WindowOGL::getTitle()
     {
-        return SDL_GetWindowTitle(handle);
+        return glfwGetWindowTitle(handle);
     }
 
     void WindowOGL::setTitle(const std::string title)
     {
-        SDL_SetWindowTitle(handle, title.c_str());
+        glfwSetWindowTitle(handle, title.c_str());
     }
 
     void WindowOGL::swapBuffers() const
     {
-        SDL_GL_SwapWindow(handle);
+        glfwSwapBuffers(handle);
     }
 
     void WindowOGL::setCursorLocked(const bool locked)
@@ -172,14 +191,18 @@ namespace Neon
 
     void WindowOGL::updateCursorState() const
     {
-        if(cursorVisible)
-            SDL_ShowCursor();
-        else
-            SDL_HideCursor();
-
-        if(cursorLocked && cursorVisible)
-            SDL_SetWindowMouseGrab(handle, cursorLocked);
-        else if(cursorLocked)
-            SDL_SetWindowRelativeMouseMode(handle, cursorLocked);
+        if (cursorLocked && !cursorVisible)
+        {
+            glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        } else if (cursorLocked && cursorVisible)
+        {
+            glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
+        } else if (!cursorVisible)
+        {
+            glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        } else
+        {
+            glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
     }
 }

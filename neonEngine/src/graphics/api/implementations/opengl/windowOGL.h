@@ -1,6 +1,7 @@
 #pragma once
 #include "graphics/api/window.h"
-#include <SDL3/SDL.h>
+
+#include "GLFW/glfw3.h"
 
 namespace Neon
 {
@@ -31,10 +32,16 @@ public:
     void setCursorVisible(bool visible) override;
 private:
     WindowCreationOptions creationOptions;
-    SDL_Window* handle{};
-    bool cursorVisible = false;
+    GLFWwindow* handle{};
+    bool cursorVisible = true;
     bool cursorLocked = false;
 
     void updateCursorState() const;
+
+    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+    static void cursorPosCallback(GLFWwindow* window, double xPos, double yPos);
+    static void windowSizeCallback(GLFWwindow* window, int width, int height);
+    static void windowCloseCallback(GLFWwindow* window);
 };
 }
