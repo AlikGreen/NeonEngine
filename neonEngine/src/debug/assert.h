@@ -1,68 +1,50 @@
 #pragma once
-#include <source_location>
-#include <format>
-#include <string>
-#include <stdexcept>
-#include <cstdlib>
 
-#include "assertAction.h"
-#include "logger.h"
+#include <source_location>
+
+#include "assertionException.h"
+
 
 namespace Neon
 {
 class Assert
 {
 public:
-    static AssertAction assertAction;
-
-    // Simple check with message only
-    static void check(
-        bool condition,
-        const std::string& message = "",
-        const std::source_location& location = std::source_location::current());
-
-    // Templated check with format string and arguments (auto-captures location)
-    template<typename... Args>
-    static void check(const bool condition, const std::string& format, Args&&... args,
-                     const std::source_location& location = std::source_location::current())
+    template <typename... Args>
+    static void check(const bool condition, const char* message, Args... args)
     {
-        check_impl(condition, format, location, std::forward<Args>(args)...);
+        if(condition) return;
+
+        const char* formattedMessage = format(message, args...);
+
+        throw AssertionException(formattedMessage);
+    }
+private:
+    template<typename T>
+    static std::string toString(const T& v)
+    {
+        std::ostringstream oss;
+        oss << v;
+        return oss.str();
     }
 
-private:
-    // Private implementation that does the actual work
     template<typename... Args>
-    static void check_impl(const bool condition, const std::string& format,
-                          const std::source_location& location, Args&&... args)
+    static const char* format(const char* message, Args... args)
     {
-        if (condition) return;
+        thread_local std::string buf;
+        buf = message;
 
-        std::string message;
-        if constexpr (sizeof...(args) > 0)
+        (void)std::initializer_list<int>
         {
-            message = std::vformat(format, std::make_format_args(args...));
-        }
-        else
-        {
-            message = format;
-        }
+            ( [&]()
+            {
+                auto p = buf.find("{}");
+                if (p != std::string::npos)
+                    buf.replace(p, 2, toString(args));
+            }(), 0 )...
+        };
 
-        const std::string fullMessage = message + "\n" +
-                                        "  Function:  " + location.function_name() + "\n" +
-                                        "  File:      " + location.file_name() + "\n" +
-                                        "  Line:      " + std::to_string(location.line());
-
-        Logger::fatal("ASSERTION FAILED", fullMessage);
-
-        switch (assertAction)
-        {
-            case AssertAction::LogAndThrow:
-                throw std::runtime_error(fullMessage);
-            case AssertAction::LogAndAbort:
-                std::abort();
-            case AssertAction::LogOnly:
-                break;
-        }
+        return buf.c_str();
     }
 };
 }

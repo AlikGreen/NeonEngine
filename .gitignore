@@ -9,3 +9,5 @@ neonEngine/cmake-build-debug/
 *.exe
 *.dll
 *.so
+
+*.glb

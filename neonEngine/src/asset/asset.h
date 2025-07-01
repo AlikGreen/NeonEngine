@@ -1,8 +1,4 @@
 #pragma once
-#include <string>
-
-#include "streams/assetStream.h"
-
 
 namespace Neon
 {

@@ -29,6 +29,14 @@ public:
     }
 
     template<DerivesAsset T>
+    AssetHandle addAsset(T* asset)
+    {
+        AssetHandle handle;
+        assets.emplace(handle, Scope<Asset>(asset));
+        return handle;
+    }
+
+    template<DerivesAsset T>
     T* getAsset(const AssetHandle& assetHandle)
     {
         if(!assetHandle.isValid()) return nullptr;
@@ -36,12 +44,17 @@ public:
     }
 
     template<typename T, typename... Args>
-    void registerSerializer(const std::string& extension, Args&&... args)
+    void registerSerializer(const std::vector<std::string>& extensions, Args&&... args)
     {
-        serializers[extension] = makeScope<T>(std::forward<Args>(args)...);
+        Ref<T> serializer = makeRef<T>(std::forward<Args>(args)...);
+
+        for(std::string extension : extensions)
+        {
+            serializers.emplace(extension, serializer);
+        }
     }
 private:
-    std::unordered_map<std::string, Scope<AssetSerializer>> serializers;
+    std::unordered_map<std::string, Ref<AssetSerializer>> serializers;
     std::unordered_map<AssetHandle, Scope<Asset>> assets;
 
     static std::string getFullPath(const std::string& filePath);

@@ -1,9 +1,7 @@
 #pragma once
 #include "frameBuffer.h"
 #include "graphicsPipeline.h"
-#include "buffers/uniformBuffer.h"
-#include "buffers/indexBuffer.h"
-#include "buffers/vertexBuffer.h"
+#include "buffer.h"
 #include "enums/indexFormat.h"
 #include "glm/glm.hpp"
 
@@ -20,6 +18,8 @@ public:
     virtual ~CommandList() = default;
 
     virtual void begin() = 0;
+
+
     virtual void setFrameBuffer(Ref<FrameBuffer> frameBuffer) = 0;
 
     void draw(const uint32_t vertexCount, const uint32_t instanceCount = 1, const uint32_t firstVertex = 0, const uint32_t firstInstance = 0)
@@ -30,16 +30,30 @@ public:
     virtual void clearColorTarget(uint32_t target, glm::vec4 color) = 0;
     virtual void clearDepthStencil(float value) = 0;
 
-    virtual void setVertexBuffer(uint32_t index, Ref<VertexBuffer> vertexBuffer) = 0;
-    virtual void setIndexBuffer(Ref<IndexBuffer> indexBuffer, IndexFormat indexFormat) = 0;
-    virtual void setUniformBuffer(uint32_t slot, ShaderType shaderType, const Ref<UniformBuffer>& buffer) = 0;
+    virtual void setVertexBuffer(uint32_t index, Ref<Buffer> vertexBuffer) = 0;
+    virtual void setIndexBuffer(Ref<Buffer> indexBuffer, IndexFormat indexFormat) = 0;
+    virtual void setUniformBuffer(uint32_t slot, ShaderType shaderType, const Ref<Buffer>& buffer) = 0;
 
     virtual void setPipeline(Ref<GraphicsPipeline> pipeline) = 0;
+
+    virtual void reserveBuffer(const Ref<Buffer>& buffer, size_t size) = 0;
 
     template<typename T>
     void updateBuffer(const Ref<Buffer>& buffer, T& data)
     {
         updateBufferImpl(buffer, &data, sizeof(T));
+    }
+
+    template<typename T>
+    void updateBuffer(const Ref<Buffer>& buffer, std::vector<T> data)
+    {
+        updateBufferImpl(buffer, data.data(), sizeof(T)*data.size());
+    }
+
+    template<typename T>
+    void updateBuffer(const Ref<Buffer>& buffer, T* data)
+    {
+        updateBufferImpl(buffer, data, sizeof(T));
     }
 protected:
     virtual void drawImpl(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) = 0;

@@ -1,8 +1,7 @@
 #pragma once
 #include <vector>
 
-#include "api/buffers/indexBuffer.h"
-#include "api/buffers/vertexBuffer.h"
+#include "api/buffer.h"
 #include "asset/asset.h"
 #include "glm/glm.hpp"
 
@@ -15,7 +14,7 @@ namespace Neon
         glm::vec2 uv;
     };
 
-    class Mesh : public Asset
+    class Mesh final : public Asset
     {
     public:
         Mesh() = default;
@@ -25,7 +24,7 @@ namespace Neon
         std::vector<Vertex> vertices{};
         std::vector<uint32_t> indices{};
 
-        Ref<VertexBuffer> vertexBuffer = nullptr;
-        Ref<IndexBuffer> indexBuffer = nullptr;
+        Ref<Buffer> vertexBuffer = nullptr;
+        Ref<Buffer> indexBuffer = nullptr;
     };
 }

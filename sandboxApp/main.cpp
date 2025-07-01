@@ -1,12 +1,11 @@
-#include <iostream>
-
 #include "gameSystem.h"
+#include "asset/assetManager.h"
 #include "core/coreSystem.h"
 #include "core/engine.h"
-#include "ecs/ecsSystem.h"
-#include "graphics/MeshSerializerGLB.h"
+#include "core/prefabSerializerGLB.h"
 #include "graphics/renderSystem.h"
 #include "input/inputSystem.h"
+
 
 int main()
 {
@@ -21,11 +20,10 @@ int main()
 
     Neon::Engine::registerSystem<Neon::CoreSystem>();
     Neon::Engine::registerSystem<Neon::RenderSystem>(config.windowOptions);
-    Neon::Engine::registerSystem<Neon::ECSSystem>();
     Neon::Engine::registerSystem<GameSystem>();
     Neon::Engine::registerSystem<Neon::InputSystem>();
 
-    Neon::Engine::getAssetManager().registerSerializer<Neon::MeshSerializerGLB>(".glb");
+    Neon::Engine::getAssetManager().registerSerializer<Neon::PrefabSerializerGLB>({".glb"});
 
     Neon::Engine::startup();
     Neon::Engine::run();

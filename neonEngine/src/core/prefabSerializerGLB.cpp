@@ -1,42 +1,77 @@
-#include "MeshSerializerGLB.h"
+#include "prefabSerializerGLB.h"
 
 #include <tiny_gltf.h>
 
+#include "graphics/components/meshRenderer.h"
+#include "core/engine.h"
+
 namespace Neon
 {
-    Mesh* MeshSerializerGLB::load(const std::string filePath)
+    Prefab* PrefabSerializerGLB::load(const std::string filePath)
     {
-        using namespace tinygltf;
-
-        const auto nMesh = new Mesh();
-
-        Model model;
-        TinyGLTF loader;
+        tinygltf::Model model;
+        tinygltf::TinyGLTF loader;
         std::string err, warn;
 
-        // Load the binary glTF (.glb)
+        const auto nModel = new Prefab();
+
         const bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, filePath);
         if (!warn.empty())  printf("Warn: %s\n", warn.c_str());
         if (!err.empty())   fprintf(stderr, "Err: %s\n", err.c_str());
         if (!ret)          return nullptr;
 
-        // Ensure there is at least one mesh and one primitive
-        if (model.meshes.empty())               return nullptr;
-        const auto& mesh = model.meshes[0];
+        Entity rootEntity = nModel->world.createEntity();
+        rootEntity.addComponent<PrefabComponent>();
+
+        for(const auto& node : model.nodes)
+        {
+            if(node.mesh >= 0)
+            {
+                Mesh* nMesh = createMesh(model.meshes[node.mesh], model);
+                if(nMesh == nullptr) continue;
+                const auto meshHandle = Engine::getAssetManager().addAsset(nMesh);
+                Entity entity = nModel->world.createEntity();
+                entity.setParent(rootEntity);
+                auto& meshRenderer = entity.addComponent<MeshRenderer>();
+                meshRenderer.mesh = meshHandle;
+                meshRenderer.mesh->apply();
+
+                meshRenderer.material = new Material();
+            }
+        }
+
+        return nModel;
+    }
+
+    void PrefabSerializerGLB::serialize(std::string filePath)
+    {
+    }
+
+    Prefab* PrefabSerializerGLB::deserialize(std::string filePath)
+    {
+        return nullptr;
+    }
+
+    Mesh* PrefabSerializerGLB::createMesh(const tinygltf::Mesh &mesh, const tinygltf::Model &model)
+    {
+        using namespace tinygltf;
+
+        auto nMesh = new Mesh();
+
         if (mesh.primitives.empty())            return nullptr;
         const auto& prim = mesh.primitives[0];
 
         // POSITION
         {
-            auto it = prim.attributes.find("POSITION");
+            const auto it = prim.attributes.find("POSITION");
             if (it == prim.attributes.end())    return nullptr;
             const Accessor& acc = model.accessors[it->second];
             const BufferView& bv = model.bufferViews[acc.bufferView];
             const tinygltf::Buffer& buf = model.buffers[bv.buffer];
-            size_t count = acc.count;
+            const size_t count = acc.count;
             nMesh->vertices.resize(count);
 
-            const float* dataPtr = reinterpret_cast<const float*>(
+            const auto* dataPtr = reinterpret_cast<const float*>(
                 buf.data.data() + bv.byteOffset + acc.byteOffset);
 
             for (size_t i = 0; i < count; ++i) {
@@ -51,12 +86,12 @@ namespace Neon
 
         // NORMAL (optional)
         {
-            auto it = prim.attributes.find("NORMAL");
+            const auto it = prim.attributes.find("NORMAL");
             if (it != prim.attributes.end()) {
                 const Accessor& acc = model.accessors[it->second];
                 const BufferView& bv = model.bufferViews[acc.bufferView];
                 const tinygltf::Buffer& buf = model.buffers[bv.buffer];
-                const float* dataPtr = reinterpret_cast<const float*>(
+                const auto* dataPtr = reinterpret_cast<const float*>(
                     buf.data.data() + bv.byteOffset + acc.byteOffset);
 
                 for (size_t i = 0; i < acc.count; ++i) {
@@ -79,7 +114,7 @@ namespace Neon
                 const tinygltf::Accessor& acc = model.accessors[it->second];
                 const tinygltf::BufferView& bv = model.bufferViews[acc.bufferView];
                 const tinygltf::Buffer& buf = model.buffers[bv.buffer];
-                const float* dataPtr = reinterpret_cast<const float*>(
+                const auto* dataPtr = reinterpret_cast<const float*>(
                     buf.data.data() + bv.byteOffset + acc.byteOffset);
 
                 for (size_t i = 0; i < acc.count; ++i) {
@@ -100,35 +135,24 @@ namespace Neon
             const BufferView& bv = model.bufferViews[acc.bufferView];
             const tinygltf::Buffer& buf = model.buffers[bv.buffer];
 
-            size_t count = acc.count;
+            const size_t count = acc.count;
             nMesh->indices.resize(count);
 
             const unsigned char* data = buf.data.data() + bv.byteOffset + acc.byteOffset;
             // glTF allows index componentType = UNSIGNED_SHORT or UNSIGNED_INT
             if (acc.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
             {
-                auto ptr = reinterpret_cast<const uint16_t*>(data);
+                const auto ptr = reinterpret_cast<const uint16_t*>(data);
                 for (size_t i = 0; i < count; ++i)
                     nMesh->indices[i] = static_cast<uint32_t>(ptr[i]);
             } else if (acc.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
             {
-                auto ptr = reinterpret_cast<const uint32_t*>(data);
+                const auto ptr = reinterpret_cast<const uint32_t*>(data);
                 for (size_t i = 0; i < count; ++i)
                     nMesh->indices[i] = ptr[i];
             }
         }
-
-        nMesh->apply();
         return nMesh;
-    }
-
-    void MeshSerializerGLB::serialize(std::string filePath)
-    {
-    }
-
-    Mesh * MeshSerializerGLB::deserialize(std::string filePath)
-    {
-        return nullptr;
     }
 }
 

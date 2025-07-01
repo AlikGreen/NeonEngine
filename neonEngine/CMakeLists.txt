@@ -9,10 +9,6 @@ add_subdirectory(dependencies/spirv-cross)
 
 add_subdirectory(dependencies/glfw)
 
-set(FLECS_SHARED OFF FORCE)
-set(FLECS_STATIC ON FORCE)
-add_subdirectory(dependencies/flecs)
-
 set(TINYGLTF_HEADER_ONLY OFF CACHE BOOL "Build tinygltf as a library" FORCE)
 add_subdirectory(dependencies/tinygltf)
 
@@ -26,10 +22,7 @@ file(GLOB_RECURSE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
 )
 
-add_library(neonEngine STATIC ${SRC_FILES}
-        src/asset/assetSerializer.h
-        src/graphics/MeshSerializerGLB.cpp
-        src/graphics/MeshSerializerGLB.h)
+add_library(neonEngine STATIC ${SRC_FILES})
 
 target_link_options(neonEngine
         INTERFACE
@@ -43,5 +36,5 @@ target_compile_definitions(neonEngine PRIVATE GLFW_INCLUDE_NONE)
 set(CMAKE_PCH_INSTANTIATE_TEMPLATES ON)
 target_precompile_headers(neonEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/common.h")
 
-target_include_directories(neonEngine PUBLIC src/)
-target_link_libraries(neonEngine PUBLIC glfw tinygltf glm::glm shaderc spirv-cross-c flecs_static miniaudio glad)
+target_include_directories(neonEngine PUBLIC src/ include/)
+target_link_libraries(neonEngine PUBLIC glfw tinygltf glm::glm shaderc spirv-cross-c miniaudio glad)

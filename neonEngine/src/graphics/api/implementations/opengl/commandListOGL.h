@@ -15,11 +15,13 @@ namespace Neon
 
         void clearColorTarget(uint32_t target, glm::vec4 color) override;
         void clearDepthStencil(float value) override;
-        void setVertexBuffer(uint32_t index, Ref<VertexBuffer> vertexBuffer) override;
-        void setIndexBuffer(Ref<IndexBuffer> indexBuffer, IndexFormat indexFormat) override;
-        void setUniformBuffer(uint32_t slot, ShaderType shaderType, const Ref<UniformBuffer>& buffer) override;
+        void setVertexBuffer(uint32_t index, Ref<Buffer> vertexBuffer) override;
+        void setIndexBuffer(Ref<Buffer> indexBuffer, IndexFormat indexFormat) override;
+        void setUniformBuffer(uint32_t slot, ShaderType shaderType, const Ref<Buffer>& buffer) override;
 
         void setPipeline(Ref<GraphicsPipeline> pipeline) override;
+
+        void reserveBuffer(const Ref<Buffer>& buffer, size_t size) override;
 
         void executeCommands();
 

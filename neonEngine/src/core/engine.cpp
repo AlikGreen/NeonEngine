@@ -1,14 +1,19 @@
 #include "engine.h"
 
 #include "coreSystem.h"
-#include "ecs/ecsSystem.h"
 #include "graphics/renderSystem.h"
+
+#include "eventManager.h"
+#include "sceneManager.h"
+#include "audio/audioManager.h"
+#include "asset/assetManager.h"
 
 namespace Neon
 {
     Scope<EventManager> Engine::eventManager;
     Scope<AssetManager> Engine::assetManager;
     Scope<AudioManager> Engine::audioManager;
+    Scope<SceneManager> Engine::sceneManager;
 
     bool Engine::running = false;
     std::vector<System*> Engine::registeredSystems = std::vector<System*>();
@@ -20,6 +25,7 @@ namespace Neon
         eventManager = makeScope<EventManager>();
         assetManager = makeScope<AssetManager>();
         audioManager = makeScope<AudioManager>();
+        sceneManager = makeScope<SceneManager>();
     }
 
     void Engine::startup()
@@ -77,6 +83,11 @@ namespace Neon
     AudioManager& Engine::getAudioManager()
     {
         return *audioManager;
+    }
+
+    SceneManager & Engine::getSceneManager()
+    {
+        return *sceneManager;
     }
 
     void Engine::run()

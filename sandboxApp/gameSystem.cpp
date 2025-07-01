@@ -1,48 +1,32 @@
 #include "gameSystem.h"
 
-#include <iostream>
-#include <tiny_gltf.h>
-
-#include "asset/assetHandle.h"
-#include "asset/assetManager.h"
-#include "audio/audioManager.h"
-#include "core/engine.h"
-#include "debug/logger.h"
-#include "ecs/ecsSystem.h"
-#include "ecs/components/transformComponent.h"
-#include "graphics/components/camera.h"
-#include "graphics/components/meshRenderer.h"
-#include "graphics/components/pointLight.h"
-#include "input/input.h"
-#include "input/events/keyDownEvent.h"
-#include "input/events/textInputEvent.h"
+#include "neonEngine/neonEngine.h"
 
 void GameSystem::postStartup()
 {
-    auto* ecsSystem = Neon::Engine::getSystem<Neon::ECSSystem>();
-    const auto world = ecsSystem->getWorld();
-
-    // Cube entity
-    Neon::Entity entity = world->createEntity();
-    entity.addComponent<Neon::MeshRenderer>();
-    auto& meshRenderer = entity.getComponent<Neon::MeshRenderer>();
-
-    meshRenderer.material = new Neon::Material();
-    meshRenderer.material->albedo = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-    meshRenderer.material->roughness = 0.5f;
+    auto& world = Neon::Engine::getSceneManager().getCurrentScene().getWorld();
 
     Neon::AssetManager& assetManager = Neon::Engine::getAssetManager();
-    const Neon::AssetHandle meshHandle = assetManager.loadAsset<Neon::Mesh>("models/sphere.glb");
-    meshRenderer.mesh = meshHandle;
+    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/sponza.glb");
+    const auto* model = assetManager.getAsset<Neon::Prefab>(modelHandle);
+
+    world.merge(model->world);
+
+    auto prefabs = world.getComponents<Neon::PrefabComponent, Neon::Transform>();
+    for (auto [entity, prefab, transform]: prefabs)
+    {
+        transform.setScale(glm::vec3(0.001f));
+    }
+
 
     // Player/Camera entity
-    Neon::Entity cameraEntity = world->createEntity();
+    Neon::Entity cameraEntity = world.createEntity();
     cameraEntity.addComponent<Neon::Camera>();
     auto& camTransform = cameraEntity.getComponent<Neon::Transform>();
-    camTransform.setPosition({0, 0, -5});
+    camTransform.setPosition({0, 0, 0});
 
     // Light entity
-    Neon::Entity lightEntity = world->createEntity();
+    Neon::Entity lightEntity = world.createEntity();
     auto& lightTransform = lightEntity.getComponent<Neon::Transform>();
     lightTransform.setPosition({2, 5, 0});
 
@@ -60,9 +44,9 @@ void GameSystem::postStartup()
 
 void GameSystem::update()
 {
-    const auto world = Neon::Engine::getSystem<Neon::ECSSystem>()->getWorld();
+    auto& world = Neon::Engine::getSceneManager().getCurrentScene().getWorld();
 
-    const auto cameras = world->getComponents<Neon::Camera, Neon::Transform>();
+    const auto cameras = world.getComponents<Neon::Camera, Neon::Transform>();
     if(cameras.size() < 1) return;
     auto [camEntity, camera, camTransform] = cameras[0];
 

@@ -1,13 +1,11 @@
 #include "deviceOGL.h"
 #include <glad/glad.h>
 
+#include "bufferOGL.h"
 #include "commandListOGL.h"
 #include "frameBufferOGL.h"
 #include "graphicsPipelineOGL.h"
-#include "indexBufferOGL.h"
 #include "shaderOGL.h"
-#include "uniformBufferOGL.h"
-#include "vertexBufferOGL.h"
 #include "windowOGL.h"
 
 namespace Neon
@@ -27,12 +25,22 @@ namespace Neon
         return makeRef<CommandListOGL>();
     }
 
-    Ref<IndexBuffer> DeviceOGL::createIndexBuffer(std::vector<uint32_t> data)
+    Ref<Buffer> DeviceOGL::createIndexBuffer()
     {
-        return makeRef<IndexBufferOGL>(data);
+        return makeRef<BufferOGL>(GL_ELEMENT_ARRAY_BUFFER);
     }
 
-    void DeviceOGL::submitCommandList(const Ref<CommandList> commandList)
+    Ref<Buffer> DeviceOGL::createUniformBuffer()
+    {
+        return makeRef<BufferOGL>(GL_UNIFORM_BUFFER);
+    }
+
+    Ref<Buffer> DeviceOGL::createVertexBuffer()
+    {
+        return makeRef<BufferOGL>(GL_ARRAY_BUFFER);
+    }
+
+    void DeviceOGL::submit(const Ref<CommandList> commandList)
     {
         dynamic_cast<CommandListOGL*>(commandList.get())->executeCommands();
     }
@@ -54,19 +62,9 @@ namespace Neon
         //return makeRef<Texture2DOGL>(width, height, usage, format, data);
     }
 
-    Ref<VertexBuffer> DeviceOGL::createVertexBufferImpl(void *data, uint32_t elementCount, uint32_t elementSize)
-    {
-        return makeRef<VertexBufferOGL>(data, elementCount, elementSize);
-    }
-
     Ref<Shader> DeviceOGL::createShaderFromSpirvImpl(
         std::unordered_map<ShaderType, std::vector<uint32_t>> shadersSpirv)
     {
         return makeRef<ShaderOGL>(shadersSpirv);
-    }
-
-    Ref<UniformBuffer> DeviceOGL::createUniformBufferImpl(void *data, uint32_t size)
-    {
-        return makeRef<UniformBufferOGL>(data, size);
     }
 }

@@ -13,12 +13,15 @@
 [submodule "neonEngine/dependencies/tinygltf"]
 	path = neonEngine/dependencies/tinygltf
 	url = https://github.com/syoyo/tinygltf.git
-[submodule "neonEngine/dependencies/flecs"]
-	path = neonEngine/dependencies/flecs
-	url = https://github.com/SanderMertens/flecs.git
 [submodule "neonEngine/dependencies/miniaudio"]
 	path = neonEngine/dependencies/miniaudio
 	url = https://github.com/mackron/miniaudio.git
 [submodule "neonEngine/dependencies/glfw"]
 	path = neonEngine/dependencies/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "neonEngine/dependencies/entt"]
+	path = neonEngine/dependencies/entt
+	url = https://github.com/skypjack/entt.git
+[submodule "neonEngine/dependencies/gaiaecs"]
+	path = neonEngine/dependencies/gaiaecs
+	url = https://github.com/richardbiely/gaia-ecs.git

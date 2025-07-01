@@ -2,14 +2,16 @@
 #include <memory>
 #include <vector>
 
-#include "asset/assetManager.h"
-#include "audio/audioManager.h"
 #include "core/system.h"
-#include "core/eventManager.h"
 #include "graphics/api/descriptions/windowCreationOptions.h"
 
 namespace Neon
 {
+    class EventManager;
+    class AssetManager;
+    class AudioManager;
+    class SceneManager;
+
     struct EngineConfig
     {
         std::string engineResourcesPath;
@@ -53,10 +55,12 @@ namespace Neon
         static EventManager& getEventManager();
         static AssetManager& getAssetManager();
         static AudioManager& getAudioManager();
+        static SceneManager& getSceneManager();
     private:
         static Scope<EventManager> eventManager;
         static Scope<AssetManager> assetManager;
         static Scope<AudioManager> audioManager;
+        static Scope<SceneManager> sceneManager;
 
         static std::vector<System*> registeredSystems;
         static EngineConfig config;

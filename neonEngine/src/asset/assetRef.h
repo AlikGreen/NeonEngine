@@ -1,5 +1,7 @@
 #pragma once
 
+#include "assetHandle.h"
+#include "assetManager.h"
 #include "core/engine.h"
 
 namespace Neon
@@ -19,6 +21,15 @@ public:
             cachedAsset = Engine::getAssetManager().getAsset<T>(handle);
         }
         return cachedAsset;
+    }
+
+    T& operator*() const
+    {
+        if (cachedAsset == nullptr)
+        {
+            cachedAsset = Engine::getAssetManager().getAsset<T>(handle);
+        }
+        return *cachedAsset;
     }
 
     bool operator==(const AssetHandle& other) const

@@ -2,11 +2,11 @@
 
 #include "frameBufferOGL.h"
 #include "graphicsPipelineOGL.h"
-#include "indexBufferOGL.h"
-#include "uniformBufferOGL.h"
-#include "vertexBufferOGL.h"
 
 #include <cstring>
+
+#include "bufferOGL.h"
+#include "debug/assert.h"
 
 namespace Neon
 {
@@ -50,12 +50,12 @@ namespace Neon
         });
     }
 
-    void CommandListOGL::setVertexBuffer(const uint32_t index, const Ref<VertexBuffer> vertexBuffer)
+    void CommandListOGL::setVertexBuffer(const uint32_t index, const Ref<Buffer> vertexBuffer)
     {
         commands.emplace_back([this, vertexBuffer]
         {
-            const auto* oglVertexBuffer = dynamic_cast<VertexBufferOGL*>(vertexBuffer.get());
-
+            const auto* oglVertexBuffer = dynamic_cast<BufferOGL*>(vertexBuffer.get());
+            Assert::check(oglVertexBuffer->getTarget() == GL_ARRAY_BUFFER, "Buffer being set as Vertex Buffer was not created as a Vertex Buffer");
             oglVertexBuffer->bind();
 
             const auto& attributes = pipeline->getVertexAttributes();
@@ -73,19 +73,23 @@ namespace Neon
         });
     }
 
-    void CommandListOGL::setIndexBuffer(const Ref<IndexBuffer> indexBuffer, const IndexFormat indexFormat)
+    void CommandListOGL::setIndexBuffer(const Ref<Buffer> indexBuffer, const IndexFormat indexFormat)
     {
         commands.emplace_back([indexBuffer]
         {
-            dynamic_cast<IndexBufferOGL*>(indexBuffer.get())->bind();
+            const auto* indexBufferOGL = dynamic_cast<BufferOGL*>(indexBuffer.get());
+            Assert::check(indexBufferOGL->getTarget() == GL_ELEMENT_ARRAY_BUFFER, "Buffer being set as Index Buffer was not created as an Index Buffer");
+            indexBufferOGL->bind();
         });
     }
 
-    void CommandListOGL::setUniformBuffer(uint32_t slot, ShaderType shaderType, const Ref<UniformBuffer> &buffer)
+    void CommandListOGL::setUniformBuffer(uint32_t slot, ShaderType shaderType, const Ref<Buffer> &buffer)
     {
         commands.emplace_back([buffer, slot]
         {
-            dynamic_cast<UniformBufferOGL*>(buffer.get())->bindBase(slot);
+            const auto* uniformBufferOGL = dynamic_cast<BufferOGL*>(buffer.get());
+            Assert::check(uniformBufferOGL->getTarget() == GL_UNIFORM_BUFFER, "Buffer being set as Uniform Buffer was not created as an Uniform Buffer");
+            uniformBufferOGL->bindBase(slot);
         });
     }
 
@@ -95,6 +99,15 @@ namespace Neon
         {
             this->pipeline = dynamic_cast<GraphicsPipelineOGL*>(pipeline.get());
             this->pipeline->bind();
+        });
+    }
+
+    void CommandListOGL::reserveBuffer(const Ref<Buffer> &buffer, size_t size)
+    {
+        commands.emplace_back([buffer, size]
+        {
+            auto* bufferOGL = dynamic_cast<BufferOGL*>(buffer.get());
+            bufferOGL->reserveSpace(size);
         });
     }
 
@@ -120,19 +133,10 @@ namespace Neon
     {
         std::vector dataCopy(static_cast<uint8_t*>(data), static_cast<uint8_t*>(data) + size);
 
-        if (auto* uniformBuffer = dynamic_cast<UniformBufferOGL*>(buffer.get()))
+        auto* bufferOGL = dynamic_cast<BufferOGL*>(buffer.get());
+        commands.emplace_back([bufferOGL, dataCopy = std::move(dataCopy), size]
         {
-            commands.emplace_back([uniformBuffer, dataCopy = std::move(dataCopy), size]
-            {
-                uniformBuffer->uploadData(dataCopy.data(), size);
-            });
-        }
-        else if (auto* vertexBuffer = dynamic_cast<VertexBufferOGL*>(buffer.get()))
-        {
-            commands.emplace_back([vertexBuffer, dataCopy = std::move(dataCopy), size]
-            {
-                vertexBuffer->uploadData(dataCopy.data(), size);
-            });
-        }
+            bufferOGL->uploadData(dataCopy.data(), size);
+        });
     }
 }

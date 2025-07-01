@@ -4,8 +4,6 @@
 #include "api/device.h"
 #include "api/window.h"
 #include "components/meshRenderer.h"
-#include "components/pointLight.h"
-#include "ecs/componentList.h"
 #include "ecs/components/transformComponent.h"
 
 namespace Neon
@@ -60,7 +58,7 @@ namespace Neon
         [[nodiscard]] Ref<Device> getDevice() const;
         [[nodiscard]] Ref<Window> getWindow() const;
     private:
-        void renderMesh(const MeshRenderer& meshRenderer, const Transform& transform) const;
+        void renderMesh(EntityID entity, const MeshRenderer& meshRenderer, const Transform& transform) const;
 
         Ref<Window> window{};
         Ref<Device> device{};
@@ -69,10 +67,10 @@ namespace Neon
         Ref<Texture2D> depthTexture{};
         Ref<CommandList> commandList{};
 
-        Ref<UniformBuffer> cameraUniformBuffer{};
-        Ref<UniformBuffer> modelUniformBuffer{};
-        Ref<UniformBuffer> debugUniformBuffer{};
-        Ref<UniformBuffer> materialUniformBuffer{};
-        Ref<UniformBuffer> pointLightsUniformBuffer{};
+        Ref<Buffer> cameraUniformBuffer{};
+        Ref<Buffer> modelUniformBuffer{};
+        Ref<Buffer> debugUniformBuffer{};
+        Ref<Buffer> materialUniformBuffer{};
+        Ref<Buffer> pointLightsUniformBuffer{};
     };
 }

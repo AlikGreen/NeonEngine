@@ -20,11 +20,6 @@ namespace Neon
         return createTexture2DImpl(width, height, usage, format, data);
     }
 
-    Ref<Shader> Device::createShaderFromPath(const std::string &filepath)
-    {
-        const std::string source = File::readFileText(filepath.c_str());
-        return createShaderFromSource(source, filepath);
-    }
 
     std::vector<uint32_t> compileToSpirv(const std::string& source_name,
                                         const ShaderType type,

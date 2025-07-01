@@ -2,130 +2,127 @@
 
 #include <tuple>
 #include <cassert>
-#include <flecs.h>
+
+#include "componentArray.h"
 
 namespace Neon
 {
-    template<typename... Components>
+    template<typename... Types>
     class ComponentList
     {
-        flecs::world&                 world;
-        flecs::query<Components...>   query;
-
     public:
-        ComponentList(flecs::world& world, flecs::query<Components...> q)
-            : world(world)
-            , query(std::move(q))
-        { }
+        explicit ComponentList(ComponentArray<Types>*... componentArrays) : arrays(componentArrays...)
+        {
+            maxSize = std::min({componentArrays->getSize()...});
+        }
+
+        size_t size() const
+        {
+            size_t count = 0;
+            if (maxSize == 0) return 0;
+            if(cachedSize != 0xffffffff) return cachedSize;
+
+            for (size_t i = 0; i < maxSize; ++i)
+            {
+                EntityID entity = std::get<0>(arrays)->getEntity(i);
+                if (entityHasAllComponents(entity))
+                {
+                    ++count;
+                }
+            }
+            cachedSize = count;
+            return count;
+        }
+
+        std::tuple<EntityID, Types&...> operator[](const size_t index) const
+        {
+            size_t count = 0;
+            for (size_t i = 0; i < maxSize; ++i)
+            {
+                EntityID entity = std::get<0>(arrays)->getEntity(i);
+                if (entityHasAllComponents(entity))
+                {
+                    if (count == index)
+                    {
+                        return std::tie(entity, std::get<ComponentArray<Types>*>(arrays)->getData(entity)...);
+                    }
+                    ++count;
+                }
+            }
+            return operator[](0);
+        }
 
         class Iterator
         {
-            ecs_iter_t  iterData;
-            flecs::iter iter;
-            bool        alive;
-            std::size_t row;
-
-            template<std::size_t... Is>
-            auto get_components_tuple(std::index_sequence<Is...>) const
-            {
-                return std::tuple<Components&...>
-                {
-                    (iter.field_at<Components>(Is, row))...
-                };
-            }
-
-            void find_next_valid_batch()
-            {
-                while (iter.next())
-                {
-                    if (iter.count() > 0)
-                    {
-                        alive = true;
-                        row = 0;
-                        return;
-                    }
-                }
-                alive = false;
-            }
-
         public:
-            Iterator(flecs::world& world_ref, const flecs::query<Components...>& query_ref)
-              : iterData( ecs_query_iter(world_ref.c_ptr(), query_ref.c_ptr()))
-              , iter(&iterData)
-              , alive(false)
-              , row(0)
+            Iterator(ComponentList* l, size_t i) : list(l), index(i)
             {
-                find_next_valid_batch();
+                findNext();
             }
 
-            Iterator()
-              : iterData{}, iter{nullptr}, alive(false), row(0)
-            { }
-
-            bool operator!=(const Iterator& other) const
+            std::tuple<EntityID, Types&...> operator*()
             {
-                return alive != other.alive;
+                EntityID entity = std::get<0>(list->arrays)->getEntity(index);
+                return std::tie(entity, std::get<ComponentArray<Types>*>(list->arrays)->getData(entity)...);
             }
 
             Iterator& operator++()
             {
-                assert(alive && "Cannot increment an invalid or end iterator.");
-                row++;
-                if (row >= iter.count())
-                {
-                    find_next_valid_batch();
-                }
+                ++index;
+                findNext();
                 return *this;
             }
 
-            auto operator*() const
+            bool operator!=(const Iterator& other) const
             {
-                assert(alive && "Cannot dereference an invalid or end iterator.");
-                assert(row < iter.count() && "Row index out of bounds for current batch.");
+                return index != other.index;
+            }
+        private:
+            ComponentList* list;
+            size_t index;
 
-                flecs::entity e = iter.entity(row);
-
-                auto comps = get_components_tuple(
-                    std::index_sequence_for<Components...>{}
-                );
-
-                return std::tuple_cat(
-                    std::make_tuple(e),
-                    comps
-                );
+            void findNext()
+            {
+                while (index < list->maxSize)
+                {
+                    EntityID entity = std::get<0>(list->arrays)->getEntity(index);
+                    if (list->entityHasAllComponents(entity))
+                    {
+                        break;
+                    }
+                    ++index;
+                }
             }
         };
 
-        Iterator begin() { return Iterator{ world, query }; }
-        Iterator end() const { return Iterator{}; }
-
-        [[nodiscard]] std::size_t size() const
+        Iterator begin()
         {
-            return query.count();
+            return Iterator(this, 0);
         }
 
-
-        auto operator[](std::size_t index) const
+        Iterator end()
         {
-            assert(index < size() && "Index out of bounds");
+            return Iterator(this, maxSize);
+        }
+    private:
+        std::tuple<ComponentArray<Types>*...> arrays;
+        size_t currentIndex = 0;
+        size_t maxSize = 0;
 
-            std::size_t current_index = 0;
-            std::optional<std::tuple<flecs::entity, Components&...>> result;
+        mutable size_t cachedSize = 0xffffffff;
 
-            query.each([&](flecs::entity e, Components&... comps)
+        template<typename T>
+        static bool entityHasComponent(EntityID entity, ComponentArray<T>* arr)
+        {
+            return arr->hasData(entity);
+        }
+
+        bool entityHasAllComponents(EntityID entity) const
+        {
+            return std::apply([entity, this](auto*... arrays)
             {
-                if (current_index == index)
-                {
-                    // Use std::tie to create a tuple of references
-                    result = std::tuple<flecs::entity, Components&...>(e, comps...);
-                    return false;
-                }
-                current_index++;
-                return true;
-            });
-
-            assert(result.has_value() && "Failed to find element at index");
-            return result.value();
+                return (entityHasComponent(entity, arrays) && ...);
+            }, arrays);
         }
     };
 }

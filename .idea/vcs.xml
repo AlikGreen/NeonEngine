@@ -2,8 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/SDL3" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/flecs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/glfw" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/glm" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/miniaudio" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/shaderc" vcs="Git" />

@@ -9,11 +9,13 @@
 #include "api/descriptions/windowCreationOptions.h"
 #include "api/enums/shaderType.h"
 #include "components/camera.h"
+#include "components/pointLight.h"
 #include "core/engine.h"
+#include "core/sceneManager.h"
 #include "debug/logger.h"
-#include "ecs/ecsSystem.h"
 #include "ecs/components/transformComponent.h"
 #include "glm/glm.hpp"
+#include "util/file.h"
 
 namespace Neon
 {
@@ -27,7 +29,8 @@ namespace Neon
     	window->run();
     	device = window->createDevice();
 
-	    const auto shader = device->createShaderFromPath("C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/triangle.glsl");
+	    const auto shaderPath = "C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/triangle.glsl";
+	    const auto shader = device->createShaderFromSource(File::readFileText(shaderPath), shaderPath);
     	shader->compile();
 
     	VertexInputState vertexInputState{};
@@ -55,23 +58,34 @@ namespace Neon
 
     	commandList = device->createCommandList();
 
-    	cameraUniformBuffer = device->createUniformBuffer<CameraUniforms>();
-    	modelUniformBuffer = device->createUniformBuffer<ModelUniforms>();
-    	materialUniformBuffer = device->createUniformBuffer<MaterialUniforms>();
-    	pointLightsUniformBuffer = device->createUniformBuffer<PointLightUniforms>();
+    	cameraUniformBuffer      = device->createUniformBuffer();
+    	modelUniformBuffer       = device->createUniformBuffer();
+    	materialUniformBuffer    = device->createUniformBuffer();
+    	pointLightsUniformBuffer = device->createUniformBuffer();
+    	debugUniformBuffer       = device->createUniformBuffer();
 
     	DebugUniforms debugUniforms{};
     	debugUniforms.debugUvs = false;
     	debugUniforms.debugNormals = false;
 
-    	debugUniformBuffer = device->createUniformBuffer<DebugUniforms>(debugUniforms);
+    	commandList->begin();
+
+    	commandList->reserveBuffer(cameraUniformBuffer, sizeof(CameraUniforms));
+    	commandList->reserveBuffer(modelUniformBuffer, sizeof(ModelUniforms));
+    	commandList->reserveBuffer(materialUniformBuffer, sizeof(MaterialUniforms));
+    	commandList->reserveBuffer(pointLightsUniformBuffer, sizeof(PointLightUniforms));
+
+    	commandList->reserveBuffer(debugUniformBuffer, sizeof(DebugUniforms));
+    	commandList->updateBuffer(debugUniformBuffer, debugUniforms);
+
+		device->submit(commandList);
     }
 
     void RenderSystem::render()
     {
-    	const auto world = Engine::getSystem<ECSSystem>()->getWorld();
+    	auto world = Engine::getSceneManager().getCurrentScene().getWorld();
 
-	    const auto cameras = world->getComponents<Camera, Transform>();
+	    const auto cameras = world.getComponents<Camera, Transform>();
     	if(cameras.size() < 1) return;
 
     	auto [camEntity, camera, camTransform] = cameras[0];
@@ -84,8 +98,8 @@ namespace Neon
     	commandList->clearColorTarget(0, camera.bgColor);
     	commandList->clearDepthStencil(1.0f);
 
-	    const glm::mat4 flip = glm::scale(glm::mat4(1.0f),glm::vec3(1, 1, -1));
-	    const glm::mat4 viewMatrix = glm::inverse(camTransform.getMatrix() * flip);
+    	const glm::mat4 flip = glm::scale(glm::mat4(1.0f),glm::vec3(1, 1, -1));
+    	const glm::mat4 viewMatrix = glm::inverse(Transform::getWorldMatrix(camEntity) * flip);
 
     	CameraUniforms cameraMatrices =
 		{
@@ -96,10 +110,10 @@ namespace Neon
 		commandList->updateBuffer(cameraUniformBuffer, cameraMatrices);
      	commandList->setUniformBuffer(0, ShaderType::Vertex, cameraUniformBuffer);
 
-    	commandList->setUniformBuffer(4, ShaderType::Vertex, debugUniformBuffer);
+    	commandList->setUniformBuffer(4, ShaderType::Fragment, debugUniformBuffer);
 
-    	auto meshRenderers = world->getComponents<MeshRenderer, Transform>();
-    	auto pointLights = world->getComponents<PointLight, Transform>();
+    	auto meshRenderers = world.getComponents<MeshRenderer, Transform>();
+    	auto pointLights = world.getComponents<PointLight, Transform>();
 
     	PointLightUniforms pointLightUniforms{};
 
@@ -124,10 +138,10 @@ namespace Neon
 
      	for (auto[entity, meshRenderer, transform] : meshRenderers)
      	{
-			 renderMesh(meshRenderer, transform);
+			 renderMesh(entity, meshRenderer, transform);
      	}
 
-        device->submitCommandList(commandList);
+        device->submit(commandList);
     	device->swapBuffers();
     }
 
@@ -142,13 +156,15 @@ namespace Neon
     	return window;
     }
 
-    void RenderSystem::renderMesh(const MeshRenderer& meshRenderer, const Transform& transform) const
+    void RenderSystem::renderMesh(const EntityID entity, const MeshRenderer& meshRenderer, const Transform& transform) const
     {
     	if(meshRenderer.mesh == nullptr) return;
 
+    	const glm::mat4 modelMatrix = Transform::getWorldMatrix(entity);
+
     	ModelUniforms modelUniforms =
 		{
-    		transform.getMatrix(),
+    		modelMatrix
 		};
 
     	commandList->updateBuffer(modelUniformBuffer, modelUniforms);
@@ -162,7 +178,7 @@ namespace Neon
     	};
 
     	commandList->updateBuffer(materialUniformBuffer, materialUniforms);
-    	commandList->setUniformBuffer(2, ShaderType::Vertex, materialUniformBuffer);
+    	commandList->setUniformBuffer(2, ShaderType::Fragment, materialUniformBuffer);
 
     	commandList->setVertexBuffer(0, meshRenderer.mesh->vertexBuffer);
     	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer, IndexFormat::UInt32);
