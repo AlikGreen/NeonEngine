@@ -6,28 +6,9 @@
 namespace Neon
 {
     bool Logger::consoleOutput = true;
-    LogLevel Logger::minLevel = LogLevel::INFO;
 
-    std::mutex Logger::mutex;
-    std::ofstream Logger::logFile;
-    std::unordered_map<std::string, std::chrono::time_point<std::chrono::high_resolution_clock>> Logger::timers;
-
-    void Logger::setLogLevel(const LogLevel level)
+    void Logger::log(const LogLevel level, const std::string &message)
     {
-        minLevel = level;
-    }
-
-    void Logger::setConsoleOutput(const bool enabled)
-    {
-        consoleOutput = enabled;
-    }
-
-    void Logger::log(const LogLevel level, const std::string &component, const std::string &message)
-    {
-        if (level < minLevel) return;
-
-        std::lock_guard lock(mutex);
-
         const std::time_t now = std::time(nullptr);
         const std::tm* tm = std::localtime(&now);
 
@@ -43,8 +24,6 @@ namespace Neon
             case LogLevel::ERROR:   ss << "[ERROR] "; break;
             case LogLevel::FATAL:   ss << "[FATAL] "; break;
         }
-
-        ss << "[" << component << "] " << message;
 
         if (logFile.is_open()) {
             logFile << ss.str() << "\n";
