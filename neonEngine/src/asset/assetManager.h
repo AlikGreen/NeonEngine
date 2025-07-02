@@ -5,6 +5,7 @@
 #include <filesystem>
 
 #include "assetSerializer.h"
+#include "debug/assert.h"
 
 namespace Neon
 {
@@ -15,6 +16,8 @@ public:
     AssetHandle loadAsset(const std::string& filePath)
     {
         const std::filesystem::path fullPath = getFullPath(filePath);
+
+        Assert::check(std::filesystem::exists(fullPath), "File was not found\n{}", filePath);
 
         const std::string fileExtension = fullPath.extension().string();
         if(!serializers.contains(fileExtension)) return 0;

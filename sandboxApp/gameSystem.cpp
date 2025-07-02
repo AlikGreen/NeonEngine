@@ -7,7 +7,7 @@ void GameSystem::postStartup()
     auto& world = Neon::Engine::getSceneManager().getCurrentScene().getWorld();
 
     Neon::AssetManager& assetManager = Neon::Engine::getAssetManager();
-    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/sponza.glb");
+    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/sphere.glb");
     const auto* model = assetManager.getAsset<Neon::Prefab>(modelHandle);
 
     world.merge(model->world);
@@ -15,7 +15,7 @@ void GameSystem::postStartup()
     auto prefabs = world.getComponents<Neon::PrefabComponent, Neon::Transform>();
     for (auto [entity, prefab, transform]: prefabs)
     {
-        transform.setScale(glm::vec3(0.001f));
+        transform.setScale(glm::vec3(1.0f));
     }
 
 

@@ -5,8 +5,6 @@
 
 namespace Neon
 {
-    bool Logger::consoleOutput = true;
-
     void Logger::log(const LogLevel level, const std::string &message)
     {
         const std::time_t now = std::time(nullptr);
@@ -17,77 +15,13 @@ namespace Neon
 
         switch (level)
         {
-            case LogLevel::TRACE:   ss << "[TRACE] "; break;
-            case LogLevel::DEBUG:   ss << "[DEBUG] "; break;
-            case LogLevel::INFO:    ss << "[INFO] "; break;
-            case LogLevel::WARNING: ss << "[WARNING] "; break;
-            case LogLevel::ERROR:   ss << "[ERROR] "; break;
-            case LogLevel::FATAL:   ss << "[FATAL] "; break;
+            case LogLevel::Info:    ss << "[INFO] "; break;
+            case LogLevel::Warning: ss << "[WARNING] "; break;
+            case LogLevel::Error:   ss << "[ERROR] "; break;
         }
 
-        if (logFile.is_open()) {
-            logFile << ss.str() << "\n";
-            logFile.flush();
-        }
+        ss << message;
 
-        if (consoleOutput) {
-            std::cout << ss.str() << "\n";
-        }
-    }
-
-    void Logger::trace(const std::string &component, const std::string &message)
-    {
-        log(LogLevel::TRACE, component, message);
-    }
-
-    void Logger::debug(const std::string &component, const std::string &message)
-    {
-        log(LogLevel::DEBUG, component, message);
-    }
-
-    void Logger::info(const std::string &component, const std::string &message)
-    {
-        log(LogLevel::INFO, component, message);
-    }
-
-    void Logger::warning(const std::string &component, const std::string &message)
-    {
-        log(LogLevel::WARNING, component, message);
-    }
-
-    void Logger::error(const std::string &component, const std::string &message)
-    {
-        log(LogLevel::ERROR, component, message);
-    }
-
-    void Logger::fatal(const std::string &component, const std::string &message)
-    {
-        log(LogLevel::FATAL, component, message);
-    }
-
-    void Logger::startTimer(const std::string &name)
-    {
-        timers[name] = std::chrono::high_resolution_clock::now();
-    }
-
-    float Logger::endTimer(const std::string &name, const bool logResult)
-    {
-        const auto endTime = std::chrono::high_resolution_clock::now();
-
-        if (!timers.contains(name)) {
-            warning("Profiler", "Attempted to end timer '{}' that wasn't started", name);
-            return 0.0f;
-        }
-
-        const auto startTime = timers[name];
-        const double duration = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count()) / 1000.0;
-
-        if (logResult)
-        {
-            debug("Profiler", "{} took {} ms", name, duration);
-        }
-
-        timers.erase(name);
-        return static_cast<float>(duration);
+        std::cout << ss.str() << "\n";
     }
 }
