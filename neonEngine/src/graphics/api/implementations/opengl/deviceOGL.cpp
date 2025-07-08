@@ -6,6 +6,7 @@
 #include "frameBufferOGL.h"
 #include "graphicsPipelineOGL.h"
 #include "shaderOGL.h"
+#include "textureOGL.h"
 #include "windowOGL.h"
 
 namespace Neon
@@ -40,6 +41,11 @@ namespace Neon
         return makeRef<BufferOGL>(GL_ARRAY_BUFFER);
     }
 
+    Ref<Texture> DeviceOGL::createTexture(TextureDescription textureDescription)
+    {
+        return makeRef<TextureOGL>(textureDescription);
+    }
+
     void DeviceOGL::submit(const Ref<CommandList> commandList)
     {
         dynamic_cast<CommandListOGL*>(commandList.get())->executeCommands();
@@ -55,12 +61,6 @@ namespace Neon
         return makeRef<FrameBufferOGL>(0);
     }
 
-    Ref<Texture2D> DeviceOGL::createTexture2DImpl(uint32_t width, uint32_t height, TextureUsage usage,
-                                                  TextureFormat format, uint8_t *data)
-    {
-        return nullptr;
-        //return makeRef<Texture2DOGL>(width, height, usage, format, data);
-    }
 
     Ref<Shader> DeviceOGL::createShaderFromSpirvImpl(
         std::unordered_map<ShaderType, std::vector<uint32_t>> shadersSpirv)

@@ -7,7 +7,21 @@ namespace Neon
 {
 struct MeshRenderer
 {
-    AssetRef<Material> material = new Material();
+    std::vector<AssetRef<Material>> materials{};
     AssetRef<Mesh> mesh{};
+
+    void setMaterial(const AssetRef<Material> material)
+    {
+        if(materials.empty())
+            materials.push_back(material);
+        else
+            materials[0] = material;
+    }
+
+    AssetRef<Material> getMaterial() const
+    {
+        if(materials.empty()) return nullptr;
+        return materials[0];
+    }
 };
 }

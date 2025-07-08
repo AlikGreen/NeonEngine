@@ -15,12 +15,6 @@
 
 namespace Neon
 {
-    Ref<Texture2D> Device::createTexture2D(const uint32_t width, const uint32_t height, const TextureUsage usage, const TextureFormat format, uint8_t *data)
-    {
-        return createTexture2DImpl(width, height, usage, format, data);
-    }
-
-
     std::vector<uint32_t> compileToSpirv(const std::string& source_name,
                                         const ShaderType type,
                                         const std::string& source,

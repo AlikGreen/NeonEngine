@@ -16,12 +16,13 @@ public:
     Ref<Buffer> createUniformBuffer() override;
     Ref<Buffer> createVertexBuffer() override;
 
+    Ref<Texture> createTexture(TextureDescription textureDescription) override;
+
     void submit(Ref<CommandList> commandList) override;
     void swapBuffers() override;
 
     Ref<FrameBuffer> getSwapChainFrameBuffer() override;
 protected:
-    Ref<Texture2D> createTexture2DImpl(uint32_t width, uint32_t height, TextureUsage usage, TextureFormat format, uint8_t* data) override;
     Ref<Shader> createShaderFromSpirvImpl(std::unordered_map<ShaderType, std::vector<uint32_t>> shadersSpirv) override;
 private:
     WindowOGL* window;

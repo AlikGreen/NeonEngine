@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 
 #include "GLFW/glfw3.h"
+#include "graphics/api/enums/mipmapFilter.h"
 
 namespace Neon
 {
@@ -70,6 +71,190 @@ namespace Neon
         if(type == ShaderType::Compute) return GL_COMPUTE_SHADER;
         return GL_INVALID_ENUM;
     }
+
+    GLenum ConvertOGL::textureFormatToGL(TextureFormat format)
+    {
+        switch(format)
+        {
+            case TextureFormat::R8Unorm:
+            case TextureFormat::R8Snorm:
+            case TextureFormat::R8Uint:
+            case TextureFormat::R8Int:
+            case TextureFormat::R16Unorm:
+            case TextureFormat::R16Snorm:
+            case TextureFormat::R16Float:
+            case TextureFormat::R16Uint:
+            case TextureFormat::R16Int:
+            case TextureFormat::R32Float:
+            case TextureFormat::R32Uint:
+            case TextureFormat::R32Int:
+            return GL_RED;
+
+            // Two channel
+            case TextureFormat::R8G8Unorm:
+            case TextureFormat::R8G8Snorm:
+            case TextureFormat::R8G8Uint:
+            case TextureFormat::R8G8Int:
+            case TextureFormat::R16G16Unorm:
+            case TextureFormat::R16G16Snorm:
+            case TextureFormat::R16G16Float:
+            case TextureFormat::R16G16Uint:
+            case TextureFormat::R16G16Int:
+            case TextureFormat::R32G32Float:
+            case TextureFormat::R32G32Uint:
+            case TextureFormat::R32G32Int:
+            case TextureFormat::BC4RUnorm:
+            case TextureFormat::BC5RgUnorm:
+                return GL_RG;
+
+            // Three channel
+            case TextureFormat::R11G11B10Ufloat:
+                return GL_RGB;
+
+            // Four channel RGBA
+            case TextureFormat::R8G8B8A8Unorm:
+            case TextureFormat::R8G8B8A8Snorm:
+            case TextureFormat::R8G8B8A8Uint:
+            case TextureFormat::R8G8B8A8Int:
+            case TextureFormat::R16G16B16A16Unorm:
+            case TextureFormat::R16G16B16A16Snorm:
+            case TextureFormat::R16G16B16A16Float:
+            case TextureFormat::R16G16B16A16Uint:
+            case TextureFormat::R16G16B16A16Int:
+            case TextureFormat::R32G32B32A32Float:
+            case TextureFormat::R32G32B32A32Uint:
+            case TextureFormat::R32G32B32A32Int:
+            case TextureFormat::R10G10B10A2Unorm:
+            case TextureFormat::R8G8B8A8UnormSrgb:
+            case TextureFormat::BC1RgbaUnorm:
+            case TextureFormat::BC1RgbaUnormSrgb:
+            case TextureFormat::BC2RgbaUnorm:
+            case TextureFormat::BC2RgbaUnormSrgb:
+            case TextureFormat::BC3RgbaUnorm:
+            case TextureFormat::BC3RgbaUnormSrgb:
+            case TextureFormat::BC7RgbaUnorm:
+            case TextureFormat::BC7RgbaUnormSrgb:
+                return GL_RGBA;
+
+            // Four channel BGRA
+            case TextureFormat::B8G8R8A8Unorm:
+            case TextureFormat::B8G8R8A8UnormSrgb:
+                return GL_BGRA;
+
+            // Depth-stencil formats
+            case TextureFormat::D24UnormS8Uint:
+            case TextureFormat::D32FloatS8Uint:
+                return GL_DEPTH_STENCIL;
+        }
+    }
+
+    GLenum ConvertOGL::textureFormatToGLType(const TextureFormat format)
+    {
+        switch(format)
+        {
+            case TextureFormat::R8Unorm:
+            case TextureFormat::R8G8Unorm:
+            case TextureFormat::R8G8B8A8Unorm:
+            case TextureFormat::B8G8R8A8Unorm:
+            case TextureFormat::R8G8B8A8UnormSrgb:
+            case TextureFormat::B8G8R8A8UnormSrgb:
+                return GL_UNSIGNED_BYTE;
+
+            // Unsigned normalized 16-bit
+            case TextureFormat::R16Unorm:
+            case TextureFormat::R16G16Unorm:
+            case TextureFormat::R16G16B16A16Unorm:
+                return GL_UNSIGNED_SHORT;
+
+            // Signed normalized 8-bit
+            case TextureFormat::R8Snorm:
+            case TextureFormat::R8G8Snorm:
+            case TextureFormat::R8G8B8A8Snorm:
+                return GL_BYTE;
+
+            // Signed normalized 16-bit
+            case TextureFormat::R16Snorm:
+            case TextureFormat::R16G16Snorm:
+            case TextureFormat::R16G16B16A16Snorm:
+                return GL_SHORT;
+
+            // Half float (16-bit)
+            case TextureFormat::R16Float:
+            case TextureFormat::R16G16Float:
+            case TextureFormat::R16G16B16A16Float:
+                return GL_HALF_FLOAT;
+
+            // Float (32-bit)
+            case TextureFormat::R32Float:
+            case TextureFormat::R32G32Float:
+            case TextureFormat::R32G32B32A32Float:
+                return GL_FLOAT;
+
+            // Unsigned integer 8-bit
+            case TextureFormat::R8Uint:
+            case TextureFormat::R8G8Uint:
+            case TextureFormat::R8G8B8A8Uint:
+                return GL_UNSIGNED_BYTE;
+
+            // Unsigned integer 16-bit
+            case TextureFormat::R16Uint:
+            case TextureFormat::R16G16Uint:
+            case TextureFormat::R16G16B16A16Uint:
+                return GL_UNSIGNED_SHORT;
+
+            // Unsigned integer 32-bit
+            case TextureFormat::R32Uint:
+            case TextureFormat::R32G32Uint:
+            case TextureFormat::R32G32B32A32Uint:
+                return GL_UNSIGNED_INT;
+
+            // Signed integer 8-bit
+            case TextureFormat::R8Int:
+            case TextureFormat::R8G8Int:
+            case TextureFormat::R8G8B8A8Int:
+                return GL_BYTE;
+
+            // Signed integer 16-bit
+            case TextureFormat::R16Int:
+            case TextureFormat::R16G16Int:
+            case TextureFormat::R16G16B16A16Int:
+                return GL_SHORT;
+
+            // Signed integer 32-bit
+            case TextureFormat::R32Int:
+            case TextureFormat::R32G32Int:
+            case TextureFormat::R32G32B32A32Int:
+                return GL_INT;
+
+            // Special packed formats
+            case TextureFormat::R10G10B10A2Unorm:
+                return GL_UNSIGNED_INT_2_10_10_10_REV;
+
+            case TextureFormat::R11G11B10Ufloat:
+                return GL_UNSIGNED_INT_10F_11F_11F_REV;
+
+            case TextureFormat::D24UnormS8Uint:
+                return GL_UNSIGNED_INT_24_8;
+
+            case TextureFormat::D32FloatS8Uint:
+                return GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
+
+            // Compressed formats - these don't have a "type" in the traditional sense
+            // They're handled differently in OpenGL (glCompressedTexImage2D)
+            case TextureFormat::BC1RgbaUnorm:
+            case TextureFormat::BC1RgbaUnormSrgb:
+            case TextureFormat::BC2RgbaUnorm:
+            case TextureFormat::BC2RgbaUnormSrgb:
+            case TextureFormat::BC3RgbaUnorm:
+            case TextureFormat::BC3RgbaUnormSrgb:
+            case TextureFormat::BC4RUnorm:
+            case TextureFormat::BC5RgUnorm:
+            case TextureFormat::BC7RgbaUnorm:
+            case TextureFormat::BC7RgbaUnormSrgb:
+                return GL_NONE; // Not applicable for compressed formats
+        }
+    }
+
 
     uint32_t ConvertOGL::getComponentCount(const std::type_info* type)
     {
@@ -257,6 +442,66 @@ namespace Neon
             case GLFW_MOUSE_BUTTON_5:      return MouseButton::Side2;
             // GLFW supports buttons 6-8 as well if your MouseButton enum has more
             default:                       return MouseButton::None;
+        }
+    }
+
+    GLenum ConvertOGL::textureWrapToGL(TextureWrap wrap) {
+        switch(wrap) {
+            case TextureWrap::Repeat:
+                return GL_REPEAT;
+
+            case TextureWrap::MirroredRepeat:
+                return GL_MIRRORED_REPEAT;
+
+            case TextureWrap::ClampToEdge:
+                return GL_CLAMP_TO_EDGE;
+
+            case TextureWrap::ClampToBorder:
+                return GL_CLAMP_TO_BORDER;
+
+            default:
+                return GL_REPEAT;
+        }
+    }
+
+    GLenum ConvertOGL::textureFilterCombineToGL(const TextureFilter filter, const MipmapFilter mipmapFilter)
+    {
+        if (mipmapFilter == MipmapFilter::None)
+        {
+            switch(filter)
+            {
+                case TextureFilter::Nearest:
+                    return GL_NEAREST;
+
+                case TextureFilter::Linear:
+                    return GL_LINEAR;
+
+                default:
+                    return GL_LINEAR;
+            }
+        }
+
+        if (filter == TextureFilter::Nearest)
+        {
+            switch(mipmapFilter)
+            {
+                case MipmapFilter::Nearest:
+                    return GL_NEAREST_MIPMAP_NEAREST;
+                case MipmapFilter::Linear:
+                    return GL_NEAREST_MIPMAP_LINEAR;
+                default:
+                    return GL_NEAREST_MIPMAP_LINEAR;
+            }
+        }
+
+        switch(mipmapFilter)
+        {
+            case MipmapFilter::Nearest:
+                return GL_LINEAR_MIPMAP_NEAREST;
+            case MipmapFilter::Linear:
+                return GL_LINEAR_MIPMAP_LINEAR;
+            default:
+                return GL_LINEAR_MIPMAP_LINEAR;
         }
     }
 

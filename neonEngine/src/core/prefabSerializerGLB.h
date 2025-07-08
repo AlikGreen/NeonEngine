@@ -3,7 +3,9 @@
 
 #include "graphics/mesh.h"
 #include "prefab.h"
+#include "asset/assetHandle.h"
 #include "asset/assetSerializer.h"
+#include "graphics/components/material.h"
 
 namespace Neon
 {
@@ -14,6 +16,8 @@ public:
     void serialize(std::string filePath) override;
     Prefab* deserialize(std::string filePath) override;
 private:
+    static AssetHandle processMaterial(const tinygltf::Material& material, const tinygltf::Model& model);
     static Mesh* createMesh(const tinygltf::Mesh &mesh, const tinygltf::Model &model);
+    static AssetHandle loadTexture(const tinygltf::Texture& texture, const tinygltf::Model& model, bool isSrgb);
 };
 }

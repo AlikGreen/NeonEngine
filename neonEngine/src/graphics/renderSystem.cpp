@@ -54,7 +54,13 @@ namespace Neon
 
     	pipeline = device->createGraphicsPipeline(pipelineDescription);
 
-    	depthTexture = device->createTexture2D(window->getWidth(), window->getHeight(), TextureUsage::DepthStencilTarget, TextureFormat::D32Float);
+    	TextureDescription depthTextureDesc{};
+    	depthTextureDesc.width = window->getWidth();
+    	depthTextureDesc.height = window->getHeight();
+    	depthTextureDesc.usage = TextureUsage::DepthStencilTarget;
+    	depthTextureDesc.format = TextureFormat::D32FloatS8Uint;
+
+    	depthTexture = device->createTexture(depthTextureDesc);
 
     	commandList = device->createCommandList();
 
@@ -138,7 +144,7 @@ namespace Neon
 
      	for (auto[entity, meshRenderer, transform] : meshRenderers)
      	{
-			 renderMesh(entity, meshRenderer, transform);
+			 renderMesh(entity, meshRenderer);
      	}
 
         device->submit(commandList);
@@ -156,7 +162,7 @@ namespace Neon
     	return window;
     }
 
-    void RenderSystem::renderMesh(const EntityID entity, const MeshRenderer& meshRenderer, const Transform& transform) const
+    void RenderSystem::renderMesh(const EntityID entity, const MeshRenderer& meshRenderer) const
     {
     	if(meshRenderer.mesh == nullptr) return;
 
@@ -172,9 +178,9 @@ namespace Neon
 
     	MaterialUniforms materialUniforms =
     	{
-    		meshRenderer.material->roughness,
-    		meshRenderer.material->metalness,
-    		meshRenderer.material->albedo
+    		meshRenderer.getMaterial()->roughness,
+    		meshRenderer.getMaterial()->metalness,
+    		meshRenderer.getMaterial()->albedo
     	};
 
     	commandList->updateBuffer(materialUniformBuffer, materialUniforms);

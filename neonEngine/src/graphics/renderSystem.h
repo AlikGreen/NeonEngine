@@ -58,13 +58,13 @@ namespace Neon
         [[nodiscard]] Ref<Device> getDevice() const;
         [[nodiscard]] Ref<Window> getWindow() const;
     private:
-        void renderMesh(EntityID entity, const MeshRenderer& meshRenderer, const Transform& transform) const;
+        void renderMesh(EntityID entity, const MeshRenderer& meshRenderer) const;
 
         Ref<Window> window{};
         Ref<Device> device{};
 
         Ref<GraphicsPipeline> pipeline{};
-        Ref<Texture2D> depthTexture{};
+        Ref<Texture> depthTexture{};
         Ref<CommandList> commandList{};
 
         Ref<Buffer> cameraUniformBuffer{};

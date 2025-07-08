@@ -17,7 +17,7 @@ public:
     {
         const std::filesystem::path fullPath = getFullPath(filePath);
 
-        Assert::check(std::filesystem::exists(fullPath), "File was not found\n{}", filePath);
+        Assert::check(exists(fullPath), "File was not found\n{}", filePath);
 
         const std::string fileExtension = fullPath.extension().string();
         if(!serializers.contains(fileExtension)) return 0;
