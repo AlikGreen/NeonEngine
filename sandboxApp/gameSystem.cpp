@@ -7,7 +7,7 @@ void GameSystem::postStartup()
     auto& world = Neon::Engine::getSceneManager().getCurrentScene().getWorld();
 
     Neon::AssetManager& assetManager = Neon::Engine::getAssetManager();
-    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/sphere.glb");
+    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/silly.glb");
     const auto* model = assetManager.getAsset<Neon::Prefab>(modelHandle);
 
     world.merge(model->world);

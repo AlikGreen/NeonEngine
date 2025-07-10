@@ -11,6 +11,7 @@ public:
     [[nodiscard]] virtual std::unique_ptr<IComponentArray> clone() const = 0;
     virtual void copyTo(IComponentArray* other, const std::unordered_map<EntityID, EntityID>& entityMap) const = 0;
     [[nodiscard]] virtual std::vector<EntityID> getAllEntities() const = 0;
+    [[nodiscard]] virtual std::unique_ptr<IComponentArray> createEmpty() const = 0;
 };
 
 template<typename T>
@@ -94,6 +95,11 @@ public:
                 typedOther->insertData(newEntity, components[index]);
             }
         }
+    }
+
+    std::unique_ptr<IComponentArray> createEmpty() const override
+    {
+        return std::make_unique<ComponentArray>();
     }
 
     std::vector<EntityID> getAllEntities() const override

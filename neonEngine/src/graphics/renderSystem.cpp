@@ -66,7 +66,7 @@ namespace Neon
 
     	cameraUniformBuffer      = device->createUniformBuffer();
     	modelUniformBuffer       = device->createUniformBuffer();
-    	materialUniformBuffer    = device->createUniformBuffer();
+    	materialsUniformBuffer    = device->createUniformBuffer();
     	pointLightsUniformBuffer = device->createUniformBuffer();
     	debugUniformBuffer       = device->createUniformBuffer();
 
@@ -77,8 +77,8 @@ namespace Neon
     	commandList->begin();
 
     	commandList->reserveBuffer(cameraUniformBuffer, sizeof(CameraUniforms));
-    	commandList->reserveBuffer(modelUniformBuffer, sizeof(ModelUniforms));
-    	commandList->reserveBuffer(materialUniformBuffer, sizeof(MaterialUniforms));
+    	commandList->reserveBuffer(modelUniformBuffer, sizeof(MeshUniforms));
+    	commandList->reserveBuffer(materialsUniformBuffer, sizeof(MaterialsUniforms));
     	commandList->reserveBuffer(pointLightsUniformBuffer, sizeof(PointLightUniforms));
 
     	commandList->reserveBuffer(debugUniformBuffer, sizeof(DebugUniforms));
@@ -168,7 +168,7 @@ namespace Neon
 
     	const glm::mat4 modelMatrix = Transform::getWorldMatrix(entity);
 
-    	ModelUniforms modelUniforms =
+    	MeshUniforms modelUniforms =
 		{
     		modelMatrix
 		};
@@ -176,15 +176,23 @@ namespace Neon
     	commandList->updateBuffer(modelUniformBuffer, modelUniforms);
     	commandList->setUniformBuffer(1, ShaderType::Vertex, modelUniformBuffer);
 
-    	MaterialUniforms materialUniforms =
-    	{
-    		meshRenderer.getMaterial()->roughness,
-    		meshRenderer.getMaterial()->metalness,
-    		meshRenderer.getMaterial()->albedo
-    	};
+    	MaterialsUniforms materialsUniforms{};
 
-    	commandList->updateBuffer(materialUniformBuffer, materialUniforms);
-    	commandList->setUniformBuffer(2, ShaderType::Fragment, materialUniformBuffer);
+    	for(int i = 0; i < meshRenderer.materials.size() && i < 64; i++)
+    	{
+		    const MaterialUniforms materialUniforms =
+			{
+    			meshRenderer.getMaterial()->roughness,
+				meshRenderer.getMaterial()->metalness,
+				meshRenderer.getMaterial()->albedo
+			};
+
+    		materialsUniforms.materials[i] = materialUniforms;
+    		materialsUniforms.count = i;
+    	}
+
+    	commandList->updateBuffer(materialsUniformBuffer, materialsUniforms);
+    	commandList->setUniformBuffer(2, ShaderType::Fragment, materialsUniformBuffer);
 
     	commandList->setVertexBuffer(0, meshRenderer.mesh->vertexBuffer);
     	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer, IndexFormat::UInt32);

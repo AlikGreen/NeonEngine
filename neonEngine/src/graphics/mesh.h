@@ -14,6 +14,12 @@ namespace Neon
         glm::vec2 uv;
     };
 
+    struct Primitive
+    {
+        uint32_t indexStart;
+        uint32_t indexCount;
+    };
+
     class Mesh final : public Asset
     {
     public:
@@ -23,6 +29,7 @@ namespace Neon
 
         std::vector<Vertex> vertices{};
         std::vector<uint32_t> indices{};
+        std::vector<Primitive> primitives{};
 
         Ref<Buffer> vertexBuffer = nullptr;
         Ref<Buffer> indexBuffer = nullptr;

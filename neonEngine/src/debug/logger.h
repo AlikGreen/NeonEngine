@@ -1,10 +1,9 @@
 #pragma once
 #include <string>
 #include <mutex>
-#include <fstream>
-#include <unordered_map>
+#include <format>
 #include <chrono>
-#include <sstream>
+
 
 namespace Neon
 {
@@ -21,21 +20,30 @@ namespace Neon
         static void log(LogLevel level, const std::string& message);
 
         template<typename... Args>
-        static void info(const std::string& format_str, Args&&... args)
+        static void info(const std::string& fmt, const Args&... args)
         {
-            info(LogLevel::Info, std::vformat(format_str, std::forward<Args>(args)...));
+            // now args are lvalues and bind to make_format_args
+            auto fmtArgs = std::make_format_args(args...);
+            log(LogLevel::Info,
+                std::vformat(fmt, fmtArgs));
         }
 
         template<typename... Args>
-        static void warning(const std::string& format_str, Args&&... args)
+        static void warning(const std::string& fmt, const Args&... args)
         {
-            log(LogLevel::Warning, std::vformat(format_str, std::forward<Args>(args)...));
+            // now args are lvalues and bind to make_format_args
+            auto fmtArgs = std::make_format_args(args...);
+            log(LogLevel::Warning,
+                std::vformat(fmt, fmtArgs));
         }
 
         template<typename... Args>
-        static void error(const std::string& format_str, Args&&... args)
+        static void error(const std::string& fmt, const Args&... args)
         {
-            log(LogLevel::Error, std::vformat(format_str, std::forward<Args>(args)...));
+            // now args are lvalues and bind to make_format_args
+            auto fmtArgs = std::make_format_args(args...);
+            log(LogLevel::Error,
+                std::vformat(fmt, fmtArgs));
         }
     };
 }

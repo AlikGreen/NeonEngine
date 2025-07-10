@@ -2,6 +2,8 @@
 
 #include "parentComponent.h"
 #include "ecs/world.h"
+#include "glm/gtx/matrix_decompose.hpp"
+#include "glm/gtx/quaternion.hpp"
 
 namespace Neon
 {
@@ -63,6 +65,21 @@ namespace Neon
         }
         return cachedLocalMatrix;
     }
+
+    void Transform::setLocalMatrix(const glm::mat4& transform)
+    {
+        cachedLocalMatrix = transform;
+
+        glm::vec3 skew;
+        glm::vec4 perspective;
+        glm::quat rotQuat;
+        glm::decompose(transform, scale, rotQuat, position, skew, perspective);
+
+        rotation = glm::eulerAngles(rotQuat);
+        cachedLocalRotationMatrix = glm::toMat4(rotQuat);
+        dirty = false;
+    }
+
 
     glm::vec3 Transform::forward() const
     {

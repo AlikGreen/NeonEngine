@@ -14,9 +14,10 @@ namespace Neon
         glm::mat4 proj;
     };
 
-    struct ModelUniforms
+    struct MeshUniforms
     {
         glm::mat4 model;
+        Primitive primitives[64]{};
     };
 
     struct DebugUniforms
@@ -30,6 +31,12 @@ namespace Neon
         float roughness;
         float metalness;
         alignas(16) glm::vec4 albedo;
+    };
+
+    struct MaterialsUniforms
+    {
+        int count{};
+        MaterialUniforms materials[64]{};
     };
 
     struct PointLightUniform
@@ -70,7 +77,7 @@ namespace Neon
         Ref<Buffer> cameraUniformBuffer{};
         Ref<Buffer> modelUniformBuffer{};
         Ref<Buffer> debugUniformBuffer{};
-        Ref<Buffer> materialUniformBuffer{};
+        Ref<Buffer> materialsUniformBuffer{};
         Ref<Buffer> pointLightsUniformBuffer{};
     };
 }

@@ -31,13 +31,19 @@ void main()
 }
 
 #type fragment
+struct Material
+{
+    float roughness;
+    float metanless;
+    vec4 albedo;
+};
+
 layout(location = 0) out vec4 outColor;
 
-layout(std140, binding = 2) uniform MaterialUniforms
+layout(std140, binding = 2) uniform MaterialsUniforms
 {
-    float uRoughness;
-    float uMetanless;
-    vec4 uAlbedo;
+    int materialCount;
+    Material[64] materials;
 };
 
 struct PointLight
@@ -77,6 +83,8 @@ void main()
         return;
     }
 
+    Material material = materials[0];
+
     vec3 diffuseLight = vec3(0.0);
 
     for(int i = 0; i < pointLightsCount; i++)
@@ -90,7 +98,7 @@ void main()
 
     diffuseLight = max(diffuseLight, vec3(0.02));
 
-    outColor = uAlbedo*vec4(diffuseLight, 0.0);
+    outColor = material.albedo*vec4(diffuseLight, 0.0);
 
     //outColor = uAlbedo;
 }

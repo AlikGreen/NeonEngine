@@ -72,14 +72,8 @@ namespace Neon
             {
                 if (!other.componentArrays.contains(typeIndex))
                 {
-                    auto emptyArray = sourceArray->clone();
-                    other.componentArrays[typeIndex] = std::move(emptyArray);
-
-                    auto entities = other.componentArrays[typeIndex]->getAllEntities();
-                    for (const EntityID entity : entities)
-                    {
-                        other.componentArrays[typeIndex]->entityDestroyed(entity);
-                    }
+                    // Create empty array instead of cloning
+                    other.componentArrays[typeIndex] = sourceArray->createEmpty();
                 }
                 sourceArray->copyTo(other.componentArrays[typeIndex].get(), entityMap);
             }

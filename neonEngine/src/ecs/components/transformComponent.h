@@ -20,6 +20,7 @@ public:
     void setScale(const glm::vec3& scl);
 
     const glm::mat4& getLocalMatrix() const;
+    void setLocalMatrix(const glm::mat4& transform);
 
     glm::vec3 forward() const;
     glm::vec3 backward() const;
