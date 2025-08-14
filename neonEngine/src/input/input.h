@@ -1,6 +1,7 @@
 #pragma once
-#include "keyCodes.h"
 #include <glm/glm.hpp>
+
+#include "input/keyCodes.h"
 
 namespace Neon
 {

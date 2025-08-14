@@ -1,14 +1,14 @@
 #pragma once
-#include <graphics/api/texture.h>
+#include <neonRHI/neonRHI.h>
 
 #include "glm/vec3.hpp"
 
-#include "asset/asset.h"
 #include "asset/assetRef.h"
+#include "graphics/image.h"
 
 namespace Neon
 {
-class Material final : public Asset
+class Material
 {
 public:
     const char* name = "material";
@@ -17,19 +17,19 @@ public:
     bool doubleSided = false;
 
     glm::vec4 albedo = glm::vec4(1.0f);
-    AssetRef<Texture> albedoTexture = nullptr;
+    AssetRef<Image> albedoTexture = nullptr;
 
     float roughness = 1.0f;
     float metalness = 0.0f;
-    AssetRef<Texture> metallicRoughnessTexture = nullptr;
+    AssetRef<Image> metallicRoughnessTexture = nullptr;
 
     glm::vec3 emission = glm::vec3(0.0f);
-    AssetRef<Texture> emissionTexture = nullptr;
+    AssetRef<Image> emissionTexture = nullptr;
 
     float normalTextureStrength = 1.0f;
-    AssetRef<Texture> normalTexture = nullptr;
+    AssetRef<Image> normalTexture = nullptr;
 
     float occlusionTextureStrength = 1.0f;
-    AssetRef<Texture> occlusionTexture = nullptr;
+    AssetRef<Image> occlusionTexture = nullptr;
 };
 }

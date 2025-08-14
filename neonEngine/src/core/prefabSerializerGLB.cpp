@@ -7,11 +7,13 @@
 #include "debug/Logger.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "graphics/renderSystem.h"
-#include "graphics/api/texture.h"
+#include <neonRHI/neonRHI.h>
+
+#include "graphics/image.h"
 
 namespace Neon
 {
-    Prefab* PrefabSerializerGLB::load(const std::string& filePath)
+    void* PrefabSerializerGLB::load(const std::string& filePath)
     {
         tinygltf::Model model;
         if (!loadModel(model, filePath))
@@ -33,7 +35,7 @@ namespace Neon
     {
     }
 
-    Prefab* PrefabSerializerGLB::deserialize(const std::string& filePath)
+    void* PrefabSerializerGLB::deserialize(const std::string& filePath)
     {
         return nullptr;
     }
@@ -193,8 +195,9 @@ namespace Neon
         mat->doubleSided = material.doubleSided;
     }
 
-    TextureFilter convertGLTFFilter(const int gltfFilter)
+    NRHI::TextureFilter convertGLTFFilter(const int gltfFilter)
     {
+        using namespace NRHI;
         switch (gltfFilter)
         {
             case TINYGLTF_TEXTURE_FILTER_NEAREST:
@@ -209,8 +212,9 @@ namespace Neon
         }
     }
 
-    MipmapFilter convertGLTFMipmapFilter(const int gltfFilter)
+    NRHI::MipmapFilter convertGLTFMipmapFilter(const int gltfFilter)
     {
+        using namespace NRHI;
         switch (gltfFilter)
         {
             case TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST:
@@ -224,8 +228,9 @@ namespace Neon
         }
     }
 
-    TextureWrap convertGLTFWrap(const int gltfWrap)
+    NRHI::TextureWrap convertGLTFWrap(const int gltfWrap)
     {
+        using namespace NRHI;
         switch (gltfWrap)
         {
             case TINYGLTF_TEXTURE_WRAP_MIRRORED_REPEAT:
@@ -238,8 +243,9 @@ namespace Neon
         }
     }
 
-    TextureFormat determineTextureFormat(const tinygltf::Image& image, const bool isSRGB)
+    NRHI::TextureFormat determineTextureFormat(const tinygltf::Image& image, const bool isSRGB)
     {
+        using namespace NRHI;
         const auto components = image.component;
         const auto bits = image.bits;
 
@@ -273,29 +279,39 @@ namespace Neon
         }
 
         const tinygltf::Image& image = model.images[texture.source];
+        const std::vector<unsigned char>& data = image.image;
 
-        TextureDescription description{};
-        description.format = determineTextureFormat(image, isSrgb);
-        description.width = image.width;
-        description.height = image.height;
+        NRHI::TextureDescription textureDescription{};
+        textureDescription.format = determineTextureFormat(image, isSrgb);
+        textureDescription.width = image.width;
+        textureDescription.height = image.height;
+
+        NRHI::SamplerDescription samplerDescription{};
 
         if (texture.sampler >= 0)
         {
             const tinygltf::Sampler& sampler = model.samplers[texture.sampler];
-            description.minFilter = convertGLTFFilter(sampler.minFilter);
-            description.magFilter = convertGLTFFilter(sampler.magFilter);
-            description.wrapMode.x = convertGLTFWrap(sampler.wrapS);
-            description.wrapMode.y = convertGLTFWrap(sampler.wrapT);
+            samplerDescription.minFilter = convertGLTFFilter(sampler.minFilter);
+            samplerDescription.magFilter = convertGLTFFilter(sampler.magFilter);
+            samplerDescription.wrapMode.x = convertGLTFWrap(sampler.wrapS);
+            samplerDescription.wrapMode.y = convertGLTFWrap(sampler.wrapT);
         }
 
-        const Ref<Device> device = Engine::getSystem<RenderSystem>()->getDevice();
-        const Ref<Texture> tex = device->createTexture(description);
+        const Ref<NRHI::Device> device = Engine::getSystem<RenderSystem>()->getDevice();
+        const Ref<NRHI::Texture> tex = device->createTexture(textureDescription);
+        const Ref<NRHI::Sampler> sampler = device->createSampler(samplerDescription);
 
-        auto commandList = device->createCommandList();
+        AssetManager& assetManager = Engine::getAssetManager();
+
+        AssetHandle texAsset = assetManager.addAsset(tex);
+        AssetHandle samplerAsset = assetManager.addAsset(sampler);
+
+        const auto commandList = device->createCommandList();
         commandList->begin();
+        commandList->updateTexture(tex, data.data());
         device->submit(commandList);
 
-        return Engine::getAssetManager().addAsset(tex.get());
+        return assetManager.addAsset(new Image(texAsset, samplerAsset));
     }
 
     Mesh* PrefabSerializerGLB::createMesh(const tinygltf::Mesh& mesh, const tinygltf::Model& model)

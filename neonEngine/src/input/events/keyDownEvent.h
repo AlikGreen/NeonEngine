@@ -7,12 +7,12 @@ namespace Neon
 class KeyDownEvent final : public Event
 {
 public:
-    KeyDownEvent(const KeyCode keycode, const KeyMod modifier) : keycode(keycode), modifier(modifier) { };
+    KeyDownEvent(const KeyCode keycode, const bool repeat) : keycode(keycode), repeat(repeat) { };
 
     [[nodiscard]] KeyCode getKeycode() const { return keycode; }
-    [[nodiscard]] KeyMod getModifier() const { return modifier; }
+    [[nodiscard]] bool isRepeat() const { return repeat; }
 private:
     KeyCode keycode;
-    KeyMod modifier;
+    bool repeat;
 };
 }

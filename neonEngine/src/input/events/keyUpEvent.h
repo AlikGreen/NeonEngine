@@ -7,12 +7,10 @@ namespace Neon
     class KeyUpEvent final : public Event
     {
     public:
-        KeyUpEvent(const KeyCode keycode, const KeyMod modifier) : keycode(keycode), modifier(modifier) { };
+        explicit KeyUpEvent(const KeyCode keycode) : keycode(keycode) { };
 
         [[nodiscard]] KeyCode getKeycode() const { return keycode; }
-        [[nodiscard]] KeyMod getModifier() const { return modifier; }
     private:
         KeyCode keycode;
-        KeyMod modifier;
     };
 }

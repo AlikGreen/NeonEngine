@@ -1,8 +1,7 @@
 #pragma once
 
+#include <neonRHI/neonRHI.h>
 #include "core/system.h"
-#include "api/device.h"
-#include "api/window.h"
 #include "components/meshRenderer.h"
 #include "ecs/components/transformComponent.h"
 
@@ -31,6 +30,7 @@ namespace Neon
         float roughness;
         float metalness;
         alignas(16) glm::vec4 albedo;
+        int useAlbedoTexture;
     };
 
     struct MaterialsUniforms
@@ -55,29 +55,28 @@ namespace Neon
     class RenderSystem final : public System
     {
     public:
-        explicit RenderSystem(const WindowCreationOptions &windowOptions);
+        explicit RenderSystem(const NRHI::WindowCreationOptions &windowOptions);
 
         void preStartup() override;
         void shutdown() override;
         void preUpdate() override;
         void render() override;
 
-        [[nodiscard]] Ref<Device> getDevice() const;
-        [[nodiscard]] Ref<Window> getWindow() const;
+        [[nodiscard]] Ref<NRHI::Device> getDevice() const;
+        [[nodiscard]] Ref<NRHI::Window> getWindow() const;
     private:
         void renderMesh(EntityID entity, const MeshRenderer& meshRenderer) const;
 
-        Ref<Window> window{};
-        Ref<Device> device{};
+        Ref<NRHI::Window> window{};
+        Ref<NRHI::Device> device{};
 
-        Ref<GraphicsPipeline> pipeline{};
-        Ref<Texture> depthTexture{};
-        Ref<CommandList> commandList{};
+        Ref<NRHI::GraphicsPipeline> pipeline{};
+        Ref<NRHI::CommandList> commandList{};
 
-        Ref<Buffer> cameraUniformBuffer{};
-        Ref<Buffer> modelUniformBuffer{};
-        Ref<Buffer> debugUniformBuffer{};
-        Ref<Buffer> materialsUniformBuffer{};
-        Ref<Buffer> pointLightsUniformBuffer{};
+        Ref<NRHI::Buffer> cameraUniformBuffer{};
+        Ref<NRHI::Buffer> modelUniformBuffer{};
+        Ref<NRHI::Buffer> debugUniformBuffer{};
+        Ref<NRHI::Buffer> materialsUniformBuffer{};
+        Ref<NRHI::Buffer> pointLightsUniformBuffer{};
     };
 }

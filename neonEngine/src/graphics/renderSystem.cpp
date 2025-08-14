@@ -2,26 +2,33 @@
 
 #include <tiny_gltf.h>
 
+#include <neonRHI/neonRHI.h>
 
 #include "mesh.h"
-#include "api/commandList.h"
-#include "api/window.h"
-#include "api/descriptions/windowCreationOptions.h"
-#include "api/enums/shaderType.h"
 #include "components/camera.h"
 #include "components/pointLight.h"
 #include "core/engine.h"
+#include "core/eventManager.h"
 #include "core/sceneManager.h"
 #include "debug/logger.h"
 #include "ecs/components/transformComponent.h"
+#include "events/quitEvent.h"
+#include "events/windowResizeEvent.h"
 #include "glm/glm.hpp"
+#include "input/events/keyDownEvent.h"
+#include "input/events/keyUpEvent.h"
+#include "input/events/mouseButtonDownEvent.h"
+#include "input/events/mouseButtonUpEvent.h"
+#include "input/events/mouseMoveEvent.h"
+#include "input/events/mouseWheelEvent.h"
+#include "input/events/textInputEvent.h"
 #include "util/file.h"
 
 namespace Neon
 {
-    RenderSystem::RenderSystem(const WindowCreationOptions &windowOptions)
+    RenderSystem::RenderSystem(const NRHI::WindowCreationOptions &windowOptions)
     {
-    	window = Window::createWindow(windowOptions);
+    	window = NRHI::Window::createWindow(windowOptions);
     }
 
     void RenderSystem::preStartup()
@@ -33,34 +40,26 @@ namespace Neon
 	    const auto shader = device->createShaderFromSource(File::readFileText(shaderPath), shaderPath);
     	shader->compile();
 
-    	VertexInputState vertexInputState{};
+    	NRHI::VertexInputState vertexInputState{};
     	vertexInputState.addVertexBuffer<Vertex>(0);
     	vertexInputState.addVertexAttribute<glm::vec3>(0, 0);
     	vertexInputState.addVertexAttribute<glm::vec3>(0, 1);
     	vertexInputState.addVertexAttribute<glm::vec2>(0, 2);
 
-    	DepthState depthState{};
+    	NRHI::DepthState depthState{};
     	depthState.hasDepthTarget = true;
     	depthState.enableDepthTest = true;
 
-	    const RenderTargetsDescription targetsDesc{};
+	    const NRHI::RenderTargetsDescription targetsDesc{};
 
-    	GraphicsPipelineDescription pipelineDescription{};
+    	NRHI::GraphicsPipelineDescription pipelineDescription{};
     	pipelineDescription.shader = shader;
     	pipelineDescription.vertexInputState = vertexInputState;
-    	pipelineDescription.cullMode = CullMode::None;
+    	pipelineDescription.cullMode = NRHI::CullMode::None;
     	pipelineDescription.targetsDescription = targetsDesc;
     	pipelineDescription.depthState = depthState;
 
     	pipeline = device->createGraphicsPipeline(pipelineDescription);
-
-    	TextureDescription depthTextureDesc{};
-    	depthTextureDesc.width = window->getWidth();
-    	depthTextureDesc.height = window->getHeight();
-    	depthTextureDesc.usage = TextureUsage::DepthStencilTarget;
-    	depthTextureDesc.format = TextureFormat::D32FloatS8Uint;
-
-    	depthTexture = device->createTexture(depthTextureDesc);
 
     	commandList = device->createCommandList();
 
@@ -114,9 +113,9 @@ namespace Neon
 		};
 
 		commandList->updateBuffer(cameraUniformBuffer, cameraMatrices);
-     	commandList->setUniformBuffer(0, ShaderType::Vertex, cameraUniformBuffer);
+     	commandList->setUniformBuffer("CameraUniforms", cameraUniformBuffer);
 
-    	commandList->setUniformBuffer(4, ShaderType::Fragment, debugUniformBuffer);
+    	commandList->setUniformBuffer("DebugUniforms", debugUniformBuffer);
 
     	auto meshRenderers = world.getComponents<MeshRenderer, Transform>();
     	auto pointLights = world.getComponents<PointLight, Transform>();
@@ -140,7 +139,7 @@ namespace Neon
     	pointLightUniforms.pointLightsCount = i;
 
     	commandList->updateBuffer(pointLightsUniformBuffer, pointLightUniforms);
-    	commandList->setUniformBuffer(3, ShaderType::Fragment, pointLightsUniformBuffer);
+    	commandList->setUniformBuffer("PointLightUniforms", pointLightsUniformBuffer);
 
      	for (auto[entity, meshRenderer, transform] : meshRenderers)
      	{
@@ -152,12 +151,12 @@ namespace Neon
     }
 
 
-    Ref<Device> RenderSystem::getDevice() const
+    Ref<NRHI::Device> RenderSystem::getDevice() const
     {
     	return device;
     }
 
-    Ref<Window> RenderSystem::getWindow() const
+    Ref<NRHI::Window> RenderSystem::getWindow() const
     {
     	return window;
     }
@@ -174,28 +173,42 @@ namespace Neon
 		};
 
     	commandList->updateBuffer(modelUniformBuffer, modelUniforms);
-    	commandList->setUniformBuffer(1, ShaderType::Vertex, modelUniformBuffer);
+    	commandList->setUniformBuffer("ModelUniforms", modelUniformBuffer);
+
+	    constexpr int MAX_MATERIALS = 64;
+	    const int materialsInUse = std::min(static_cast<int>(meshRenderer.materials.size()), MAX_MATERIALS);
 
     	MaterialsUniforms materialsUniforms{};
 
-    	for(int i = 0; i < meshRenderer.materials.size() && i < 64; i++)
+    	for(int i = 0; i < materialsInUse; i++)
     	{
+    		// bind texture somewhere here
+    		int useAlbedoTexture = false;
+		    const AssetRef<Material> mat = meshRenderer.getMaterial();
+			if(mat->albedoTexture != nullptr)
+			{
+				useAlbedoTexture = true;
+				commandList->setTexture("albedoTextures", i, mat->albedoTexture->getTexture());
+				commandList->setSampler("albedoTextures", i, mat->albedoTexture->getSampler());
+			}
+
 		    const MaterialUniforms materialUniforms =
 			{
-    			meshRenderer.getMaterial()->roughness,
-				meshRenderer.getMaterial()->metalness,
-				meshRenderer.getMaterial()->albedo
+    			mat->roughness,
+				mat->metalness,
+				mat->albedo,
+				useAlbedoTexture
 			};
 
     		materialsUniforms.materials[i] = materialUniforms;
-    		materialsUniforms.count = i;
+    		materialsUniforms.count = i+1;
     	}
 
     	commandList->updateBuffer(materialsUniformBuffer, materialsUniforms);
-    	commandList->setUniformBuffer(2, ShaderType::Fragment, materialsUniformBuffer);
+    	commandList->setUniformBuffer("MaterialsUniforms", materialsUniformBuffer);
 
     	commandList->setVertexBuffer(0, meshRenderer.mesh->vertexBuffer);
-    	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer, IndexFormat::UInt32);
+    	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer, NRHI::IndexFormat::UInt32);
     	commandList->drawIndexed(meshRenderer.mesh->indices.size());
     }
 
@@ -206,6 +219,42 @@ namespace Neon
 
     void RenderSystem::preUpdate()
     {
-	    window->pollEvents();
+	    std::vector<NRHI::Event> events = window->pollEvents();
+
+    	EventManager& eventManager = Engine::getEventManager();
+
+    	for(const auto event : events)
+    	{
+    		switch (event.type)
+    		{
+    			case NRHI::Event::Type::Quit:
+    				eventManager.queueEvent(new QuitEvent());
+    				break;
+    			case NRHI::Event::Type::WindowResize:
+    				eventManager.queueEvent(new WindowResizeEvent(event.window.width, event.window.height));
+    				break;
+    			case NRHI::Event::Type::KeyDown:
+    				eventManager.queueEvent(new KeyDownEvent(event.key.key, event.key.repeat));
+    				break;
+    			case NRHI::Event::Type::KeyUp:
+    				eventManager.queueEvent(new KeyUpEvent(event.key.key));
+    				break;
+    			case NRHI::Event::Type::MouseButtonDown:
+    				eventManager.queueEvent(new MouseButtonDownEvent(event.button.button));
+    				break;
+    			case NRHI::Event::Type::MouseButtonUp:
+    				eventManager.queueEvent(new MouseButtonUpEvent(event.button.button));
+    				break;
+    			case NRHI::Event::Type::MouseMotion:
+    				eventManager.queueEvent(new MouseMoveEvent(event.motion.x, event.motion.y));
+    				break;
+    			case NRHI::Event::Type::MouseWheel:
+    				eventManager.queueEvent(new MouseWheelEvent(event.wheel.x, event.wheel.y));
+    				break;
+    			case NRHI::Event::Type::TextInput:
+    				eventManager.queueEvent(new TextInputEvent(event.text.text));
+    				break;
+    		}
+    	}
     }
 }

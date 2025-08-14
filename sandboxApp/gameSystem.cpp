@@ -7,8 +7,8 @@ void GameSystem::postStartup()
     auto& world = Neon::Engine::getSceneManager().getCurrentScene().getWorld();
 
     Neon::AssetManager& assetManager = Neon::Engine::getAssetManager();
-    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/silly.glb");
-    const auto* model = assetManager.getAsset<Neon::Prefab>(modelHandle);
+    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/monkey.glb");
+    const auto model = assetManager.getAsset<Neon::Prefab>(modelHandle);
 
     world.merge(model->world);
 
@@ -52,7 +52,10 @@ void GameSystem::update()
 
     constexpr float cameraSpeed = 0.0005f;
 
-    if(Neon::Input::isKeyHeld(KeyCode::W)) { camTransform.translate(camTransform.forward()*cameraSpeed); }
+    if(Neon::Input::isKeyHeld(KeyCode::W))
+    {
+        camTransform.translate(camTransform.forward()*cameraSpeed);
+    }
     if(Neon::Input::isKeyHeld(KeyCode::A)) { camTransform.translate(camTransform.left()*cameraSpeed); }
     if(Neon::Input::isKeyHeld(KeyCode::S)) { camTransform.translate(camTransform.backward()*cameraSpeed); }
     if(Neon::Input::isKeyHeld(KeyCode::D)) { camTransform.translate(camTransform.right()*cameraSpeed); }

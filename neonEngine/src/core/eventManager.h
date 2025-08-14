@@ -11,7 +11,6 @@ class EventManager
 public:
     EventManager() = default;
 
-    // Template function using the concept
     template <DerivedFromEvent T>
     void queueEvent(T* event)
     {

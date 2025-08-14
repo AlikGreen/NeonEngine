@@ -1,11 +1,9 @@
 #pragma once
-#include "core/event.h"
 
 namespace Neon
 {
-class QuitEvent : public Event
+class QuitEvent final : public Event
 {
-public:
-    QuitEvent() = default;
+
 };
 }

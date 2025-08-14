@@ -31,11 +31,15 @@ void main()
 }
 
 #type fragment
+const int MAX_MATERIALS = 32;
+const int MAX_POINT_LIGHTS = 32;
+
 struct Material
 {
     float roughness;
     float metanless;
     vec4 albedo;
+    bool useAlbedoTexture;
 };
 
 layout(location = 0) out vec4 outColor;
@@ -43,7 +47,7 @@ layout(location = 0) out vec4 outColor;
 layout(std140, binding = 2) uniform MaterialsUniforms
 {
     int materialCount;
-    Material[64] materials;
+    Material[MAX_MATERIALS] materials;
 };
 
 struct PointLight
@@ -56,7 +60,7 @@ struct PointLight
 layout(std140, binding = 3) uniform PointLightUniforms
 {
     int pointLightsCount;
-    PointLight[32] pointLights;
+    PointLight[MAX_POINT_LIGHTS] pointLights;
 };
 
 layout(std140, binding = 4) uniform DebugUniforms
@@ -65,9 +69,13 @@ layout(std140, binding = 4) uniform DebugUniforms
     bool uDebugNormals;
 };
 
+layout(binding = 1) uniform sampler2D albedoTextures[MAX_MATERIALS];
+
 layout(location = 0) in vec3 vNormal;
 layout(location = 1) in vec2 vUV;
 layout(location = 2) in vec3 vFragPos;
+
+
 
 void main()
 {
@@ -96,9 +104,14 @@ void main()
         diffuseLight += pointLights[i].color*(1/dist)*pointLights[i].power*dot(lightDir, vNormal);
     }
 
-    diffuseLight = max(diffuseLight, vec3(0.02));
+    diffuseLight = max(diffuseLight, vec3(0.2));
 
-    outColor = material.albedo*vec4(diffuseLight, 0.0);
+    vec4 albedo = material.albedo;
 
-    //outColor = uAlbedo;
+    if(material.useAlbedoTexture)
+    {
+        albedo *= texture(albedoTextures[0], vUV);
+    }
+
+    outColor = albedo*vec4(diffuseLight, 1.0);
 }

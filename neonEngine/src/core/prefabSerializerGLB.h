@@ -12,9 +12,9 @@ namespace Neon
 class PrefabSerializerGLB final : public AssetSerializer
 {
 public:
-    Prefab* load(const std::string& filePath) override;
+    void* load(const std::string& filePath) override;
     void serialize(const std::string& filePath) override;
-    Prefab* deserialize(const std::string &filePath) override;
+    void* deserialize(const std::string &filePath) override;
 
 private:
 

@@ -2,8 +2,8 @@
 #include <memory>
 #include <vector>
 
+#include <neonRHI/neonRHI.h>
 #include "core/system.h"
-#include "graphics/api/descriptions/windowCreationOptions.h"
 
 namespace Neon
 {
@@ -16,7 +16,7 @@ namespace Neon
     {
         std::string engineResourcesPath;
         std::string gameResourcesPath;
-        WindowCreationOptions windowOptions;
+        NRHI::WindowCreationOptions windowOptions;
     };
 
     class Engine

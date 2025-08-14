@@ -10,53 +10,65 @@ template <typename T>
 class AssetRef
 {
 public:
-    AssetRef() : cachedAsset(nullptr), handle(0) {};
-    AssetRef(const AssetHandle& handle) : handle(handle) {} // NOLINT(*-explicit-constructor)
-    AssetRef(T* asset) : cachedAsset(asset) {} // NOLINT(*-explicit-constructor)
+    AssetRef() : cachedAsset(nullptr), handle(0)         {  };
+    AssetRef(const AssetHandle& handle) : handle(handle) {  } // NOLINT(*-explicit-constructor)
+    AssetRef(T* asset) : cachedAsset(Ref<T>(asset))      {  } // NOLINT(*-explicit-constructor)
+    AssetRef(Ref<T> asset) : cachedAsset(asset)          {  } // NOLINT(*-explicit-constructor)
 
     T* operator->() const
     {
-        if (cachedAsset == nullptr)
-        {
-            cachedAsset = Engine::getAssetManager().getAsset<T>(handle);
-        }
-        return cachedAsset;
+        updateCachedAsset();
+        return cachedAsset.get();
     }
 
     T& operator*() const
     {
-        if (cachedAsset == nullptr)
-        {
-            cachedAsset = Engine::getAssetManager().getAsset<T>(handle);
-        }
-        return *cachedAsset;
+        updateCachedAsset();
+        return *cachedAsset.get();
+    }
+
+    Ref<T> get() const
+    {
+        updateCachedAsset();
+        return cachedAsset;
+    }
+
+    T* raw() const
+    {
+        updateCachedAsset();
+        return cachedAsset.get();
     }
 
     bool operator==(const AssetHandle& other) const
     {
-        if(cachedAsset == nullptr) cachedAsset = Engine::getAssetManager().getAsset<T>(handle);
+        updateCachedAsset();
         return handle == other;
     }
 
     bool operator!=(const AssetHandle& other) const
     {
-        if(cachedAsset == nullptr) cachedAsset = Engine::getAssetManager().getAsset<T>(handle);
+        updateCachedAsset();
         return handle != other;
     }
 
     bool operator==(const T* other) const
     {
-        if(cachedAsset == nullptr) cachedAsset = Engine::getAssetManager().getAsset<T>(handle);
-        return cachedAsset == other;
+        updateCachedAsset();
+        return cachedAsset.get() == other;
     }
 
     bool operator!=(const T* other) const
     {
-        if(cachedAsset == nullptr) cachedAsset = Engine::getAssetManager().getAsset<T>(handle);
-        return cachedAsset != other;
+        updateCachedAsset();
+        return cachedAsset.get() != other;
     }
 private:
-    mutable T* cachedAsset = nullptr;
+    void updateCachedAsset() const
+    {
+        if(cachedAsset == nullptr) cachedAsset = Engine::getAssetManager().getAsset<T>(handle);
+    }
+
+    mutable Ref<T> cachedAsset = nullptr;
     AssetHandle handle{};
 };
 }

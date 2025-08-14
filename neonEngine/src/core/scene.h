@@ -1,10 +1,9 @@
 #pragma once
-#include "asset/asset.h"
 #include "ecs/world.h"
 
 namespace Neon
 {
-class Scene final : public Asset
+class Scene
 {
 public:
     World& getWorld();

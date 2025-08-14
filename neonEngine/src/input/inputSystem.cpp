@@ -13,6 +13,7 @@ namespace Neon
     {
         if(const auto* keyDownEvent = dynamic_cast<KeyDownEvent*>(event))
         {
+            if(keyDownEvent->isRepeat()) return;
             Input::keyStates[keyDownEvent->getKeycode()].held = true;
             Input::keyStates[keyDownEvent->getKeycode()].pressed = true;
         }else if(const auto* keyUpEvent = dynamic_cast<KeyUpEvent*>(event))

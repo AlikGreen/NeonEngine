@@ -25,3 +25,6 @@
 [submodule "neonEngine/dependencies/gaiaecs"]
 	path = neonEngine/dependencies/gaiaecs
 	url = https://github.com/richardbiely/gaia-ecs.git
+[submodule "neonEngine/dependencies/shaderc"]
+	path = neonEngine/dependencies/shaderc
+	url = https://github.com/google/shaderc.git

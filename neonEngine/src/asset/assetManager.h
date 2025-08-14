@@ -1,6 +1,5 @@
 #pragma once
 
-#include "asset.h"
 #include "assetHandle.h"
 #include <filesystem>
 
@@ -12,7 +11,7 @@ namespace Neon
 class AssetManager
 {
 public:
-    template<DerivesAsset T>
+    template<typename T>
     AssetHandle loadAsset(const std::string& filePath)
     {
         const std::filesystem::path fullPath = getFullPath(filePath);
@@ -23,27 +22,35 @@ public:
         if(!serializers.contains(fileExtension)) return 0;
 
         const auto assetSerializer = serializers.at(fileExtension).get();
-        Asset* asset = assetSerializer->load(fullPath.string());
+        T* asset = static_cast<T*>(assetSerializer->load(fullPath.string()));
 
         AssetHandle handle;
-        assets.emplace(handle, Scope<Asset>(asset));
+        assets.emplace(handle, Ref<T>(asset));
 
         return handle;
     }
 
-    template<DerivesAsset T>
+    template<typename T>
     AssetHandle addAsset(T* asset)
     {
         AssetHandle handle;
-        assets.emplace(handle, Scope<Asset>(asset));
+        assets.emplace(handle, Ref<T>(asset));
         return handle;
     }
 
-    template<DerivesAsset T>
-    T* getAsset(const AssetHandle& assetHandle)
+    template<typename T>
+    AssetHandle addAsset(Ref<T> asset)
+    {
+        AssetHandle handle;
+        assets.emplace(handle, asset);
+        return handle;
+    }
+
+    template<typename T>
+    Ref<T> getAsset(const AssetHandle& assetHandle)
     {
         if(!assetHandle.isValid()) return nullptr;
-        return dynamic_cast<T*>(assets.at(assetHandle).get());
+        return std::static_pointer_cast<T>(assets.at(assetHandle));
     }
 
     template<typename T, typename... Args>
@@ -58,7 +65,7 @@ public:
     }
 private:
     std::unordered_map<std::string, Ref<AssetSerializer>> serializers;
-    std::unordered_map<AssetHandle, Scope<Asset>> assets;
+    std::unordered_map<AssetHandle, Ref<void>> assets;
 
     static std::string getFullPath(const std::string& filePath);
 };

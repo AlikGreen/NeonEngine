@@ -14,7 +14,7 @@ namespace Neon
         vertexBuffer = device->createVertexBuffer();
         indexBuffer = device->createIndexBuffer();
 
-        const Ref<CommandList> cl =  device->createCommandList();
+        const Ref<NRHI::CommandList> cl =  device->createCommandList();
         cl->begin();
 
         cl->reserveBuffer(vertexBuffer, vertices.size() * sizeof(Vertex));

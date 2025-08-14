@@ -1,8 +1,7 @@
 #pragma once
 #include <vector>
 
-#include "api/buffer.h"
-#include "asset/asset.h"
+#include <neonRHI/neonRHI.h>
 #include "glm/glm.hpp"
 
 namespace Neon
@@ -20,7 +19,7 @@ namespace Neon
         uint32_t indexCount;
     };
 
-    class Mesh final : public Asset
+    class Mesh
     {
     public:
         Mesh() = default;
@@ -31,7 +30,7 @@ namespace Neon
         std::vector<uint32_t> indices{};
         std::vector<Primitive> primitives{};
 
-        Ref<Buffer> vertexBuffer = nullptr;
-        Ref<Buffer> indexBuffer = nullptr;
+        Ref<NRHI::Buffer> vertexBuffer = nullptr;
+        Ref<NRHI::Buffer> indexBuffer = nullptr;
     };
 }
