@@ -8,7 +8,7 @@ namespace NRHI
 {
     GraphicsPipelineOGL::GraphicsPipelineOGL(GraphicsPipelineDescription &description) : description(description)
     {
-        shader = std::dynamic_pointer_cast<ShaderOGL>(description.shader);
+        shader = dynamic_cast<ShaderOGL*>(description.shader);
 
         uint32_t offset = 0;
         for (const auto& attr : description.vertexInputState.getVertexAttributes())
@@ -46,7 +46,7 @@ namespace NRHI
             glDisable(GL_DEPTH_TEST);
     }
 
-    Ref<ShaderOGL> GraphicsPipelineOGL::getShader() const
+    ShaderOGL* GraphicsPipelineOGL::getShader() const
     {
         return shader;
     }

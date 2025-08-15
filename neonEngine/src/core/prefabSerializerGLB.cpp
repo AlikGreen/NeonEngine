@@ -297,14 +297,14 @@ namespace Neon
             samplerDescription.wrapMode.y = convertGLTFWrap(sampler.wrapT);
         }
 
-        const Ref<NRHI::Device> device = Engine::getSystem<RenderSystem>()->getDevice();
-        const Ref<NRHI::Texture> tex = device->createTexture(textureDescription);
-        const Ref<NRHI::Sampler> sampler = device->createSampler(samplerDescription);
+        NRHI::Device* device = Engine::getSystem<RenderSystem>()->getDevice();
+        NRHI::Texture* tex = device->createTexture(textureDescription);
+        NRHI::Sampler* sampler = device->createSampler(samplerDescription);
 
         AssetManager& assetManager = Engine::getAssetManager();
 
-        AssetHandle texAsset = assetManager.addAsset(tex);
-        AssetHandle samplerAsset = assetManager.addAsset(sampler);
+        const AssetHandle texAsset = assetManager.addAsset(tex);
+        const AssetHandle samplerAsset = assetManager.addAsset(sampler);
 
         const auto commandList = device->createCommandList();
         commandList->begin();

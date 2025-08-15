@@ -12,9 +12,9 @@ class Window
 public:
   virtual ~Window() = default;
 
-  static Ref<Window> createWindow(const WindowCreationOptions& creationOptions, BackendAPI backendApi = BackendAPI::OpenGL);
+  static Window* createWindow(const WindowCreationOptions& creationOptions, BackendAPI backendApi = BackendAPI::OpenGL);
 
-  virtual Ref<Device> createDevice() = 0;
+  virtual Device* createDevice() = 0;
 
   virtual void run() = 0;
   virtual void close() = 0;

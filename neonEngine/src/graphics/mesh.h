@@ -30,7 +30,7 @@ namespace Neon
         std::vector<uint32_t> indices{};
         std::vector<Primitive> primitives{};
 
-        Ref<NRHI::Buffer> vertexBuffer = nullptr;
-        Ref<NRHI::Buffer> indexBuffer = nullptr;
+        Scope<NRHI::Buffer> vertexBuffer = nullptr;
+        Scope<NRHI::Buffer> indexBuffer = nullptr;
     };
 }

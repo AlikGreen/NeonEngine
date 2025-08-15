@@ -17,6 +17,7 @@ namespace NRHI
         glBindTexture(GL_TEXTURE_2D, handle);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, static_cast<int>(description.numMipmaps-1));
+        glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int>(ConvertOGL::textureFormatToGL(description.format)), static_cast<int>(width), static_cast<int>(height), 0, GL_NONE, ConvertOGL::textureFormatToGLType(description.format), nullptr);
 
         glBindTexture(GL_TEXTURE_2D, 0);
     }
@@ -45,7 +46,6 @@ namespace NRHI
     void TextureOGL::setData(const void *data) const
     {
         glBindTexture(GL_TEXTURE_2D, handle);
-        // ConvertOGL::textureFormatToGL(description.format)
         glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int>(ConvertOGL::textureFormatToGL(description.format)), static_cast<int>(width), static_cast<int>(height), 0, GL_RGBA, ConvertOGL::textureFormatToGLType(description.format), data);
         glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);

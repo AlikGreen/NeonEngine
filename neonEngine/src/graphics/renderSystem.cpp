@@ -28,13 +28,13 @@ namespace Neon
 {
     RenderSystem::RenderSystem(const NRHI::WindowCreationOptions &windowOptions)
     {
-    	window = NRHI::Window::createWindow(windowOptions);
+    	window = Scope<NRHI::Window>(NRHI::Window::createWindow(windowOptions));
     }
 
     void RenderSystem::preStartup()
     {
     	window->run();
-    	device = window->createDevice();
+    	device = Scope<NRHI::Device>(window->createDevice());
 
 	    const auto shaderPath = "C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/triangle.glsl";
 	    const auto shader = device->createShaderFromSource(File::readFileText(shaderPath), shaderPath);
@@ -59,15 +59,15 @@ namespace Neon
     	pipelineDescription.targetsDescription = targetsDesc;
     	pipelineDescription.depthState = depthState;
 
-    	pipeline = device->createGraphicsPipeline(pipelineDescription);
+    	pipeline = Scope<NRHI::GraphicsPipeline>(device->createGraphicsPipeline(pipelineDescription));
 
-    	commandList = device->createCommandList();
+    	commandList = Scope<NRHI::CommandList>(device->createCommandList());
 
-    	cameraUniformBuffer      = device->createUniformBuffer();
-    	modelUniformBuffer       = device->createUniformBuffer();
-    	materialsUniformBuffer    = device->createUniformBuffer();
-    	pointLightsUniformBuffer = device->createUniformBuffer();
-    	debugUniformBuffer       = device->createUniformBuffer();
+    	cameraUniformBuffer      = Scope<NRHI::Buffer>(device->createUniformBuffer());
+    	modelUniformBuffer       = Scope<NRHI::Buffer>(device->createUniformBuffer());
+    	materialsUniformBuffer   = Scope<NRHI::Buffer>(device->createUniformBuffer());
+    	pointLightsUniformBuffer = Scope<NRHI::Buffer>(device->createUniformBuffer());
+    	debugUniformBuffer       = Scope<NRHI::Buffer>(device->createUniformBuffer());
 
     	DebugUniforms debugUniforms{};
     	debugUniforms.debugUvs = false;
@@ -75,15 +75,15 @@ namespace Neon
 
     	commandList->begin();
 
-    	commandList->reserveBuffer(cameraUniformBuffer, sizeof(CameraUniforms));
-    	commandList->reserveBuffer(modelUniformBuffer, sizeof(MeshUniforms));
-    	commandList->reserveBuffer(materialsUniformBuffer, sizeof(MaterialsUniforms));
-    	commandList->reserveBuffer(pointLightsUniformBuffer, sizeof(PointLightUniforms));
+    	commandList->reserveBuffer(cameraUniformBuffer.get()     , sizeof(CameraUniforms));
+    	commandList->reserveBuffer(modelUniformBuffer.get()      , sizeof(MeshUniforms));
+    	commandList->reserveBuffer(materialsUniformBuffer.get()  , sizeof(MaterialsUniforms));
+    	commandList->reserveBuffer(pointLightsUniformBuffer.get(), sizeof(PointLightUniforms));
 
-    	commandList->reserveBuffer(debugUniformBuffer, sizeof(DebugUniforms));
-    	commandList->updateBuffer(debugUniformBuffer, debugUniforms);
+    	commandList->reserveBuffer(debugUniformBuffer.get(), sizeof(DebugUniforms));
+    	commandList->updateBuffer(debugUniformBuffer.get(), debugUniforms);
 
-		device->submit(commandList);
+		device->submit(commandList.get());
     }
 
     void RenderSystem::render()
@@ -98,7 +98,7 @@ namespace Neon
     	commandList->begin();
 
     	commandList->setFrameBuffer(device->getSwapChainFrameBuffer());
-        commandList->setPipeline(pipeline);
+        commandList->setPipeline(pipeline.get());
 
     	commandList->clearColorTarget(0, camera.bgColor);
     	commandList->clearDepthStencil(1.0f);
@@ -112,10 +112,10 @@ namespace Neon
 			camera.getProjectionMatrix(),
 		};
 
-		commandList->updateBuffer(cameraUniformBuffer, cameraMatrices);
-     	commandList->setUniformBuffer("CameraUniforms", cameraUniformBuffer);
+		commandList->updateBuffer(cameraUniformBuffer.get(), cameraMatrices);
+     	commandList->setUniformBuffer("CameraUniforms", cameraUniformBuffer.get());
 
-    	commandList->setUniformBuffer("DebugUniforms", debugUniformBuffer);
+    	commandList->setUniformBuffer("DebugUniforms", debugUniformBuffer.get());
 
     	auto meshRenderers = world.getComponents<MeshRenderer, Transform>();
     	auto pointLights = world.getComponents<PointLight, Transform>();
@@ -138,27 +138,27 @@ namespace Neon
 
     	pointLightUniforms.pointLightsCount = i;
 
-    	commandList->updateBuffer(pointLightsUniformBuffer, pointLightUniforms);
-    	commandList->setUniformBuffer("PointLightUniforms", pointLightsUniformBuffer);
+    	commandList->updateBuffer(pointLightsUniformBuffer.get(), pointLightUniforms);
+    	commandList->setUniformBuffer("PointLightUniforms", pointLightsUniformBuffer.get());
 
      	for (auto[entity, meshRenderer, transform] : meshRenderers)
      	{
 			 renderMesh(entity, meshRenderer);
      	}
 
-        device->submit(commandList);
+        device->submit(commandList.get());
     	device->swapBuffers();
     }
 
 
-    Ref<NRHI::Device> RenderSystem::getDevice() const
+    NRHI::Device* RenderSystem::getDevice() const
     {
-    	return device;
+    	return device.get();
     }
 
-    Ref<NRHI::Window> RenderSystem::getWindow() const
+    NRHI::Window* RenderSystem::getWindow() const
     {
-    	return window;
+    	return window.get();
     }
 
     void RenderSystem::renderMesh(const EntityID entity, const MeshRenderer& meshRenderer) const
@@ -172,8 +172,8 @@ namespace Neon
     		modelMatrix
 		};
 
-    	commandList->updateBuffer(modelUniformBuffer, modelUniforms);
-    	commandList->setUniformBuffer("ModelUniforms", modelUniformBuffer);
+    	commandList->updateBuffer(modelUniformBuffer.get(), modelUniforms);
+    	commandList->setUniformBuffer("ModelUniforms", modelUniformBuffer.get());
 
 	    constexpr int MAX_MATERIALS = 64;
 	    const int materialsInUse = std::min(static_cast<int>(meshRenderer.materials.size()), MAX_MATERIALS);
@@ -188,8 +188,8 @@ namespace Neon
 			if(mat->albedoTexture != nullptr)
 			{
 				useAlbedoTexture = true;
-				commandList->setTexture("albedoTextures", i, mat->albedoTexture->getTexture());
-				commandList->setSampler("albedoTextures", i, mat->albedoTexture->getSampler());
+				commandList->setTexture("albedoTextures", i, mat->albedoTexture->getTexture().get());
+				commandList->setSampler("albedoTextures", i, mat->albedoTexture->getSampler().get());
 			}
 
 		    const MaterialUniforms materialUniforms =
@@ -204,11 +204,11 @@ namespace Neon
     		materialsUniforms.count = i+1;
     	}
 
-    	commandList->updateBuffer(materialsUniformBuffer, materialsUniforms);
-    	commandList->setUniformBuffer("MaterialsUniforms", materialsUniformBuffer);
+    	commandList->updateBuffer(materialsUniformBuffer.get(), materialsUniforms);
+    	commandList->setUniformBuffer("MaterialsUniforms", materialsUniformBuffer.get());
 
-    	commandList->setVertexBuffer(0, meshRenderer.mesh->vertexBuffer);
-    	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer, NRHI::IndexFormat::UInt32);
+    	commandList->setVertexBuffer(0, meshRenderer.mesh->vertexBuffer.get());
+    	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer.get(), NRHI::IndexFormat::UInt32);
     	commandList->drawIndexed(meshRenderer.mesh->indices.size());
     }
 

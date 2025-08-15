@@ -10,7 +10,7 @@ class WindowOGL final : public Window
 {
 public:
     explicit WindowOGL(const WindowCreationOptions& creationOptions);
-    Ref<Device> createDevice() override;
+    Device* createDevice() override;
 
     void run() override;
     void close() override;

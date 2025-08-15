@@ -39,7 +39,7 @@ namespace NRHI
         return {module.cbegin(), module.cend()};
     }
 
-    Ref<Shader> Device::createShaderFromSource(const std::string &source, const std::string &filepath)
+    Shader* Device::createShaderFromSource(const std::string &source, const std::string &filepath)
     {
         std::unordered_map<ShaderType, std::string> shaderSources;
         std::string common;

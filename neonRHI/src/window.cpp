@@ -4,12 +4,12 @@
 
 namespace NRHI
 {
-    Ref<Window> Window::createWindow(const WindowCreationOptions& creationOptions, const BackendAPI backendApi)
+    Window* Window::createWindow(const WindowCreationOptions& creationOptions, const BackendAPI backendApi)
     {
         switch (backendApi)
         {
             case BackendAPI::OpenGL:
-                return makeRef<WindowOGL>(creationOptions);
+                return new WindowOGL(creationOptions);
         }
 
         return nullptr;

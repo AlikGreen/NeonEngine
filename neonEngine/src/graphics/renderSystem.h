@@ -62,21 +62,21 @@ namespace Neon
         void preUpdate() override;
         void render() override;
 
-        [[nodiscard]] Ref<NRHI::Device> getDevice() const;
-        [[nodiscard]] Ref<NRHI::Window> getWindow() const;
+        [[nodiscard]] NRHI::Device* getDevice() const;
+        [[nodiscard]] NRHI::Window* getWindow() const;
     private:
         void renderMesh(EntityID entity, const MeshRenderer& meshRenderer) const;
 
-        Ref<NRHI::Window> window{};
-        Ref<NRHI::Device> device{};
+        Scope<NRHI::Window> window{};
+        Scope<NRHI::Device> device{};
 
-        Ref<NRHI::GraphicsPipeline> pipeline{};
-        Ref<NRHI::CommandList> commandList{};
+        Scope<NRHI::GraphicsPipeline> pipeline{};
+        Scope<NRHI::CommandList> commandList{};
 
-        Ref<NRHI::Buffer> cameraUniformBuffer{};
-        Ref<NRHI::Buffer> modelUniformBuffer{};
-        Ref<NRHI::Buffer> debugUniformBuffer{};
-        Ref<NRHI::Buffer> materialsUniformBuffer{};
-        Ref<NRHI::Buffer> pointLightsUniformBuffer{};
+        Scope<NRHI::Buffer> cameraUniformBuffer{};
+        Scope<NRHI::Buffer> modelUniformBuffer{};
+        Scope<NRHI::Buffer> debugUniformBuffer{};
+        Scope<NRHI::Buffer> materialsUniformBuffer{};
+        Scope<NRHI::Buffer> pointLightsUniformBuffer{};
     };
 }

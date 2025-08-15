@@ -22,12 +22,12 @@ public:
     [[nodiscard]] std::vector<VertexAttributeOGL> getVertexAttributes() const;
 
     void bind() const;
-    [[nodiscard]] Ref<ShaderOGL> getShader() const;
+    [[nodiscard]] ShaderOGL* getShader() const;
 
     GLuint vao{};
 private:
     std::vector<VertexAttributeOGL> vertexAttributesOGL;
-    Ref<ShaderOGL> shader;
+    ShaderOGL* shader;
     GraphicsPipelineDescription description;
 };
 }

@@ -79,9 +79,9 @@ namespace NRHI
 
     WindowOGL::WindowOGL(const WindowCreationOptions &creationOptions) : creationOptions(creationOptions) { }
 
-    Ref<Device> WindowOGL::createDevice()
+    Device* WindowOGL::createDevice()
     {
-        return makeRef<DeviceOGL>(this);
+        return new DeviceOGL(this);
     }
 
     void WindowOGL::run()

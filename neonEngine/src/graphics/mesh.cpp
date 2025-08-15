@@ -11,18 +11,18 @@ namespace Neon
     {
         const auto device = Engine::getSystem<RenderSystem>()->getDevice();
 
-        vertexBuffer = device->createVertexBuffer();
-        indexBuffer = device->createIndexBuffer();
+        vertexBuffer = Scope<NRHI::Buffer>(device->createVertexBuffer());
+        indexBuffer  = Scope<NRHI::Buffer>(device->createIndexBuffer());
 
-        const Ref<NRHI::CommandList> cl =  device->createCommandList();
+        const Scope<NRHI::CommandList> cl =  Scope<NRHI::CommandList>(device->createCommandList());
         cl->begin();
 
-        cl->reserveBuffer(vertexBuffer, vertices.size() * sizeof(Vertex));
-        cl->updateBuffer(vertexBuffer, vertices);
+        cl->reserveBuffer(vertexBuffer.get(), vertices.size() * sizeof(Vertex));
+        cl->updateBuffer(vertexBuffer.get(), vertices);
 
-        cl->reserveBuffer(indexBuffer, indices.size() * sizeof(uint32_t));
-        cl->updateBuffer(indexBuffer, indices);
+        cl->reserveBuffer(indexBuffer.get(), indices.size() * sizeof(uint32_t));
+        cl->updateBuffer(indexBuffer.get(), indices);
 
-        device->submit(cl);
+        device->submit(cl.get());
     }
 }

@@ -24,57 +24,57 @@ namespace NRHI
         commands.clear();
     }
 
-    void CommandListOGL::setUniformBuffer(std::string_view name, const Ref<Buffer> &buffer)
+    void CommandListOGL::setUniformBuffer(const std::string& name, Buffer* buffer)
     {
         commands.emplace_back([buffer, name, this]
         {
-            const uint32_t binding = getPipeline()->getShader()->getUBOLocation(name.data());
-            const auto* uniformBufferOGL = dynamic_cast<BufferOGL*>(buffer.get());
+            const uint32_t binding = getPipeline()->getShader()->getUBOLocation(name);
+            const auto* uniformBufferOGL = dynamic_cast<BufferOGL*>(buffer);
             // Assert::check(uniformBufferOGL->getTarget() == GL_UNIFORM_BUFFER, "Buffer being set as Uniform Buffer was not created as a Uniform Buffer");
             uniformBufferOGL->bindBase(binding);
         });
     }
 
-    void CommandListOGL::setTexture(std::string_view name, uint32_t offset, const Ref<Texture> &texture)
+    void CommandListOGL::setTexture(const std::string& name, uint32_t offset, Texture* texture)
     {
         commands.emplace_back([name, texture, this, offset]
         {
-            const uint32_t binding = getPipeline()->getShader()->getSamplerLocation(name.data()) + offset;
-            dynamic_cast<TextureOGL*>(texture.get())->bind(binding);
+            const uint32_t binding = getPipeline()->getShader()->getSamplerLocation(name) + offset;
+            dynamic_cast<TextureOGL*>(texture)->bind(binding);
         });
     }
 
-    void CommandListOGL::setSampler(const std::string_view name, const uint32_t offset, const Ref<Sampler> &sampler)
+    void CommandListOGL::setSampler(const std::string& name, const uint32_t offset, Sampler* sampler)
     {
         commands.emplace_back([name, sampler, this, offset]
         {
-            const uint32_t binding = getPipeline()->getShader()->getSamplerLocation(name.data()) + offset;
-            dynamic_cast<SamplerOGL*>(sampler.get())->bind(binding);
+            const uint32_t binding = getPipeline()->getShader()->getSamplerLocation(name) + offset;
+            dynamic_cast<SamplerOGL*>(sampler)->bind(binding);
         });
     }
 
-    void CommandListOGL::setPipeline(const Ref<GraphicsPipeline> pipeline)
+    void CommandListOGL::setPipeline(GraphicsPipeline* pipeline)
     {
         commands.emplace_back([this, pipeline]
         {
-            this->pipeline = dynamic_cast<GraphicsPipelineOGL*>(pipeline.get());
+            this->pipeline = dynamic_cast<GraphicsPipelineOGL*>(pipeline);
             this->pipeline->bind();
         });
     }
 
-    void CommandListOGL::setFrameBuffer(const Ref<FrameBuffer> frameBuffer)
+    void CommandListOGL::setFrameBuffer(FrameBuffer* frameBuffer)
     {
         commands.emplace_back([frameBuffer]
         {
-            dynamic_cast<FrameBufferOGL*>(frameBuffer.get())->bind();
+            dynamic_cast<FrameBufferOGL*>(frameBuffer)->bind();
         });
     }
 
-    void CommandListOGL::setVertexBuffer(const uint32_t index, const Ref<Buffer> vertexBuffer)
+    void CommandListOGL::setVertexBuffer(const uint32_t index, Buffer* vertexBuffer)
     {
         commands.emplace_back([this, vertexBuffer]
         {
-            const auto* oglVertexBuffer = dynamic_cast<BufferOGL*>(vertexBuffer.get());
+            const auto* oglVertexBuffer = dynamic_cast<BufferOGL*>(vertexBuffer);
             // Assert::check(oglVertexBuffer->getTarget() == GL_ARRAY_BUFFER, "Buffer being set as Vertex Buffer was not created as a Vertex Buffer");
             oglVertexBuffer->bind();
 
@@ -93,11 +93,11 @@ namespace NRHI
         });
     }
 
-    void CommandListOGL::setIndexBuffer(const Ref<Buffer> indexBuffer, const IndexFormat indexFormat)
+    void CommandListOGL::setIndexBuffer(Buffer* indexBuffer, const IndexFormat indexFormat)
     {
         commands.emplace_back([indexBuffer]
         {
-            const auto* indexBufferOGL = dynamic_cast<BufferOGL*>(indexBuffer.get());
+            const auto* indexBufferOGL = dynamic_cast<BufferOGL*>(indexBuffer);
             // Assert::check(indexBufferOGL->getTarget() == GL_ELEMENT_ARRAY_BUFFER, "Buffer being set as Index Buffer was not created as an Index Buffer");
             indexBufferOGL->bind();
         });
@@ -123,20 +123,20 @@ namespace NRHI
         });
     }
 
-    void CommandListOGL::updateTexture(const Ref<Texture> &texture, const void *data)
+    void CommandListOGL::updateTexture(Texture* texture, const void *data)
     {
         commands.emplace_back([texture, data]
         {
-            const auto* textureOGL = dynamic_cast<TextureOGL*>(texture.get());
+            const auto* textureOGL = dynamic_cast<TextureOGL*>(texture);
             textureOGL->setData(data);
         });
     }
 
-    void CommandListOGL::reserveBuffer(const Ref<Buffer> &buffer, size_t size)
+    void CommandListOGL::reserveBuffer(Buffer* buffer, size_t size)
     {
         commands.emplace_back([buffer, size]
         {
-            auto* bufferOGL = dynamic_cast<BufferOGL*>(buffer.get());
+            auto* bufferOGL = dynamic_cast<BufferOGL*>(buffer);
             bufferOGL->reserveSpace(size);
         });
     }
@@ -159,13 +159,13 @@ namespace NRHI
         });
     }
 
-    void CommandListOGL::updateBufferImpl(const Ref<Buffer> &buffer, void *data, uint32_t size)
+    void CommandListOGL::updateBufferImpl(Buffer* buffer, void *data, uint32_t size)
     {
         std::vector dataCopy(static_cast<uint8_t*>(data), static_cast<uint8_t*>(data) + size);
 
         commands.emplace_back([buffer, dataCopy = std::move(dataCopy), size]
         {
-            const auto* bufferOGL = dynamic_cast<BufferOGL*>(buffer.get());
+            const auto* bufferOGL = dynamic_cast<BufferOGL*>(buffer);
             bufferOGL->uploadData(dataCopy.data(), size);
         });
     }

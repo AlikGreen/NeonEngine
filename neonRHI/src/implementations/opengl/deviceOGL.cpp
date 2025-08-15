@@ -17,44 +17,44 @@ namespace NRHI
 
     }
 
-    Ref<GraphicsPipeline> DeviceOGL::createGraphicsPipeline(GraphicsPipelineDescription graphicsPipelineDescription)
+    GraphicsPipeline* DeviceOGL::createGraphicsPipeline(GraphicsPipelineDescription graphicsPipelineDescription)
     {
-        return makeRef<GraphicsPipelineOGL>(graphicsPipelineDescription);
+        return new GraphicsPipelineOGL(graphicsPipelineDescription);
     }
 
-    Ref<CommandList> DeviceOGL::createCommandList()
+    CommandList* DeviceOGL::createCommandList()
     {
-        return makeRef<CommandListOGL>();
+        return new CommandListOGL();
     }
 
-    Ref<Buffer> DeviceOGL::createIndexBuffer()
+    Buffer* DeviceOGL::createIndexBuffer()
     {
-        return makeRef<BufferOGL>(GL_ELEMENT_ARRAY_BUFFER);
+        return new BufferOGL(GL_ELEMENT_ARRAY_BUFFER);
     }
 
-    Ref<Buffer> DeviceOGL::createUniformBuffer()
+    Buffer* DeviceOGL::createUniformBuffer()
     {
-        return makeRef<BufferOGL>(GL_UNIFORM_BUFFER);
+        return new BufferOGL(GL_UNIFORM_BUFFER);
     }
 
-    Ref<Buffer> DeviceOGL::createVertexBuffer()
+    Buffer* DeviceOGL::createVertexBuffer()
     {
-        return makeRef<BufferOGL>(GL_ARRAY_BUFFER);
+        return new BufferOGL(GL_ARRAY_BUFFER);
     }
 
-    Ref<Texture> DeviceOGL::createTexture(TextureDescription textureDescription)
+    Texture* DeviceOGL::createTexture(TextureDescription textureDescription)
     {
-        return makeRef<TextureOGL>(textureDescription);
+        return new TextureOGL(textureDescription);
     }
 
-    Ref<Sampler> DeviceOGL::createSampler(SamplerDescription samplerDescription)
+    Sampler* DeviceOGL::createSampler(SamplerDescription samplerDescription)
     {
-        return makeRef<SamplerOGL>(samplerDescription);
+        return new SamplerOGL(samplerDescription);
     }
 
-    void DeviceOGL::submit(const Ref<CommandList> commandList)
+    void DeviceOGL::submit(CommandList* commandList)
     {
-        dynamic_cast<CommandListOGL*>(commandList.get())->executeCommands();
+        dynamic_cast<CommandListOGL*>(commandList)->executeCommands();
     }
 
     void DeviceOGL::swapBuffers()
@@ -62,15 +62,14 @@ namespace NRHI
         window->swapBuffers();
     }
 
-    Ref<FrameBuffer> DeviceOGL::getSwapChainFrameBuffer()
+    FrameBuffer* DeviceOGL::getSwapChainFrameBuffer()
     {
-        return makeRef<FrameBufferOGL>(0);
+        return new FrameBufferOGL(0);
     }
 
 
-    Ref<Shader> DeviceOGL::createShaderFromSpirvImpl(
-        std::unordered_map<ShaderType, std::vector<uint32_t>> shadersSpirv)
+    Shader* DeviceOGL::createShaderFromSpirvImpl(std::unordered_map<ShaderType, std::vector<uint32_t>> shadersSpirv)
     {
-        return makeRef<ShaderOGL>(shadersSpirv);
+        return new ShaderOGL(shadersSpirv);
     }
 }

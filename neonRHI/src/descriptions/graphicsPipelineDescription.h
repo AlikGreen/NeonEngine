@@ -12,7 +12,7 @@ namespace NRHI
 {
     struct GraphicsPipelineDescription
     {
-        Ref<Shader> shader = nullptr;
+        Shader* shader = nullptr;
         PrimitiveType primitiveType = PrimitiveType::TriangleList;
         FillMode fillMode = FillMode::Fill;
         CullMode cullMode = CullMode::None;
