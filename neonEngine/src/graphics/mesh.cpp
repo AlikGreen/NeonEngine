@@ -14,7 +14,7 @@ namespace Neon
         vertexBuffer = Scope<NRHI::Buffer>(device->createVertexBuffer());
         indexBuffer  = Scope<NRHI::Buffer>(device->createIndexBuffer());
 
-        const Scope<NRHI::CommandList> cl =  Scope<NRHI::CommandList>(device->createCommandList());
+        const auto cl =  Scope<NRHI::CommandList>(device->createCommandList());
         cl->begin();
 
         cl->reserveBuffer(vertexBuffer.get(), vertices.size() * sizeof(Vertex));

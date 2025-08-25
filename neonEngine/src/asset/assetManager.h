@@ -24,8 +24,8 @@ public:
         const auto assetSerializer = serializers.at(fileExtension).get();
         T* asset = static_cast<T*>(assetSerializer->load(fullPath.string()));
 
-        AssetHandle handle;
-        assets.emplace(handle, Ref<T>(asset));
+        AssetHandle handle = AssetHandle::create();
+        assets.emplace(handle, asset);
 
         return handle;
     }
@@ -33,24 +33,16 @@ public:
     template<typename T>
     AssetHandle addAsset(T* asset)
     {
-        AssetHandle handle;
-        assets.emplace(handle, Ref<T>(asset));
-        return handle;
-    }
-
-    template<typename T>
-    AssetHandle addAsset(Ref<T> asset)
-    {
-        AssetHandle handle;
+        AssetHandle handle = AssetHandle::create();
         assets.emplace(handle, asset);
         return handle;
     }
 
     template<typename T>
-    Ref<T> getAsset(const AssetHandle& assetHandle)
+    T* getAsset(const AssetHandle& assetHandle)
     {
         if(!assetHandle.isValid()) return nullptr;
-        return std::static_pointer_cast<T>(assets.at(assetHandle));
+        return static_cast<T*>(assets.at(assetHandle));
     }
 
     template<typename T, typename... Args>
@@ -65,7 +57,7 @@ public:
     }
 private:
     std::unordered_map<std::string, Ref<AssetSerializer>> serializers;
-    std::unordered_map<AssetHandle, Ref<void>> assets;
+    std::unordered_map<AssetHandle, void*> assets;
 
     static std::string getFullPath(const std::string& filePath);
 };

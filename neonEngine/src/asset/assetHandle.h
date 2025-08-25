@@ -7,7 +7,7 @@ namespace Neon
     class AssetHandle
     {
     public:
-        AssetHandle() : handle(generateRandomHandle()) {}
+        AssetHandle() : handle(0) {}
         AssetHandle(const uint64_t handle) : handle(handle) {}
         AssetHandle(const AssetHandle& other) = default;
 
@@ -29,6 +29,11 @@ namespace Neon
         [[nodiscard]] bool isValid() const
         {
             return handle != 0;
+        }
+
+        static AssetHandle create()
+        {
+            return generateRandomHandle();
         }
     private:
         uint64_t handle;

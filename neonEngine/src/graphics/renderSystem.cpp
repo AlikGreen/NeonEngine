@@ -185,11 +185,12 @@ namespace Neon
     		// bind texture somewhere here
     		int useAlbedoTexture = false;
 		    const AssetRef<Material> mat = meshRenderer.getMaterial();
-			if(mat->albedoTexture != nullptr)
+    		auto albedoTexture = mat->albedoTexture;
+			if(albedoTexture != nullptr)
 			{
 				useAlbedoTexture = true;
-				commandList->setTexture("albedoTextures", i, mat->albedoTexture->getTexture().get());
-				commandList->setSampler("albedoTextures", i, mat->albedoTexture->getSampler().get());
+				commandList->setTexture("albedoTextures", i, mat->albedoTexture->getTexture());
+				commandList->setSampler("albedoTextures", i, mat->albedoTexture->getSampler());
 			}
 
 		    const MaterialUniforms materialUniforms =

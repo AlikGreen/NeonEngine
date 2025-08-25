@@ -26,7 +26,8 @@ namespace Neon
         rootEntity.addComponent<PrefabComponent>();
 
         auto materials = processMaterials(model);
-        processNodes(model, *prefab, materials);
+        const AssetRef<Material> defaultMaterial = Engine::getAssetManager().addAsset(new Material());
+        processNodes(model, *prefab, materials, defaultMaterial);
 
         return prefab.release();
     }
@@ -72,16 +73,14 @@ namespace Neon
         return materials;
     }
 
-    void PrefabSerializerGLB::processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetHandle>& materials)
+    void PrefabSerializerGLB::processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetHandle>& materials, const AssetRef<Material>& defaultMaterial)
     {
-        const AssetRef<Material> defaultMaterial = Engine::getAssetManager().addAsset(new Material());
-
         for (const auto& node : model.nodes)
         {
             if (node.mesh < 0) continue;
 
             const tinygltf::Mesh& mesh = model.meshes[node.mesh];
-            auto nMesh = createMesh(mesh, model);
+            const auto nMesh = createMesh(mesh, model);
             if (!nMesh) continue;
 
             const auto meshHandle = Engine::getAssetManager().addAsset(nMesh);
@@ -126,9 +125,9 @@ namespace Neon
         }
         else
         {
-            for (const auto& material : materials)
+            for (const auto& primitive : mesh.primitives)
             {
-                meshRenderer.materials.emplace_back(material);
+                meshRenderer.materials.emplace_back(materials[primitive.material]);
             }
         }
     }

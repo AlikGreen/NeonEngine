@@ -1,20 +1,13 @@
 cmake_minimum_required(VERSION 3.29)
 project(neonEngine)
-
 set(CMAKE_CXX_STANDARD 23)
-
-#add_subdirectory(dependencies/glm)
-#add_subdirectory(dependencies/spirv-cross)
-#add_subdirectory(dependencies/shaderc)
-#add_subdirectory(dependencies/glfw)
-#add_subdirectory(dependencies/glad)
 
 set(TINYGLTF_HEADER_ONLY OFF CACHE BOOL "Build tinygltf as a library" FORCE)
 add_subdirectory(dependencies/tinygltf)
 
 add_subdirectory(dependencies/miniaudio)
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/../neonRHI ${CMAKE_BINARY_DIR}/neonRHI)
+add_subdirectory(dependencies/neonRHI)
 
 file(GLOB_RECURSE
         SRC_FILES
@@ -23,9 +16,7 @@ file(GLOB_RECURSE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
 )
 
-add_library(neonEngine STATIC ${SRC_FILES}
-        src/graphics/image.cpp
-        src/graphics/image.h)
+add_library(neonEngine STATIC ${SRC_FILES})
 
 target_link_options(neonEngine
         INTERFACE

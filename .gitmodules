@@ -4,27 +4,18 @@
 [submodule "neonEngine/dependencies/SDL3"]
 	path = neonEngine/dependencies/SDL3
 	url = https://github.com/libsdl-org/SDL.git
-[submodule "neonEngine/dependencies/glm"]
-	path = neonEngine/dependencies/glm
-	url = https://github.com/g-truc/glm.git
-[submodule "neonEngine/dependencies/spirv-cross"]
-	path = neonEngine/dependencies/spirv-cross
-	url = https://github.com/KhronosGroup/SPIRV-Cross.git
 [submodule "neonEngine/dependencies/tinygltf"]
 	path = neonEngine/dependencies/tinygltf
 	url = https://github.com/syoyo/tinygltf.git
 [submodule "neonEngine/dependencies/miniaudio"]
 	path = neonEngine/dependencies/miniaudio
 	url = https://github.com/mackron/miniaudio.git
-[submodule "neonEngine/dependencies/glfw"]
-	path = neonEngine/dependencies/glfw
-	url = https://github.com/glfw/glfw.git
 [submodule "neonEngine/dependencies/entt"]
 	path = neonEngine/dependencies/entt
 	url = https://github.com/skypjack/entt.git
 [submodule "neonEngine/dependencies/gaiaecs"]
 	path = neonEngine/dependencies/gaiaecs
 	url = https://github.com/richardbiely/gaia-ecs.git
-[submodule "neonEngine/dependencies/shaderc"]
-	path = neonEngine/dependencies/shaderc
-	url = https://github.com/google/shaderc.git
+[submodule "neonEngine/dependencies/neonrhi"]
+	path = neonEngine/dependencies/neonrhi
+	url = https://github.com/AlikGreen/NeonRHI.git
