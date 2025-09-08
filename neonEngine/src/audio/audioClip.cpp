@@ -1,7 +1,5 @@
 #include "audioClip.h"
 
-#include "debug/assert.h"
-#include "debug/logger.h"
 
 namespace Neon
 {

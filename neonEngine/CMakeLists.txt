@@ -3,11 +3,11 @@ project(neonEngine)
 set(CMAKE_CXX_STANDARD 23)
 
 set(TINYGLTF_HEADER_ONLY OFF CACHE BOOL "Build tinygltf as a library" FORCE)
-add_subdirectory(dependencies/tinygltf)
-
-add_subdirectory(dependencies/miniaudio)
-
-add_subdirectory(dependencies/neonRHI)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/tinygltf)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/miniaudio)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/stb)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/neonRHI)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/neonLog)
 
 file(GLOB_RECURSE
         SRC_FILES
@@ -31,5 +31,4 @@ set(CMAKE_PCH_INSTANTIATE_TEMPLATES ON)
 target_precompile_headers(neonEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/common.h")
 
 target_include_directories(neonEngine PUBLIC src/ include/)
-#target_link_libraries(neonEngine PUBLIC glfw tinygltf glm::glm shaderc spirv-cross-c miniaudio glad)
-target_link_libraries(neonEngine PUBLIC glfw tinygltf miniaudio neonRHI)
+target_link_libraries(neonEngine PUBLIC glfw tinygltf miniaudio neonRHI neonLog)

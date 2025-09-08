@@ -2,7 +2,7 @@
 #include "asset/assetManager.h"
 #include "core/coreSystem.h"
 #include "core/engine.h"
-#include "core/prefabSerializerGLB.h"
+#include "asset/serializers/prefabSerializerGLB.h"
 #include "graphics/renderSystem.h"
 #include "input/inputSystem.h"
 

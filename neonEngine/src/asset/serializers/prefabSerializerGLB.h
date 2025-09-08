@@ -2,7 +2,7 @@
 #include <tiny_gltf.h>
 
 #include "graphics/mesh.h"
-#include "prefab.h"
+#include "core/prefab.h"
 #include "asset/assetHandle.h"
 #include "asset/assetSerializer.h"
 #include "graphics/components/material.h"

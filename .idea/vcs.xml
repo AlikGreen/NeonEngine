@@ -3,17 +3,11 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/miniaudio" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonLog" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonLog/dependencies/spdlog" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/glfw" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/glm" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/shaderc" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/shaderc/third_party/abseil_cpp" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/shaderc/third_party/effcee" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/shaderc/third_party/glslang" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/shaderc/third_party/googletest" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/shaderc/third_party/re2" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/shaderc/third_party/spirv-headers" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/shaderc/third_party/spirv-tools" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/spirv-cross" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/tinygltf" vcs="Git" />
   </component>

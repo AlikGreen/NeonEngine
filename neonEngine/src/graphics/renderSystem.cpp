@@ -10,7 +10,6 @@
 #include "core/engine.h"
 #include "core/eventManager.h"
 #include "core/sceneManager.h"
-#include "debug/logger.h"
 #include "ecs/components/transformComponent.h"
 #include "events/quitEvent.h"
 #include "events/windowResizeEvent.h"
@@ -26,48 +25,48 @@
 
 namespace Neon
 {
-    RenderSystem::RenderSystem(const NRHI::WindowCreationOptions &windowOptions)
+    RenderSystem::RenderSystem(const RHI::WindowCreationOptions &windowOptions)
     {
-    	window = Scope<NRHI::Window>(NRHI::Window::createWindow(windowOptions));
+    	window = Scope<RHI::Window>(RHI::Window::createWindow(windowOptions));
     }
 
     void RenderSystem::preStartup()
     {
     	window->run();
-    	device = Scope<NRHI::Device>(window->createDevice());
+    	device = Scope<RHI::Device>(window->createDevice());
 
 	    const auto shaderPath = "C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/triangle.glsl";
 	    const auto shader = device->createShaderFromSource(File::readFileText(shaderPath), shaderPath);
     	shader->compile();
 
-    	NRHI::VertexInputState vertexInputState{};
+    	RHI::VertexInputState vertexInputState{};
     	vertexInputState.addVertexBuffer<Vertex>(0);
     	vertexInputState.addVertexAttribute<glm::vec3>(0, 0);
     	vertexInputState.addVertexAttribute<glm::vec3>(0, 1);
     	vertexInputState.addVertexAttribute<glm::vec2>(0, 2);
 
-    	NRHI::DepthState depthState{};
+    	RHI::DepthState depthState{};
     	depthState.hasDepthTarget = true;
     	depthState.enableDepthTest = true;
 
-	    const NRHI::RenderTargetsDescription targetsDesc{};
+	    const RHI::RenderTargetsDescription targetsDesc{};
 
-    	NRHI::GraphicsPipelineDescription pipelineDescription{};
+    	RHI::GraphicsPipelineDescription pipelineDescription{};
     	pipelineDescription.shader = shader;
     	pipelineDescription.vertexInputState = vertexInputState;
-    	pipelineDescription.cullMode = NRHI::CullMode::None;
+    	pipelineDescription.cullMode = RHI::CullMode::None;
     	pipelineDescription.targetsDescription = targetsDesc;
     	pipelineDescription.depthState = depthState;
 
-    	pipeline = Scope<NRHI::GraphicsPipeline>(device->createGraphicsPipeline(pipelineDescription));
+    	pipeline = Scope<RHI::GraphicsPipeline>(device->createGraphicsPipeline(pipelineDescription));
 
-    	commandList = Scope<NRHI::CommandList>(device->createCommandList());
+    	commandList = Scope<RHI::CommandList>(device->createCommandList());
 
-    	cameraUniformBuffer      = Scope<NRHI::Buffer>(device->createUniformBuffer());
-    	modelUniformBuffer       = Scope<NRHI::Buffer>(device->createUniformBuffer());
-    	materialsUniformBuffer   = Scope<NRHI::Buffer>(device->createUniformBuffer());
-    	pointLightsUniformBuffer = Scope<NRHI::Buffer>(device->createUniformBuffer());
-    	debugUniformBuffer       = Scope<NRHI::Buffer>(device->createUniformBuffer());
+    	cameraUniformBuffer      = Scope<RHI::Buffer>(device->createUniformBuffer());
+    	modelUniformBuffer       = Scope<RHI::Buffer>(device->createUniformBuffer());
+    	materialsUniformBuffer   = Scope<RHI::Buffer>(device->createUniformBuffer());
+    	pointLightsUniformBuffer = Scope<RHI::Buffer>(device->createUniformBuffer());
+    	debugUniformBuffer       = Scope<RHI::Buffer>(device->createUniformBuffer());
 
     	DebugUniforms debugUniforms{};
     	debugUniforms.debugUvs = false;
@@ -151,12 +150,12 @@ namespace Neon
     }
 
 
-    NRHI::Device* RenderSystem::getDevice() const
+    RHI::Device* RenderSystem::getDevice() const
     {
     	return device.get();
     }
 
-    NRHI::Window* RenderSystem::getWindow() const
+    RHI::Window* RenderSystem::getWindow() const
     {
     	return window.get();
     }
@@ -209,7 +208,7 @@ namespace Neon
     	commandList->setUniformBuffer("MaterialsUniforms", materialsUniformBuffer.get());
 
     	commandList->setVertexBuffer(0, meshRenderer.mesh->vertexBuffer.get());
-    	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer.get(), NRHI::IndexFormat::UInt32);
+    	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer.get(), RHI::IndexFormat::UInt32);
     	commandList->drawIndexed(meshRenderer.mesh->indices.size());
     }
 
@@ -220,7 +219,7 @@ namespace Neon
 
     void RenderSystem::preUpdate()
     {
-	    std::vector<NRHI::Event> events = window->pollEvents();
+	    std::vector<RHI::Event> events = window->pollEvents();
 
     	EventManager& eventManager = Engine::getEventManager();
 
@@ -228,31 +227,31 @@ namespace Neon
     	{
     		switch (event.type)
     		{
-    			case NRHI::Event::Type::Quit:
+    			case RHI::Event::Type::Quit:
     				eventManager.queueEvent(new QuitEvent());
     				break;
-    			case NRHI::Event::Type::WindowResize:
+    			case RHI::Event::Type::WindowResize:
     				eventManager.queueEvent(new WindowResizeEvent(event.window.width, event.window.height));
     				break;
-    			case NRHI::Event::Type::KeyDown:
+    			case RHI::Event::Type::KeyDown:
     				eventManager.queueEvent(new KeyDownEvent(event.key.key, event.key.repeat));
     				break;
-    			case NRHI::Event::Type::KeyUp:
+    			case RHI::Event::Type::KeyUp:
     				eventManager.queueEvent(new KeyUpEvent(event.key.key));
     				break;
-    			case NRHI::Event::Type::MouseButtonDown:
+    			case RHI::Event::Type::MouseButtonDown:
     				eventManager.queueEvent(new MouseButtonDownEvent(event.button.button));
     				break;
-    			case NRHI::Event::Type::MouseButtonUp:
+    			case RHI::Event::Type::MouseButtonUp:
     				eventManager.queueEvent(new MouseButtonUpEvent(event.button.button));
     				break;
-    			case NRHI::Event::Type::MouseMotion:
+    			case RHI::Event::Type::MouseMotion:
     				eventManager.queueEvent(new MouseMoveEvent(event.motion.x, event.motion.y));
     				break;
-    			case NRHI::Event::Type::MouseWheel:
+    			case RHI::Event::Type::MouseWheel:
     				eventManager.queueEvent(new MouseWheelEvent(event.wheel.x, event.wheel.y));
     				break;
-    			case NRHI::Event::Type::TextInput:
+    			case RHI::Event::Type::TextInput:
     				eventManager.queueEvent(new TextInputEvent(event.text.text));
     				break;
     		}

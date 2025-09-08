@@ -4,10 +4,12 @@
 
 #include "graphics/components/meshRenderer.h"
 #include "core/engine.h"
-#include "debug/Logger.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "graphics/renderSystem.h"
+
 #include <neonRHI/neonRHI.h>
+#include <neonLog/neonLog.h>
+
 
 #include "graphics/image.h"
 
@@ -50,7 +52,7 @@ namespace Neon
 
         if (!warn.empty())
         {
-            Logger::warning(warn);
+            Log::warning(warn);
         }
         if (!err.empty())
         {

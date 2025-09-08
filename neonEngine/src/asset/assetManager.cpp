@@ -1,7 +1,6 @@
 #include "assetManager.h"
 
 #include "core/engine.h"
-#include "debug/logger.h"
 
 namespace Neon
 {

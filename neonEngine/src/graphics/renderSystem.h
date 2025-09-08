@@ -55,28 +55,28 @@ namespace Neon
     class RenderSystem final : public System
     {
     public:
-        explicit RenderSystem(const NRHI::WindowCreationOptions &windowOptions);
+        explicit RenderSystem(const RHI::WindowCreationOptions &windowOptions);
 
         void preStartup() override;
         void shutdown() override;
         void preUpdate() override;
         void render() override;
 
-        [[nodiscard]] NRHI::Device* getDevice() const;
-        [[nodiscard]] NRHI::Window* getWindow() const;
+        [[nodiscard]] RHI::Device* getDevice() const;
+        [[nodiscard]] RHI::Window* getWindow() const;
     private:
         void renderMesh(EntityID entity, const MeshRenderer& meshRenderer) const;
 
-        Scope<NRHI::Window> window{};
-        Scope<NRHI::Device> device{};
+        Scope<RHI::Window> window{};
+        Scope<RHI::Device> device{};
 
-        Scope<NRHI::GraphicsPipeline> pipeline{};
-        Scope<NRHI::CommandList> commandList{};
+        Scope<RHI::GraphicsPipeline> pipeline{};
+        Scope<RHI::CommandList> commandList{};
 
-        Scope<NRHI::Buffer> cameraUniformBuffer{};
-        Scope<NRHI::Buffer> modelUniformBuffer{};
-        Scope<NRHI::Buffer> debugUniformBuffer{};
-        Scope<NRHI::Buffer> materialsUniformBuffer{};
-        Scope<NRHI::Buffer> pointLightsUniformBuffer{};
+        Scope<RHI::Buffer> cameraUniformBuffer{};
+        Scope<RHI::Buffer> modelUniformBuffer{};
+        Scope<RHI::Buffer> debugUniformBuffer{};
+        Scope<RHI::Buffer> materialsUniformBuffer{};
+        Scope<RHI::Buffer> pointLightsUniformBuffer{};
     };
 }
