@@ -4,9 +4,8 @@
 #include <filesystem>
 #include <ranges>
 
+#include "debug.h"
 #include "miniaudio.h"
-#include "debug/assert.h"
-#include "debug/logger.h"
 
 namespace Neon
 {
@@ -45,7 +44,7 @@ namespace Neon
 
         ma_device device;
         ma_result result = ma_device_init(nullptr, &deviceConfig, &device);
-        Assert::check(result == MA_SUCCESS, "Failed to initialize device");
+        Debug::ensure(result == MA_SUCCESS, "Failed to initialize device");
 
         // --- Waveform generation setup ---
         // ma_waveform_config waveformConfig;
@@ -53,7 +52,7 @@ namespace Neon
         // ma_waveform_init(&waveformConfig, &waveform);
 
         result = ma_device_start(&device);
-        Assert::check(result == MA_SUCCESS, "Failed to start playback device");
+        Debug::ensure(result == MA_SUCCESS, "Failed to start playback device");
 
         while (running)
         {

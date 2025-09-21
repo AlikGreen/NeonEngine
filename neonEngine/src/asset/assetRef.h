@@ -56,9 +56,13 @@ public:
         return cachedAsset != other;
     }
 private:
+    friend class AssetManager;
     void updateCachedAsset() const
     {
-        if(cachedAsset == nullptr) cachedAsset = Engine::getAssetManager().getAsset<T>(handle);
+        if (cachedAsset == nullptr)
+        {
+            cachedAsset = Engine::getAssetManager().getAsset<T>(handle);
+        }
     }
 
     mutable T* cachedAsset = nullptr;

@@ -5,6 +5,7 @@
 #include <neonRHI/neonRHI.h>
 
 #include "mesh.h"
+#include "asset/assetManager.h"
 #include "components/camera.h"
 #include "components/pointLight.h"
 #include "core/engine.h"
@@ -35,8 +36,10 @@ namespace Neon
     	window->run();
     	device = Scope<RHI::Device>(window->createDevice());
 
-	    const auto shaderPath = "C:/Users/alikg/CLionProjects/neonEngine/neonEngine/resources/shaders/triangle.glsl";
-	    const auto shader = device->createShaderFromSource(File::readFileText(shaderPath), shaderPath);
+    	AssetManager& assetManager = Engine::getAssetManager();
+	    const auto shaderHandle = assetManager.loadAsset<RHI::Shader>("shaders/pbr.glsl");
+    	const auto shader = assetManager.getAsset<RHI::Shader>(shaderHandle);
+
     	shader->compile();
 
     	RHI::VertexInputState vertexInputState{};

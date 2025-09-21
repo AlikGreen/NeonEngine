@@ -4,15 +4,21 @@
 
 namespace Neon
 {
-    Image::Image(const AssetHandle texture, const AssetHandle sampler) : texture(texture), sampler(sampler) {  }
-
-    NRHI::Texture* Image::getTexture() const
+    Image::Image(RHI::Texture* texture, RHI::Sampler* sampler)
     {
-        return texture.get();
+        AssetManager& assetManager = Engine::getAssetManager();
+
+        textureHandle = assetManager.addAsset(texture);
+        samplerHandle = assetManager.addAsset(sampler);
     }
 
-    NRHI::Sampler* Image::getSampler() const
+    RHI::Texture* Image::getTexture() const
     {
-        return sampler.get();
+        return textureHandle.get();
+    }
+
+    RHI::Sampler* Image::getSampler() const
+    {
+        return samplerHandle.get();
     }
 }

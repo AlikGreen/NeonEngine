@@ -2,7 +2,6 @@
 #include "asset/assetManager.h"
 #include "core/coreSystem.h"
 #include "core/engine.h"
-#include "asset/serializers/prefabSerializerGLB.h"
 #include "graphics/renderSystem.h"
 #include "input/inputSystem.h"
 
@@ -23,9 +22,5 @@ int main()
     Neon::Engine::registerSystem<GameSystem>();
     Neon::Engine::registerSystem<Neon::InputSystem>();
 
-    Neon::Engine::getAssetManager().registerSerializer<Neon::PrefabSerializerGLB>({".glb"});
-
-    Neon::Engine::startup();
     Neon::Engine::run();
-    Neon::Engine::shutdown();
 }

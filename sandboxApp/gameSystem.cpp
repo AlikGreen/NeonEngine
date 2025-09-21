@@ -1,5 +1,7 @@
 #include "gameSystem.h"
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/string_cast.hpp"
 #include "neonEngine/neonEngine.h"
 
 void GameSystem::postStartup()
@@ -51,16 +53,18 @@ void GameSystem::update()
     auto [camEntity, camera, camTransform] = cameras[0];
 
     constexpr float cameraSpeed = 0.0005f;
+    glm::vec3 dir{0.0f};
 
-    if(Neon::Input::isKeyHeld(KeyCode::W))
-    {
-        camTransform.translate(camTransform.forward()*cameraSpeed);
-    }
-    if(Neon::Input::isKeyHeld(KeyCode::A)) { camTransform.translate(camTransform.left()*cameraSpeed); }
-    if(Neon::Input::isKeyHeld(KeyCode::S)) { camTransform.translate(camTransform.backward()*cameraSpeed); }
-    if(Neon::Input::isKeyHeld(KeyCode::D)) { camTransform.translate(camTransform.right()*cameraSpeed); }
-    if(Neon::Input::isKeyHeld(KeyCode::Space)) { camTransform.translate(camTransform.up()*cameraSpeed); }
-    if(Neon::Input::isKeyHeld(KeyCode::LShift)) { camTransform.translate(camTransform.down()*cameraSpeed); }
+    if(Neon::Input::isKeyHeld(KeyCode::W)) dir += glm::vec3(camTransform.forward().x, 0, camTransform.forward().z);
+    if(Neon::Input::isKeyHeld(KeyCode::S)) dir += glm::vec3(camTransform.backward().x, 0, camTransform.backward().z);
+    if(Neon::Input::isKeyHeld(KeyCode::A)) dir += glm::vec3(camTransform.left().x, 0, camTransform.left().z);
+    if(Neon::Input::isKeyHeld(KeyCode::D)) dir += glm::vec3(camTransform.right().x, 0, camTransform.right().z);
+
+    if(Neon::Input::isKeyHeld(KeyCode::Space) && camTransform.getPosition().y <= 0) { camTransform.translate(camTransform.up()); }
+
+    camTransform.translate(dir * cameraSpeed);
+    camTransform.translate({0, -1*cameraSpeed, 0});
+    if(camTransform.getPosition().y < 0) camTransform.setPosition({camTransform.getPosition().x, 0, camTransform.getPosition().z});
 
     constexpr float cameraSens = 0.0005f;
     camTransform.rotate(glm::vec3(Neon::Input::getMouseDelta().y, Neon::Input::getMouseDelta().x, 0)*cameraSens);

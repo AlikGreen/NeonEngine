@@ -3,7 +3,11 @@
 #include "assetHandle.h"
 #include <filesystem>
 
+#include "assetDeserializer.h"
+#include "assetLoader.h"
 #include "assetSerializer.h"
+#include "debug.h"
+#include "log.h"
 
 namespace Neon
 {
@@ -15,13 +19,13 @@ public:
     {
         const std::filesystem::path fullPath = getFullPath(filePath);
 
-        Neon::Log::check(exists(fullPath), "File was not found\n{}", filePath);
+        Debug::ensure(exists(fullPath), "File was not found\n{}", filePath);
 
         const std::string fileExtension = fullPath.extension().string();
-        if(!serializers.contains(fileExtension)) return 0;
+        Debug::ensure(loaders.contains(fileExtension), "Cannot load files with {} extension", fileExtension);
 
-        const auto assetSerializer = serializers.at(fileExtension).get();
-        T* asset = static_cast<T*>(assetSerializer->load(fullPath.string()));
+        const auto assetLoader = loaders.at(fileExtension).get();
+        T* asset = static_cast<T*>(assetLoader->load(fullPath.string()));
 
         AssetHandle handle = AssetHandle::create();
         assets.emplace(handle, asset);
@@ -29,7 +33,7 @@ public:
         return handle;
     }
 
-    template<typename T>
+    template<typename T> requires (!std::is_const_v<T>)
     AssetHandle addAsset(T* asset)
     {
         AssetHandle handle = AssetHandle::create();
@@ -44,7 +48,7 @@ public:
         return static_cast<T*>(assets.at(assetHandle));
     }
 
-    template<typename T, typename... Args>
+    template<typename T, typename... Args> requires std::derived_from<T, AssetSerializer>
     void registerSerializer(const std::vector<std::string>& extensions, Args&&... args)
     {
         Ref<T> serializer = makeRef<T>(std::forward<Args>(args)...);
@@ -54,8 +58,32 @@ public:
             serializers.emplace(extension, serializer);
         }
     }
+
+    template<typename T, typename... Args> requires std::derived_from<T, AssetDeserializer>
+    void registerDeserializer(const std::vector<std::string>& extensions, Args&&... args)
+    {
+        Ref<T> deserializer = makeRef<T>(std::forward<Args>(args)...);
+
+        for(std::string extension : extensions)
+        {
+            deserializers.emplace(extension, deserializer);
+        }
+    }
+
+    template<typename T, typename... Args> requires std::derived_from<T, AssetLoader>
+    void registerLoader(const std::vector<std::string>& extensions, Args&&... args)
+    {
+        Ref<T> loader = makeRef<T>(std::forward<Args>(args)...);
+
+        for(std::string extension : extensions)
+        {
+            loaders.emplace(extension, loader);
+        }
+    }
 private:
     std::unordered_map<std::string, Ref<AssetSerializer>> serializers;
+    std::unordered_map<std::string, Ref<AssetDeserializer>> deserializers;
+    std::unordered_map<std::string, Ref<AssetLoader>> loaders;
     std::unordered_map<AssetHandle, void*> assets;
 
     static std::string getFullPath(const std::string& filePath);

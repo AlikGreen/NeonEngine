@@ -7,6 +7,9 @@
 #include "sceneManager.h"
 #include "audio/audioManager.h"
 #include "asset/assetManager.h"
+#include "graphics/serializers/imageLoader.h"
+#include "graphics/serializers/prefabLoaderGLB.h"
+#include "graphics/serializers/shaderLoader.h"
 
 namespace Neon
 {
@@ -26,32 +29,10 @@ namespace Neon
         assetManager = makeScope<AssetManager>();
         audioManager = makeScope<AudioManager>();
         sceneManager = makeScope<SceneManager>();
-    }
 
-    void Engine::startup()
-    {
-        for (const auto system: registeredSystems)
-        {
-            system->preStartup();
-        }
-
-        for (const auto system: registeredSystems)
-        {
-            system->startup();
-        }
-
-        for (const auto system: registeredSystems)
-        {
-            system->postStartup();
-        }
-    }
-
-    void Engine::shutdown()
-    {
-        for (const auto system: registeredSystems)
-        {
-            system->shutdown();
-        }
+        getAssetManager().registerLoader<PrefabLoaderGLB>({".glb"});
+        getAssetManager().registerLoader<ImageLoader>({".png", ".jpg", ".jpeg", ".bmp", ".hdr", ".ppm"});
+        getAssetManager().registerLoader<ShaderLoader>({".glsl", ".shader"});
     }
 
     void Engine::quit()
@@ -92,6 +73,8 @@ namespace Neon
 
     void Engine::run()
     {
+        startup();
+
         running = true;
         while (running)
         {
@@ -136,6 +119,36 @@ namespace Neon
             }
 
             eventManager->handleEvents();
+        }
+
+        shutdown();
+    }
+
+    void Engine::startup()
+    {
+
+
+        for (const auto system: registeredSystems)
+        {
+            system->preStartup();
+        }
+
+        for (const auto system: registeredSystems)
+        {
+            system->startup();
+        }
+
+        for (const auto system: registeredSystems)
+        {
+            system->postStartup();
+        }
+    }
+
+    void Engine::shutdown()
+    {
+        for (const auto system: registeredSystems)
+        {
+            system->shutdown();
         }
     }
 }

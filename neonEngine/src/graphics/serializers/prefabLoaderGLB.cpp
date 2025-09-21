@@ -1,4 +1,4 @@
-#include "prefabSerializerGLB.h"
+#include "prefabLoaderGLB.h"
 
 #include <tiny_gltf.h>
 
@@ -15,7 +15,7 @@
 
 namespace Neon
 {
-    void* PrefabSerializerGLB::load(const std::string& filePath)
+    void* PrefabLoaderGLB::load(const std::string& filePath)
     {
         tinygltf::Model model;
         if (!loadModel(model, filePath))
@@ -34,16 +34,7 @@ namespace Neon
         return prefab.release();
     }
 
-    void PrefabSerializerGLB::serialize(const std::string& filePath)
-    {
-    }
-
-    void* PrefabSerializerGLB::deserialize(const std::string& filePath)
-    {
-        return nullptr;
-    }
-
-    bool PrefabSerializerGLB::loadModel(tinygltf::Model& model, const std::string& filePath)
+    bool PrefabLoaderGLB::loadModel(tinygltf::Model& model, const std::string& filePath)
     {
         tinygltf::TinyGLTF loader;
         std::string err, warn;
@@ -56,13 +47,13 @@ namespace Neon
         }
         if (!err.empty())
         {
-            Logger::error("Failed to load model\nPath:{}\nError: {}", filePath, err);
+            Log::error("Failed to load model\nPath:{}\nError: {}", filePath, err);
         }
 
         return success;
     }
 
-    std::vector<AssetHandle> PrefabSerializerGLB::processMaterials(const tinygltf::Model& model)
+    std::vector<AssetHandle> PrefabLoaderGLB::processMaterials(const tinygltf::Model& model)
     {
         std::vector<AssetHandle> materials;
         materials.reserve(model.materials.size());
@@ -75,7 +66,7 @@ namespace Neon
         return materials;
     }
 
-    void PrefabSerializerGLB::processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetHandle>& materials, const AssetRef<Material>& defaultMaterial)
+    void PrefabLoaderGLB::processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetHandle>& materials, const AssetRef<Material>& defaultMaterial)
     {
         for (const auto& node : model.nodes)
         {
@@ -93,7 +84,7 @@ namespace Neon
         }
     }
 
-    void PrefabSerializerGLB::setupTransform(Entity& entity, const tinygltf::Node& node)
+    void PrefabLoaderGLB::setupTransform(Entity& entity, const tinygltf::Node& node)
     {
         auto& transform = entity.getComponent<Transform>();
 
@@ -115,7 +106,7 @@ namespace Neon
         }
     }
 
-    void PrefabSerializerGLB::setupMeshRenderer(Entity& entity, const AssetHandle meshHandle, const tinygltf::Mesh& mesh, const AssetRef<Material>& defaultMaterial, const std::vector<AssetHandle>& materials)
+    void PrefabLoaderGLB::setupMeshRenderer(Entity& entity, const AssetHandle meshHandle, const tinygltf::Mesh& mesh, const AssetRef<Material>& defaultMaterial, const std::vector<AssetHandle>& materials)
     {
         auto& meshRenderer = entity.addComponent<MeshRenderer>();
         meshRenderer.mesh = meshHandle;
@@ -134,7 +125,7 @@ namespace Neon
         }
     }
 
-    AssetHandle PrefabSerializerGLB::processMaterial(const tinygltf::Material& material, const tinygltf::Model& model)
+    AssetHandle PrefabLoaderGLB::processMaterial(const tinygltf::Material& material, const tinygltf::Model& model)
     {
         auto mat = std::make_unique<Material>();
         mat->name = material.name.c_str();
@@ -146,7 +137,7 @@ namespace Neon
         return Engine::getAssetManager().addAsset(mat.release());
     }
 
-    void PrefabSerializerGLB::setupPBRProperties(Material* mat, const tinygltf::Material& material, const tinygltf::Model& model)
+    void PrefabLoaderGLB::setupPBRProperties(Material* mat, const tinygltf::Material& material, const tinygltf::Model& model)
     {
         const auto& pbr = material.pbrMetallicRoughness;
 
@@ -167,7 +158,7 @@ namespace Neon
         }
     }
 
-    void PrefabSerializerGLB::setupTextureProperties(Material* mat, const tinygltf::Material& material, const tinygltf::Model& model)
+    void PrefabLoaderGLB::setupTextureProperties(Material* mat, const tinygltf::Material& material, const tinygltf::Model& model)
     {
         if (material.normalTexture.index >= 0)
         {
@@ -190,15 +181,15 @@ namespace Neon
         mat->emission = glm::vec3(emissive[0], emissive[1], emissive[2]);
     }
 
-    void PrefabSerializerGLB::setupMaterialFlags(Material* mat, const tinygltf::Material& material)
+    void PrefabLoaderGLB::setupMaterialFlags(Material* mat, const tinygltf::Material& material)
     {
         mat->alphaCutoff = static_cast<float>(material.alphaCutoff);
         mat->doubleSided = material.doubleSided;
     }
 
-    NRHI::TextureFilter convertGLTFFilter(const int gltfFilter)
+    RHI::TextureFilter convertGLTFFilter(const int gltfFilter)
     {
-        using namespace NRHI;
+        using namespace RHI;
         switch (gltfFilter)
         {
             case TINYGLTF_TEXTURE_FILTER_NEAREST:
@@ -213,9 +204,9 @@ namespace Neon
         }
     }
 
-    NRHI::MipmapFilter convertGLTFMipmapFilter(const int gltfFilter)
+    RHI::MipmapFilter convertGLTFMipmapFilter(const int gltfFilter)
     {
-        using namespace NRHI;
+        using namespace RHI;
         switch (gltfFilter)
         {
             case TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST:
@@ -229,9 +220,9 @@ namespace Neon
         }
     }
 
-    NRHI::TextureWrap convertGLTFWrap(const int gltfWrap)
+    RHI::TextureWrap convertGLTFWrap(const int gltfWrap)
     {
-        using namespace NRHI;
+        using namespace RHI;
         switch (gltfWrap)
         {
             case TINYGLTF_TEXTURE_WRAP_MIRRORED_REPEAT:
@@ -244,9 +235,9 @@ namespace Neon
         }
     }
 
-    NRHI::TextureFormat determineTextureFormat(const tinygltf::Image& image, const bool isSRGB)
+    RHI::TextureFormat determineTextureFormat(const tinygltf::Image& image, const bool isSRGB)
     {
-        using namespace NRHI;
+        using namespace RHI;
         const auto components = image.component;
         const auto bits = image.bits;
 
@@ -272,7 +263,7 @@ namespace Neon
         return TextureFormat::R8G8B8A8Unorm;
     }
 
-    AssetHandle PrefabSerializerGLB::loadTexture(const tinygltf::Texture& texture, const tinygltf::Model& model, const bool isSrgb)
+    AssetHandle PrefabLoaderGLB::loadTexture(const tinygltf::Texture& texture, const tinygltf::Model& model, const bool isSrgb)
     {
         if (texture.source < 0)
         {
@@ -282,12 +273,12 @@ namespace Neon
         const tinygltf::Image& image = model.images[texture.source];
         const std::vector<unsigned char>& data = image.image;
 
-        NRHI::TextureDescription textureDescription{};
+        RHI::TextureDescription textureDescription{};
         textureDescription.format = determineTextureFormat(image, isSrgb);
         textureDescription.width = image.width;
         textureDescription.height = image.height;
 
-        NRHI::SamplerDescription samplerDescription{};
+        RHI::SamplerDescription samplerDescription{};
 
         if (texture.sampler >= 0)
         {
@@ -298,24 +289,26 @@ namespace Neon
             samplerDescription.wrapMode.y = convertGLTFWrap(sampler.wrapT);
         }
 
-        NRHI::Device* device = Engine::getSystem<RenderSystem>()->getDevice();
-        NRHI::Texture* tex = device->createTexture(textureDescription);
-        NRHI::Sampler* sampler = device->createSampler(samplerDescription);
+        RHI::Device* device = Engine::getSystem<RenderSystem>()->getDevice();
+        RHI::Texture* tex = device->createTexture(textureDescription);
+        RHI::Sampler* sampler = device->createSampler(samplerDescription);
 
         AssetManager& assetManager = Engine::getAssetManager();
 
-        const AssetHandle texAsset = assetManager.addAsset(tex);
-        const AssetHandle samplerAsset = assetManager.addAsset(sampler);
+        RHI::TextureUploadDescription uploadDescription{};
+        uploadDescription.data = data.data();
+        uploadDescription.pixelFormat = tinyGltfGetPixelFormat(image);
+        uploadDescription.pixelType = tinyGltfGetPixelType(image);
 
         const auto commandList = device->createCommandList();
         commandList->begin();
-        commandList->updateTexture(tex, data.data());
+        commandList->updateTexture(tex, uploadDescription);
         device->submit(commandList);
 
-        return assetManager.addAsset(new Image(texAsset, samplerAsset));
+        return assetManager.addAsset(new Image(tex, sampler));
     }
 
-    Mesh* PrefabSerializerGLB::createMesh(const tinygltf::Mesh& mesh, const tinygltf::Model& model)
+    Mesh* PrefabLoaderGLB::createMesh(const tinygltf::Mesh& mesh, const tinygltf::Model& model)
     {
         if (mesh.primitives.empty())
         {
@@ -326,7 +319,6 @@ namespace Neon
 
         for(const auto& primitive : mesh.primitives)
         {
-
             const auto positions = extractVertexPositions(primitive, model);
 
             const uint32_t startingVerticesCount = nMesh->vertices.size();
@@ -369,7 +361,7 @@ namespace Neon
         return nMesh.release();
     }
 
-    std::vector<glm::vec3> PrefabSerializerGLB::extractVertexPositions(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
+    std::vector<glm::vec3> PrefabLoaderGLB::extractVertexPositions(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
     {
         const auto it = primitive.attributes.find("POSITION");
         if (it == primitive.attributes.end())
@@ -394,7 +386,7 @@ namespace Neon
         return positions;
     }
 
-    std::vector<glm::vec3> PrefabSerializerGLB::extractVertexNormals(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
+    std::vector<glm::vec3> PrefabLoaderGLB::extractVertexNormals(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
     {
         const auto it = primitive.attributes.find("NORMAL");
         if (it == primitive.attributes.end())
@@ -419,7 +411,7 @@ namespace Neon
         return normals;
     }
 
-    std::vector<glm::vec2> PrefabSerializerGLB::extractVertexUVs(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
+    std::vector<glm::vec2> PrefabLoaderGLB::extractVertexUVs(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
     {
         const auto it = primitive.attributes.find("TEXCOORD_0");
         if (it == primitive.attributes.end())
@@ -444,7 +436,7 @@ namespace Neon
         return uvs;
     }
 
-    std::vector<uint32_t> PrefabSerializerGLB::extractIndices(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
+    std::vector<uint32_t> PrefabLoaderGLB::extractIndices(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
     {
         if (primitive.indices < 0)
         {
@@ -478,5 +470,41 @@ namespace Neon
         }
 
         return newIndices;
+    }
+
+    RHI::PixelFormat PrefabLoaderGLB::tinyGltfGetPixelFormat(const tinygltf::Image &img)
+    {
+        switch (img.component)
+        {
+            case 1: return RHI::PixelFormat::R;
+            case 2: return RHI::PixelFormat::RG;
+            case 3: return RHI::PixelFormat::RGB;
+            default: return RHI::PixelFormat::RGBA;
+        }
+    }
+
+    RHI::PixelType PrefabLoaderGLB::tinyGltfGetPixelType(const tinygltf::Image &img)
+    {
+        switch (img.pixel_type)
+        {
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+                return RHI::PixelType::UnsignedByte;
+            case TINYGLTF_COMPONENT_TYPE_BYTE:
+                return RHI::PixelType::Byte;
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+                return RHI::PixelType::UnsignedShort;
+            case TINYGLTF_COMPONENT_TYPE_SHORT:
+                return RHI::PixelType::Short;
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+                return RHI::PixelType::UnsignedInt;
+            case TINYGLTF_COMPONENT_TYPE_INT:
+                return RHI::PixelType::Int;
+            case TINYGLTF_COMPONENT_TYPE_FLOAT:
+                return RHI::PixelType::Float;
+            default:
+                    if (img.bits == 16) return RHI::PixelType::UnsignedShort;
+            if (img.bits == 32) return RHI::PixelType::Float;
+            return RHI::PixelType::UnsignedByte;
+        }
     }
 }

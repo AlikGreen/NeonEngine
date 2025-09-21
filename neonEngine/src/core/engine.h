@@ -16,16 +16,14 @@ namespace Neon
     {
         std::string engineResourcesPath;
         std::string gameResourcesPath;
-        NRHI::WindowCreationOptions windowOptions;
+        RHI::WindowCreationOptions windowOptions;
     };
 
     class Engine
     {
     public:
         static void initialize(const EngineConfig &config);
-        static void startup();
         static void run();
-        static void shutdown();
 
         static void quit();
 
@@ -64,6 +62,9 @@ namespace Neon
 
         static std::vector<System*> registeredSystems;
         static EngineConfig config;
+
+        static void shutdown();
+        static void startup();
 
         static bool running;
     };

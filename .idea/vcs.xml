@@ -3,11 +3,11 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/miniaudio" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonLog" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonLog/dependencies/spdlog" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/glfw" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/glm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/neonLog" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/spirv-cross" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/tinygltf" vcs="Git" />
   </component>

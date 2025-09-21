@@ -20,4 +20,4 @@
 #include "core/sceneManager.h"
 #include "core/eventManager.h"
 
-#include "debug/logger.h"
+#include "neonLog/neonLog.h"

@@ -9,12 +9,12 @@ namespace Neon
 class Image
 {
 public:
-    Image(AssetHandle texture, AssetHandle sampler);
+    Image(RHI::Texture* texture, RHI::Sampler* sampler);
 
-    [[nodiscard]] NRHI::Texture* getTexture() const;
-    [[nodiscard]] NRHI::Sampler* getSampler() const;
+    [[nodiscard]] RHI::Texture* getTexture() const;
+    [[nodiscard]] RHI::Sampler* getSampler() const;
 private:
-    AssetRef<NRHI::Texture> texture;
-    AssetRef<NRHI::Sampler> sampler;
+    AssetRef<RHI::Texture> textureHandle;
+    AssetRef<RHI::Sampler> samplerHandle;
 };
 }
