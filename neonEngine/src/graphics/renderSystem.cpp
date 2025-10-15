@@ -42,26 +42,26 @@ namespace Neon
 
     	shader->compile();
 
-    	RHI::VertexInputState vertexInputState{};
+    	RHI::InputLayout vertexInputState{};
     	vertexInputState.addVertexBuffer<Vertex>(0);
     	vertexInputState.addVertexAttribute<glm::vec3>(0, 0);
     	vertexInputState.addVertexAttribute<glm::vec3>(0, 1);
     	vertexInputState.addVertexAttribute<glm::vec2>(0, 2);
 
     	RHI::DepthState depthState{};
-    	depthState.hasDepthTarget = true;
+    	depthState.hasDepthTarget  = true;
     	depthState.enableDepthTest = true;
 
 	    const RHI::RenderTargetsDescription targetsDesc{};
 
     	RHI::GraphicsPipelineDescription pipelineDescription{};
-    	pipelineDescription.shader = shader;
-    	pipelineDescription.vertexInputState = vertexInputState;
-    	pipelineDescription.cullMode = RHI::CullMode::None;
+    	pipelineDescription.shader             = shader;
+    	pipelineDescription.inputLayout   = vertexInputState;
+    	pipelineDescription.cullMode           = RHI::CullMode::None;
     	pipelineDescription.targetsDescription = targetsDesc;
-    	pipelineDescription.depthState = depthState;
+    	pipelineDescription.depthState         = depthState;
 
-    	pipeline = Scope<RHI::GraphicsPipeline>(device->createGraphicsPipeline(pipelineDescription));
+    	pipeline = Scope<RHI::Pipeline>(device->createPipeline(pipelineDescription));
 
     	commandList = Scope<RHI::CommandList>(device->createCommandList());
 
@@ -72,14 +72,14 @@ namespace Neon
     	debugUniformBuffer       = Scope<RHI::Buffer>(device->createUniformBuffer());
 
     	DebugUniforms debugUniforms{};
-    	debugUniforms.debugUvs = false;
+    	debugUniforms.debugUvs     = false;
     	debugUniforms.debugNormals = false;
 
     	commandList->begin();
 
-    	commandList->reserveBuffer(cameraUniformBuffer.get()     , sizeof(CameraUniforms));
-    	commandList->reserveBuffer(modelUniformBuffer.get()      , sizeof(MeshUniforms));
-    	commandList->reserveBuffer(materialsUniformBuffer.get()  , sizeof(MaterialsUniforms));
+    	commandList->reserveBuffer(cameraUniformBuffer     .get(), sizeof(CameraUniforms));
+    	commandList->reserveBuffer(modelUniformBuffer      .get(), sizeof(MeshUniforms));
+    	commandList->reserveBuffer(materialsUniformBuffer  .get(), sizeof(MaterialsUniforms));
     	commandList->reserveBuffer(pointLightsUniformBuffer.get(), sizeof(PointLightUniforms));
 
     	commandList->reserveBuffer(debugUniformBuffer.get(), sizeof(DebugUniforms));
@@ -99,7 +99,7 @@ namespace Neon
 
     	commandList->begin();
 
-    	commandList->setFrameBuffer(device->getSwapChainFrameBuffer());
+    	commandList->setFramebuffer(device->getSwapChainFramebuffer());
         commandList->setPipeline(pipeline.get());
 
     	commandList->clearColorTarget(0, camera.bgColor);
@@ -177,42 +177,55 @@ namespace Neon
     	commandList->updateBuffer(modelUniformBuffer.get(), modelUniforms);
     	commandList->setUniformBuffer("ModelUniforms", modelUniformBuffer.get());
 
-	    constexpr int MAX_MATERIALS = 64;
-	    const int materialsInUse = std::min(static_cast<int>(meshRenderer.materials.size()), MAX_MATERIALS);
+		// TODO make it use all materials on meshRenderer currently only uses one
 
     	MaterialsUniforms materialsUniforms{};
 
-    	for(int i = 0; i < materialsInUse; i++)
-    	{
-    		// bind texture somewhere here
-    		int useAlbedoTexture = false;
-		    const AssetRef<Material> mat = meshRenderer.getMaterial();
-    		auto albedoTexture = mat->albedoTexture;
-			if(albedoTexture != nullptr)
-			{
-				useAlbedoTexture = true;
-				commandList->setTexture("albedoTextures", i, mat->albedoTexture->getTexture());
-				commandList->setSampler("albedoTextures", i, mat->albedoTexture->getSampler());
-			}
+    	int useAlbedoTexture = false;
+		const AssetRef<Material> mat = meshRenderer.getMaterial();
+	    const auto albedoTexture = mat->albedoTexture;
+		if(albedoTexture != nullptr)
+		{
+			useAlbedoTexture = true;
 
-		    const MaterialUniforms materialUniforms =
-			{
-    			mat->roughness,
-				mat->metalness,
-				mat->albedo,
-				useAlbedoTexture
-			};
+			RHI::TextureView* view = getOrCreateTextureView(albedoTexture->getTexture());
 
-    		materialsUniforms.materials[i] = materialUniforms;
-    		materialsUniforms.count = i+1;
-    	}
+			commandList->setTexture("albedoTextures", view);
+			commandList->setSampler("albedoTextures", mat->albedoTexture->getSampler());
+		}
+
+		const MaterialUniforms materialUniforms =
+		{
+    		mat->roughness,
+			mat->metalness,
+			mat->albedo,
+			useAlbedoTexture
+		};
+
+    	materialsUniforms.materials[0] = materialUniforms;
+    	materialsUniforms.count = 1;
 
     	commandList->updateBuffer(materialsUniformBuffer.get(), materialsUniforms);
-    	commandList->setUniformBuffer("MaterialsUniforms", materialsUniformBuffer.get());
+    	commandList->setUniformBuffer("MaterialUniforms", materialsUniformBuffer.get());
 
     	commandList->setVertexBuffer(0, meshRenderer.mesh->vertexBuffer.get());
     	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer.get(), RHI::IndexFormat::UInt32);
     	commandList->drawIndexed(meshRenderer.mesh->indices.size());
+    }
+
+    RHI::TextureView * RenderSystem::getOrCreateTextureView(const AssetRef<RHI::Texture> &texture) const
+    {
+    	if(texture == nullptr) return nullptr;
+    	const uint64_t key = static_cast<uint64_t>(texture.getHandle());
+
+    	if(textureViewCache.contains(key))
+			return textureViewCache.at(key).get();
+
+    	const RHI::TextureViewDescription viewDesc{ texture.get() };
+    	RHI::TextureView* view = device->createTextureView(viewDesc);
+    	textureViewCache.emplace(key, Scope<RHI::TextureView>(view));
+
+    	return view;
     }
 
     void RenderSystem::shutdown()

@@ -1,5 +1,9 @@
 #include "engine.h"
 
+#include <graphics/loaders/imageLoader.h>
+#include <graphics/loaders/prefabLoaderGLB.h>
+#include <graphics/loaders/shaderLoader.h>
+
 #include "coreSystem.h"
 #include "graphics/renderSystem.h"
 
@@ -7,9 +11,6 @@
 #include "sceneManager.h"
 #include "audio/audioManager.h"
 #include "asset/assetManager.h"
-#include "graphics/serializers/imageLoader.h"
-#include "graphics/serializers/prefabLoaderGLB.h"
-#include "graphics/serializers/shaderLoader.h"
 
 namespace Neon
 {
@@ -30,9 +31,9 @@ namespace Neon
         audioManager = makeScope<AudioManager>();
         sceneManager = makeScope<SceneManager>();
 
-        getAssetManager().registerLoader<PrefabLoaderGLB>({".glb"});
-        getAssetManager().registerLoader<ImageLoader>({".png", ".jpg", ".jpeg", ".bmp", ".hdr", ".ppm"});
-        getAssetManager().registerLoader<ShaderLoader>({".glsl", ".shader"});
+        getAssetManager().registerLoader<PrefabLoaderGLB, Prefab>({".glb"});
+        getAssetManager().registerLoader<ImageLoader, Image>({".png", ".jpg", ".jpeg", ".bmp", ".hdr", ".ppm"});
+        getAssetManager().registerLoader<ShaderLoader, RHI::Shader>({".glsl", ".shader"});
     }
 
     void Engine::quit()

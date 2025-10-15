@@ -32,6 +32,11 @@ public:
         return cachedAsset;
     }
 
+    AssetHandle getHandle() const
+    {
+        return handle;
+    }
+
     bool operator==(const AssetHandle& other) const
     {
         updateCachedAsset();

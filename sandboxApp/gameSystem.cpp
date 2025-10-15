@@ -2,6 +2,7 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/string_cast.hpp"
+#include "graphics/renderSystem.h"
 #include "neonEngine/neonEngine.h"
 
 void GameSystem::postStartup()
@@ -39,6 +40,7 @@ void GameSystem::postStartup()
     // const Neon::AssetHandle songHandle = assetManager->loadAsset<Neon::AudioClip>("city-bgm-336601.mp3");
     // auto *song = assetManager->getAsset<Neon::AudioClip>(songHandle);
     // Neon::Engine::getAudioManager()->playSound(song);
+
 
     Neon::Input::setCursorLocked(true);
     Neon::Input::setCursorVisible(false);

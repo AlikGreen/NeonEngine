@@ -28,8 +28,8 @@ namespace Neon
         auto* device = Engine::getSystem<RenderSystem>()->getDevice();
 
         RHI::TextureDescription texDesc{};
-        texDesc.width = w;
-        texDesc.height = h;
+        texDesc.dimensions.x = w;
+        texDesc.dimensions.y = h;
         texDesc.format = getOptimalFormat(ext, channels);
 
         const auto texture = device->createTexture(texDesc);
@@ -37,7 +37,6 @@ namespace Neon
         RHI::TextureUploadDescription uploadDesc{};
 
         uploadDesc.data = pixels;
-        uploadDesc.pixelFormat = getPixelFormatFromExtension(ext);
         uploadDesc.pixelType = getPixelTypeFromExtension(ext);
 
         const auto cl = device->createCommandList();
@@ -53,14 +52,6 @@ namespace Neon
         return new Image(texture, sampler);
     }
 
-    RHI::PixelFormat ImageLoader::getPixelFormatFromExtension(const std::string &extension)
-    {
-        if (extension == "jpg" || extension == "jpeg" || extension == "bmp")
-            return RHI::PixelFormat::RGB; // 8 bit
-
-        return RHI::PixelFormat::RGBA;
-    }
-
     RHI::PixelType ImageLoader::getPixelTypeFromExtension(const std::string &extension)
     {
         if (extension == "exr" || extension == "hdr")
@@ -69,13 +60,13 @@ namespace Neon
         return RHI::PixelType::UnsignedByte;
     }
 
-    RHI::TextureFormat ImageLoader::getOptimalFormat(const std::string& extension, const int channels)
+    RHI::PixelFormat ImageLoader::getOptimalFormat(const std::string& extension, const int channels)
     {
         if (extension == "hdr" || extension == "exr")
-            return RHI::TextureFormat::R32G32B32A32Float;
+            return RHI::PixelFormat::R32G32B32A32Float;
 
-        if (channels == 3) return RHI::TextureFormat::R8G8B8Unorm;
+        if (channels == 3) return RHI::PixelFormat::R8G8B8Unorm;
 
-        return RHI::TextureFormat::R8G8B8A8Unorm;
+        return RHI::PixelFormat::R8G8B8A8Unorm;
     }
 }

@@ -235,7 +235,7 @@ namespace Neon
         }
     }
 
-    RHI::TextureFormat determineTextureFormat(const tinygltf::Image& image, const bool isSRGB)
+    RHI::PixelFormat determineTextureFormat(const tinygltf::Image& image, const bool isSRGB)
     {
         using namespace RHI;
         const auto components = image.component;
@@ -243,24 +243,24 @@ namespace Neon
 
         if (components == 1)
         {
-            if (bits == 8) return TextureFormat::R8Unorm;
-            if (bits == 16) return TextureFormat::R16Unorm;
-            if (bits == 32) return TextureFormat::R32Float;
+            if (bits == 8) return PixelFormat::R8Unorm;
+            if (bits == 16) return PixelFormat::R16Unorm;
+            if (bits == 32) return PixelFormat::R32Float;
         }
         else if (components == 2)
         {
-            if (bits == 8) return TextureFormat::R8G8Unorm;
-            if (bits == 16) return TextureFormat::R16G16Unorm;
-            if (bits == 32) return TextureFormat::R32G32Float;
+            if (bits == 8) return PixelFormat::R8G8Unorm;
+            if (bits == 16) return PixelFormat::R16G16Unorm;
+            if (bits == 32) return PixelFormat::R32G32Float;
         }
         else if (components == 3 || components == 4)
         {
-            if (bits == 8) return isSRGB ? TextureFormat::R8G8B8A8UnormSrgb : TextureFormat::R8G8B8A8Unorm;
-            if (bits == 16) return TextureFormat::R16G16B16A16Unorm;
-            if (bits == 32) return TextureFormat::R32G32B32A32Float;
+            if (bits == 8) return isSRGB ? PixelFormat::R8G8B8A8UnormSrgb : PixelFormat::R8G8B8A8Unorm;
+            if (bits == 16) return PixelFormat::R16G16B16A16Unorm;
+            if (bits == 32) return PixelFormat::R32G32B32A32Float;
         }
 
-        return TextureFormat::R8G8B8A8Unorm;
+        return PixelFormat::R8G8B8A8Unorm;
     }
 
     AssetHandle PrefabLoaderGLB::loadTexture(const tinygltf::Texture& texture, const tinygltf::Model& model, const bool isSrgb)
@@ -275,8 +275,8 @@ namespace Neon
 
         RHI::TextureDescription textureDescription{};
         textureDescription.format = determineTextureFormat(image, isSrgb);
-        textureDescription.width = image.width;
-        textureDescription.height = image.height;
+        textureDescription.dimensions.x = image.width;
+        textureDescription.dimensions.y = image.height;
 
         RHI::SamplerDescription samplerDescription{};
 
@@ -297,10 +297,12 @@ namespace Neon
 
         RHI::TextureUploadDescription uploadDescription{};
         uploadDescription.data = data.data();
-        uploadDescription.pixelFormat = tinyGltfGetPixelFormat(image);
         uploadDescription.pixelType = tinyGltfGetPixelType(image);
+        uploadDescription.size.x = image.width;
+        uploadDescription.size.y = image.height;
 
         const auto commandList = device->createCommandList();
+
         commandList->begin();
         commandList->updateTexture(tex, uploadDescription);
         device->submit(commandList);
@@ -472,16 +474,6 @@ namespace Neon
         return newIndices;
     }
 
-    RHI::PixelFormat PrefabLoaderGLB::tinyGltfGetPixelFormat(const tinygltf::Image &img)
-    {
-        switch (img.component)
-        {
-            case 1: return RHI::PixelFormat::R;
-            case 2: return RHI::PixelFormat::RG;
-            case 3: return RHI::PixelFormat::RGB;
-            default: return RHI::PixelFormat::RGBA;
-        }
-    }
 
     RHI::PixelType PrefabLoaderGLB::tinyGltfGetPixelType(const tinygltf::Image &img)
     {

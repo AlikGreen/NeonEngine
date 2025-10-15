@@ -7,14 +7,14 @@ layout(location = 2) in vec2 inUV;
 
 layout(std140, binding = 0) uniform CameraUniforms
 {
-    mat4 uViewMatrix;
-    mat4 uProjMatrix;
-};
+    mat4 viewMatrix;
+    mat4 projMatrix;
+} camera;
 
 layout(std140, binding = 1) uniform ModelUniforms
 {
-    mat4 uModelMatrix;
-};
+    mat4 matrix;
+} model;
 
 layout(location = 0) out vec3 vNormal;
 layout(location = 1) out vec2 vUV;
@@ -24,9 +24,9 @@ void main()
 {
     vNormal = inNormal;
     vUV = inUV;
-    vec4 fragPos = uModelMatrix*vec4(inPosition, 1.0);
+    vec4 fragPos = model.matrix*vec4(inPosition, 1.0);
     vFragPos = fragPos.xyz;
-    vec4 camPos = uProjMatrix*uViewMatrix*fragPos;
+    vec4 camPos = camera.projMatrix*camera.viewMatrix*fragPos;
     gl_Position = camPos;
 }
 
@@ -34,21 +34,15 @@ void main()
 const int MAX_MATERIALS = 32;
 const int MAX_POINT_LIGHTS = 32;
 
-struct Material
+layout(location = 0) out vec4 outColor;
+
+layout(std140, binding = 2) uniform MaterialUniforms
 {
     float roughness;
     float metanless;
     vec4 albedo;
     bool useAlbedoTexture;
-};
-
-layout(location = 0) out vec4 outColor;
-
-layout(std140, binding = 2) uniform MaterialsUniforms
-{
-    int materialCount;
-    Material[MAX_MATERIALS] materials;
-};
+} material;
 
 struct PointLight
 {
@@ -59,15 +53,15 @@ struct PointLight
 
 layout(std140, binding = 3) uniform PointLightUniforms
 {
-    int pointLightsCount;
-    PointLight[MAX_POINT_LIGHTS] pointLights;
-};
+    int count;
+    PointLight[MAX_POINT_LIGHTS] lights;
+} pointLights;
 
 layout(std140, binding = 4) uniform DebugUniforms
 {
-    bool uDebugUVs;
-    bool uDebugNormals;
-};
+    bool uvs;
+    bool normals;
+} debug;
 
 layout(binding = 1) uniform sampler2D albedoTextures[MAX_MATERIALS];
 
@@ -79,29 +73,27 @@ layout(location = 2) in vec3 vFragPos;
 
 void main()
 {
-    if(uDebugUVs)
+    if(debug.uvs)
     {
         outColor = vec4(vUV, 0.0f, 1.0f);
         return;
     }
 
-    if(uDebugNormals)
+    if(debug.normals)
     {
         outColor = vec4(vNormal * 0.5 + 0.5, 1.0f); // Map normal from [-1,1] to [0,1]
         return;
     }
 
-    Material material = materials[0];
-
     vec3 diffuseLight = vec3(0.0);
 
-    for(int i = 0; i < pointLightsCount; i++)
+    for(int i = 0; i < pointLights.count; i++)
     {
-        vec3 lightPosition = pointLights[i].position;
-        float dist = length(vFragPos - lightPosition);
-        vec3 lightDir = lightPosition-vFragPos;
+        PointLight light = pointLights.lights[i];
+        float dist = length(vFragPos - light.position);
+        vec3 lightDir = light.position-vFragPos;
 
-        diffuseLight += pointLights[i].color*(1/dist)*pointLights[i].power*dot(lightDir, vNormal);
+        diffuseLight += light.color*(1/dist)*light.power*dot(lightDir, vNormal);
     }
 
     diffuseLight = max(diffuseLight, vec3(0.2));

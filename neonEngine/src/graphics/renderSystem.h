@@ -66,11 +66,15 @@ namespace Neon
         [[nodiscard]] RHI::Window* getWindow() const;
     private:
         void renderMesh(EntityID entity, const MeshRenderer& meshRenderer) const;
+        RHI::TextureView* getOrCreateTextureView(const AssetRef<RHI::Texture>& texture) const;
+
+
+        mutable std::unordered_map<uint64_t, Scope<RHI::TextureView>> textureViewCache;
 
         Scope<RHI::Window> window{};
         Scope<RHI::Device> device{};
 
-        Scope<RHI::GraphicsPipeline> pipeline{};
+        Scope<RHI::Pipeline> pipeline{};
         Scope<RHI::CommandList> commandList{};
 
         Scope<RHI::Buffer> cameraUniformBuffer{};
