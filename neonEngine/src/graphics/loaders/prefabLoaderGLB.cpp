@@ -305,6 +305,7 @@ namespace Neon
 
         commandList->begin();
         commandList->updateTexture(tex, uploadDescription);
+        commandList->generateMipmaps(tex);
         device->submit(commandList);
 
         return assetManager.addAsset(new Image(tex, sampler));

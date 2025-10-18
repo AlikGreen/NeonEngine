@@ -67,7 +67,7 @@ namespace Neon
 
     	cameraUniformBuffer      = Scope<RHI::Buffer>(device->createUniformBuffer());
     	modelUniformBuffer       = Scope<RHI::Buffer>(device->createUniformBuffer());
-    	materialsUniformBuffer   = Scope<RHI::Buffer>(device->createUniformBuffer());
+    	materialUniformBuffer    = Scope<RHI::Buffer>(device->createUniformBuffer());
     	pointLightsUniformBuffer = Scope<RHI::Buffer>(device->createUniformBuffer());
     	debugUniformBuffer       = Scope<RHI::Buffer>(device->createUniformBuffer());
 
@@ -79,7 +79,7 @@ namespace Neon
 
     	commandList->reserveBuffer(cameraUniformBuffer     .get(), sizeof(CameraUniforms));
     	commandList->reserveBuffer(modelUniformBuffer      .get(), sizeof(MeshUniforms));
-    	commandList->reserveBuffer(materialsUniformBuffer  .get(), sizeof(MaterialsUniforms));
+    	commandList->reserveBuffer(materialUniformBuffer   .get(), sizeof(MaterialUniforms));
     	commandList->reserveBuffer(pointLightsUniformBuffer.get(), sizeof(PointLightUniforms));
 
     	commandList->reserveBuffer(debugUniformBuffer.get(), sizeof(DebugUniforms));
@@ -179,8 +179,6 @@ namespace Neon
 
 		// TODO make it use all materials on meshRenderer currently only uses one
 
-    	MaterialsUniforms materialsUniforms{};
-
     	int useAlbedoTexture = false;
 		const AssetRef<Material> mat = meshRenderer.getMaterial();
 	    const auto albedoTexture = mat->albedoTexture;
@@ -190,11 +188,11 @@ namespace Neon
 
 			RHI::TextureView* view = getOrCreateTextureView(albedoTexture->getTexture());
 
-			commandList->setTexture("albedoTextures", view);
-			commandList->setSampler("albedoTextures", mat->albedoTexture->getSampler());
+			commandList->setTexture("albedoTexture", view);
+			commandList->setSampler("albedoTexture", mat->albedoTexture->getSampler());
 		}
 
-		const MaterialUniforms materialUniforms =
+    	MaterialUniforms materialUniforms =
 		{
     		mat->roughness,
 			mat->metalness,
@@ -202,11 +200,8 @@ namespace Neon
 			useAlbedoTexture
 		};
 
-    	materialsUniforms.materials[0] = materialUniforms;
-    	materialsUniforms.count = 1;
-
-    	commandList->updateBuffer(materialsUniformBuffer.get(), materialsUniforms);
-    	commandList->setUniformBuffer("MaterialUniforms", materialsUniformBuffer.get());
+    	commandList->updateBuffer(materialUniformBuffer.get(), materialUniforms);
+    	commandList->setUniformBuffer("MaterialUniforms", materialUniformBuffer.get());
 
     	commandList->setVertexBuffer(0, meshRenderer.mesh->vertexBuffer.get());
     	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer.get(), RHI::IndexFormat::UInt32);

@@ -2,7 +2,6 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/string_cast.hpp"
-#include "graphics/renderSystem.h"
 #include "neonEngine/neonEngine.h"
 
 void GameSystem::postStartup()
@@ -31,11 +30,12 @@ void GameSystem::postStartup()
     // Light entity
     Neon::Entity lightEntity = world.createEntity();
     auto& lightTransform = lightEntity.getComponent<Neon::Transform>();
-    lightTransform.setPosition({2, 5, 0});
+    lightTransform.setPosition({5, 5, 0});
 
     lightEntity.addComponent<Neon::PointLight>();
     auto& pointLight = lightEntity.getComponent<Neon::PointLight>();
-    pointLight.power = 1.0f;
+    pointLight.power = 10.0f;
+    pointLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
 
     // const Neon::AssetHandle songHandle = assetManager->loadAsset<Neon::AudioClip>("city-bgm-336601.mp3");
     // auto *song = assetManager->getAsset<Neon::AudioClip>(songHandle);

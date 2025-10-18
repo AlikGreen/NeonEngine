@@ -33,12 +33,6 @@ namespace Neon
         int useAlbedoTexture;
     };
 
-    struct MaterialsUniforms
-    {
-        int count{};
-        MaterialUniforms materials[64]{};
-    };
-
     struct PointLightUniform
     {
         glm::vec3 position;
@@ -80,7 +74,7 @@ namespace Neon
         Scope<RHI::Buffer> cameraUniformBuffer{};
         Scope<RHI::Buffer> modelUniformBuffer{};
         Scope<RHI::Buffer> debugUniformBuffer{};
-        Scope<RHI::Buffer> materialsUniformBuffer{};
+        Scope<RHI::Buffer> materialUniformBuffer{};
         Scope<RHI::Buffer> pointLightsUniformBuffer{};
     };
 }

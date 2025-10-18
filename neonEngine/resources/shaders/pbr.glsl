@@ -63,7 +63,7 @@ layout(std140, binding = 4) uniform DebugUniforms
     bool normals;
 } debug;
 
-layout(binding = 1) uniform sampler2D albedoTextures[MAX_MATERIALS];
+layout(binding = 1) uniform sampler2D albedoTexture;
 
 layout(location = 0) in vec3 vNormal;
 layout(location = 1) in vec2 vUV;
@@ -81,7 +81,7 @@ void main()
 
     if(debug.normals)
     {
-        outColor = vec4(vNormal * 0.5 + 0.5, 1.0f); // Map normal from [-1,1] to [0,1]
+        outColor = vec4(vNormal * 0.5 + 0.5, 1.0f);
         return;
     }
 
@@ -102,7 +102,7 @@ void main()
 
     if(material.useAlbedoTexture)
     {
-        albedo *= texture(albedoTextures[0], vUV);
+        albedo *= texture(albedoTexture, vUV);
     }
 
     outColor = albedo*vec4(diffuseLight, 1.0);
