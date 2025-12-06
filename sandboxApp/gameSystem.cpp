@@ -11,17 +11,11 @@ void GameSystem::postStartup()
     auto& world = scene.getRegistry();
 
     Neon::AssetManager& assetManager = Neon::Engine::getAssetManager();
-    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/balls.glb");
+    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/monkey.glb");
     const auto model = assetManager.getAsset<Neon::Prefab>(modelHandle);
 
-    scene.import(model);
-
-    const auto prefabs = world.view<Neon::PrefabComponent, Neon::Transform>();
-    for (auto [entity, prefab, transform]: prefabs)
-    {
-        transform.setScale(glm::vec3(1.0f));
-    }
-
+    Neon::ECS::Entity modelEntity = scene.import(model);
+    modelEntity.get<Neon::Transform>().setScale(glm::vec3(1.0f));
 
     // Player/Camera entity
     Neon::ECS::Entity cameraEntity = scene.createEntity();
@@ -32,7 +26,7 @@ void GameSystem::postStartup()
     // Light entity
     Neon::ECS::Entity lightEntity = scene.createEntity();
     auto& lightTransform = lightEntity.get<Neon::Transform>();
-    lightTransform.setPosition({5, 5, 0});
+    lightTransform.setPosition({8, 10, 8});
 
     lightEntity.emplace<Neon::PointLight>();
     auto& pointLight = lightEntity.get<Neon::PointLight>();
@@ -46,6 +40,8 @@ void GameSystem::postStartup()
 
     Neon::Input::setCursorLocked(true);
     Neon::Input::setCursorVisible(false);
+
+    start = std::chrono::high_resolution_clock::now();
 }
 
 void GameSystem::update()
@@ -64,14 +60,26 @@ void GameSystem::update()
     if(Neon::Input::isKeyHeld(KeyCode::A)) dir += glm::vec3(camTransform.left().x, 0, camTransform.left().z);
     if(Neon::Input::isKeyHeld(KeyCode::D)) dir += glm::vec3(camTransform.right().x, 0, camTransform.right().z);
 
-    if(Neon::Input::isKeyHeld(KeyCode::Space) && camTransform.getPosition().y <= 0) { camTransform.translate(camTransform.up()); }
+    if(Neon::Input::isKeyHeld(KeyCode::Space)) { dir.y += 1; }
+    if(Neon::Input::isKeyHeld(KeyCode::LShift)) { dir.y -= 1; }
 
     camTransform.translate(dir * cameraSpeed);
-    camTransform.translate({0, -1*cameraSpeed, 0});
-    if(camTransform.getPosition().y < 0) camTransform.setPosition({camTransform.getPosition().x, 0, camTransform.getPosition().z});
+    // camTransform.translate({0, -1*cameraSpeed, 0});
+    // if(camTransform.getPosition().y < 0) camTransform.setPosition({camTransform.getPosition().x, 0, camTransform.getPosition().z});
 
     constexpr float cameraSens = 0.0005f;
     camTransform.rotate(glm::vec3(Neon::Input::getMouseDelta().y, Neon::Input::getMouseDelta().x, 0)*cameraSens);
+
+    const std::chrono::time_point<std::chrono::high_resolution_clock> end = std::chrono::high_resolution_clock::now();
+
+    frameCount++;
+
+    if(end - start >= std::chrono::seconds(5))
+    {
+        Neon::Log::info("FPS: {}", frameCount/5);
+        start = end;
+        frameCount = 0;
+    }
 }
 
 void GameSystem::event(Neon::Event *event)

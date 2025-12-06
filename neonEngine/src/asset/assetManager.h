@@ -72,21 +72,21 @@ public:
     template<typename LoaderType, typename AssetType, typename... Args> requires std::derived_from<LoaderType, AssetLoader>
     void registerLoader(const std::vector<std::string>& extensions, Args&&... args)
     {
-        Box<LoaderType> loader = makeBox<LoaderType>(std::forward<Args>(args)...);
+        Rc<LoaderType> loader = makeBox<LoaderType>(std::forward<Args>(args)...);
 
         auto typeIndex = std::type_index(typeid(AssetType));
         if(!loaders.contains(typeIndex))
-            loaders.emplace(typeIndex, std::unordered_map<std::string, Box<AssetLoader>>());
+            loaders.emplace(typeIndex, std::unordered_map<std::string, Rc<AssetLoader>>());
 
         for(std::string extension : extensions)
         {
-            loaders.at(typeIndex).emplace(extension, std::move(loader));
+            loaders.at(typeIndex).emplace(extension, loader);
         }
     }
 private:
     std::unordered_map<std::type_index, Box<AssetSerializer>> serializers;
     std::unordered_map<std::type_index, Box<AssetDeserializer>> deserializers;
-    std::unordered_map<std::type_index, std::unordered_map<std::string, Box<AssetLoader>>> loaders;
+    std::unordered_map<std::type_index, std::unordered_map<std::string, Rc<AssetLoader>>> loaders;
     std::unordered_map<AssetHandle, void*> assets;
 
     static std::string getFullPath(const std::string& filePath);

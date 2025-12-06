@@ -35,12 +35,33 @@ namespace Neon
         return prefab.release();
     }
 
+    bool isGlbFile(std::filesystem::path const& path)
+    {
+        std::ifstream file(path, std::ios::binary);
+        if (!file)
+            return false;
+
+        char magic[4]{};
+        if (!file.read(magic, 4))
+            return false;
+
+        return magic[0] == 'g'
+            && magic[1] == 'l'
+            && magic[2] == 'T'
+            && magic[3] == 'F';
+    }
+
     bool PrefabLoaderGLB::loadModel(tinygltf::Model& model, const std::string& filePath)
     {
         tinygltf::TinyGLTF loader;
         std::string err, warn;
 
-        const bool success = loader.LoadBinaryFromFile(&model, &err, &warn, filePath);
+        bool success = false;
+
+        if(isGlbFile(filePath))
+            success = loader.LoadBinaryFromFile(&model, &err, &warn, filePath);
+        else
+            success = loader.LoadASCIIFromFile(&model, &err, &warn, filePath);
 
         if (!warn.empty())
         {

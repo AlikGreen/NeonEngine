@@ -11,6 +11,6 @@ public:
     void event(Neon::Event *event) override;
 
 private:
-    int frameCount = 0;
+    size_t frameCount = 0;
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
 };

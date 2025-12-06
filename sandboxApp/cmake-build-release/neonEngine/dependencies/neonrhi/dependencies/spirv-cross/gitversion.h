@@ -4,6 +4,6 @@
 #ifndef SPIRV_CROSS_GIT_VERSION_H_
 #define SPIRV_CROSS_GIT_VERSION_H_
 
-#define SPIRV_CROSS_GIT_REVISION "Git commit: vulkan-sdk-1.4.321.0-41-g0a88b2d5 Timestamp: 2025-12-06T14:53:02"
+#define SPIRV_CROSS_GIT_REVISION "Git commit: vulkan-sdk-1.4.321.0-41-g0a88b2d5 Timestamp: 2025-12-06T15:19:42"
 
 #endif

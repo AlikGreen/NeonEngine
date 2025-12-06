@@ -24,8 +24,25 @@ namespace Neon
         return entity;
     }
 
-    void Scene::import(Prefab* entity)
+    ECS::Entity Scene::import(Prefab* prefab)
     {
-        registry.merge(entity->scene.getRegistry());
+        const std::vector<ECS::Entity> newEntities = registry.merge(prefab->scene.getRegistry());
+
+        const ECS::Entity parent = createEntity(prefab->name);
+
+        for(auto entity : newEntities)
+        {
+            if(!entity.has<Parent>())
+                continue;
+
+            auto& p = entity.get<Parent>();
+
+            if(!p.hasParent())
+            {
+                p.setParent(parent);
+            }
+        }
+
+        return parent;
     }
 }

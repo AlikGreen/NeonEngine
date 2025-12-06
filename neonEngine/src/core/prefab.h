@@ -15,5 +15,6 @@ class Prefab
 {
 public:
     Scene scene{};
+    std::string name;
 };
 }

@@ -31,7 +31,7 @@ namespace Neon
         audioManager = makeBox<AudioManager>();
         sceneManager = makeBox<SceneManager>();
 
-        getAssetManager().registerLoader<PrefabLoaderGLB, Prefab>({".glb"});
+        getAssetManager().registerLoader<PrefabLoaderGLB, Prefab>({".glb", ".bin", ".gltf"});
         getAssetManager().registerLoader<ImageLoader, Image>({".png", ".jpg", ".jpeg", ".bmp", ".hdr", ".ppm"});
         getAssetManager().registerLoader<ShaderLoader, RHI::Shader>({".glsl", ".shader"});
     }

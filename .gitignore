@@ -1,6 +1,6 @@
 # Ignore build directories
-sandboxApp/cmake-build-debug/
-neonEngine/cmake-build-debug/
+sandboxApp/cmake-build-*/
+neonEngine/cmake-build-*/
 
 # Ignore object files and executables
 *.a
