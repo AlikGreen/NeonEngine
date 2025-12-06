@@ -1,0 +1,11 @@
+{
+"rules": [
+{
+"primary-output": "neonEngine/dependencies/neonecs/CMakeFiles/neonECS.dir/src/registry.cpp.o",
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

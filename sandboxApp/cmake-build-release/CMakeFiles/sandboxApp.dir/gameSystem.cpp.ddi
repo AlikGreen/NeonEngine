@@ -1,0 +1,11 @@
+{
+"rules": [
+{
+"primary-output": "CMakeFiles/sandboxApp.dir/gameSystem.cpp.o",
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

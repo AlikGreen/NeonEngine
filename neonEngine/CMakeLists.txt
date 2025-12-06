@@ -5,7 +5,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(TINYGLTF_HEADER_ONLY OFF CACHE BOOL "Build tinygltf as a library" FORCE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/tinygltf)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/miniaudio)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/neonRHI)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/neonrhi)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/neonecs)
 
 file(GLOB_RECURSE
         SRC_FILES
@@ -28,5 +29,5 @@ target_compile_definitions(neonEngine PRIVATE GLFW_INCLUDE_NONE)
 set(CMAKE_PCH_INSTANTIATE_TEMPLATES ON)
 target_precompile_headers(neonEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/common.h")
 
-target_include_directories(neonEngine PUBLIC src/ include/)
-target_link_libraries(neonEngine PUBLIC glfw tinygltf miniaudio neonRHI)
+target_include_directories(neonEngine PUBLIC src/ include/ )
+target_link_libraries(neonEngine PUBLIC glfw tinygltf miniaudio neonRHI neonECS)

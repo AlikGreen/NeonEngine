@@ -1,0 +1,11 @@
+{
+"rules": [
+{
+"primary-output": "neonEngine/CMakeFiles/neonEngine.dir/src/ecs/components/transformComponent.cpp.o",
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

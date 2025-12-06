@@ -1,0 +1,1178 @@
+{
+	"archive" : {},
+	"artifacts" : 
+	[
+		{
+			"path" : "neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/libglslang.a"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"add_compile_options",
+			"add_compile_definitions",
+			"target_include_directories",
+			"glslang_add_build_info_dependency"
+		],
+		"files" : 
+		[
+			"C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/CMakeLists.txt",
+			"C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 170,
+				"parent" : 0
+			},
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 142,
+				"parent" : 2
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 145,
+				"parent" : 2
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 148,
+				"parent" : 2
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 151,
+				"parent" : 2
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 129,
+				"parent" : 2
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 308,
+				"parent" : 2
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 125,
+				"parent" : 2
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 134,
+				"parent" : 2
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 177,
+				"parent" : 0
+			},
+			{
+				"command" : 4,
+				"file" : 0,
+				"line" : 181,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 1,
+				"line" : 249,
+				"parent" : 12
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-O3 -DNDEBUG -std=c++17 -fdiagnostics-color=always"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wall"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wmaybe-uninitialized"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wuninitialized"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused-local-typedefs"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wimplicit-fallthrough"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused-parameter"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused-value"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused-variable"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused-but-set-parameter"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused-but-set-variable"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-fno-rtti"
+				},
+				{
+					"backtrace" : 5,
+					"fragment" : "-fno-exceptions"
+				},
+				{
+					"backtrace" : 6,
+					"fragment" : "-Werror=deprecated-copy"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 7,
+					"define" : "ENABLE_HLSL"
+				},
+				{
+					"backtrace" : 8,
+					"define" : "ENABLE_OPT=0"
+				},
+				{
+					"backtrace" : 9,
+					"define" : "ENABLE_SPIRV"
+				},
+				{
+					"backtrace" : 10,
+					"define" : "GLSLANG_OSINCLUDE_WIN32"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 11,
+					"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/.."
+				},
+				{
+					"backtrace" : 13,
+					"path" : "C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/include"
+				}
+			],
+			"language" : "CXX",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					1
+				],
+				"standard" : "17"
+			},
+			"sourceIndexes" : 
+			[
+				0,
+				17,
+				18,
+				19,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32,
+				33,
+				34,
+				35,
+				36,
+				37,
+				38,
+				39,
+				40,
+				41,
+				42,
+				43,
+				44,
+				45,
+				46,
+				47,
+				48,
+				49,
+				50,
+				51,
+				52,
+				53,
+				54,
+				55,
+				56,
+				83,
+				84,
+				85,
+				86,
+				87,
+				88,
+				89,
+				90,
+				91
+			]
+		},
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-O3 -DNDEBUG -std=c++17 -fdiagnostics-color=always"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wall"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wmaybe-uninitialized"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wuninitialized"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused-local-typedefs"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wimplicit-fallthrough"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused-parameter"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused-value"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused-variable"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused-but-set-parameter"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wunused-but-set-variable"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-fno-rtti"
+				},
+				{
+					"backtrace" : 5,
+					"fragment" : "-fno-exceptions"
+				},
+				{
+					"backtrace" : 6,
+					"fragment" : "-Werror=deprecated-copy"
+				},
+				{
+					"fragment" : "-Wno-unused-but-set-variable"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 7,
+					"define" : "ENABLE_HLSL"
+				},
+				{
+					"backtrace" : 8,
+					"define" : "ENABLE_OPT=0"
+				},
+				{
+					"backtrace" : 9,
+					"define" : "ENABLE_SPIRV"
+				},
+				{
+					"backtrace" : 10,
+					"define" : "GLSLANG_OSINCLUDE_WIN32"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 11,
+					"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/.."
+				},
+				{
+					"backtrace" : 13,
+					"path" : "C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/include"
+				}
+			],
+			"language" : "CXX",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					1
+				],
+				"standard" : "17"
+			},
+			"sourceIndexes" : 
+			[
+				22
+			]
+		}
+	],
+	"folder" : 
+	{
+		"name" : "glslang"
+	},
+	"id" : "glslang::@08914fc1406bcdec791d",
+	"name" : "glslang",
+	"nameOnDisk" : "libglslang.a",
+	"paths" : 
+	{
+		"build" : "neonEngine/dependencies/neonrhi/dependencies/glslang/glslang",
+		"source" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "CInterface",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "Public",
+			"sourceIndexes" : 
+			[
+				1
+			]
+		},
+		{
+			"name" : "Include",
+			"sourceIndexes" : 
+			[
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16
+			]
+		},
+		{
+			"name" : "GenericCodeGen",
+			"sourceIndexes" : 
+			[
+				17,
+				18
+			]
+		},
+		{
+			"name" : "OSDependent\\Windows",
+			"sourceIndexes" : 
+			[
+				19
+			]
+		},
+		{
+			"name" : "OSDependent",
+			"sourceIndexes" : 
+			[
+				20
+			]
+		},
+		{
+			"name" : "MachineIndependent",
+			"sourceIndexes" : 
+			[
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32,
+				33,
+				34,
+				35,
+				36,
+				37,
+				38,
+				39,
+				40,
+				41,
+				42,
+				43,
+				49,
+				57,
+				58,
+				59,
+				60,
+				61,
+				62,
+				63,
+				64,
+				65,
+				66,
+				67,
+				68,
+				69,
+				70,
+				71,
+				72
+			]
+		},
+		{
+			"name" : "MachineIndependent\\Preprocessor",
+			"sourceIndexes" : 
+			[
+				44,
+				45,
+				46,
+				47,
+				48,
+				73,
+				74
+			]
+		},
+		{
+			"name" : "HLSL",
+			"sourceIndexes" : 
+			[
+				50,
+				51,
+				52,
+				53,
+				54,
+				55,
+				56,
+				75,
+				76,
+				77,
+				78,
+				79,
+				80,
+				81,
+				82
+			]
+		},
+		{
+			"name" : "SPIRV",
+			"sourceIndexes" : 
+			[
+				83,
+				84,
+				85,
+				86,
+				87,
+				88,
+				89,
+				90,
+				92,
+				93,
+				94,
+				95,
+				96,
+				97,
+				98,
+				99,
+				100,
+				101,
+				102,
+				103,
+				104,
+				105,
+				106,
+				107,
+				108,
+				109,
+				110,
+				111
+			]
+		},
+		{
+			"name" : "SPIRV\\CInterface",
+			"sourceIndexes" : 
+			[
+				91
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/CInterface/glslang_c_interface.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Public/ShaderLang.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/arrays.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/BaseTypes.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/Common.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/ConstantUnion.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/glslang_c_interface.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/glslang_c_shader_types.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/InfoSink.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/InitializeGlobals.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/intermediate.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/PoolAlloc.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/ResourceLimits.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/ShHandle.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/SpirvIntrinsics.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/Types.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/Include/visibility.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/GenericCodeGen/CodeGen.cpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/GenericCodeGen/Link.cpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/OSDependent/Windows/ossource.cpp",
+			"sourceGroupIndex" : 4
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/OSDependent/osinclude.h",
+			"sourceGroupIndex" : 5
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/glslang.y",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/glslang_tab.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/attribute.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/Constant.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/iomapper.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/InfoSink.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/Initialize.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/IntermTraverse.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/Intermediate.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/ParseContextBase.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/ParseHelper.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/PoolAlloc.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/RemoveTree.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/Scan.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/ShaderLang.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/SpirvIntrinsics.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/SymbolTable.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/Versions.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/intermOut.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/limits.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/linkValidate.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/parseConst.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/reflection.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/preprocessor/Pp.cpp",
+			"sourceGroupIndex" : 7
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/preprocessor/PpAtom.cpp",
+			"sourceGroupIndex" : 7
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/preprocessor/PpContext.cpp",
+			"sourceGroupIndex" : 7
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/preprocessor/PpScanner.cpp",
+			"sourceGroupIndex" : 7
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/preprocessor/PpTokens.cpp",
+			"sourceGroupIndex" : 7
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/propagateNoContraction.cpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslAttributes.cpp",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslParseHelper.cpp",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslScanContext.cpp",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslOpMap.cpp",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslTokenStream.cpp",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslGrammar.cpp",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslParseables.cpp",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/attribute.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/glslang_tab.cpp.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/gl_types.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/Initialize.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/iomapper.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/LiveTraverser.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/localintermediate.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/ParseHelper.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/reflection.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/RemoveTree.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/Scan.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/ScanContext.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/SymbolTable.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/Versions.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/parseVersions.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/propagateNoContraction.h",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/preprocessor/PpContext.h",
+			"sourceGroupIndex" : 7
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/MachineIndependent/preprocessor/PpTokens.h",
+			"sourceGroupIndex" : 7
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslAttributes.h",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslParseHelper.h",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslTokens.h",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslScanContext.h",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslOpMap.h",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslTokenStream.h",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslGrammar.h",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/glslang/HLSL/hlslParseables.h",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/GlslangToSpv.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/InReadableOrder.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/Logger.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/SpvBuilder.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/SpvPostProcess.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/doc.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/SpvTools.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/disassemble.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/CInterface/spirv_c_interface.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/bitutils.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/spirv.hpp11",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/GLSL.std.450.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/GLSL.ext.EXT.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/GLSL.ext.KHR.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/GlslangToSpv.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/hex_float.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/Logger.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/SpvBuilder.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/spvIR.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/spvUtil.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/doc.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/SpvTools.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/disassemble.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/GLSL.ext.AMD.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/GLSL.ext.NV.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/GLSL.ext.ARM.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/GLSL.ext.QCOM.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/NonSemanticDebugPrintf.h",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 1,
+			"path" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glslang/SPIRV/NonSemanticShaderDebugInfo100.h",
+			"sourceGroupIndex" : 9
+		}
+	],
+	"type" : "STATIC_LIBRARY"
+}

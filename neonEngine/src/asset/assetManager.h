@@ -55,7 +55,7 @@ public:
     template<typename SerializerType, typename AssetType, typename... Args> requires std::derived_from<SerializerType, AssetSerializer>
     void registerSerializer(Args&&... args)
     {
-        Ref<SerializerType> serializer = makeRef<SerializerType>(std::forward<Args>(args)...);
+        Box<SerializerType> serializer = makeBox<SerializerType>(std::forward<Args>(args)...);
 
         auto typeIndex = std::type_index(typeid(AssetType));
         serializers.emplace(typeIndex, serializer);
@@ -64,7 +64,7 @@ public:
     template<typename DeserializerType, typename AssetType, typename... Args> requires std::derived_from<DeserializerType, AssetDeserializer>
     void registerDeserializer(Args&&... args)
     {
-        Ref<DeserializerType> deserializer = makeRef<DeserializerType>(std::forward<Args>(args)...);
+        Box<DeserializerType> deserializer = makeBox<DeserializerType>(std::forward<Args>(args)...);
         auto typeIndex = std::type_index(typeid(AssetType));
         deserializers.emplace(typeIndex, deserializer);
     }
@@ -72,21 +72,21 @@ public:
     template<typename LoaderType, typename AssetType, typename... Args> requires std::derived_from<LoaderType, AssetLoader>
     void registerLoader(const std::vector<std::string>& extensions, Args&&... args)
     {
-        Ref<LoaderType> loader = makeRef<LoaderType>(std::forward<Args>(args)...);
+        Box<LoaderType> loader = makeBox<LoaderType>(std::forward<Args>(args)...);
 
         auto typeIndex = std::type_index(typeid(AssetType));
         if(!loaders.contains(typeIndex))
-            loaders.emplace(typeIndex, std::unordered_map<std::string, Ref<AssetLoader>>());
+            loaders.emplace(typeIndex, std::unordered_map<std::string, Box<AssetLoader>>());
 
         for(std::string extension : extensions)
         {
-            loaders.at(typeIndex).emplace(extension, loader);
+            loaders.at(typeIndex).emplace(extension, std::move(loader));
         }
     }
 private:
-    std::unordered_map<std::type_index, Ref<AssetSerializer>> serializers;
-    std::unordered_map<std::type_index, Ref<AssetDeserializer>> deserializers;
-    std::unordered_map<std::type_index, std::unordered_map<std::string, Ref<AssetLoader>>> loaders;
+    std::unordered_map<std::type_index, Box<AssetSerializer>> serializers;
+    std::unordered_map<std::type_index, Box<AssetDeserializer>> deserializers;
+    std::unordered_map<std::type_index, std::unordered_map<std::string, Box<AssetLoader>>> loaders;
     std::unordered_map<AssetHandle, void*> assets;
 
     static std::string getFullPath(const std::string& filePath);

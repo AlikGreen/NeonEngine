@@ -1,6 +1,8 @@
 #pragma once
 
-#include "ecs/world.h"
+#include <neonECS/neonECS.h>
+
+#include "scene.h"
 
 namespace Neon
 {
@@ -12,6 +14,6 @@ struct PrefabComponent
 class Prefab
 {
 public:
-    World world{};
+    Scene scene{};
 };
 }

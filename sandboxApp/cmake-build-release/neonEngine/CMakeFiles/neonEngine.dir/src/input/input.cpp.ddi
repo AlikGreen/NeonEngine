@@ -1,0 +1,11 @@
+{
+"rules": [
+{
+"primary-output": "neonEngine/CMakeFiles/neonEngine.dir/src/input/input.cpp.o",
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

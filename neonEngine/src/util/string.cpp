@@ -1,5 +1,7 @@
 #include "string.h"
 
+#include <algorithm>
+
 namespace Neon
 {
     std::string String::trim(const std::string& str)
@@ -15,7 +17,7 @@ namespace Neon
     {
         std::string result = str;
         std::ranges::transform(result, result.begin(),
-                               [](unsigned char c) { return std::tolower(c); });
+                               [](const unsigned char c) { return std::tolower(c); });
         return result;
     }
 }

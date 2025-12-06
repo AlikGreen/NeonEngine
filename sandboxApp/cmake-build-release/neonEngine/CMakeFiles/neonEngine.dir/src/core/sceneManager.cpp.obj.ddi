@@ -1,0 +1,11 @@
+{
+"rules": [
+{
+"primary-output": "neonEngine\\CMakeFiles\\neonEngine.dir\\src\\core\\sceneManager.cpp.obj",
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

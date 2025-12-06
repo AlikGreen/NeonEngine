@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "neonEngine/dependencies/neonrhi/dependencies/glad",
+		"source" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glad"
+	}
+}

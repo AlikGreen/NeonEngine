@@ -3,7 +3,6 @@
 #include <neonRHI/neonRHI.h>
 #include "core/system.h"
 #include "components/meshRenderer.h"
-#include "ecs/components/transformComponent.h"
 
 namespace Neon
 {
@@ -59,22 +58,24 @@ namespace Neon
         [[nodiscard]] RHI::Device* getDevice() const;
         [[nodiscard]] RHI::Window* getWindow() const;
     private:
-        void renderMesh(EntityID entity, const MeshRenderer& meshRenderer) const;
+        void renderMesh(ECS::Entity entity, const MeshRenderer& meshRenderer) const;
+
+        void renderSubMesh(const MeshRenderer &meshRenderer, int materialIndex) const;
+
         RHI::TextureView* getOrCreateTextureView(const AssetRef<RHI::Texture>& texture) const;
 
+        mutable std::unordered_map<uint64_t, Box<RHI::TextureView>> textureViewCache;
 
-        mutable std::unordered_map<uint64_t, Scope<RHI::TextureView>> textureViewCache;
+        Box<RHI::Window> window{};
+        Box<RHI::Device> device{};
 
-        Scope<RHI::Window> window{};
-        Scope<RHI::Device> device{};
+        Box<RHI::Pipeline> pipeline{};
+        Box<RHI::CommandList> commandList{};
 
-        Scope<RHI::Pipeline> pipeline{};
-        Scope<RHI::CommandList> commandList{};
-
-        Scope<RHI::Buffer> cameraUniformBuffer{};
-        Scope<RHI::Buffer> modelUniformBuffer{};
-        Scope<RHI::Buffer> debugUniformBuffer{};
-        Scope<RHI::Buffer> materialUniformBuffer{};
-        Scope<RHI::Buffer> pointLightsUniformBuffer{};
+        Box<RHI::Buffer> cameraUniformBuffer{};
+        Box<RHI::Buffer> modelUniformBuffer{};
+        Box<RHI::Buffer> debugUniformBuffer{};
+        Box<RHI::Buffer> materialUniformBuffer{};
+        Box<RHI::Buffer> pointLightsUniformBuffer{};
     };
 }

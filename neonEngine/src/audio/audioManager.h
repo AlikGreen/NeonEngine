@@ -1,6 +1,7 @@
 #pragma once
 #include <queue>
 #include <thread>
+#include <mutex>
 
 #include "audioClip.h"
 #include "audioCommand.h"
@@ -22,7 +23,7 @@ private:
     std::queue<AudioCommand> commandQueue;
     std::mutex commandQueueMutex;
 
-    std::unordered_map<SoundHandle, Ref<AudioClip>> audioClipsMap;
+    std::unordered_map<SoundHandle, Rc<AudioClip>> audioClipsMap;
     std::mutex audioClipMutex;
 
     void audioThreadLoop();

@@ -11,6 +11,7 @@
 #include <neonLog/neonLog.h>
 
 
+#include "core/components/transformComponent.h"
 #include "graphics/image.h"
 
 namespace Neon
@@ -24,8 +25,8 @@ namespace Neon
         }
 
         auto prefab = std::make_unique<Prefab>();
-        Entity rootEntity = prefab->world.createEntity();
-        rootEntity.addComponent<PrefabComponent>();
+        ECS::Entity rootEntity = prefab->scene.createEntity();
+        rootEntity.emplace<PrefabComponent>();
 
         auto materials = processMaterials(model);
         const AssetRef<Material> defaultMaterial = Engine::getAssetManager().addAsset(new Material());
@@ -77,16 +78,16 @@ namespace Neon
             if (!nMesh) continue;
 
             const auto meshHandle = Engine::getAssetManager().addAsset(nMesh);
-            Entity entity = prefab.world.createEntity();
+            ECS::Entity entity = prefab.scene.createEntity();
 
             setupTransform(entity, node);
             setupMeshRenderer(entity, meshHandle, mesh, defaultMaterial, materials);
         }
     }
 
-    void PrefabLoaderGLB::setupTransform(Entity& entity, const tinygltf::Node& node)
+    void PrefabLoaderGLB::setupTransform(ECS::Entity& entity, const tinygltf::Node& node)
     {
-        auto& transform = entity.getComponent<Transform>();
+        auto& transform = entity.get<Transform>();
 
         if (node.translation.size() == 3)
         {
@@ -106,9 +107,9 @@ namespace Neon
         }
     }
 
-    void PrefabLoaderGLB::setupMeshRenderer(Entity& entity, const AssetHandle meshHandle, const tinygltf::Mesh& mesh, const AssetRef<Material>& defaultMaterial, const std::vector<AssetHandle>& materials)
+    void PrefabLoaderGLB::setupMeshRenderer(ECS::Entity& entity, const AssetHandle meshHandle, const tinygltf::Mesh& mesh, const AssetRef<Material>& defaultMaterial, const std::vector<AssetHandle>& materials)
     {
-        auto& meshRenderer = entity.addComponent<MeshRenderer>();
+        auto& meshRenderer = entity.emplace<MeshRenderer>();
         meshRenderer.mesh = meshHandle;
         meshRenderer.mesh->apply();
 
@@ -318,19 +319,22 @@ namespace Neon
             return nullptr;
         }
 
+        std::vector<Vertex> vertices{};
+        std::vector<uint32_t> meshIndices{};
+
         auto nMesh = std::make_unique<Mesh>();
 
         for(const auto& primitive : mesh.primitives)
         {
             const auto positions = extractVertexPositions(primitive, model);
 
-            const uint32_t startingVerticesCount = nMesh->vertices.size();
+            const uint32_t startingVerticesCount = vertices.size();
 
-            nMesh->vertices.resize(startingVerticesCount+positions.size());
+            vertices.resize(startingVerticesCount+positions.size());
 
             for(int i = 0; i < positions.size(); i++)
             {
-                nMesh->vertices[startingVerticesCount+i].position = positions[i];
+                vertices[startingVerticesCount+i].position = positions[i];
             }
 
             const auto normals = extractVertexNormals(primitive, model);
@@ -338,7 +342,7 @@ namespace Neon
             {
                 for(int i = 0; i < normals.size(); i++)
                 {
-                    nMesh->vertices[startingVerticesCount+i].normal = normals[i];
+                    vertices[startingVerticesCount+i].normal = normals[i];
                 }
             }
 
@@ -347,20 +351,24 @@ namespace Neon
             {
                 for(int i = 0; i < uvs.size(); i++)
                 {
-                    nMesh->vertices[startingVerticesCount+i].uv = uvs[i];
+                    vertices[startingVerticesCount+i].uv = uvs[i];
                 }
             }
 
             auto indices = extractIndices(primitive, model);
-            const uint32_t startingIndicesCount = nMesh->indices.size();
-            nMesh->indices.resize(startingIndicesCount+indices.size());
+            const uint32_t startingIndicesCount = meshIndices.size();
+            meshIndices.resize(startingIndicesCount+indices.size());
+
+            nMesh->addPrimitive(startingIndicesCount, indices.size());
 
             for(int i = 0; i < indices.size(); i++)
             {
-                nMesh->indices[startingIndicesCount+i] = startingVerticesCount+indices[i];
+                meshIndices[startingIndicesCount+i] = startingVerticesCount+indices[i];
             }
         }
 
+        nMesh->setIndices(meshIndices);
+        nMesh->setVertices(vertices);
         return nMesh.release();
     }
 

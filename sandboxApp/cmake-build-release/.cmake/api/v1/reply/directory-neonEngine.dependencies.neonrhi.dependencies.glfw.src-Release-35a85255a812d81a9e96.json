@@ -1,0 +1,45 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glfw/src/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 335,
+				"parent" : 0
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"neonEngine/dependencies/neonrhi/dependencies/glfw/src/libglfw3.a"
+			],
+			"targetId" : "glfw::@83c116453a9f118a080e",
+			"targetIndex" : 6,
+			"type" : "target"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "neonEngine/dependencies/neonrhi/dependencies/glfw/src",
+		"source" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glfw/src"
+	}
+}

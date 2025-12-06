@@ -20,8 +20,8 @@ private:
     static std::vector<AssetHandle> processMaterials(const tinygltf::Model& model);
     static void processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetHandle>& materials, const AssetRef<Material>& defaultMaterial);
 
-    static void setupTransform(Entity& entity, const tinygltf::Node& node);
-    static void setupMeshRenderer(Entity& entity, AssetHandle meshHandle, const tinygltf::Mesh& mesh, const AssetRef<Material>& defaultMaterial, const std::vector<AssetHandle>& materials);
+    static void setupTransform(ECS::Entity& entity, const tinygltf::Node& node);
+    static void setupMeshRenderer(ECS::Entity& entity, AssetHandle meshHandle, const tinygltf::Mesh& mesh, const AssetRef<Material>& defaultMaterial, const std::vector<AssetHandle>& materials);
     static void setupPBRProperties(Material* mat, const tinygltf::Material& material, const tinygltf::Model& model);
     static void setupTextureProperties(Material* mat, const tinygltf::Material& material, const tinygltf::Model& model);
     static void setupMaterialFlags(Material* mat, const tinygltf::Material& material);
@@ -36,7 +36,7 @@ private:
 
     static AssetHandle loadTexture(const tinygltf::Texture& texture, const tinygltf::Model& model, bool isSrgb);
 
-    static RHI::PixelFormat tinyGltfGetPixelFormat(const tinygltf::Image &img);
+    // static RHI::PixelFormat tinyGltfGetPixelFormat(const tinygltf::Image &img);
     static RHI::PixelType tinyGltfGetPixelType(const tinygltf::Image &img);
 };
 }

@@ -34,6 +34,24 @@ namespace Neon
             registeredSystems.push_back(system);
         }
 
+        // template <typename T>
+        // static void unregisterSystems()
+        // {
+        //     for (size_t i = 0; i < registeredSystems.size(); )
+        //     {
+        //         if (typeid(*registeredSystems[i]) == typeid(T))
+        //         {
+        //             delete registeredSystems[i];
+        //             registeredSystems.erase(registeredSystems.begin() + i);
+        //             // Don't increment i, since elements shift down
+        //         }
+        //         else
+        //         {
+        //             ++i;
+        //         }
+        //     }
+        // }
+
         template <typename T>
         static T* getSystem()
         {
@@ -55,10 +73,10 @@ namespace Neon
         static AudioManager& getAudioManager();
         static SceneManager& getSceneManager();
     private:
-        static Scope<EventManager> eventManager;
-        static Scope<AssetManager> assetManager;
-        static Scope<AudioManager> audioManager;
-        static Scope<SceneManager> sceneManager;
+        static Box<EventManager> eventManager;
+        static Box<AssetManager> assetManager;
+        static Box<AudioManager> audioManager;
+        static Box<SceneManager> sceneManager;
 
         static std::vector<System*> registeredSystems;
         static EngineConfig config;

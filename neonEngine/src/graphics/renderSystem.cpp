@@ -11,10 +11,11 @@
 #include "core/engine.h"
 #include "core/eventManager.h"
 #include "core/sceneManager.h"
-#include "ecs/components/transformComponent.h"
+#include "core/components/transformComponent.h"
 #include "events/quitEvent.h"
 #include "events/windowResizeEvent.h"
 #include "glm/glm.hpp"
+#include "glm/gtx/dual_quaternion.hpp"
 #include "input/events/keyDownEvent.h"
 #include "input/events/keyUpEvent.h"
 #include "input/events/mouseButtonDownEvent.h"
@@ -22,19 +23,18 @@
 #include "input/events/mouseMoveEvent.h"
 #include "input/events/mouseWheelEvent.h"
 #include "input/events/textInputEvent.h"
-#include "util/file.h"
 
 namespace Neon
 {
     RenderSystem::RenderSystem(const RHI::WindowCreationOptions &windowOptions)
     {
-    	window = Scope<RHI::Window>(RHI::Window::createWindow(windowOptions));
+    	window = Box<RHI::Window>(RHI::Window::createWindow(windowOptions));
     }
 
     void RenderSystem::preStartup()
     {
     	window->run();
-    	device = Scope<RHI::Device>(window->createDevice());
+    	device = Box<RHI::Device>(window->createDevice());
 
     	AssetManager& assetManager = Engine::getAssetManager();
 	    const auto shaderHandle = assetManager.loadAsset<RHI::Shader>("shaders/pbr.glsl");
@@ -56,20 +56,20 @@ namespace Neon
 
     	RHI::GraphicsPipelineDescription pipelineDescription{};
     	pipelineDescription.shader             = shader;
-    	pipelineDescription.inputLayout   = vertexInputState;
+    	pipelineDescription.inputLayout		   = vertexInputState;
     	pipelineDescription.cullMode           = RHI::CullMode::None;
     	pipelineDescription.targetsDescription = targetsDesc;
     	pipelineDescription.depthState         = depthState;
 
-    	pipeline = Scope<RHI::Pipeline>(device->createPipeline(pipelineDescription));
+    	pipeline = Box<RHI::Pipeline>(device->createPipeline(pipelineDescription));
 
-    	commandList = Scope<RHI::CommandList>(device->createCommandList());
+    	commandList = Box<RHI::CommandList>(device->createCommandList());
 
-    	cameraUniformBuffer      = Scope<RHI::Buffer>(device->createUniformBuffer());
-    	modelUniformBuffer       = Scope<RHI::Buffer>(device->createUniformBuffer());
-    	materialUniformBuffer    = Scope<RHI::Buffer>(device->createUniformBuffer());
-    	pointLightsUniformBuffer = Scope<RHI::Buffer>(device->createUniformBuffer());
-    	debugUniformBuffer       = Scope<RHI::Buffer>(device->createUniformBuffer());
+    	cameraUniformBuffer      = Box<RHI::Buffer>(device->createUniformBuffer());
+    	modelUniformBuffer       = Box<RHI::Buffer>(device->createUniformBuffer());
+    	materialUniformBuffer    = Box<RHI::Buffer>(device->createUniformBuffer());
+    	pointLightsUniformBuffer = Box<RHI::Buffer>(device->createUniformBuffer());
+    	debugUniformBuffer       = Box<RHI::Buffer>(device->createUniformBuffer());
 
     	DebugUniforms debugUniforms{};
     	debugUniforms.debugUvs     = false;
@@ -90,12 +90,12 @@ namespace Neon
 
     void RenderSystem::render()
     {
-    	auto world = Engine::getSceneManager().getCurrentScene().getWorld();
+    	auto& world = Engine::getSceneManager().getCurrentScene().getRegistry();
 
-	    const auto cameras = world.getComponents<Camera, Transform>();
+	    const auto cameras = world.view<Camera, Transform>();
     	if(cameras.size() < 1) return;
 
-    	auto [camEntity, camera, camTransform] = cameras[0];
+    	auto [camEntity, camera, camTransform] = cameras.at(0);
 
     	commandList->begin();
 
@@ -119,8 +119,8 @@ namespace Neon
 
     	commandList->setUniformBuffer("DebugUniforms", debugUniformBuffer.get());
 
-    	auto meshRenderers = world.getComponents<MeshRenderer, Transform>();
-    	auto pointLights = world.getComponents<PointLight, Transform>();
+    	auto meshRenderers = world.view<MeshRenderer, Transform>();
+    	auto pointLights = world.view<PointLight, Transform>();
 
     	PointLightUniforms pointLightUniforms{};
 
@@ -143,10 +143,21 @@ namespace Neon
     	commandList->updateBuffer(pointLightsUniformBuffer.get(), pointLightUniforms);
     	commandList->setUniformBuffer("PointLightUniforms", pointLightsUniformBuffer.get());
 
+    	std::vector<std::pair<ECS::Entity, MeshRenderer&>> orderedAndCulledEntities{};
+
      	for (auto[entity, meshRenderer, transform] : meshRenderers)
      	{
-			 renderMesh(entity, meshRenderer);
+     		glm::mat4 worldMat = Transform::getWorldMatrix(entity);
+     		if(camera.getFrustum(glm::inverse(worldMat)).intersects(meshRenderer.mesh->getBounds()))
+     		{
+     			orderedAndCulledEntities.emplace_back(entity, meshRenderer);
+     		}
      	}
+
+	    for (const auto& [entity, meshRenderer]: orderedAndCulledEntities)
+	    {
+	    	renderMesh(entity, meshRenderer);
+	    }
 
         device->submit(commandList.get());
     	device->swapBuffers();
@@ -163,7 +174,7 @@ namespace Neon
     	return window.get();
     }
 
-    void RenderSystem::renderMesh(const EntityID entity, const MeshRenderer& meshRenderer) const
+    void RenderSystem::renderMesh(const ECS::Entity entity, const MeshRenderer& meshRenderer) const
     {
     	if(meshRenderer.mesh == nullptr) return;
 
@@ -177,20 +188,29 @@ namespace Neon
     	commandList->updateBuffer(modelUniformBuffer.get(), modelUniforms);
     	commandList->setUniformBuffer("ModelUniforms", modelUniformBuffer.get());
 
-		// TODO make it use all materials on meshRenderer currently only uses one
+		for(int i = 0; i < meshRenderer.materials.size(); i++)
+		{
+			renderSubMesh(meshRenderer, i);
+		}
+    }
+
+	void RenderSystem::renderSubMesh(const MeshRenderer& meshRenderer, const int materialIndex) const
+    {
+    	if(meshRenderer.materials.size() < materialIndex ||
+    		meshRenderer.mesh->getPrimitives().size() < materialIndex) return;
 
     	int useAlbedoTexture = false;
-		const AssetRef<Material> mat = meshRenderer.getMaterial();
-	    const auto albedoTexture = mat->albedoTexture;
-		if(albedoTexture != nullptr)
-		{
-			useAlbedoTexture = true;
+    	const AssetRef<Material> mat = meshRenderer.materials[materialIndex];
+    	const auto albedoTexture = mat->albedoTexture;
+    	if(albedoTexture != nullptr)
+    	{
+    		useAlbedoTexture = true;
 
-			RHI::TextureView* view = getOrCreateTextureView(albedoTexture->getTexture());
+    		RHI::TextureView* view = getOrCreateTextureView(albedoTexture->getTexture());
 
-			commandList->setTexture("albedoTexture", view);
-			commandList->setSampler("albedoTexture", mat->albedoTexture->getSampler());
-		}
+    		commandList->setTexture("albedoTexture", view);
+    		commandList->setSampler("albedoTexture", mat->albedoTexture->getSampler());
+    	}
 
     	MaterialUniforms materialUniforms =
 		{
@@ -200,13 +220,16 @@ namespace Neon
 			useAlbedoTexture
 		};
 
+	    const Primitive primitive = meshRenderer.mesh->getPrimitives().at(materialIndex);
+
     	commandList->updateBuffer(materialUniformBuffer.get(), materialUniforms);
     	commandList->setUniformBuffer("MaterialUniforms", materialUniformBuffer.get());
 
-    	commandList->setVertexBuffer(0, meshRenderer.mesh->vertexBuffer.get());
-    	commandList->setIndexBuffer(meshRenderer.mesh->indexBuffer.get(), RHI::IndexFormat::UInt32);
-    	commandList->drawIndexed(meshRenderer.mesh->indices.size());
+    	commandList->setVertexBuffer(0, meshRenderer.mesh->getVertexBuffer());
+    	commandList->setIndexBuffer(meshRenderer.mesh->getIndexBuffer(), RHI::IndexFormat::UInt32);
+    	commandList->drawIndexed(primitive.indexCount, 1, primitive.indexStart);
     }
+
 
     RHI::TextureView * RenderSystem::getOrCreateTextureView(const AssetRef<RHI::Texture> &texture) const
     {
@@ -218,7 +241,7 @@ namespace Neon
 
     	const RHI::TextureViewDescription viewDesc{ texture.get() };
     	RHI::TextureView* view = device->createTextureView(viewDesc);
-    	textureViewCache.emplace(key, Scope<RHI::TextureView>(view));
+    	textureViewCache.emplace(key, Box<RHI::TextureView>(view));
 
     	return view;
     }

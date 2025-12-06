@@ -19,3 +19,9 @@
 [submodule "neonEngine/dependencies/neonrhi"]
 	path = neonEngine/dependencies/neonrhi
 	url = https://github.com/AlikGreen/NeonRHI.git
+[submodule "neonEngine/dependencies/neonEcs"]
+	path = neonEngine/dependencies/neonEcs
+	url = https://github.com/AlikGreen/NeonECS.git
+[submodule "neonEngine/dependencies/neonecs"]
+	path = neonEngine/dependencies/neonecs
+	url = https://github.com/AlikGreen/NeonECS.git

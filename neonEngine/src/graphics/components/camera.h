@@ -1,6 +1,7 @@
 #pragma once
 #include "glm/glm.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
+#include "graphics/frustum.h"
 
 namespace Neon
 {
@@ -10,70 +11,21 @@ public:
     bool autoAspectRatio = true;
     glm::vec4 bgColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-    void setAspectRatio(const float ratio)
-    {
-        if(aspectRatio != ratio)
-        {
-            aspectRatio = ratio;
-            projectionDirty = true;
-        }
-    }
+    void setAspectRatio(float ratio);
+    [[nodiscard]] float getAspectRatio() const;
 
-    [[nodiscard]] float getAspectRatio() const
-    {
-        return aspectRatio;
-    }
+    void setFov(float fov);
+    [[nodiscard]] float getFov() const;
 
-    void setFov(const float fov)
-    {
-        if(this->fov != fov)
-        {
-            this->fov = fov;
-            projectionDirty = true;
-        }
-    }
+    void setNear(float near);
+    [[nodiscard]] float getNear() const;
 
-    [[nodiscard]] float getFov() const
-    {
-        return fov;
-    }
+    void setFar(float far);
+    [[nodiscard]] float getFar() const;
 
-    void setNear(const float near)
-    {
-        if(nearClip != near)
-        {
-            nearClip = near;
-            projectionDirty = true;
-        }
-    }
+    Frustum getFrustum(const glm::mat4 &view);
+    [[nodiscard]] const glm::mat4& getProjectionMatrix();
 
-    [[nodiscard]] float getNear() const
-    {
-        return nearClip;
-    }
-
-    void setFar(const float far)
-    {
-        if(farClip != far)
-        {
-            farClip = far;
-            projectionDirty = true;
-        }
-    }
-
-    [[nodiscard]] float getFar() const
-    {
-        return farClip;
-    }
-
-    [[nodiscard]] const glm::mat4& getProjectionMatrix()
-    {
-        if (projectionDirty)
-        {
-            updateProjectionMatrix();
-        }
-        return projectionMatrix;
-    }
 private:
     float aspectRatio = 16.0f/9.0f;
 
@@ -82,17 +34,12 @@ private:
     float farClip = 1000.0f;
 
     bool projectionDirty = true;
-    glm::mat4 projectionMatrix{};
 
-    void updateProjectionMatrix()
-    {
-        projectionMatrix = glm::perspective(
-            glm::radians(fov),
-            aspectRatio,
-            nearClip,
-            farClip
-        );
-        projectionDirty = false;
-    }
+    glm::mat4 projectionMatrix{};
+    glm::mat4 viewMatrix{};
+
+    Frustum frustum{};
+
+    void updateProjectionMatrix();
 };
 }

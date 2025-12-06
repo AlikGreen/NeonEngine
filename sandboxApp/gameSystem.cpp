@@ -1,20 +1,22 @@
 #include "gameSystem.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
+#include "core/components/transformComponent.h"
 #include "glm/gtx/string_cast.hpp"
 #include "neonEngine/neonEngine.h"
 
 void GameSystem::postStartup()
 {
-    auto& world = Neon::Engine::getSceneManager().getCurrentScene().getWorld();
+    auto& scene = Neon::Engine::getSceneManager().getCurrentScene();
+    auto& world = scene.getRegistry();
 
     Neon::AssetManager& assetManager = Neon::Engine::getAssetManager();
-    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/monkey.glb");
+    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/balls.glb");
     const auto model = assetManager.getAsset<Neon::Prefab>(modelHandle);
 
-    world.merge(model->world);
+    scene.import(model);
 
-    auto prefabs = world.getComponents<Neon::PrefabComponent, Neon::Transform>();
+    const auto prefabs = world.view<Neon::PrefabComponent, Neon::Transform>();
     for (auto [entity, prefab, transform]: prefabs)
     {
         transform.setScale(glm::vec3(1.0f));
@@ -22,18 +24,18 @@ void GameSystem::postStartup()
 
 
     // Player/Camera entity
-    Neon::Entity cameraEntity = world.createEntity();
-    cameraEntity.addComponent<Neon::Camera>();
-    auto& camTransform = cameraEntity.getComponent<Neon::Transform>();
+    Neon::ECS::Entity cameraEntity = scene.createEntity();
+    cameraEntity.emplace<Neon::Camera>();
+    auto& camTransform = cameraEntity.get<Neon::Transform>();
     camTransform.setPosition({0, 0, 0});
 
     // Light entity
-    Neon::Entity lightEntity = world.createEntity();
-    auto& lightTransform = lightEntity.getComponent<Neon::Transform>();
+    Neon::ECS::Entity lightEntity = scene.createEntity();
+    auto& lightTransform = lightEntity.get<Neon::Transform>();
     lightTransform.setPosition({5, 5, 0});
 
-    lightEntity.addComponent<Neon::PointLight>();
-    auto& pointLight = lightEntity.getComponent<Neon::PointLight>();
+    lightEntity.emplace<Neon::PointLight>();
+    auto& pointLight = lightEntity.get<Neon::PointLight>();
     pointLight.power = 10.0f;
     pointLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
 
@@ -48,11 +50,11 @@ void GameSystem::postStartup()
 
 void GameSystem::update()
 {
-    auto& world = Neon::Engine::getSceneManager().getCurrentScene().getWorld();
+    auto& world = Neon::Engine::getSceneManager().getCurrentScene().getRegistry();
 
-    const auto cameras = world.getComponents<Neon::Camera, Neon::Transform>();
+    const auto cameras = world.view<Neon::Camera, Neon::Transform>();
     if(cameras.size() < 1) return;
-    auto [camEntity, camera, camTransform] = cameras[0];
+    auto [camEntity, camera, camTransform] = cameras.at(0);
 
     constexpr float cameraSpeed = 0.0005f;
     glm::vec3 dir{0.0f};

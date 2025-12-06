@@ -16,17 +16,17 @@ namespace Neon
 
     SoundHandle AudioManager::playSound(AudioClip* clip, SoundHandle soundHandle)
     {
-        std::lock_guard lock(commandQueueMutex);
+        //std::lock_guard lock(commandQueueMutex);
         commandQueue.push({ AudioCommand::Play, clip, soundHandle });
 
-        std::lock_guard audioClipLock(audioClipMutex);
+        //std::lock_guard audioClipLock(audioClipMutex);
         audioClipsMap.emplace(soundHandle, clip);
         return soundHandle;
     }
 
     void AudioManager::stopSound(const SoundHandle soundHandle)
     {
-        std::lock_guard lock(commandQueueMutex);
+        //std::lock_guard lock(commandQueueMutex);
         commandQueue.push({ AudioCommand::Stop, nullptr, soundHandle });
     }
 
@@ -73,7 +73,7 @@ namespace Neon
         // zero out buffer
         std::fill_n(pOutF32, frameCount * 2, 0.0f);
 
-        std::lock_guard vlock(audioClipMutex);
+        //std::lock_guard vlock(audioClipMutex);
         for (const auto& clip : std::ranges::views::values(audioClipsMap))
         {
             //ma_decoder_read_pcm_frames(&clip->decoder, pOutF32, frameCount, nullptr);

@@ -1,0 +1,11 @@
+{
+"rules": [
+{
+"primary-output": "neonEngine/dependencies/neonrhi/CMakeFiles/neonRHI.dir/src/util/stringUtil.cpp.o",
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

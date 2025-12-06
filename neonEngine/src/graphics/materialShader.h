@@ -1,6 +1,7 @@
 #pragma once
 #include "image.h"
 #include "shader.h"
+#include <variant>
 
 namespace Neon
 {

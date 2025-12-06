@@ -1,13 +1,18 @@
 #pragma once
-#include "ecs/world.h"
+#include <neonECS/neonECS.h>
+
 
 namespace Neon
 {
-class Scene
+    class Prefab;
+
+    class Scene
 {
 public:
-    World& getWorld();
+    [[nodiscard]] ECS::Registry& getRegistry();
+    ECS::Entity createEntity(const std::string& name = "Entity");
+    void import(Prefab* entity);
 private:
-    World* world = new World();
+    ECS::Registry registry = ECS::Registry();
 };
 }

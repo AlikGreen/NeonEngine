@@ -1,0 +1,248 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install",
+			"add_extra_node"
+		],
+		"files" : 
+		[
+			"C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/miniaudio/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 511,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 596,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 584,
+				"parent" : 2
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 597,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 584,
+				"parent" : 4
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 598,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 584,
+				"parent" : 6
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 599,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 584,
+				"parent" : 8
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 600,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 584,
+				"parent" : 10
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 859,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 862,
+				"parent" : 0
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "Unspecified",
+			"destination" : "include/miniaudio",
+			"paths" : 
+			[
+				"C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/miniaudio/miniaudio.h"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 3,
+			"component" : "Unspecified",
+			"destination" : "include/miniaudio/extras/nodes/ma_channel_combiner_node",
+			"paths" : 
+			[
+				"C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/miniaudio/extras/nodes/ma_channel_combiner_node/ma_channel_combiner_node.h"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 5,
+			"component" : "Unspecified",
+			"destination" : "include/miniaudio/extras/nodes/ma_channel_separator_node",
+			"paths" : 
+			[
+				"C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/miniaudio/extras/nodes/ma_channel_separator_node/ma_channel_separator_node.h"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 7,
+			"component" : "Unspecified",
+			"destination" : "include/miniaudio/extras/nodes/ma_ltrim_node",
+			"paths" : 
+			[
+				"C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/miniaudio/extras/nodes/ma_ltrim_node/ma_ltrim_node.h"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 9,
+			"component" : "Unspecified",
+			"destination" : "include/miniaudio/extras/nodes/ma_reverb_node",
+			"paths" : 
+			[
+				"C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/miniaudio/extras/nodes/ma_reverb_node/ma_reverb_node.h"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 11,
+			"component" : "Unspecified",
+			"destination" : "include/miniaudio/extras/nodes/ma_vocoder_node",
+			"paths" : 
+			[
+				"C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/miniaudio/extras/nodes/ma_vocoder_node/ma_vocoder_node.h"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 12,
+			"component" : "Unspecified",
+			"destination" : "lib/pkgconfig",
+			"paths" : 
+			[
+				"cmake-build-release/neonEngine/dependencies/miniaudio/miniaudio.pc"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 13,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"neonEngine/dependencies/miniaudio/libminiaudio.a"
+			],
+			"targetId" : "miniaudio::@af02f98e07d001a4e9eb",
+			"targetIndex" : 12,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 13,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"neonEngine/dependencies/miniaudio/libminiaudio_channel_combiner_node.a"
+			],
+			"targetId" : "miniaudio_channel_combiner_node::@af02f98e07d001a4e9eb",
+			"targetIndex" : 13,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 13,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"neonEngine/dependencies/miniaudio/libminiaudio_channel_separator_node.a"
+			],
+			"targetId" : "miniaudio_channel_separator_node::@af02f98e07d001a4e9eb",
+			"targetIndex" : 14,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 13,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"neonEngine/dependencies/miniaudio/libminiaudio_ltrim_node.a"
+			],
+			"targetId" : "miniaudio_ltrim_node::@af02f98e07d001a4e9eb",
+			"targetIndex" : 15,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 13,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"neonEngine/dependencies/miniaudio/libminiaudio_reverb_node.a"
+			],
+			"targetId" : "miniaudio_reverb_node::@af02f98e07d001a4e9eb",
+			"targetIndex" : 16,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 13,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"neonEngine/dependencies/miniaudio/libminiaudio_vocoder_node.a"
+			],
+			"targetId" : "miniaudio_vocoder_node::@af02f98e07d001a4e9eb",
+			"targetIndex" : 17,
+			"type" : "target"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "neonEngine/dependencies/miniaudio",
+		"source" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/miniaudio"
+	}
+}

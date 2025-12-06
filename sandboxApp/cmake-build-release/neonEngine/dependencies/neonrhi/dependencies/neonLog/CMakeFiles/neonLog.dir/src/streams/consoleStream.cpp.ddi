@@ -1,0 +1,11 @@
+{
+"rules": [
+{
+"primary-output": "neonEngine/dependencies/neonrhi/dependencies/neonLog/CMakeFiles/neonLog.dir/src/streams/consoleStream.cpp.o",
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

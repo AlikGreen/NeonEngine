@@ -14,10 +14,10 @@
 
 namespace Neon
 {
-    Scope<EventManager> Engine::eventManager;
-    Scope<AssetManager> Engine::assetManager;
-    Scope<AudioManager> Engine::audioManager;
-    Scope<SceneManager> Engine::sceneManager;
+    Box<EventManager> Engine::eventManager;
+    Box<AssetManager> Engine::assetManager;
+    Box<AudioManager> Engine::audioManager;
+    Box<SceneManager> Engine::sceneManager;
 
     bool Engine::running = false;
     std::vector<System*> Engine::registeredSystems = std::vector<System*>();
@@ -26,10 +26,10 @@ namespace Neon
     void Engine::initialize(const EngineConfig &config)
     {
         Engine::config = config;
-        eventManager = makeScope<EventManager>();
-        assetManager = makeScope<AssetManager>();
-        audioManager = makeScope<AudioManager>();
-        sceneManager = makeScope<SceneManager>();
+        eventManager = makeBox<EventManager>();
+        assetManager = makeBox<AssetManager>();
+        audioManager = makeBox<AudioManager>();
+        sceneManager = makeBox<SceneManager>();
 
         getAssetManager().registerLoader<PrefabLoaderGLB, Prefab>({".glb"});
         getAssetManager().registerLoader<ImageLoader, Image>({".png", ".jpg", ".jpeg", ".bmp", ".hdr", ".ppm"});

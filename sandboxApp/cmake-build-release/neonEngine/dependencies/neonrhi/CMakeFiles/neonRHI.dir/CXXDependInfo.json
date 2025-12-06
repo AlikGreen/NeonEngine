@@ -1,0 +1,31 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "GNU",
+	"compiler-id" : "GNU",
+	"compiler-simulate-id" : "",
+	"config" : "Release",
+	"cxx-modules" : {},
+	"dir-cur-bld" : "C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi",
+	"dir-cur-src" : "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi",
+	"dir-top-bld" : "C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release",
+	"dir-top-src" : "C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : 
+	[
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\src",
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\include",
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\glfw\\include",
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\glm",
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\glslang\\glslang\\..",
+		"include",
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\spirv-cross",
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\glad\\include",
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\neonLog\\include",
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\neonLog\\src",
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\neonLog\\dependencies\\spdlog\\include"
+	],
+	"language" : "CXX",
+	"linked-target-dirs" : [],
+	"module-dir" : "C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/CMakeFiles/neonRHI.dir"
+}

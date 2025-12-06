@@ -1,0 +1,11 @@
+{
+"rules": [
+{
+"primary-output": "neonEngine\\dependencies\\neonrhi\\CMakeFiles\\neonRHI.dir\\src\\implementations\\opengl\\commandListOGL.cpp.obj",
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

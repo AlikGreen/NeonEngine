@@ -1,0 +1,26 @@
+"C:\Program Files\JetBrains\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_MAKE_PROGRAM=C:/Program Files/JetBrains/CLion 2024.2.2/bin/ninja/win/x64/ninja.exe" -G Ninja -S C:\Users\alikg\CLionProjects\neonEngine\sandboxApp -B C:\Users\alikg\CLionProjects\neonEngine\sandboxApp\cmake-build-release
+-- Checking for module 'vorbisfile'
+--   Package 'vorbisfile' not found
+-- libvorbisfile not found. miniaudio_libvorbis will be excluded.
+-- Checking for module 'opusfile'
+--   Package 'opusfile' not found
+-- libopusfile not found. miniaudio_libopus will be excluded.
+-- SDL2 not found. SDL2 examples will be excluded.
+-- SteamAudio not found. miniaudio_engine_steamaudio will be excluded.
+-- Library list: miniaudio;miniaudio_channel_combiner_node;miniaudio_channel_separator_node;miniaudio_ltrim_node;miniaudio_reverb_node;miniaudio_vocoder_node
+Disabling PCH
+-- spirv-tools not linked - illegal SPIRV may be generated for HLSL
+-- GLM: Version 1.0.2
+-- GLM: Build with C++ features auto detection
+-- SPIRV-Cross: Finding Git version for SPIRV-Cross.
+-- SPIRV-Cross: Git hash: vulkan-sdk-1.4.321.0-41-g0a88b2d5
+SPIRV-Cross:  Testing will be disabled for SPIRV-Cross. Could not find glslang or SPIRV-Tools build under external/. To enable testing, run ./checkout_glslang_spirv_tools.sh and ./build_glslang_spirv_tools.sh first.
+-- Including Win32 support
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
+-- Documentation generation requires Doxygen 1.9.8 or later
+-- Build spdlog: 1.16.0
+-- Build type: Release
+-- Found source files: C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/callbackSink.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/debug.cpp;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/debug.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/level.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/log.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/consoleStream.cpp;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/consoleStream.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/fileStream.cpp;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/fileStream.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/stream.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/timers/scopeTimer.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/timers/timer.h
+-- Configuring done (1.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release
