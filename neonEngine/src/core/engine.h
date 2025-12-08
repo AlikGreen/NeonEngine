@@ -1,4 +1,5 @@
 #pragma once
+#include <chrono>
 #include <memory>
 #include <vector>
 
@@ -34,24 +35,6 @@ namespace Neon
             registeredSystems.push_back(system);
         }
 
-        // template <typename T>
-        // static void unregisterSystems()
-        // {
-        //     for (size_t i = 0; i < registeredSystems.size(); )
-        //     {
-        //         if (typeid(*registeredSystems[i]) == typeid(T))
-        //         {
-        //             delete registeredSystems[i];
-        //             registeredSystems.erase(registeredSystems.begin() + i);
-        //             // Don't increment i, since elements shift down
-        //         }
-        //         else
-        //         {
-        //             ++i;
-        //         }
-        //     }
-        // }
-
         template <typename T>
         static T* getSystem()
         {
@@ -72,6 +55,8 @@ namespace Neon
         static AssetManager& getAssetManager();
         static AudioManager& getAudioManager();
         static SceneManager& getSceneManager();
+
+        static float getDeltaTime();
     private:
         static Box<EventManager> eventManager;
         static Box<AssetManager> assetManager;
@@ -85,5 +70,6 @@ namespace Neon
         static void startup();
 
         static bool running;
+        static float deltaTime;
     };
 }

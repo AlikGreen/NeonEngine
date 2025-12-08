@@ -14,7 +14,7 @@
 	"include-dirs" : 
 	[
 		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonecs\\include",
-		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonecs\\dependencies\\neonCore\\src"
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\neonCore\\src"
 	],
 	"language" : "CXX",
 	"linked-target-dirs" : [],

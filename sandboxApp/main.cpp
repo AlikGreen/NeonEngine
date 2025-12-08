@@ -3,6 +3,7 @@
 #include "core/coreSystem.h"
 #include "core/engine.h"
 #include "graphics/guiSystem.h"
+#include "graphics/imGuiSystem.h"
 #include "graphics/renderSystem.h"
 #include "input/inputSystem.h"
 
@@ -20,6 +21,7 @@ int main()
 
     Neon::Engine::registerSystem<Neon::CoreSystem>();
     Neon::Engine::registerSystem<Neon::RenderSystem>(config.windowOptions);
+    Neon::Engine::registerSystem<Neon::ImGuiSystem>();
     Neon::Engine::registerSystem<Neon::GuiSystem>();
 
     Neon::Engine::registerSystem<GameSystem>();

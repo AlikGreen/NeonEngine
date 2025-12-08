@@ -33,6 +33,8 @@ C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngin
 C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/miniaudio/CMakeFiles/install/local.dir
 C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/miniaudio/CMakeFiles/install/strip.dir
 C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/CMakeFiles/neonRHI.dir
+C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/CMakeFiles/imgui_static.dir
+C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/CMakeFiles/neonRHI_imgui.dir
 C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/CMakeFiles/edit_cache.dir
 C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/CMakeFiles/rebuild_cache.dir
 C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/CMakeFiles/list_install_components.dir
@@ -154,6 +156,12 @@ C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngin
 C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/CMakeFiles/install.dir
 C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/CMakeFiles/install/local.dir
 C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/CMakeFiles/install/strip.dir
+C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/neonCore/CMakeFiles/edit_cache.dir
+C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/neonCore/CMakeFiles/rebuild_cache.dir
+C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/neonCore/CMakeFiles/list_install_components.dir
+C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/neonCore/CMakeFiles/install.dir
+C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/neonCore/CMakeFiles/install/local.dir
+C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/neonCore/CMakeFiles/install/strip.dir
 C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonecs/CMakeFiles/neonECS.dir
 C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonecs/CMakeFiles/neonECS_test.dir
 C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonecs/CMakeFiles/edit_cache.dir

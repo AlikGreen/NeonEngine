@@ -17,6 +17,12 @@ namespace Neon
         {
             return canceled;
         }
+
+        template<typename... Types>
+        [[nodiscard]] bool isAny() const
+        {
+            return ( (dynamic_cast<const Types*>(this) != nullptr) || ... );
+        }
     private:
         bool canceled = false;
     };

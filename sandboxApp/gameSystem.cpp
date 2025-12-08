@@ -3,6 +3,13 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "core/components/transformComponent.h"
 #include "glm/gtx/string_cast.hpp"
+#include "input/events/keyDownEvent.h"
+#include "input/events/keyUpEvent.h"
+#include "input/events/mouseButtonDownEvent.h"
+#include "input/events/mouseButtonUpEvent.h"
+#include "input/events/mouseMoveEvent.h"
+#include "input/events/mouseWheelEvent.h"
+#include "input/events/textInputEvent.h"
 #include "neonEngine/neonEngine.h"
 
 void GameSystem::postStartup()
@@ -37,11 +44,6 @@ void GameSystem::postStartup()
     // auto *song = assetManager->getAsset<Neon::AudioClip>(songHandle);
     // Neon::Engine::getAudioManager()->playSound(song);
 
-
-    Neon::Input::setCursorLocked(true);
-    Neon::Input::setCursorVisible(false);
-
-    start = std::chrono::high_resolution_clock::now();
 }
 
 void GameSystem::update()
@@ -54,6 +56,23 @@ void GameSystem::update()
 
     constexpr float cameraSpeed = 0.0005f;
     glm::vec3 dir{0.0f};
+
+    if(Neon::Input::isKeyPressed(KeyCode::Escape))
+    {
+        focused = !focused;
+
+        if(focused)
+        {
+            Neon::Input::setCursorLocked(true);
+            Neon::Input::setCursorVisible(false);
+        }else
+        {
+            Neon::Input::setCursorLocked(false);
+            Neon::Input::setCursorVisible(true);
+        }
+    }
+
+    if(!focused) return;
 
     if(Neon::Input::isKeyHeld(KeyCode::W)) dir += glm::vec3(camTransform.forward().x, 0, camTransform.forward().z);
     if(Neon::Input::isKeyHeld(KeyCode::S)) dir += glm::vec3(camTransform.backward().x, 0, camTransform.backward().z);
@@ -69,20 +88,21 @@ void GameSystem::update()
 
     constexpr float cameraSens = 0.0005f;
     camTransform.rotate(glm::vec3(Neon::Input::getMouseDelta().y, Neon::Input::getMouseDelta().x, 0)*cameraSens);
-
-    const std::chrono::time_point<std::chrono::high_resolution_clock> end = std::chrono::high_resolution_clock::now();
-
-    frameCount++;
-
-    if(end - start >= std::chrono::seconds(5))
-    {
-        Neon::Log::info("FPS: {}", frameCount/5);
-        start = end;
-        frameCount = 0;
-    }
 }
 
-void GameSystem::event(Neon::Event *event)
+void GameSystem::event(Neon::Event* event)
 {
+    if(!focused) return;
 
+    if(event->isAny<
+        Neon::KeyDownEvent,
+        Neon::KeyUpEvent,
+        Neon::MouseButtonDownEvent,
+        Neon::MouseButtonUpEvent,
+        Neon::MouseMoveEvent,
+        Neon::MouseWheelEvent,
+        Neon::TextInputEvent>())
+    {
+        event->cancel();
+    }
 }

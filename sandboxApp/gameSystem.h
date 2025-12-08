@@ -9,8 +9,6 @@ public:
     void postStartup() override;
     void update() override;
     void event(Neon::Event *event) override;
-
 private:
-    size_t frameCount = 0;
-    std::chrono::time_point<std::chrono::high_resolution_clock> start;
+    bool focused = false;
 };

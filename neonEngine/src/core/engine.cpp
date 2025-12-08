@@ -20,6 +20,7 @@ namespace Neon
     Box<SceneManager> Engine::sceneManager;
 
     bool Engine::running = false;
+    float Engine::deltaTime = 0.0f;
     std::vector<System*> Engine::registeredSystems = std::vector<System*>();
     EngineConfig Engine::config;
 
@@ -72,6 +73,11 @@ namespace Neon
         return *sceneManager;
     }
 
+    float Engine::getDeltaTime()
+    {
+        return deltaTime;
+    }
+
     void Engine::run()
     {
         startup();
@@ -79,47 +85,43 @@ namespace Neon
         running = true;
         while (running)
         {
+            auto start = std::chrono::high_resolution_clock::now();
+
+            eventManager->handleEvents();
+
             for (const auto system: registeredSystems)
             {
                 system->preUpdate();
             }
-
-            eventManager->handleEvents();
 
             for (const auto system: registeredSystems)
             {
                 system->update();
             }
 
-            eventManager->handleEvents();
-
             for (const auto system: registeredSystems)
             {
                 system->postUpdate();
             }
-
-            eventManager->handleEvents();
 
             for (const auto system: registeredSystems)
             {
                 system->preRender();
             }
 
-            eventManager->handleEvents();
-
             for (const auto system: registeredSystems)
             {
                 system->render();
             }
-
-            eventManager->handleEvents();
 
             for (const auto system: registeredSystems)
             {
                 system->postRender();
             }
 
-            eventManager->handleEvents();
+            auto end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<float> diff = end - start;
+            deltaTime = diff.count();
         }
 
         shutdown();
@@ -127,7 +129,6 @@ namespace Neon
 
     void Engine::startup()
     {
-
 
         for (const auto system: registeredSystems)
         {

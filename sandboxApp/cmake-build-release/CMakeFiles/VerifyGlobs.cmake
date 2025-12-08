@@ -60,7 +60,7 @@ if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   file(TOUCH_NOCREATE "C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/CMakeFiles/cmake.verify_globs")
 endif()
 
-# SRC_FILES at C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/CMakeLists.txt:15 (file)
+# SRC_FILES at C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/CMakeLists.txt:18 (file)
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/*.cpp")
 set(OLD_GLOB
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.cpp"
@@ -84,18 +84,21 @@ if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   file(TOUCH_NOCREATE "C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/CMakeFiles/cmake.verify_globs")
 endif()
 
-# SRC_FILES at C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/CMakeLists.txt:15 (file)
+# SRC_FILES at C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/CMakeLists.txt:18 (file)
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/*.h")
 set(OLD_GLOB
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/buffer.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/blendState.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/computePipelineDescription.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/depthState.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/framebufferDescription.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/inputLayout.h"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/rasterizerState.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/renderTargetsDescription.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/scissorRect.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/shaderReflection.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureDescription.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureUploadDescription.h"
@@ -106,6 +109,8 @@ set(OLD_GLOB
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/windowCreationOptions.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/backendAPI.h"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendFactor.h"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendOp.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/cullMode.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/fillMode.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/indexFormat.h"
@@ -169,6 +174,7 @@ set(OLD_GLOB
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/components/camera.cpp"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/frustum.cpp"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/guiSystem.cpp"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/imGuiSystem.cpp"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/image.cpp"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/loaders/imageLoader.cpp"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/loaders/prefabLoaderGLB.cpp"
@@ -221,6 +227,7 @@ set(OLD_GLOB
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/events/windowResizeEvent.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/frustum.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/guiSystem.h"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/imGuiSystem.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/image.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/loaders/imageLoader.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/loaders/prefabLoaderGLB.h"

@@ -54,6 +54,7 @@ namespace Neon
         void shutdown() override;
         void preUpdate() override;
         void render() override;
+        void postRender() override;
 
         [[nodiscard]] RHI::Device* getDevice() const;
         [[nodiscard]] RHI::Window* getWindow() const;

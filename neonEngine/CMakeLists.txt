@@ -30,4 +30,4 @@ set(CMAKE_PCH_INSTANTIATE_TEMPLATES ON)
 target_precompile_headers(neonEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/common.h")
 
 target_include_directories(neonEngine PUBLIC src/ include/ )
-target_link_libraries(neonEngine PUBLIC glfw tinygltf miniaudio neonRHI neonECS)
+target_link_libraries(neonEngine PUBLIC glfw tinygltf miniaudio neonRHI neonECS neonRHI::imgui)

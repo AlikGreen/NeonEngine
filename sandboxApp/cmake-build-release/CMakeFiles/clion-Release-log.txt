@@ -18,9 +18,9 @@ SPIRV-Cross:  Testing will be disabled for SPIRV-Cross. Could not find glslang o
 -- Including Win32 support
 -- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
 -- Documentation generation requires Doxygen 1.9.8 or later
--- Build spdlog: 1.16.0
+-- Build spdlog: 1.15.3
 -- Build type: Release
 -- Found source files: C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/callbackSink.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/debug.cpp;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/debug.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/level.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/log.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/consoleStream.cpp;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/consoleStream.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/fileStream.cpp;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/fileStream.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/stream.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/timers/scopeTimer.h;C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/timers/timer.h
 -- Configuring done (1.3s)
--- Generating done (0.3s)
+-- Generating done (0.5s)
 -- Build files have been written to: C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release

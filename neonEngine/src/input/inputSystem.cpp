@@ -30,7 +30,7 @@ namespace Neon
 
     void InputSystem::postUpdate()
     {
-        for (auto keyState: std::views::values(Input::keyStates))
+        for (auto& keyState: std::views::values(Input::keyStates))
         {
             keyState.pressed = false;
             keyState.released = false;

@@ -1,5 +1,7 @@
 #include "eventManager.h"
 
+#include <ranges>
+
 #include "core/engine.h"
 
 namespace Neon
@@ -8,7 +10,7 @@ namespace Neon
     {
         for(const auto event : events)
         {
-            for(const auto system : Engine::getSystems())
+            for (const auto system : std::ranges::reverse_view(Engine::getSystems()))
             {
                 system->event(event);
 

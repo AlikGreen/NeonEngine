@@ -52,14 +52,17 @@ namespace Neon
     	depthState.hasDepthTarget  = true;
     	depthState.enableDepthTest = true;
 
+    	RHI::RasterizerState rasterizerState{};
+    	rasterizerState.cullMode = RHI::CullMode::None;
+
 	    const RHI::RenderTargetsDescription targetsDesc{};
 
     	RHI::GraphicsPipelineDescription pipelineDescription{};
     	pipelineDescription.shader             = shader;
     	pipelineDescription.inputLayout		   = vertexInputState;
-    	pipelineDescription.cullMode           = RHI::CullMode::None;
     	pipelineDescription.targetsDescription = targetsDesc;
     	pipelineDescription.depthState         = depthState;
+    	pipelineDescription.rasterizerState    = rasterizerState;
 
     	pipeline = Box<RHI::Pipeline>(device->createPipeline(pipelineDescription));
 
@@ -119,8 +122,8 @@ namespace Neon
 
     	commandList->setUniformBuffer("DebugUniforms", debugUniformBuffer.get());
 
-    	auto meshRenderers = world.view<MeshRenderer, Transform>();
-    	auto pointLights = world.view<PointLight, Transform>();
+	    const auto meshRenderers = world.view<MeshRenderer, Transform>();
+	    const auto pointLights = world.view<PointLight, Transform>();
 
     	PointLightUniforms pointLightUniforms{};
 
@@ -160,6 +163,10 @@ namespace Neon
 	    }
 
         device->submit(commandList.get());
+    }
+
+    void RenderSystem::postRender()
+    {
     	device->swapBuffers();
     }
 
