@@ -36,11 +36,11 @@ namespace Neon
 
     void Input::setCursorLocked(const bool locked)
     {
-        Engine::getSystem<RenderSystem>()->getWindow()->setCursorLocked(locked);
+        Engine::getSystem<GraphicsSystem>()->getWindow()->setCursorLocked(locked);
     }
 
     void Input::setCursorVisible(const bool visible)
     {
-        Engine::getSystem<RenderSystem>()->getWindow()->setCursorVisible(visible);
+        Engine::getSystem<GraphicsSystem>()->getWindow()->setCursorVisible(visible);
     }
 }

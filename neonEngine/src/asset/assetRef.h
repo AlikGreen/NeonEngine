@@ -26,10 +26,10 @@ public:
         return *cachedAsset;
     }
 
-    T* get() const
+    T& get() const
     {
         updateCachedAsset();
-        return cachedAsset;
+        return *cachedAsset;
     }
 
     AssetHandle getHandle() const
@@ -64,9 +64,9 @@ private:
     friend class AssetManager;
     void updateCachedAsset() const
     {
-        if (cachedAsset == nullptr)
+        if (cachedAsset == nullptr && handle.isValid())
         {
-            cachedAsset = Engine::getAssetManager().getAsset<T>(handle);
+            cachedAsset = &Engine::getAssetManager().getAsset<T>(handle);
         }
     }
 

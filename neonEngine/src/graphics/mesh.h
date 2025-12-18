@@ -45,8 +45,8 @@ namespace Neon
 
         AABB getBounds();
 
-        [[nodiscard]] RHI::Buffer* getVertexBuffer();
-        [[nodiscard]] RHI::Buffer* getIndexBuffer();
+        [[nodiscard]] Rc<RHI::Buffer> getVertexBuffer();
+        [[nodiscard]] Rc<RHI::Buffer> getIndexBuffer();
 
         void setReadable(bool readable);
     private:
@@ -61,7 +61,7 @@ namespace Neon
 
         AABB bounds{};
 
-        Box<RHI::Buffer> vertexBuffer = nullptr;
-        Box<RHI::Buffer> indexBuffer = nullptr;
+        Rc<RHI::Buffer> vertexBuffer = nullptr;
+        Rc<RHI::Buffer> indexBuffer = nullptr;
     };
 }

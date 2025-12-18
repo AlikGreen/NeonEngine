@@ -28,8 +28,8 @@
 		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\neonLog\\include",
 		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\neonLog\\src",
 		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\neonLog\\dependencies\\spdlog\\include",
-		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonecs\\include",
 		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\neonCore\\src",
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonecs\\include",
 		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\backends",
 		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\imgui"
 	],

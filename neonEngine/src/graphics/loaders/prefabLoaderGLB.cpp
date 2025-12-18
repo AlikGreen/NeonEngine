@@ -297,8 +297,8 @@ namespace Neon
 
         RHI::TextureDescription textureDescription{};
         textureDescription.format = determineTextureFormat(image, isSrgb);
-        textureDescription.dimensions.x = image.width;
-        textureDescription.dimensions.y = image.height;
+        textureDescription.width = image.width;
+        textureDescription.height = image.height;
 
         RHI::SamplerDescription samplerDescription{};
 
@@ -311,9 +311,9 @@ namespace Neon
             samplerDescription.wrapMode.y = convertGLTFWrap(sampler.wrapT);
         }
 
-        RHI::Device* device = Engine::getSystem<RenderSystem>()->getDevice();
-        RHI::Texture* tex = device->createTexture(textureDescription);
-        RHI::Sampler* sampler = device->createSampler(samplerDescription);
+        const Rc<RHI::Device>& device = Engine::getSystem<GraphicsSystem>()->getDevice();
+        const Rc<RHI::Texture>& tex = device->createTexture(textureDescription);
+        const Rc<RHI::Sampler>& sampler = device->createSampler(samplerDescription);
 
         AssetManager& assetManager = Engine::getAssetManager();
 
@@ -330,7 +330,7 @@ namespace Neon
         commandList->generateMipmaps(tex);
         device->submit(commandList);
 
-        return assetManager.addAsset(new Image(tex, sampler));
+        return assetManager.addAsset(Image(tex, sampler));
     }
 
     Mesh* PrefabLoaderGLB::createMesh(const tinygltf::Mesh& mesh, const tinygltf::Model& model)

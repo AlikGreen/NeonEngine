@@ -6,9 +6,11 @@
 
 namespace Neon
 {
-    void * ShaderLoader::load(const std::string &filepath)
+    void* ShaderLoader::load(const std::string &filepath)
     {
-        auto* device = Engine::getSystem<RenderSystem>()->getDevice();
-        return device->createShaderFromSource(File::readFileText(filepath.c_str()), filepath);;
+        const auto& device = Engine::getSystem<GraphicsSystem>()->getDevice();
+        auto shader = device->createShaderFromSource(File::readFileText(filepath.c_str()), filepath);
+
+        return new Rc(std::move(shader));
     }
 }

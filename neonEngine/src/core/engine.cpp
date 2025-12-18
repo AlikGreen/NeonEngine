@@ -34,7 +34,7 @@ namespace Neon
 
         getAssetManager().registerLoader<PrefabLoaderGLB, Prefab>({".glb", ".bin", ".gltf"});
         getAssetManager().registerLoader<ImageLoader, Image>({".png", ".jpg", ".jpeg", ".bmp", ".hdr", ".ppm"});
-        getAssetManager().registerLoader<ShaderLoader, RHI::Shader>({".glsl", ".shader"});
+        getAssetManager().registerLoader<ShaderLoader, Rc<RHI::Shader>>({".glsl", ".shader"});
     }
 
     void Engine::quit()

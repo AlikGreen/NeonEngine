@@ -4,7 +4,7 @@
 
 namespace Neon
 {
-    Image::Image(RHI::Texture* texture, RHI::Sampler* sampler)
+    Image::Image(const Rc<RHI::Texture>& texture, const Rc<RHI::Sampler>& sampler)
     {
         AssetManager& assetManager = Engine::getAssetManager();
 
@@ -12,13 +12,13 @@ namespace Neon
         samplerHandle = assetManager.addAsset(sampler);
     }
 
-    RHI::Texture* Image::getTexture() const
+    Rc<RHI::Texture> Image::getTexture() const
     {
-        return textureHandle.get();
+        return *textureHandle;
     }
 
-    RHI::Sampler* Image::getSampler() const
+    Rc<RHI::Sampler> Image::getSampler() const
     {
-        return samplerHandle.get();
+        return *samplerHandle;
     }
 }

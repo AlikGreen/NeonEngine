@@ -8,7 +8,7 @@
 namespace Neon
 {
 
-    ECS::Registry & Scene::getRegistry()
+    ECS::Registry& Scene::getRegistry()
     {
         return registry;
     }
@@ -24,11 +24,11 @@ namespace Neon
         return entity;
     }
 
-    ECS::Entity Scene::import(Prefab* prefab)
+    ECS::Entity Scene::import(Prefab& prefab)
     {
-        const std::vector<ECS::Entity> newEntities = registry.merge(prefab->scene.getRegistry());
+        const std::vector<ECS::Entity> newEntities = registry.merge(prefab.scene.getRegistry());
 
-        const ECS::Entity parent = createEntity(prefab->name);
+        const ECS::Entity parent = createEntity(prefab.name);
 
         for(auto entity : newEntities)
         {

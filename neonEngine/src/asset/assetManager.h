@@ -37,7 +37,7 @@ public:
         return handle;
     }
 
-    template<typename T> requires (!std::is_const_v<T>)
+    template<typename T> // requires (!std::is_const_v<T>)
     AssetHandle addAsset(T* asset)
     {
         AssetHandle handle = AssetHandle::create();
@@ -46,10 +46,19 @@ public:
     }
 
     template<typename T>
-    T* getAsset(const AssetHandle& assetHandle)
+    AssetHandle addAsset(T asset)
     {
-        if(!assetHandle.isValid()) return nullptr;
-        return static_cast<T*>(assets.at(assetHandle));
+        AssetHandle handle = AssetHandle::create();
+        T* heapAsset = new T(std::move(asset));  // Allocate on heap
+        assets.emplace(handle, heapAsset);
+        return handle;
+    }
+
+    template<typename T>
+    T& getAsset(const AssetHandle& assetHandle)
+    {
+        Debug::ensure(assetHandle.isValid(), "Tried to get an asset that did not exist.");
+        return *static_cast<T*>(assets.at(assetHandle));
     }
 
     template<typename SerializerType, typename AssetType, typename... Args> requires std::derived_from<SerializerType, AssetSerializer>

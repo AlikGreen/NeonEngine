@@ -5,10 +5,8 @@ namespace Neon
 class WindowResizeEvent final : public Event
 {
 public:
-    WindowResizeEvent(int width, int height) : width(width), height(height)
-    {
-
-    }
-    float width, height;
+    WindowResizeEvent(const int width, const int height)
+        : width(width), height(height) { }
+    int width, height;
 };
 }

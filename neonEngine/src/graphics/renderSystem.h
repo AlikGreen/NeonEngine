@@ -1,6 +1,8 @@
 #pragma once
 
 #include <neonRHI/neonRHI.h>
+
+#include "graphicsSystem.h"
 #include "core/system.h"
 #include "components/meshRenderer.h"
 
@@ -48,35 +50,29 @@ namespace Neon
     class RenderSystem final : public System
     {
     public:
-        explicit RenderSystem(const RHI::WindowCreationOptions &windowOptions);
-
         void preStartup() override;
-        void shutdown() override;
-        void preUpdate() override;
+        void postStartup() override;
         void render() override;
-        void postRender() override;
-
-        [[nodiscard]] RHI::Device* getDevice() const;
-        [[nodiscard]] RHI::Window* getWindow() const;
+        void event(Event *event) override;
     private:
         void renderMesh(ECS::Entity entity, const MeshRenderer& meshRenderer) const;
-
         void renderSubMesh(const MeshRenderer &meshRenderer, int materialIndex) const;
 
-        RHI::TextureView* getOrCreateTextureView(const AssetRef<RHI::Texture>& texture) const;
+        Rc<RHI::TextureView> getOrCreateTextureView(const Rc<RHI::Texture>& texture) const;
 
-        mutable std::unordered_map<uint64_t, Box<RHI::TextureView>> textureViewCache;
+        mutable std::unordered_map<RHI::Texture*, Rc<RHI::TextureView>> m_textureViewCache;
 
-        Box<RHI::Window> window{};
-        Box<RHI::Device> device{};
+        GraphicsSystem* m_graphicsSystem{};
 
-        Box<RHI::Pipeline> pipeline{};
-        Box<RHI::CommandList> commandList{};
+        Rc<RHI::Device> m_device{};
+        Rc<RHI::Window> m_window{};
+        Rc<RHI::Pipeline> m_pipeline{};
+        Rc<RHI::CommandList> m_commandList{};
 
-        Box<RHI::Buffer> cameraUniformBuffer{};
-        Box<RHI::Buffer> modelUniformBuffer{};
-        Box<RHI::Buffer> debugUniformBuffer{};
-        Box<RHI::Buffer> materialUniformBuffer{};
-        Box<RHI::Buffer> pointLightsUniformBuffer{};
+        Rc<RHI::Buffer> m_cameraUniformBuffer{};
+        Rc<RHI::Buffer> m_modelUniformBuffer{};
+        Rc<RHI::Buffer> m_debugUniformBuffer{};
+        Rc<RHI::Buffer> m_materialUniformBuffer{};
+        Rc<RHI::Buffer> m_pointLightsUniformBuffer{};
     };
 }

@@ -4,6 +4,7 @@
 
 #include <neonRHI/neonRHI.h>
 
+#include "graphicsSystem.h"
 #include "mesh.h"
 #include "asset/assetManager.h"
 #include "components/camera.h"
@@ -12,33 +13,22 @@
 #include "core/eventManager.h"
 #include "core/sceneManager.h"
 #include "core/components/transformComponent.h"
-#include "events/quitEvent.h"
 #include "events/windowResizeEvent.h"
 #include "glm/glm.hpp"
 #include "glm/gtx/dual_quaternion.hpp"
-#include "input/events/keyDownEvent.h"
-#include "input/events/keyUpEvent.h"
-#include "input/events/mouseButtonDownEvent.h"
-#include "input/events/mouseButtonUpEvent.h"
-#include "input/events/mouseMoveEvent.h"
-#include "input/events/mouseWheelEvent.h"
-#include "input/events/textInputEvent.h"
 
 namespace Neon
 {
-    RenderSystem::RenderSystem(const RHI::WindowCreationOptions &windowOptions)
-    {
-    	window = Box<RHI::Window>(RHI::Window::createWindow(windowOptions));
-    }
-
     void RenderSystem::preStartup()
     {
-    	window->run();
-    	device = Box<RHI::Device>(window->createDevice());
+    	m_graphicsSystem = Engine::getSystem<GraphicsSystem>();
+
+    	m_window = m_graphicsSystem->getWindow();
+    	m_device = m_graphicsSystem->getDevice();
 
     	AssetManager& assetManager = Engine::getAssetManager();
-	    const auto shaderHandle = assetManager.loadAsset<RHI::Shader>("shaders/pbr.glsl");
-    	const auto shader = assetManager.getAsset<RHI::Shader>(shaderHandle);
+	    const auto shaderHandle = assetManager.loadAsset<Rc<RHI::Shader>>("shaders/pbr.glsl");
+    	const auto& shader = assetManager.getAsset<Rc<RHI::Shader>>(shaderHandle);
 
     	shader->compile();
 
@@ -51,11 +41,15 @@ namespace Neon
     	RHI::DepthState depthState{};
     	depthState.hasDepthTarget  = true;
     	depthState.enableDepthTest = true;
+    	depthState.enableDepthWrite = true;
 
     	RHI::RasterizerState rasterizerState{};
     	rasterizerState.cullMode = RHI::CullMode::None;
 
 	    const RHI::RenderTargetsDescription targetsDesc{};
+
+	    RHI::BlendState blendState{};
+    	blendState.enableBlend = true;
 
     	RHI::GraphicsPipelineDescription pipelineDescription{};
     	pipelineDescription.shader             = shader;
@@ -63,32 +57,49 @@ namespace Neon
     	pipelineDescription.targetsDescription = targetsDesc;
     	pipelineDescription.depthState         = depthState;
     	pipelineDescription.rasterizerState    = rasterizerState;
+    	pipelineDescription.blendState         = blendState;
 
-    	pipeline = Box<RHI::Pipeline>(device->createPipeline(pipelineDescription));
+    	m_pipeline = m_device->createPipeline(pipelineDescription);
 
-    	commandList = Box<RHI::CommandList>(device->createCommandList());
+    	m_commandList = m_device->createCommandList();
 
-    	cameraUniformBuffer      = Box<RHI::Buffer>(device->createUniformBuffer());
-    	modelUniformBuffer       = Box<RHI::Buffer>(device->createUniformBuffer());
-    	materialUniformBuffer    = Box<RHI::Buffer>(device->createUniformBuffer());
-    	pointLightsUniformBuffer = Box<RHI::Buffer>(device->createUniformBuffer());
-    	debugUniformBuffer       = Box<RHI::Buffer>(device->createUniformBuffer());
+    	m_cameraUniformBuffer      = m_device->createUniformBuffer();
+    	m_modelUniformBuffer       = m_device->createUniformBuffer();
+    	m_materialUniformBuffer    = m_device->createUniformBuffer();
+    	m_pointLightsUniformBuffer = m_device->createUniformBuffer();
+    	m_debugUniformBuffer       = m_device->createUniformBuffer();
 
     	DebugUniforms debugUniforms{};
     	debugUniforms.debugUvs     = false;
     	debugUniforms.debugNormals = false;
 
-    	commandList->begin();
+    	m_commandList->begin();
 
-    	commandList->reserveBuffer(cameraUniformBuffer     .get(), sizeof(CameraUniforms));
-    	commandList->reserveBuffer(modelUniformBuffer      .get(), sizeof(MeshUniforms));
-    	commandList->reserveBuffer(materialUniformBuffer   .get(), sizeof(MaterialUniforms));
-    	commandList->reserveBuffer(pointLightsUniformBuffer.get(), sizeof(PointLightUniforms));
+    	m_commandList->reserveBuffer(m_cameraUniformBuffer     , sizeof(CameraUniforms));
+    	m_commandList->reserveBuffer(m_modelUniformBuffer      , sizeof(MeshUniforms));
+    	m_commandList->reserveBuffer(m_materialUniformBuffer   , sizeof(MaterialUniforms));
+    	m_commandList->reserveBuffer(m_pointLightsUniformBuffer, sizeof(PointLightUniforms));
 
-    	commandList->reserveBuffer(debugUniformBuffer.get(), sizeof(DebugUniforms));
-    	commandList->updateBuffer(debugUniformBuffer.get(), debugUniforms);
+    	m_commandList->reserveBuffer(m_debugUniformBuffer, sizeof(DebugUniforms));
+    	m_commandList->updateBuffer( m_debugUniformBuffer, debugUniforms);
 
-		device->submit(commandList.get());
+		m_device->submit(m_commandList);
+    }
+
+    void RenderSystem::postStartup()
+    {
+    	auto& world = Engine::getSceneManager().getCurrentScene().getRegistry();
+
+    	const auto cameras = world.view<Camera>();
+
+    	for(auto [entity, camera] : cameras)
+    	{
+    		if(camera.matchWindowSize)
+    		{
+    			camera.setWidth(m_window->getWidth());
+    			camera.setHeight(m_window->getHeight());
+    		}
+    	}
     }
 
     void RenderSystem::render()
@@ -100,13 +111,14 @@ namespace Neon
 
     	auto [camEntity, camera, camTransform] = cameras.at(0);
 
-    	commandList->begin();
+    	m_commandList->begin();
 
-    	commandList->setFramebuffer(device->getSwapChainFramebuffer());
-        commandList->setPipeline(pipeline.get());
+	    const Rc<RHI::Framebuffer> framebuffer = camera.getFramebuffer();
+    	m_commandList->setFramebuffer(framebuffer);
+        m_commandList->setPipeline(m_pipeline);
 
-    	commandList->clearColorTarget(0, camera.bgColor);
-    	commandList->clearDepthStencil(1.0f);
+    	m_commandList->clearColorTarget(0, camera.bgColor);
+    	m_commandList->clearDepthStencil(1.0f);
 
     	const glm::mat4 flip = glm::scale(glm::mat4(1.0f),glm::vec3(1, 1, -1));
     	const glm::mat4 viewMatrix = glm::inverse(Transform::getWorldMatrix(camEntity) * flip);
@@ -117,10 +129,10 @@ namespace Neon
 			camera.getProjectionMatrix(),
 		};
 
-		commandList->updateBuffer(cameraUniformBuffer.get(), cameraMatrices);
-     	commandList->setUniformBuffer("CameraUniforms", cameraUniformBuffer.get());
+		m_commandList->updateBuffer(m_cameraUniformBuffer, cameraMatrices);
+     	m_commandList->setUniformBuffer("CameraUniforms", m_cameraUniformBuffer);
 
-    	commandList->setUniformBuffer("DebugUniforms", debugUniformBuffer.get());
+    	m_commandList->setUniformBuffer("DebugUniforms", m_debugUniformBuffer);
 
 	    const auto meshRenderers = world.view<MeshRenderer, Transform>();
 	    const auto pointLights = world.view<PointLight, Transform>();
@@ -143,8 +155,8 @@ namespace Neon
 
     	pointLightUniforms.pointLightsCount = i;
 
-    	commandList->updateBuffer(pointLightsUniformBuffer.get(), pointLightUniforms);
-    	commandList->setUniformBuffer("PointLightUniforms", pointLightsUniformBuffer.get());
+    	m_commandList->updateBuffer(m_pointLightsUniformBuffer, pointLightUniforms);
+    	m_commandList->setUniformBuffer("PointLightUniforms", m_pointLightsUniformBuffer);
 
     	std::vector<std::pair<ECS::Entity, MeshRenderer&>> orderedAndCulledEntities{};
 
@@ -162,23 +174,26 @@ namespace Neon
 	    	renderMesh(entity, meshRenderer);
 	    }
 
-        device->submit(commandList.get());
-    }
-
-    void RenderSystem::postRender()
-    {
-    	device->swapBuffers();
+        m_device->submit(m_commandList);
     }
 
 
-    RHI::Device* RenderSystem::getDevice() const
+    void RenderSystem::event(Event *event)
     {
-    	return device.get();
-    }
+	    if(const auto resize = dynamic_cast<WindowResizeEvent*>(event))
+	    {
+	    	auto& world = Engine::getSceneManager().getCurrentScene().getRegistry();
+	    	const auto cameras = world.view<Camera>();
 
-    RHI::Window* RenderSystem::getWindow() const
-    {
-    	return window.get();
+	    	for(auto [entity, camera] : cameras)
+	    	{
+	    		if(camera.matchWindowSize)
+	    		{
+	    			camera.setWidth(resize->width);
+	    			camera.setHeight(resize->height);
+	    		}
+	    	}
+	    }
     }
 
     void RenderSystem::renderMesh(const ECS::Entity entity, const MeshRenderer& meshRenderer) const
@@ -192,8 +207,8 @@ namespace Neon
     		modelMatrix
 		};
 
-    	commandList->updateBuffer(modelUniformBuffer.get(), modelUniforms);
-    	commandList->setUniformBuffer("ModelUniforms", modelUniformBuffer.get());
+    	m_commandList->updateBuffer(m_modelUniformBuffer, modelUniforms);
+    	m_commandList->setUniformBuffer("ModelUniforms", m_modelUniformBuffer);
 
 		for(int i = 0; i < meshRenderer.materials.size(); i++)
 		{
@@ -213,10 +228,10 @@ namespace Neon
     	{
     		useAlbedoTexture = true;
 
-    		RHI::TextureView* view = getOrCreateTextureView(albedoTexture->getTexture());
+    		const Rc<RHI::TextureView>& view = getOrCreateTextureView(albedoTexture->getTexture());
 
-    		commandList->setTexture("albedoTexture", view);
-    		commandList->setSampler("albedoTexture", mat->albedoTexture->getSampler());
+    		m_commandList->setTexture("albedoTexture", view);
+    		m_commandList->setSampler("albedoTexture", mat->albedoTexture->getSampler());
     	}
 
     	MaterialUniforms materialUniforms =
@@ -229,73 +244,26 @@ namespace Neon
 
 	    const Primitive primitive = meshRenderer.mesh->getPrimitives().at(materialIndex);
 
-    	commandList->updateBuffer(materialUniformBuffer.get(), materialUniforms);
-    	commandList->setUniformBuffer("MaterialUniforms", materialUniformBuffer.get());
+    	m_commandList->updateBuffer(m_materialUniformBuffer, materialUniforms);
+    	m_commandList->setUniformBuffer("MaterialUniforms", m_materialUniformBuffer);
 
-    	commandList->setVertexBuffer(0, meshRenderer.mesh->getVertexBuffer());
-    	commandList->setIndexBuffer(meshRenderer.mesh->getIndexBuffer(), RHI::IndexFormat::UInt32);
-    	commandList->drawIndexed(primitive.indexCount, 1, primitive.indexStart);
+    	m_commandList->setVertexBuffer(0, meshRenderer.mesh->getVertexBuffer());
+    	m_commandList->setIndexBuffer(meshRenderer.mesh->getIndexBuffer(), RHI::IndexFormat::UInt32);
+    	m_commandList->drawIndexed(primitive.indexCount, 1, primitive.indexStart);
     }
 
 
-    RHI::TextureView * RenderSystem::getOrCreateTextureView(const AssetRef<RHI::Texture> &texture) const
+	Rc<RHI::TextureView> RenderSystem::getOrCreateTextureView(const Rc<RHI::Texture>& texture) const
     {
     	if(texture == nullptr) return nullptr;
-    	const uint64_t key = static_cast<uint64_t>(texture.getHandle());
 
-    	if(textureViewCache.contains(key))
-			return textureViewCache.at(key).get();
+    	if(m_textureViewCache.contains(texture.get()))
+			return m_textureViewCache.at(texture.get());
 
-    	const RHI::TextureViewDescription viewDesc{ texture.get() };
-    	RHI::TextureView* view = device->createTextureView(viewDesc);
-    	textureViewCache.emplace(key, Box<RHI::TextureView>(view));
+    	const RHI::TextureViewDescription viewDesc{ texture };
+    	Rc<RHI::TextureView> view = m_device->createTextureView(viewDesc);
+    	m_textureViewCache.emplace(texture.get(), view);
 
     	return view;
-    }
-
-    void RenderSystem::shutdown()
-    {
-        window->close();
-    }
-
-    void RenderSystem::preUpdate()
-    {
-	    std::vector<RHI::Event> events = window->pollEvents();
-
-    	EventManager& eventManager = Engine::getEventManager();
-
-    	for(const auto event : events)
-    	{
-    		switch (event.type)
-    		{
-    			case RHI::Event::Type::Quit:
-    				eventManager.queueEvent(new QuitEvent());
-    				break;
-    			case RHI::Event::Type::WindowResize:
-    				eventManager.queueEvent(new WindowResizeEvent(event.window.width, event.window.height));
-    				break;
-    			case RHI::Event::Type::KeyDown:
-    				eventManager.queueEvent(new KeyDownEvent(event.key.key, event.key.repeat));
-    				break;
-    			case RHI::Event::Type::KeyUp:
-    				eventManager.queueEvent(new KeyUpEvent(event.key.key));
-    				break;
-    			case RHI::Event::Type::MouseButtonDown:
-    				eventManager.queueEvent(new MouseButtonDownEvent(event.button.button));
-    				break;
-    			case RHI::Event::Type::MouseButtonUp:
-    				eventManager.queueEvent(new MouseButtonUpEvent(event.button.button));
-    				break;
-    			case RHI::Event::Type::MouseMotion:
-    				eventManager.queueEvent(new MouseMoveEvent(event.motion.x, event.motion.y));
-    				break;
-    			case RHI::Event::Type::MouseWheel:
-    				eventManager.queueEvent(new MouseWheelEvent(event.wheel.x, event.wheel.y));
-    				break;
-    			case RHI::Event::Type::TextInput:
-    				eventManager.queueEvent(new TextInputEvent(event.text.text));
-    				break;
-    		}
-    	}
     }
 }

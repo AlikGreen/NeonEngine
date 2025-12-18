@@ -3,30 +3,25 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "core/components/transformComponent.h"
 #include "glm/gtx/string_cast.hpp"
+#include "graphics/events/rhiWindowEvent.h"
 #include "input/events/keyDownEvent.h"
-#include "input/events/keyUpEvent.h"
-#include "input/events/mouseButtonDownEvent.h"
-#include "input/events/mouseButtonUpEvent.h"
-#include "input/events/mouseMoveEvent.h"
-#include "input/events/mouseWheelEvent.h"
-#include "input/events/textInputEvent.h"
 #include "neonEngine/neonEngine.h"
 
-void GameSystem::postStartup()
+void GameSystem::startup()
 {
     auto& scene = Neon::Engine::getSceneManager().getCurrentScene();
-    auto& world = scene.getRegistry();
 
     Neon::AssetManager& assetManager = Neon::Engine::getAssetManager();
     const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/monkey.glb");
-    const auto model = assetManager.getAsset<Neon::Prefab>(modelHandle);
+    auto& model = assetManager.getAsset<Neon::Prefab>(modelHandle);
 
     Neon::ECS::Entity modelEntity = scene.import(model);
     modelEntity.get<Neon::Transform>().setScale(glm::vec3(1.0f));
 
     // Player/Camera entity
     Neon::ECS::Entity cameraEntity = scene.createEntity();
-    cameraEntity.emplace<Neon::Camera>();
+    auto& camera = cameraEntity.emplace<Neon::Camera>();
+    camera.matchWindowSize = false;
     auto& camTransform = cameraEntity.get<Neon::Transform>();
     camTransform.setPosition({0, 0, 0});
 
@@ -94,14 +89,7 @@ void GameSystem::event(Neon::Event* event)
 {
     if(!focused) return;
 
-    if(event->isAny<
-        Neon::KeyDownEvent,
-        Neon::KeyUpEvent,
-        Neon::MouseButtonDownEvent,
-        Neon::MouseButtonUpEvent,
-        Neon::MouseMoveEvent,
-        Neon::MouseWheelEvent,
-        Neon::TextInputEvent>())
+    if(dynamic_cast<Neon::RhiWindowEvent*>(event))
     {
         event->cancel();
     }

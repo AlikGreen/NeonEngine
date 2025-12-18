@@ -11,21 +11,21 @@ namespace Neon
     {
         if(primitives.empty()) primitives.emplace_back(0, indices.size());
 
-        const auto device = Engine::getSystem<RenderSystem>()->getDevice();
+        const auto device = Engine::getSystem<GraphicsSystem>()->getDevice();
 
-        vertexBuffer = Box<RHI::Buffer>(device->createVertexBuffer());
-        indexBuffer  = Box<RHI::Buffer>(device->createIndexBuffer());
+        vertexBuffer = device->createVertexBuffer();
+        indexBuffer  = device->createIndexBuffer();
 
-        const auto cl =  Box<RHI::CommandList>(device->createCommandList());
+        const auto cl = device->createCommandList();
         cl->begin();
 
-        cl->reserveBuffer(vertexBuffer.get(), vertices.size() * sizeof(Vertex));
-        cl->updateBuffer(vertexBuffer.get(), vertices);
+        cl->reserveBuffer(vertexBuffer, vertices.size() * sizeof(Vertex));
+        cl->updateBuffer(vertexBuffer, vertices);
 
-        cl->reserveBuffer(indexBuffer.get(), indices.size() * sizeof(uint32_t));
-        cl->updateBuffer(indexBuffer.get(), indices);
+        cl->reserveBuffer(indexBuffer, indices.size() * sizeof(uint32_t));
+        cl->updateBuffer(indexBuffer, indices);
 
-        device->submit(cl.get());
+        device->submit(cl);
 
         recalculateBounds();
 
@@ -93,22 +93,22 @@ namespace Neon
         return bounds;
     }
 
-    RHI::Buffer * Mesh::getVertexBuffer()
+    Rc<RHI::Buffer> Mesh::getVertexBuffer()
     {
         if(verticesDirty)
         {
             apply();
         }
-        return vertexBuffer.get();
+        return vertexBuffer;
     }
 
-    RHI::Buffer * Mesh::getIndexBuffer()
+    Rc<RHI::Buffer> Mesh::getIndexBuffer()
     {
         if(indicesDirty)
         {
             apply();
         }
-        return indexBuffer.get();
+        return indexBuffer;
     }
 
     void Mesh::setReadable(const bool readable)

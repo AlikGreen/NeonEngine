@@ -8,11 +8,14 @@ namespace Neon
 struct Camera
 {
 public:
-    bool autoAspectRatio = true;
+    bool matchWindowSize = true;
     glm::vec4 bgColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-    void setAspectRatio(float ratio);
-    [[nodiscard]] float getAspectRatio() const;
+    void setWidth(uint32_t width);
+    [[nodiscard]] uint32_t getWidth() const;
+
+    void setHeight(uint32_t height);
+    [[nodiscard]] uint32_t getHeight() const;
 
     void setFov(float fov);
     [[nodiscard]] float getFov() const;
@@ -26,20 +29,30 @@ public:
     Frustum getFrustum(const glm::mat4 &view);
     [[nodiscard]] const glm::mat4& getProjectionMatrix();
 
+    Rc<RHI::Framebuffer> getFramebuffer();
+    Rc<RHI::TextureView> getDepthTexture();
+    Rc<RHI::TextureView> getColorTexture();
 private:
-    float aspectRatio = 16.0f/9.0f;
-
     float fov = 60.0f;
     float nearClip = 0.1f;
     float farClip = 1000.0f;
 
+    uint32_t width  = 0;
+    uint32_t height = 0;
+
     bool projectionDirty = true;
+    bool fbDirty = true;
 
     glm::mat4 projectionMatrix{};
     glm::mat4 viewMatrix{};
 
     Frustum frustum{};
 
+    Rc<RHI::Framebuffer> framebuffer;
+    Rc<RHI::TextureView> colorView;
+    Rc<RHI::TextureView> depthView;
+
     void updateProjectionMatrix();
+    void updateFramebuffer();
 };
 }

@@ -2,7 +2,6 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/dependencies/neonCore" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/miniaudio" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonecs" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonecs/dependencies/neonCore" vcs="Git" />

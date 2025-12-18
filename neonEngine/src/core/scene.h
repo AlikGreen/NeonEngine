@@ -11,7 +11,7 @@ namespace Neon
 public:
     [[nodiscard]] ECS::Registry& getRegistry();
     ECS::Entity createEntity(const std::string& name = "Entity");
-    ECS::Entity import(Prefab* prefab);
+    ECS::Entity import(Prefab& prefab);
 private:
     ECS::Registry registry = ECS::Registry();
 };

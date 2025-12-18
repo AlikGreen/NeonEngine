@@ -1,11 +1,11 @@
 #include "imGuiSystem.h"
 
+#include "graphicsSystem.h"
 #include "renderSystem.h"
-#include "input/events/keyDownEvent.h"
-#include "input/events/keyUpEvent.h"
-#include "input/events/mouseButtonDownEvent.h"
-#include "input/events/mouseButtonUpEvent.h"
-#include "input/events/mouseMoveEvent.h"
+#include "components/camera.h"
+#include "core/sceneManager.h"
+#include "events/rhiWindowEvent.h"
+#include "imgui/imGuiConfig.h"
 
 namespace Neon
 {
@@ -42,15 +42,15 @@ namespace Neon
 
         ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 
-        ImVec4 bg         = ImVec4(0.08f, 0.09f, 0.11f, 1.0f);
-        ImVec4 bgAlt      = ImVec4(0.11f, 0.12f, 0.15f, 1.0f);
-        ImVec4 bgHover    = ImVec4(0.16f, 0.18f, 0.22f, 1.0f);
-        ImVec4 bgActive   = ImVec4(0.23f, 0.26f, 0.31f, 1.0f);
-        ImVec4 accent     = ImVec4(0.23f, 0.63f, 0.98f, 1.0f);
-        ImVec4 accentDim  = ImVec4(0.19f, 0.46f, 0.78f, 1.0f);
-        ImVec4 accentSoft = ImVec4(0.19f, 0.46f, 0.78f, 0.35f);
-        ImVec4 text       = ImVec4(0.92f, 0.94f, 0.96f, 1.0f);
-        ImVec4 textDim    = ImVec4(0.66f, 0.70f, 0.76f, 1.0f);
+        constexpr ImVec4 bg         = {0.08f, 0.09f, 0.11f, 1.0f};
+        constexpr ImVec4 bgAlt      = {0.11f, 0.12f, 0.15f, 1.0f};
+        constexpr ImVec4 bgHover    = {0.16f, 0.18f, 0.22f, 1.0f};
+        constexpr ImVec4 bgActive   = {0.23f, 0.26f, 0.31f, 1.0f};
+        constexpr ImVec4 accent     = {0.23f, 0.63f, 0.98f, 1.0f};
+        constexpr ImVec4 accentDim  = {0.19f, 0.46f, 0.78f, 1.0f};
+        constexpr ImVec4 accentSoft = {0.19f, 0.46f, 0.78f, 0.35f};
+        constexpr ImVec4 text       = {0.92f, 0.94f, 0.96f, 1.0f};
+        constexpr ImVec4 textDim    = {0.66f, 0.70f, 0.76f, 1.0f};
 
         colors[ImGuiCol_Text]                  = text;
         colors[ImGuiCol_TextDisabled]          = textDim;
@@ -125,31 +125,54 @@ namespace Neon
 
     void ImGuiSystem::preStartup()
     {
-        const auto renderSys = Engine::getSystem<RenderSystem>();
-        m_device = renderSys->getDevice();
-        m_window = renderSys->getWindow();
+        m_graphicsSystem = Engine::getSystem<GraphicsSystem>();
+        m_device = m_graphicsSystem->getDevice();
+        m_window = m_graphicsSystem->getWindow();
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
 
         io.Fonts->Clear();
-        io.FontDefault = nullptr;
 
-        // Minimal, known-good font:
-        io.Fonts->AddFontDefault();
+
+        io.FontDefault = io.Fonts->AddFontFromFileTTF(R"(C:\Users\alikg\Downloads\JetBrainsMono-Regular.ttf)", 22.0f);
 
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // optional
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
+
+        const RHI::TextureDescription colDesc = RHI::TextureDescription::Texture2D(
+                m_window->getWidth(),
+                m_window->getHeight(),
+                RHI::PixelFormat::R8G8B8A8Unorm,
+                RHI::TextureUsage::DepthStencilTarget);
+
+        const Rc<RHI::Texture> colTex = m_device->createTexture(colDesc);
+
+        const RHI::TextureViewDescription viewDesc(colTex);
+        m_colorTextureView = m_device->createTextureView(viewDesc);
+
+        RHI::FramebufferDescription framebufferDesc{};
+        framebufferDesc.colorTargets.push_back(m_colorTextureView);
+
+        const Rc<RHI::Framebuffer> framebuffer = m_device->createFramebuffer(framebufferDesc);
+
+        RHI::SamplerDescription samplerDesc{};
+        samplerDesc.wrapMode.x = RHI::TextureWrap::ClampToEdge;
+        samplerDesc.wrapMode.y = RHI::TextureWrap::ClampToEdge;
+        m_colorTextureSampler = m_device->createSampler(samplerDesc);
+
         RHI::ImGuiController::InitInfo initInfo{};
         initInfo.device      = m_device;
-        initInfo.framebuffer = m_device->getSwapChainFramebuffer();
+        initInfo.framebuffer = framebuffer;
         initInfo.window      = m_window;
 
         m_imGuiController = makeBox<RHI::ImGuiController>(initInfo);
 
         m_frameCountStart = std::chrono::high_resolution_clock::now();
+
+        m_imguiImage = makeBox<RHI::ImGuiImage>();
 
         setNeonImGuiStyle();
     }
@@ -171,6 +194,9 @@ namespace Neon
 
     void ImGuiSystem::render()
     {
+        auto& world = Engine::getSceneManager().getCurrentScene().getRegistry();
+        const auto cameras = world.view<Camera>();
+
         ImGuiIO &io = ImGui::GetIO();
         io.DisplaySize = ImVec2(
             static_cast<float>(m_window->getWidth()),
@@ -190,7 +216,31 @@ namespace Neon
         ImGui::Text("Frame Time: %.4f ms", m_frameTime);
         ImGui::End();
 
+        ImGui::Begin("Viewport");
+
+        const ImVec2 avail = ImGui::GetContentRegionAvail();
+
+        Rc<RHI::TextureView> sceneTexture = nullptr;
+        if(cameras.size() >= 1)
+        {
+            auto [camEntity, camera] = cameras.at(0);
+            camera.setWidth(static_cast<uint32_t>(avail.x));
+            camera.setHeight(static_cast<uint32_t>(avail.y));
+            sceneTexture = camera.getColorTexture();
+        }
+
+        if(sceneTexture != m_imguiImage->view)
+        {
+            m_imguiImage->view = sceneTexture;
+        }
+
+        ImGui::Image(m_imguiImage.get(), avail, ImVec2(0, 1), ImVec2(1, 0));
+
+        ImGui::End();
+
         m_imGuiController->endFrame();
+
+        m_graphicsSystem->drawTexture(m_colorTextureView, m_colorTextureSampler);
     }
 
     void ImGuiSystem::drawDockSpace()
@@ -207,62 +257,22 @@ namespace Neon
         ImGui::PushStyleColor(ImGuiCol_WindowBg,      ImVec4(0, 0, 0, 0));
         ImGui::PushStyleColor(ImGuiCol_DockingEmptyBg,ImVec4(0, 0, 0, 0));
 
-        // This uses an implicit host window over 'viewport'
         // dockspace_id = 0 → ImGui will generate one
         ImGui::DockSpaceOverViewport(
-            0,                  // dockspace_id
-            viewport,           // viewport
-            dockspaceFlags     // flags
+            0,
+            viewport,
+            dockspaceFlags
         );
 
         ImGui::PopStyleColor(2);
-    }
 
+    }
 
     void ImGuiSystem::event(Event *event)
     {
-        if(const auto* mouseMoveEvent = dynamic_cast<MouseMoveEvent*>(event))
+        if(const auto* rhiWindowEvent = dynamic_cast<RhiWindowEvent*>(event))
         {
-            RHI::Event e{};
-            e.type = RHI::Event::Type::MouseMotion;
-            e.motion.x = mouseMoveEvent->getX();
-            e.motion.y = mouseMoveEvent->getY();
-
-            RHI::ImGuiController::processEvent(e);
-        }
-        if(const auto* mouseDownEvent = dynamic_cast<MouseButtonDownEvent*>(event))
-        {
-            RHI::Event e{};
-            e.type = RHI::Event::Type::MouseButtonDown;
-            e.button.button = mouseDownEvent->getButton();
-
-            RHI::ImGuiController::processEvent(e);
-        }
-        if(const auto* mouseUpEvent = dynamic_cast<MouseButtonUpEvent*>(event))
-        {
-            RHI::Event e{};
-            e.type = RHI::Event::Type::MouseButtonUp;
-            e.button.button = mouseUpEvent->getButton();
-
-            RHI::ImGuiController::processEvent(e);
-        }
-        if(const auto* keyDownEvent = dynamic_cast<KeyDownEvent*>(event))
-        {
-            RHI::Event e{};
-            e.type = RHI::Event::Type::KeyDown;
-            e.key.key = keyDownEvent->getKeycode();
-            e.key.repeat = keyDownEvent->isRepeat();
-
-            RHI::ImGuiController::processEvent(e);
-        }
-        if(const auto* keyUpEvent = dynamic_cast<KeyUpEvent*>(event))
-        {
-            RHI::Event e{};
-            e.type = RHI::Event::Type::KeyUp;
-            e.key.key = keyUpEvent->getKeycode();
-            e.key.repeat = false;
-
-            RHI::ImGuiController::processEvent(e);
+            RHI::ImGuiController::processEvent(rhiWindowEvent->event);
         }
     }
 }

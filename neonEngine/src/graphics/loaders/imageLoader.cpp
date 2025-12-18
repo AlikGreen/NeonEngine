@@ -25,11 +25,11 @@ namespace Neon
             pixels = stbi_load(filePath.c_str(), &w, &h, &channels, 4);
 
         Debug::ensure(pixels != nullptr, "Failed to load image %s\n", stbi_failure_reason());
-        auto* device = Engine::getSystem<RenderSystem>()->getDevice();
+        const auto& device = Engine::getSystem<GraphicsSystem>()->getDevice();
 
         RHI::TextureDescription texDesc{};
-        texDesc.dimensions.x = w;
-        texDesc.dimensions.y = h;
+        texDesc.width = w;
+        texDesc.height = h;
         texDesc.format = getOptimalFormat(ext, channels);
 
         const auto texture = device->createTexture(texDesc);
