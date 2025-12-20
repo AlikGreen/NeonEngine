@@ -16,7 +16,6 @@ namespace Neon
         NeonGui::LoadStyle("style.yaml", style);
     }
 
-
     void ImGuiSystem::preStartup()
     {
         m_graphicsSystem = Engine::getSystem<GraphicsSystem>();
@@ -40,7 +39,7 @@ namespace Neon
                 m_window->getWidth(),
                 m_window->getHeight(),
                 RHI::PixelFormat::R8G8B8A8Unorm,
-                RHI::TextureUsage::DepthStencilTarget);
+                RHI::TextureUsage::ColorTarget);
 
         const Rc<RHI::Texture> colTex = m_device->createTexture(colDesc);
 

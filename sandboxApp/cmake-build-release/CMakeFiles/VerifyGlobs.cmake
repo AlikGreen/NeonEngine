@@ -240,6 +240,7 @@ set(OLD_GLOB
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/materialShader.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/mesh.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/renderSystem.h"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/windows/window.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/input/events/keyDownEvent.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/input/events/keyUpEvent.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/input/events/mouseButtonDownEvent.h"

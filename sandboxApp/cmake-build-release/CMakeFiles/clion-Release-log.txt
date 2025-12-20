@@ -26,6 +26,6 @@ SPIRV-Cross:  Testing will be disabled for SPIRV-Cross. Could not find glslang o
 -- ryml: importing subproject c4core (SUBDIRECTORY)... C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/rapidyaml/ext/c4core
 -- c4core: using C++ standard: C++23
 -- ryml: -----> target ryml PUBLIC incorporating lib c4core
--- Configuring done (1.5s)
--- Generating done (0.2s)
+-- Configuring done (2.6s)
+-- Generating done (0.7s)
 -- Build files have been written to: C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release

@@ -76,9 +76,9 @@ namespace Neon
 
         std::vector<Rc<RHI::Texture>> textures = m_swapchain->getTextures();
 
-        for(auto texture : textures)
+        for(const auto& texture : textures)
         {
-            const RHI::TextureViewDescription viewDesc(m_swapchain->getTextures()[0]);
+            const RHI::TextureViewDescription viewDesc(texture);
             Rc<RHI::TextureView> colView = m_device->createTextureView(viewDesc);
 
             RHI::FramebufferDescription framebufferDesc{};

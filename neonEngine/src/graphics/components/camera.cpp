@@ -144,7 +144,7 @@ namespace Neon
                 width,
                 height,
                 RHI::PixelFormat::D32FloatS8Uint,
-                RHI::TextureUsage::ColorTarget);
+                RHI::TextureUsage::DepthStencilTarget);
 
         const Rc<RHI::Texture> depthTex = device->createTexture(depthDesc);
 
@@ -155,7 +155,7 @@ namespace Neon
                 width,
                 height,
                 RHI::PixelFormat::R8G8B8A8Unorm,
-                RHI::TextureUsage::DepthStencilTarget);
+                RHI::TextureUsage::ColorTarget);
 
         const Rc<RHI::Texture> colTex = device->createTexture(colDesc);
 

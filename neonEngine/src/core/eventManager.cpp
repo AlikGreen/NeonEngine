@@ -19,6 +19,11 @@ namespace Neon
             }
         }
 
+        for(const auto event : events)
+        {
+            delete event;
+        }
+
         events.clear();
     }
 }
