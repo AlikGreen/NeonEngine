@@ -28,7 +28,8 @@ private:
 
     GraphicsSystem* m_graphicsSystem{};
 
-    Box<RHI::ImGuiImage> m_imguiImage{};
+    std::string input{};
+    glm::ivec3 inputSize{};
 
     size_t m_fps = 0;
     float m_frameTime = 0;

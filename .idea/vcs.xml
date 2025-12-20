@@ -12,6 +12,11 @@
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/neonCore" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/neonLog" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/rapidyaml" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/rapidyaml/ext/c4core" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/rapidyaml/ext/c4core/cmake" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/rapidyaml/ext/c4core/src/c4/ext/debugbreak" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/rapidyaml/ext/c4core/src/c4/ext/fast_float" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/spirv-cross" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/tinygltf" vcs="Git" />
   </component>

@@ -141,7 +141,7 @@ namespace Neon
                     eventManager.queueEvent(new MouseWheelEvent(event.wheel.x, event.wheel.y));
                 break;
                 case RHI::Event::Type::TextInput:
-                    eventManager.queueEvent(new TextInputEvent(event.text.text));
+                    eventManager.queueEvent(new TextInputEvent(event.text.codepoint));
                 break;
             }
         }

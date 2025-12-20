@@ -24,8 +24,77 @@ BUILD_EXTERNAL:BOOL=ON
 //Build shared libraries
 BUILD_SHARED_LIBS:BOOL=OFF
 
+//Build the testing tree.
+BUILD_TESTING:BOOL=ON
+
 //Enable warnings as errors (default is OFF)
 BUILD_WERROR:BOOL=OFF
+
+//compilation flags for c4core targets
+C4CORE_CXX_FLAGS:STRING=
+
+//linker flags for c4core targets
+C4CORE_CXX_LINKER_FLAGS:STRING=
+
+//enable development targets: tests, benchmarks, static analysis,
+// coverage
+C4CORE_DEV:BOOL=OFF
+
+//create install target
+C4CORE_INSTALL:BOOL=ON
+
+//disable use of debug break even in debug builds
+C4CORE_NO_DEBUG_BREAK:BOOL=OFF
+
+//use libc++ instead of the default standard library
+C4CORE_USE_LIBCXX:BOOL=OFF
+
+//use fastfloat to parse floats
+C4CORE_WITH_FASTFLOAT:BOOL=ON
+
+C4CORE_WITH_STL:BOOL=ON
+
+//list of additional file extensions that might be added as sources
+// to targets
+C4_ADD_EXTS:STRING=natvis
+
+//list of CXX standards
+C4_CXX_STANDARDS:STRING=20;17;14;11
+
+//the default CXX standard for projects not specifying one
+C4_CXX_STANDARD_DEFAULT:STRING=11
+
+//enable detailed cmake logs in c4Project code
+C4_DBG_ENABLED:BOOL=OFF
+
+//enable development targets for all c4 projects
+C4_DEV:BOOL=OFF
+
+//the directory where imported projects should be looked for (or
+// cloned in when not found)
+C4_EXTERN_DIR:PATH=
+
+//the extension of the output header files resulting from concatenation
+C4_GEN_HDR_EXT:STRING=hpp
+
+//the extension of the output source files resulting from concatenation
+C4_GEN_SRC_EXT:STRING=cpp
+
+//list of header extensions for determining which files are headers
+C4_HDR_EXTS:STRING=h;hpp;hh;h++;hxx
+
+//default library type: either ""(defer to BUILD_SHARED_LIBS),INTERFACE,STATIC,SHARED,MODULE
+C4_LIBRARY_TYPE:STRING=
+
+//global source transform method
+C4_SOURCE_TRANSFORM:STRING=NONE
+
+//list of compilation unit extensions for determining which files
+// are sources
+C4_SRC_EXTS:STRING=c;cpp;cc;c++;cxx;cu;
+
+//Path to a program.
+CLANG_TIDY:FILEPATH=C:/msys64/mingw64/bin/clang-tidy.exe
 
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=C:/msys64/mingw64/bin/addr2line.exe
@@ -318,6 +387,22 @@ CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//Path to the coverage program that CTest uses for performing coverage
+// inspection
+COVERAGE_COMMAND:FILEPATH=C:/msys64/mingw64/bin/gcov.exe
+
+//Extra command line flags to pass to the coverage tool
+COVERAGE_EXTRA_FLAGS:STRING=-l
+
+//How many times to retry timed-out CTest submissions.
+CTEST_SUBMIT_RETRY_COUNT:STRING=3
+
+//How long to wait between timed-out CTest submissions.
+CTEST_SUBMIT_RETRY_DELAY:STRING=5
+
+//Maximum time allowed before CTest will kill the test.
+DART_TESTING_TIMEOUT:STRING=1500
+
 //Doxygen documentation generation tool (https://www.doxygen.nl)
 DOXYGEN_EXECUTABLE:FILEPATH=DOXYGEN_EXECUTABLE-NOTFOUND
 
@@ -345,6 +430,9 @@ ENABLE_SPIRV:BOOL=ON
 
 //Enables building of SPVRemapper
 ENABLE_SPVREMAPPER:BOOL=ON
+
+//Path to a program.
+GITCOMMAND:FILEPATH=C:/Program Files/Git/cmd/git.exe
 
 //Git command line client
 GIT_EXECUTABLE:FILEPATH=C:/Program Files/Git/cmd/git.exe
@@ -445,6 +533,15 @@ GLSLANG_ENABLE_INSTALL:BOOL=OFF
 
 //Enable glslang testing
 GLSLANG_TESTS:BOOL=OFF
+
+//Command to build the project
+MAKECOMMAND:STRING="C:\Program Files\JetBrains\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" --build . --config "${CTEST_CONFIGURATION_TYPE}"
+
+//Path to the memory checking command, used for memory error detection.
+MEMORYCHECK_COMMAND:FILEPATH=C:/Program Files (x86)/Dr. Memory/bin/drmemory.exe
+
+//File that contains suppressions for the memory checker
+MEMORYCHECK_SUPPRESSIONS_FILE:FILEPATH=
 
 //Build miniaudio examples
 MINIAUDIO_BUILD_EXAMPLES:BOOL=OFF
@@ -623,8 +720,58 @@ PKG_CONFIG_ARGN:STRING=
 //pkg-config executable
 PKG_CONFIG_EXECUTABLE:FILEPATH=C:/msys64/mingw64/bin/pkg-config.exe
 
+//Build tools
+RYML_BUILD_TOOLS:BOOL=OFF
+
+//compilation flags for ryml targets
+RYML_CXX_FLAGS:STRING=
+
+//linker flags for ryml targets
+RYML_CXX_LINKER_FLAGS:STRING=
+
+//Enable (very verbose) debug prints.
+RYML_DBG:BOOL=OFF
+
+//Enable ryml's default implementation of callbacks: allocate(),
+// free(), error()
+RYML_DEFAULT_CALLBACKS:BOOL=ON
+
+//Throw exceptions instead of calling abort in the default error
+// handler provided by ryml
+RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS:BOOL=OFF
+
+//enable development targets: tests, benchmarks, static analysis,
+// coverage
+RYML_DEV:BOOL=OFF
+
+//Compile with -fanalyzer https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Static-Analyzer-Options.html
+RYML_FANALYZER:BOOL=OFF
+
+//Enable install target
+RYML_INSTALL:BOOL=ON
+
+//Enable compilation of opting-in targets from ryml in standalone
+// mode (ie, incorporate subprojects as specified in the INCORPORATE
+// clause to c4_add_library/c4_add_target)
+RYML_STANDALONE:BOOL=ON
+
+//Enable assertions regardless of build type. Default is only when
+// NDEBUG is not defined (which is in release builds). This causes
+// a slowdown of the code.
+RYML_USE_ASSERT:BOOL=OFF
+
+//use libc++ instead of the default standard library
+RYML_USE_LIBCXX:BOOL=OFF
+
+//Enable parsing of tabs after ':' and '-'. This is costly and
+// disabled by default.
+RYML_WITH_TAB_TOKENS:BOOL=OFF
+
 //Path to a library.
 SDL2_LIBRARY:FILEPATH=SDL2_LIBRARY-NOTFOUND
+
+//Name of the computer/site where compile is being run
+SITE:STRING=ALeaksPC
 
 //Build all artifacts
 SPDLOG_BUILD_ALL:BOOL=OFF
@@ -822,6 +969,54 @@ TINYGLTF_INSTALL:BOOL=ON
 //Install vendored nlohmann/json and nothings/stb headers
 TINYGLTF_INSTALL_VENDOR:BOOL=ON
 
+//Build yaml-cpp shared library
+YAML_BUILD_SHARED_LIBS:BOOL=OFF
+
+//Value Computed by CMake
+YAML_CPP_BINARY_DIR:STATIC=C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/yamlcpp
+
+//Enable yaml-cpp contrib in library
+YAML_CPP_BUILD_CONTRIB:BOOL=ON
+
+//Enable parse tools
+YAML_CPP_BUILD_TOOLS:BOOL=ON
+
+//Disable uninstallation of yaml-cpp
+YAML_CPP_DISABLE_UNINSTALL:BOOL=OFF
+
+//Format source
+YAML_CPP_FORMAT_SOURCE:BOOL=OFF
+
+//Enable generation of yaml-cpp install targets
+YAML_CPP_INSTALL:BOOL=OFF
+
+//Path to install the CMake package to
+YAML_CPP_INSTALL_CMAKEDIR:STRING=lib/cmake/yaml-cpp
+
+//Value Computed by CMake
+YAML_CPP_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+YAML_CPP_SOURCE_DIR:STATIC=C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/yamlcpp
+
+//Use Position-Independent Code 
+YAML_ENABLE_PIC:BOOL=ON
+
+//MSVC: Build yaml-cpp with shared runtime libs (/MD)
+YAML_MSVC_SHARED_RT:BOOL=ON
+
+//Use system googletest if found
+YAML_USE_SYSTEM_GTEST:BOOL=OFF
+
+//Value Computed by CMake
+c4core_BINARY_DIR:STATIC=C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/rapidyaml/subprojects/c4core/build
+
+//Value Computed by CMake
+c4core_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+c4core_SOURCE_DIR:STATIC=C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/rapidyaml/ext/c4core
+
 //Value Computed by CMake
 glad_BINARY_DIR:STATIC=C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/glad
 
@@ -902,6 +1097,15 @@ neonRHI_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
 neonRHI_SOURCE_DIR:STATIC=C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi
+
+//Value Computed by CMake
+ryml_BINARY_DIR:STATIC=C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/dependencies/neonrhi/dependencies/rapidyaml
+
+//Value Computed by CMake
+ryml_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+ryml_SOURCE_DIR:STATIC=C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/rapidyaml
 
 //Value Computed by CMake
 sandboxApp_BINARY_DIR:STATIC=C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release
@@ -1097,7 +1301,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=23
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=25
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -1153,6 +1357,16 @@ CMAKE_STRIP-ADVANCED:INTERNAL=1
 CMAKE_TAPI-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: COVERAGE_COMMAND
+COVERAGE_COMMAND-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: COVERAGE_EXTRA_FLAGS
+COVERAGE_EXTRA_FLAGS-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CTEST_SUBMIT_RETRY_COUNT
+CTEST_SUBMIT_RETRY_COUNT-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CTEST_SUBMIT_RETRY_DELAY
+CTEST_SUBMIT_RETRY_DELAY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: DART_TESTING_TIMEOUT
+DART_TESTING_TIMEOUT-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: DOXYGEN_EXECUTABLE
 DOXYGEN_EXECUTABLE-ADVANCED:INTERNAL=1
 //Details about finding Git
@@ -1161,6 +1375,8 @@ FIND_PACKAGE_MESSAGE_DETAILS_Git:INTERNAL=[C:/Program Files/Git/cmd/git.exe][v2.
 FIND_PACKAGE_MESSAGE_DETAILS_Python3:INTERNAL=[C:/Users/alikg/AppData/Local/Programs/Python/Python313/python.exe][cfound components: Interpreter ][v3.13.7()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
+//ADVANCED property for variable: GITCOMMAND
+GITCOMMAND-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: GIT_EXECUTABLE
 GIT_EXECUTABLE-ADVANCED:INTERNAL=1
 //GLFW pkg-config Libs.private
@@ -1169,6 +1385,12 @@ GLFW_PKG_CONFIG_LIBS_PRIVATE:INTERNAL=-lgdi32
 GLFW_PKG_CONFIG_REQUIRES_PRIVATE:INTERNAL=
 //Have symbol _fwrite_nolock
 HAVE_FWRITE_UNLOCKED:INTERNAL=
+//ADVANCED property for variable: MAKECOMMAND
+MAKECOMMAND-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: MEMORYCHECK_COMMAND
+MEMORYCHECK_COMMAND-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: MEMORYCHECK_SUPPRESSIONS_FILE
+MEMORYCHECK_SUPPRESSIONS_FILE-ADVANCED:INTERNAL=1
 PC_OPUSFILE_CFLAGS:INTERNAL=
 PC_OPUSFILE_CFLAGS_I:INTERNAL=
 PC_OPUSFILE_CFLAGS_OTHER:INTERNAL=
@@ -1223,6 +1445,10 @@ PC_VORBISFILE_vorbisfile_VERSION:INTERNAL=
 PKG_CONFIG_ARGN-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: PKG_CONFIG_EXECUTABLE
 PKG_CONFIG_EXECUTABLE-ADVANCED:INTERNAL=1
+//Enable API generation (python, etc)
+RYML_BUILD_API:INTERNAL=OFF
+//ADVANCED property for variable: SITE
+SITE-ADVANCED:INTERNAL=1
 //linker supports push/pop state
 _CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED:INTERNAL=TRUE
 //CMAKE_INSTALL_PREFIX during last run

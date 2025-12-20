@@ -8,10 +8,10 @@ namespace Neon
 class TextInputEvent final : public Event
 {
 public:
-    explicit TextInputEvent(const char* text) : text(text) { };
+    explicit TextInputEvent(const uint32_t codepoint) : codepoint(codepoint) { };
 
-    [[nodiscard]] const char* getText() const { return text; }
+    [[nodiscard]] uint32_t getCodepoint() const { return codepoint; }
 private:
-    const char* text;
+    const uint32_t codepoint;
 };
 }

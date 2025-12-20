@@ -31,7 +31,9 @@
 		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\neonCore\\src",
 		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonecs\\include",
 		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\backends",
-		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\imgui"
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\imgui",
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\rapidyaml\\src",
+		"C:\\Users\\alikg\\CLionProjects\\NeonEngine\\neonEngine\\dependencies\\neonrhi\\dependencies\\rapidyaml\\ext\\c4core\\src"
 	],
 	"language" : "CXX",
 	"linked-target-dirs" : [],
