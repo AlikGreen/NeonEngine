@@ -5,6 +5,7 @@
 #include "imgui/imGuiController.h"
 #include "core/system.h"
 #include "imgui/imGuiConfig.h"
+#include "windows/imGuiWindow.h"
 
 namespace Neon
 {
@@ -15,10 +16,34 @@ public:
     void update() override;
     void render() override;
 
+    template<typename T, typename ...Args>
+    requires std::is_base_of_v<ImGuiWindow, T>
+    Rc<T> registerWindow(Args&&... args)
+    {
+        Rc<T> window = makeRc<T>(std::forward<Args>(args)...);
+        m_windows.push_back(window);
+        return window;
+    }
+
+    template<typename T>
+    requires std::is_base_of_v<ImGuiWindow, T>
+    [[nodiscard]] Rc<T> getWindow() const
+    {
+        for (const Rc<ImGuiWindow>& window : m_windows)
+        {
+            if (Rc<T> casted = std::dynamic_pointer_cast<T>(window))
+            {
+                return casted;
+            }
+        }
+        return {};
+    }
+
     static void drawDockSpace();
 
     void event(Event *event) override;
 private:
+    std::vector<Rc<ImGuiWindow>> m_windows;
     Box<RHI::ImGuiController> m_imGuiController;
     Rc<RHI::Device> m_device{};
     Rc<RHI::Window> m_window{};

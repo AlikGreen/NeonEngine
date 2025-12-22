@@ -2,7 +2,7 @@ neonEngine\CMakeFiles\neonEngine.dir\src\audio\audioManager.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/audio/audioManager.cpp \
  C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/CMakeFiles/neonEngine.dir/cmake_pch.hxx \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/common.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/dependencies/neonCore/src/neonCore/memory.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h \
  C:/msys64/mingw64/include/c++/15.2.0/memory \
  C:/msys64/mingw64/include/c++/15.2.0/bits/memoryfwd.h \
  C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++config.h \

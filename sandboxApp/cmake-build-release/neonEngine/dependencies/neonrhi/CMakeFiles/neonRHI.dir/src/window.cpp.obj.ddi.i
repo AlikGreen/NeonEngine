@@ -33408,57 +33408,149 @@ namespace std
        
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/frameBuffer.h" 1
        
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 1
 
 
-# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/frameBuffer.h"
-namespace Neon::RHI
-{
-class Framebuffer
-{
-public:
-    virtual ~Framebuffer() = default;
-};
-}
-# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/pipeline.h" 1
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp" 1
+
+
+
        
 
-namespace Neon::RHI
-{
-class Pipeline
-{
-public:
-    virtual ~Pipeline() = default;
-};
-}
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/buffer.h" 1
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp" 1
        
 
-namespace Neon::RHI
-{
-class Buffer
-{
-public:
-    virtual ~Buffer() = default;
-};
-}
-# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
 
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/sampler.h" 1
-       
 
-namespace Neon::RHI
-{
-class Sampler
-{
-public:
-    virtual ~Sampler() = default;
-};
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 1 3
+# 46 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 3
+# 1 "C:/msys64/mingw64/include/assert.h" 1 3
+# 17 "C:/msys64/mingw64/include/assert.h" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/stdlib.h" 1 3
+# 38 "C:/msys64/mingw64/include/c++/15.2.0/stdlib.h" 3
+using std::abort;
+using std::atexit;
+using std::exit;
+# 49 "C:/msys64/mingw64/include/c++/15.2.0/stdlib.h" 3
+  using std::_Exit;
+
+
+
+
+using std::div_t;
+using std::ldiv_t;
+
+using std::abs;
+using std::atof;
+using std::atoi;
+using std::atol;
+using std::bsearch;
+using std::calloc;
+using std::div;
+using std::free;
+using std::getenv;
+using std::labs;
+using std::ldiv;
+using std::malloc;
+
+using std::mblen;
+using std::mbstowcs;
+using std::mbtowc;
+
+using std::qsort;
+using std::rand;
+using std::realloc;
+using std::srand;
+using std::strtod;
+using std::strtol;
+using std::strtoul;
+using std::system;
+
+using std::wcstombs;
+using std::wctomb;
+# 18 "C:/msys64/mingw64/include/assert.h" 2 3
+
+
+
+extern "C" {
+
+
+__attribute__ ((__dllimport__)) void __attribute__((__cdecl__)) __attribute__ ((__noreturn__)) _wassert(const wchar_t *_Message,const wchar_t *_File,unsigned _Line);
+__attribute__ ((__dllimport__)) void __attribute__((__cdecl__)) __attribute__ ((__noreturn__)) _assert (const char *_Message, const char *_File, unsigned _Line);
+
+
 }
-# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/texture.h" 1
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 2 3
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 2
+# 42 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/simd/platform.h" 1
        
+# 43 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 2
+# 632 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
+
+# 632 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
+namespace glm
+{
+ using std::size_t;
+
+
+
+  typedef int length_t;
+
+}
+
+
+
+
+
+
+
+ namespace glm
+ {
+  template<typename T, std::size_t N>
+  constexpr std::size_t countof(T const (&)[N])
+  {
+   return N;
+  }
+ }
+# 670 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
+namespace glm{
+namespace detail
+{
+ template<typename T>
+ struct is_int
+ {
+  enum test {value = 0};
+ };
+
+ template<>
+ struct is_int<unsigned int>
+ {
+  enum test {value = ~0};
+ };
+
+ template<>
+ struct is_int<signed int>
+ {
+  enum test {value = ~0};
+ };
+}
+
+ typedef unsigned int uint;
+}
+
+
+
+
+
 # 1 "C:/msys64/mingw64/include/c++/15.2.0/cstdint" 1 3
 # 47 "C:/msys64/mingw64/include/c++/15.2.0/cstdint" 3
 # 1 "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdint.h" 1 3 4
@@ -33553,13 +33645,3576 @@ namespace std
   using ::uintptr_t;
 # 144 "C:/msys64/mingw64/include/c++/15.2.0/cstdint" 3
 }
-# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/texture.h" 2
+# 700 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 2
+
+
+
+# 702 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
+namespace glm{
+namespace detail
+{
+
+  typedef std::uint64_t uint64;
+  typedef std::int64_t int64;
+# 726 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
+}
+}
+
+
+
+
+
+
+
+namespace glm{
+namespace detail
+{
+ using std::make_unsigned;
+}
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp" 2
+
+namespace glm
+{
+
+ enum qualifier
+ {
+  packed_highp,
+  packed_mediump,
+  packed_lowp,
+# 21 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp"
+  highp = packed_highp,
+  mediump = packed_mediump,
+  lowp = packed_lowp,
+  packed = packed_highp,
+
+
+
+
+   defaultp = highp
+
+ };
+
+ typedef qualifier precision;
+
+ template<length_t L, typename T, qualifier Q = defaultp> struct vec;
+ template<length_t C, length_t R, typename T, qualifier Q = defaultp> struct mat;
+ template<typename T, qualifier Q = defaultp> struct qua;
+
+
+  template <typename T, qualifier Q = defaultp> using tvec1 = vec<1, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tvec2 = vec<2, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tvec3 = vec<3, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tvec4 = vec<4, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat2x2 = mat<2, 2, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat2x3 = mat<2, 3, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat2x4 = mat<2, 4, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat3x2 = mat<3, 2, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat3x3 = mat<3, 3, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat3x4 = mat<3, 4, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat4x2 = mat<4, 2, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat4x3 = mat<4, 3, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat4x4 = mat<4, 4, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tquat = qua<T, Q>;
+
+
+namespace detail
+{
+ template<glm::qualifier P>
+ struct is_aligned
+ {
+  static const bool value = false;
+ };
+# 84 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp"
+ template<length_t L, typename T, bool is_aligned>
+ struct storage
+ {
+  typedef struct type {
+   T data[L];
+  } type;
+ };
+
+
+  template<length_t L, typename T>
+  struct storage<L, T, true>
+  {
+   typedef struct alignas(L * sizeof(T)) type {
+    T data[L];
+   } type;
+  };
+
+  template<typename T>
+  struct storage<3, T, true>
+  {
+   typedef struct alignas(4 * sizeof(T)) type {
+    T data[4];
+   } type;
+  };
+# 255 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp"
+ enum genTypeEnum
+ {
+  GENTYPE_VEC,
+  GENTYPE_MAT,
+  GENTYPE_QUAT
+ };
+
+ template <typename genType>
+ struct genTypeTrait
+ {};
+
+ template <length_t C, length_t R, typename T>
+ struct genTypeTrait<mat<C, R, T> >
+ {
+  static const genTypeEnum GENTYPE = GENTYPE_MAT;
+ };
+
+ template<typename genType, genTypeEnum type>
+ struct init_gentype
+ {
+ };
+
+ template<typename genType>
+ struct init_gentype<genType, GENTYPE_QUAT>
+ {
+  inline constexpr static genType identity()
+  {
+   return genType(1, 0, 0, 0);
+  }
+ };
+
+ template<typename genType>
+ struct init_gentype<genType, GENTYPE_MAT>
+ {
+  inline constexpr static genType identity()
+  {
+   return genType(1);
+  }
+ };
+}
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp" 2
+
+
+
+
+
+
+
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct vec<2, T, Q>
+ {
+
+
+  typedef T value_type;
+  typedef vec<2, T, Q> type;
+  typedef vec<2, bool, Q> bool_type;
+  enum is_aligned
+  {
+   value = false
+  };
+
+
+
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+# 72 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
+   union {T x, r, s;};
+   union {T y, g, t;};
+# 84 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
+#pragma GCC diagnostic pop
+# 93 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length(){return 2;}
+
+  [[nodiscard]] constexpr T& operator[](length_type i);
+  [[nodiscard]] constexpr T const& operator[](length_type i) const;
+
+
+
+  constexpr vec() = default;
+  constexpr vec(vec const& v) = default;
+  template<qualifier P>
+  constexpr vec(vec<2, T, P> const& v);
+
+
+
+  constexpr explicit vec(T scalar);
+  constexpr vec(T x, T y);
+
+
+
+  template<typename U, qualifier P>
+  constexpr explicit vec(vec<1, U, P> const& v);
+
+
+  template<typename A, typename B>
+  constexpr vec(A x, B y);
+  template<typename A, typename B>
+  constexpr vec(vec<1, A, Q> const& x, B y);
+  template<typename A, typename B>
+  constexpr vec(A x, vec<1, B, Q> const& y);
+  template<typename A, typename B>
+  constexpr vec(vec<1, A, Q> const& x, vec<1, B, Q> const& y);
+
+
+
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<3, U, P> const& v);
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<4, U, P> const& v);
+
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<2, U, P> const& v);
+# 150 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
+  constexpr vec<2, T, Q> & operator=(vec const& v) = default;
+
+  template<typename U>
+  constexpr vec<2, T, Q> & operator=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator+=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator+=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator+=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator-=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator-=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator-=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator*=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator*=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator*=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator/=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator/=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator/=(vec<2, U, Q> const& v);
+
+
+
+  constexpr vec<2, T, Q> & operator++();
+  constexpr vec<2, T, Q> & operator--();
+  [[nodiscard]] constexpr vec<2, T, Q> operator++(int);
+  [[nodiscard]] constexpr vec<2, T, Q> operator--(int);
+
+
+
+  template<typename U>
+  constexpr vec<2, T, Q> & operator%=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator%=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator%=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator&=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator&=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator&=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator|=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator|=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator|=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator^=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator^=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator^=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator<<=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator<<=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator<<=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator>>=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator>>=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator>>=(vec<2, U, Q> const& v);
+ };
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator+(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator-(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator*(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator*(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator/(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator/(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator%(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator%(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator&(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator&(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator|(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator|(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator^(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator^(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator<<(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator<<(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator>>(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator>>(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator~(vec<2, T, Q> const& v);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<qualifier Q>
+ [[nodiscard]] constexpr vec<2, bool, Q> operator&&(vec<2, bool, Q> const& v1, vec<2, bool, Q> const& v2);
+
+ template<qualifier Q>
+ [[nodiscard]] constexpr vec<2, bool, Q> operator||(vec<2, bool, Q> const& v1, vec<2, bool, Q> const& v2);
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl" 1
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp" 1
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp" 2
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/limits" 1 3
+# 44 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wlong-long"
+#pragma GCC diagnostic ignored "-Wc++23-extensions"
+# 165 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
+namespace std
+{
+
+
+
+
+
+
+
+  enum float_round_style
+  {
+    round_indeterminate = -1,
+    round_toward_zero = 0,
+    round_to_nearest = 1,
+    round_toward_infinity = 2,
+    round_toward_neg_infinity = 3
+  };
+
+
+
+
+
+
+
+  enum float_denorm_style
+  {
+
+    denorm_indeterminate = -1,
+
+    denorm_absent = 0,
+
+    denorm_present = 1
+  };
+# 209 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
+  struct __numeric_limits_base
+  {
+
+
+    static constexpr bool is_specialized = false;
+
+
+
+
+    static constexpr int digits = 0;
+
+
+    static constexpr int digits10 = 0;
+
+
+
+
+    static constexpr int max_digits10 = 0;
+
+
+
+    static constexpr bool is_signed = false;
+
+
+    static constexpr bool is_integer = false;
+
+
+
+
+    static constexpr bool is_exact = false;
+
+
+
+    static constexpr int radix = 0;
+
+
+
+    static constexpr int min_exponent = 0;
+
+
+
+    static constexpr int min_exponent10 = 0;
+
+
+
+
+    static constexpr int max_exponent = 0;
+
+
+
+    static constexpr int max_exponent10 = 0;
+
+
+    static constexpr bool has_infinity = false;
+
+
+
+    static constexpr bool has_quiet_NaN = false;
+
+
+
+    static constexpr bool has_signaling_NaN = false;
+
+
+    static constexpr float_denorm_style has_denorm = denorm_absent;
+
+
+
+    static constexpr bool has_denorm_loss = false;
+
+
+
+    static constexpr bool is_iec559 = false;
+
+
+
+
+    static constexpr bool is_bounded = false;
+# 295 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
+    static constexpr bool is_modulo = false;
+
+
+    static constexpr bool traps = false;
+
+
+    static constexpr bool tinyness_before = false;
+
+
+
+
+    static constexpr float_round_style round_style =
+          round_toward_zero;
+  };
+# 318 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
+  template<typename _Tp>
+    struct numeric_limits : public __numeric_limits_base
+    {
+
+
+      static constexpr _Tp
+      min() noexcept { return _Tp(); }
+
+
+      static constexpr _Tp
+      max() noexcept { return _Tp(); }
+
+
+
+
+      static constexpr _Tp
+      lowest() noexcept { return _Tp(); }
+
+
+
+
+      static constexpr _Tp
+      epsilon() noexcept { return _Tp(); }
+
+
+      static constexpr _Tp
+      round_error() noexcept { return _Tp(); }
+
+
+      static constexpr _Tp
+      infinity() noexcept { return _Tp(); }
+
+
+
+      static constexpr _Tp
+      quiet_NaN() noexcept { return _Tp(); }
+
+
+
+      static constexpr _Tp
+      signaling_NaN() noexcept { return _Tp(); }
+
+
+
+
+      static constexpr _Tp
+      denorm_min() noexcept { return _Tp(); }
+    };
+
+
+
+
+  template<typename _Tp>
+    struct numeric_limits<const _Tp>
+    : public numeric_limits<_Tp> { };
+
+  template<typename _Tp>
+    struct numeric_limits<volatile _Tp>
+    : public numeric_limits<_Tp> { };
+
+  template<typename _Tp>
+    struct numeric_limits<const volatile _Tp>
+    : public numeric_limits<_Tp> { };
+# 390 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
+  template<>
+    struct numeric_limits<bool>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr bool
+      min() noexcept { return false; }
+
+      static constexpr bool
+      max() noexcept { return true; }
+
+
+      static constexpr bool
+      lowest() noexcept { return min(); }
+
+      static constexpr int digits = 1;
+      static constexpr int digits10 = 0;
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = false;
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr bool
+      epsilon() noexcept { return false; }
+
+      static constexpr bool
+      round_error() noexcept { return false; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr bool
+      infinity() noexcept { return false; }
+
+      static constexpr bool
+      quiet_NaN() noexcept { return false; }
+
+      static constexpr bool
+      signaling_NaN() noexcept { return false; }
+
+      static constexpr bool
+      denorm_min() noexcept { return false; }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = false;
+
+
+
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+
+
+  template<>
+    struct numeric_limits<char>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr char
+      min() noexcept { return (((char)(-1) < 0) ? -(((char)(-1) < 0) ? (((((char)1 << ((sizeof(char) * 8 - ((char)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char)0) - 1 : (char)0); }
+
+      static constexpr char
+      max() noexcept { return (((char)(-1) < 0) ? (((((char)1 << ((sizeof(char) * 8 - ((char)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char)0); }
+
+
+      static constexpr char
+      lowest() noexcept { return min(); }
+
+
+      static constexpr int digits = (sizeof(char) * 8 - ((char)(-1) < 0));
+      static constexpr int digits10 = ((sizeof(char) * 8 - ((char)(-1) < 0)) * 643L / 2136);
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = ((char)(-1) < 0);
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr char
+      epsilon() noexcept { return 0; }
+
+      static constexpr char
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr
+      char infinity() noexcept { return char(); }
+
+      static constexpr char
+      quiet_NaN() noexcept { return char(); }
+
+      static constexpr char
+      signaling_NaN() noexcept { return char(); }
+
+      static constexpr char
+      denorm_min() noexcept { return static_cast<char>(0); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = !is_signed;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+
+
+  template<>
+    struct numeric_limits<signed char>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr signed char
+      min() noexcept { return -0x7f - 1; }
+
+      static constexpr signed char
+      max() noexcept { return 0x7f; }
+
+
+      static constexpr signed char
+      lowest() noexcept { return min(); }
+
+
+      static constexpr int digits = (sizeof(signed char) * 8 - ((signed char)(-1) < 0));
+      static constexpr int digits10
+       = ((sizeof(signed char) * 8 - ((signed char)(-1) < 0)) * 643L / 2136);
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = true;
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr signed char
+      epsilon() noexcept { return 0; }
+
+      static constexpr signed char
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr signed char
+      infinity() noexcept { return static_cast<signed char>(0); }
+
+      static constexpr signed char
+      quiet_NaN() noexcept { return static_cast<signed char>(0); }
+
+      static constexpr signed char
+      signaling_NaN() noexcept
+      { return static_cast<signed char>(0); }
+
+      static constexpr signed char
+      denorm_min() noexcept
+      { return static_cast<signed char>(0); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = false;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+
+
+  template<>
+    struct numeric_limits<unsigned char>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr unsigned char
+      min() noexcept { return 0; }
+
+      static constexpr unsigned char
+      max() noexcept { return 0x7f * 2U + 1; }
+
+
+      static constexpr unsigned char
+      lowest() noexcept { return min(); }
+
+
+      static constexpr int digits
+       = (sizeof(unsigned char) * 8 - ((unsigned char)(-1) < 0));
+      static constexpr int digits10
+       = ((sizeof(unsigned char) * 8 - ((unsigned char)(-1) < 0)) * 643L / 2136);
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = false;
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr unsigned char
+      epsilon() noexcept { return 0; }
+
+      static constexpr unsigned char
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr unsigned char
+      infinity() noexcept
+      { return static_cast<unsigned char>(0); }
+
+      static constexpr unsigned char
+      quiet_NaN() noexcept
+      { return static_cast<unsigned char>(0); }
+
+      static constexpr unsigned char
+      signaling_NaN() noexcept
+      { return static_cast<unsigned char>(0); }
+
+      static constexpr unsigned char
+      denorm_min() noexcept
+      { return static_cast<unsigned char>(0); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = true;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+
+
+  template<>
+    struct numeric_limits<wchar_t>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr wchar_t
+      min() noexcept { return (((wchar_t)(-1) < 0) ? -(((wchar_t)(-1) < 0) ? (((((wchar_t)1 << ((sizeof(wchar_t) * 8 - ((wchar_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(wchar_t)0) - 1 : (wchar_t)0); }
+
+      static constexpr wchar_t
+      max() noexcept { return (((wchar_t)(-1) < 0) ? (((((wchar_t)1 << ((sizeof(wchar_t) * 8 - ((wchar_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(wchar_t)0); }
+
+
+      static constexpr wchar_t
+      lowest() noexcept { return min(); }
+
+
+      static constexpr int digits = (sizeof(wchar_t) * 8 - ((wchar_t)(-1) < 0));
+      static constexpr int digits10
+       = ((sizeof(wchar_t) * 8 - ((wchar_t)(-1) < 0)) * 643L / 2136);
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = ((wchar_t)(-1) < 0);
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr wchar_t
+      epsilon() noexcept { return 0; }
+
+      static constexpr wchar_t
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr wchar_t
+      infinity() noexcept { return wchar_t(); }
+
+      static constexpr wchar_t
+      quiet_NaN() noexcept { return wchar_t(); }
+
+      static constexpr wchar_t
+      signaling_NaN() noexcept { return wchar_t(); }
+
+      static constexpr wchar_t
+      denorm_min() noexcept { return wchar_t(); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = !is_signed;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+
+
+
+  template<>
+    struct numeric_limits<char8_t>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr char8_t
+      min() noexcept { return (((char8_t)(-1) < 0) ? -(((char8_t)(-1) < 0) ? (((((char8_t)1 << ((sizeof(char8_t) * 8 - ((char8_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char8_t)0) - 1 : (char8_t)0); }
+
+      static constexpr char8_t
+      max() noexcept { return (((char8_t)(-1) < 0) ? (((((char8_t)1 << ((sizeof(char8_t) * 8 - ((char8_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char8_t)0); }
+
+      static constexpr char8_t
+      lowest() noexcept { return min(); }
+
+      static constexpr int digits = (sizeof(char8_t) * 8 - ((char8_t)(-1) < 0));
+      static constexpr int digits10 = ((sizeof(char8_t) * 8 - ((char8_t)(-1) < 0)) * 643L / 2136);
+      static constexpr int max_digits10 = 0;
+      static constexpr bool is_signed = ((char8_t)(-1) < 0);
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr char8_t
+      epsilon() noexcept { return 0; }
+
+      static constexpr char8_t
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+ = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr char8_t
+      infinity() noexcept { return char8_t(); }
+
+      static constexpr char8_t
+      quiet_NaN() noexcept { return char8_t(); }
+
+      static constexpr char8_t
+      signaling_NaN() noexcept { return char8_t(); }
+
+      static constexpr char8_t
+      denorm_min() noexcept { return char8_t(); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = !is_signed;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+ = round_toward_zero;
+    };
+
+
+
+
+  template<>
+    struct numeric_limits<char16_t>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr char16_t
+      min() noexcept { return (((char16_t)(-1) < 0) ? -(((char16_t)(-1) < 0) ? (((((char16_t)1 << ((sizeof(char16_t) * 8 - ((char16_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char16_t)0) - 1 : (char16_t)0); }
+
+      static constexpr char16_t
+      max() noexcept { return (((char16_t)(-1) < 0) ? (((((char16_t)1 << ((sizeof(char16_t) * 8 - ((char16_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char16_t)0); }
+
+      static constexpr char16_t
+      lowest() noexcept { return min(); }
+
+      static constexpr int digits = (sizeof(char16_t) * 8 - ((char16_t)(-1) < 0));
+      static constexpr int digits10 = ((sizeof(char16_t) * 8 - ((char16_t)(-1) < 0)) * 643L / 2136);
+      static constexpr int max_digits10 = 0;
+      static constexpr bool is_signed = ((char16_t)(-1) < 0);
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr char16_t
+      epsilon() noexcept { return 0; }
+
+      static constexpr char16_t
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr char16_t
+      infinity() noexcept { return char16_t(); }
+
+      static constexpr char16_t
+      quiet_NaN() noexcept { return char16_t(); }
+
+      static constexpr char16_t
+      signaling_NaN() noexcept { return char16_t(); }
+
+      static constexpr char16_t
+      denorm_min() noexcept { return char16_t(); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = !is_signed;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style = round_toward_zero;
+    };
+
+
+  template<>
+    struct numeric_limits<char32_t>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr char32_t
+      min() noexcept { return (((char32_t)(-1) < 0) ? -(((char32_t)(-1) < 0) ? (((((char32_t)1 << ((sizeof(char32_t) * 8 - ((char32_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char32_t)0) - 1 : (char32_t)0); }
+
+      static constexpr char32_t
+      max() noexcept { return (((char32_t)(-1) < 0) ? (((((char32_t)1 << ((sizeof(char32_t) * 8 - ((char32_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char32_t)0); }
+
+      static constexpr char32_t
+      lowest() noexcept { return min(); }
+
+      static constexpr int digits = (sizeof(char32_t) * 8 - ((char32_t)(-1) < 0));
+      static constexpr int digits10 = ((sizeof(char32_t) * 8 - ((char32_t)(-1) < 0)) * 643L / 2136);
+      static constexpr int max_digits10 = 0;
+      static constexpr bool is_signed = ((char32_t)(-1) < 0);
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr char32_t
+      epsilon() noexcept { return 0; }
+
+      static constexpr char32_t
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr char32_t
+      infinity() noexcept { return char32_t(); }
+
+      static constexpr char32_t
+      quiet_NaN() noexcept { return char32_t(); }
+
+      static constexpr char32_t
+      signaling_NaN() noexcept { return char32_t(); }
+
+      static constexpr char32_t
+      denorm_min() noexcept { return char32_t(); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = !is_signed;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style = round_toward_zero;
+    };
+
+
+
+  template<>
+    struct numeric_limits<short>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr short
+      min() noexcept { return -0x7fff - 1; }
+
+      static constexpr short
+      max() noexcept { return 0x7fff; }
+
+
+      static constexpr short
+      lowest() noexcept { return min(); }
+
+
+      static constexpr int digits = (sizeof(short) * 8 - ((short)(-1) < 0));
+      static constexpr int digits10 = ((sizeof(short) * 8 - ((short)(-1) < 0)) * 643L / 2136);
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = true;
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr short
+      epsilon() noexcept { return 0; }
+
+      static constexpr short
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr short
+      infinity() noexcept { return short(); }
+
+      static constexpr short
+      quiet_NaN() noexcept { return short(); }
+
+      static constexpr short
+      signaling_NaN() noexcept { return short(); }
+
+      static constexpr short
+      denorm_min() noexcept { return short(); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = false;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+
+
+  template<>
+    struct numeric_limits<unsigned short>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr unsigned short
+      min() noexcept { return 0; }
+
+      static constexpr unsigned short
+      max() noexcept { return 0x7fff * 2U + 1; }
+
+
+      static constexpr unsigned short
+      lowest() noexcept { return min(); }
+
+
+      static constexpr int digits
+       = (sizeof(unsigned short) * 8 - ((unsigned short)(-1) < 0));
+      static constexpr int digits10
+       = ((sizeof(unsigned short) * 8 - ((unsigned short)(-1) < 0)) * 643L / 2136);
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = false;
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr unsigned short
+      epsilon() noexcept { return 0; }
+
+      static constexpr unsigned short
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr unsigned short
+      infinity() noexcept
+      { return static_cast<unsigned short>(0); }
+
+      static constexpr unsigned short
+      quiet_NaN() noexcept
+      { return static_cast<unsigned short>(0); }
+
+      static constexpr unsigned short
+      signaling_NaN() noexcept
+      { return static_cast<unsigned short>(0); }
+
+      static constexpr unsigned short
+      denorm_min() noexcept
+      { return static_cast<unsigned short>(0); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = true;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+
+
+  template<>
+    struct numeric_limits<int>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr int
+      min() noexcept { return -0x7fffffff - 1; }
+
+      static constexpr int
+      max() noexcept { return 0x7fffffff; }
+
+
+      static constexpr int
+      lowest() noexcept { return min(); }
+
+
+      static constexpr int digits = (sizeof(int) * 8 - ((int)(-1) < 0));
+      static constexpr int digits10 = ((sizeof(int) * 8 - ((int)(-1) < 0)) * 643L / 2136);
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = true;
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr int
+      epsilon() noexcept { return 0; }
+
+      static constexpr int
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr int
+      infinity() noexcept { return static_cast<int>(0); }
+
+      static constexpr int
+      quiet_NaN() noexcept { return static_cast<int>(0); }
+
+      static constexpr int
+      signaling_NaN() noexcept { return static_cast<int>(0); }
+
+      static constexpr int
+      denorm_min() noexcept { return static_cast<int>(0); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = false;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+
+
+  template<>
+    struct numeric_limits<unsigned int>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr unsigned int
+      min() noexcept { return 0; }
+
+      static constexpr unsigned int
+      max() noexcept { return 0x7fffffff * 2U + 1; }
+
+
+      static constexpr unsigned int
+      lowest() noexcept { return min(); }
+
+
+      static constexpr int digits
+       = (sizeof(unsigned int) * 8 - ((unsigned int)(-1) < 0));
+      static constexpr int digits10
+       = ((sizeof(unsigned int) * 8 - ((unsigned int)(-1) < 0)) * 643L / 2136);
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = false;
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr unsigned int
+      epsilon() noexcept { return 0; }
+
+      static constexpr unsigned int
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr unsigned int
+      infinity() noexcept { return static_cast<unsigned int>(0); }
+
+      static constexpr unsigned int
+      quiet_NaN() noexcept
+      { return static_cast<unsigned int>(0); }
+
+      static constexpr unsigned int
+      signaling_NaN() noexcept
+      { return static_cast<unsigned int>(0); }
+
+      static constexpr unsigned int
+      denorm_min() noexcept
+      { return static_cast<unsigned int>(0); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = true;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+
+
+  template<>
+    struct numeric_limits<long>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr long
+      min() noexcept { return -0x7fffffffL - 1; }
+
+      static constexpr long
+      max() noexcept { return 0x7fffffffL; }
+
+
+      static constexpr long
+      lowest() noexcept { return min(); }
+
+
+      static constexpr int digits = (sizeof(long) * 8 - ((long)(-1) < 0));
+      static constexpr int digits10 = ((sizeof(long) * 8 - ((long)(-1) < 0)) * 643L / 2136);
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = true;
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr long
+      epsilon() noexcept { return 0; }
+
+      static constexpr long
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr long
+      infinity() noexcept { return static_cast<long>(0); }
+
+      static constexpr long
+      quiet_NaN() noexcept { return static_cast<long>(0); }
+
+      static constexpr long
+      signaling_NaN() noexcept { return static_cast<long>(0); }
+
+      static constexpr long
+      denorm_min() noexcept { return static_cast<long>(0); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = false;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+
+
+  template<>
+    struct numeric_limits<unsigned long>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr unsigned long
+      min() noexcept { return 0; }
+
+      static constexpr unsigned long
+      max() noexcept { return 0x7fffffffL * 2UL + 1; }
+
+
+      static constexpr unsigned long
+      lowest() noexcept { return min(); }
+
+
+      static constexpr int digits
+       = (sizeof(unsigned long) * 8 - ((unsigned long)(-1) < 0));
+      static constexpr int digits10
+       = ((sizeof(unsigned long) * 8 - ((unsigned long)(-1) < 0)) * 643L / 2136);
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = false;
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr unsigned long
+      epsilon() noexcept { return 0; }
+
+      static constexpr unsigned long
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr unsigned long
+      infinity() noexcept
+      { return static_cast<unsigned long>(0); }
+
+      static constexpr unsigned long
+      quiet_NaN() noexcept
+      { return static_cast<unsigned long>(0); }
+
+      static constexpr unsigned long
+      signaling_NaN() noexcept
+      { return static_cast<unsigned long>(0); }
+
+      static constexpr unsigned long
+      denorm_min() noexcept
+      { return static_cast<unsigned long>(0); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = true;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+
+
+  template<>
+    struct numeric_limits<long long>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr long long
+      min() noexcept { return -0x7fffffffffffffffLL - 1; }
+
+      static constexpr long long
+      max() noexcept { return 0x7fffffffffffffffLL; }
+
+
+      static constexpr long long
+      lowest() noexcept { return min(); }
+
+
+      static constexpr int digits
+       = (sizeof(long long) * 8 - ((long long)(-1) < 0));
+      static constexpr int digits10
+       = ((sizeof(long long) * 8 - ((long long)(-1) < 0)) * 643L / 2136);
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = true;
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr long long
+      epsilon() noexcept { return 0; }
+
+      static constexpr long long
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr long long
+      infinity() noexcept { return static_cast<long long>(0); }
+
+      static constexpr long long
+      quiet_NaN() noexcept { return static_cast<long long>(0); }
+
+      static constexpr long long
+      signaling_NaN() noexcept
+      { return static_cast<long long>(0); }
+
+      static constexpr long long
+      denorm_min() noexcept { return static_cast<long long>(0); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = false;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+
+
+  template<>
+    struct numeric_limits<unsigned long long>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr unsigned long long
+      min() noexcept { return 0; }
+
+      static constexpr unsigned long long
+      max() noexcept { return 0x7fffffffffffffffLL * 2ULL + 1; }
+
+
+      static constexpr unsigned long long
+      lowest() noexcept { return min(); }
+
+
+      static constexpr int digits
+       = (sizeof(unsigned long long) * 8 - ((unsigned long long)(-1) < 0));
+      static constexpr int digits10
+       = ((sizeof(unsigned long long) * 8 - ((unsigned long long)(-1) < 0)) * 643L / 2136);
+
+      static constexpr int max_digits10 = 0;
+
+      static constexpr bool is_signed = false;
+      static constexpr bool is_integer = true;
+      static constexpr bool is_exact = true;
+      static constexpr int radix = 2;
+
+      static constexpr unsigned long long
+      epsilon() noexcept { return 0; }
+
+      static constexpr unsigned long long
+      round_error() noexcept { return 0; }
+
+      static constexpr int min_exponent = 0;
+      static constexpr int min_exponent10 = 0;
+      static constexpr int max_exponent = 0;
+      static constexpr int max_exponent10 = 0;
+
+      static constexpr bool has_infinity = false;
+      static constexpr bool has_quiet_NaN = false;
+      static constexpr bool has_signaling_NaN = false;
+      static constexpr float_denorm_style has_denorm
+       = denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr unsigned long long
+      infinity() noexcept
+      { return static_cast<unsigned long long>(0); }
+
+      static constexpr unsigned long long
+      quiet_NaN() noexcept
+      { return static_cast<unsigned long long>(0); }
+
+      static constexpr unsigned long long
+      signaling_NaN() noexcept
+      { return static_cast<unsigned long long>(0); }
+
+      static constexpr unsigned long long
+      denorm_min() noexcept
+      { return static_cast<unsigned long long>(0); }
+
+      static constexpr bool is_iec559 = false;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = true;
+
+      static constexpr bool traps = true;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+       = round_toward_zero;
+    };
+# 1644 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
+  __extension__ template<> struct numeric_limits<__int128> { static constexpr bool is_specialized = true; static constexpr __int128 min() noexcept { return (((__int128)(-1) < 0) ? -(((__int128)(-1) < 0) ? (((((__int128)1 << ((128 - ((__int128)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(__int128)0) - 1 : (__int128)0); } static constexpr __int128 max() noexcept { return (((__int128)(-1) < 0) ? (((((__int128)1 << ((128 - ((__int128)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(__int128)0); } static constexpr int digits = 128 - 1; static constexpr int digits10 = (128 - 1) * 643L / 2136; static constexpr bool is_signed = true; static constexpr bool is_integer = true; static constexpr bool is_exact = true; static constexpr int radix = 2; static constexpr __int128 epsilon() noexcept { return 0; } static constexpr __int128 round_error() noexcept { return 0; } static constexpr __int128 lowest() noexcept { return min(); } static constexpr int max_digits10 = 0; static constexpr int min_exponent = 0; static constexpr int min_exponent10 = 0; static constexpr int max_exponent = 0; static constexpr int max_exponent10 = 0; static constexpr bool has_infinity = false; static constexpr bool has_quiet_NaN = false; static constexpr bool has_signaling_NaN = false; static constexpr float_denorm_style has_denorm = denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr __int128 infinity() noexcept { return static_cast<__int128>(0); } static constexpr __int128 quiet_NaN() noexcept { return static_cast<__int128>(0); } static constexpr __int128 signaling_NaN() noexcept { return static_cast<__int128>(0); } static constexpr __int128 denorm_min() noexcept { return static_cast<__int128>(0); } static constexpr bool is_iec559 = false; static constexpr bool is_bounded = true; static constexpr bool is_modulo = false; static constexpr bool traps = true; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_toward_zero; }; __extension__ template<> struct numeric_limits<unsigned __int128> { static constexpr bool is_specialized = true; static constexpr unsigned __int128 min() noexcept { return 0; } static constexpr unsigned __int128 max() noexcept { return (((unsigned __int128)(-1) < 0) ? (((((unsigned __int128)1 << ((128 - ((unsigned __int128)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(unsigned __int128)0); } static constexpr unsigned __int128 lowest() noexcept { return min(); } static constexpr int max_digits10 = 0; static constexpr int digits = 128; static constexpr int digits10 = 128 * 643L / 2136; static constexpr bool is_signed = false; static constexpr bool is_integer = true; static constexpr bool is_exact = true; static constexpr int radix = 2; static constexpr unsigned __int128 epsilon() noexcept { return 0; } static constexpr unsigned __int128 round_error() noexcept { return 0; } static constexpr int min_exponent = 0; static constexpr int min_exponent10 = 0; static constexpr int max_exponent = 0; static constexpr int max_exponent10 = 0; static constexpr bool has_infinity = false; static constexpr bool has_quiet_NaN = false; static constexpr bool has_signaling_NaN = false; static constexpr float_denorm_style has_denorm = denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr unsigned __int128 infinity() noexcept { return static_cast<unsigned __int128>(0); } static constexpr unsigned __int128 quiet_NaN() noexcept { return static_cast<unsigned __int128>(0); } static constexpr unsigned __int128 signaling_NaN() noexcept { return static_cast<unsigned __int128>(0); } static constexpr unsigned __int128 denorm_min() noexcept { return static_cast<unsigned __int128>(0); } static constexpr bool is_iec559 = false; static constexpr bool is_bounded = true; static constexpr bool is_modulo = true; static constexpr bool traps = true; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_toward_zero; };
+# 1676 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
+  template<>
+    struct numeric_limits<float>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr float
+      min() noexcept { return 1.17549435082228750796873653722224568e-38F; }
+
+      static constexpr float
+      max() noexcept { return 3.40282346638528859811704183484516925e+38F; }
+
+
+      static constexpr float
+      lowest() noexcept { return -3.40282346638528859811704183484516925e+38F; }
+
+
+      static constexpr int digits = 24;
+      static constexpr int digits10 = 6;
+
+      static constexpr int max_digits10
+  = (2 + (24) * 643L / 2136);
+
+      static constexpr bool is_signed = true;
+      static constexpr bool is_integer = false;
+      static constexpr bool is_exact = false;
+      static constexpr int radix = 2;
+
+      static constexpr float
+      epsilon() noexcept { return 1.19209289550781250000000000000000000e-7F; }
+
+      static constexpr float
+      round_error() noexcept { return 0.5F; }
+
+      static constexpr int min_exponent = (-125);
+      static constexpr int min_exponent10 = (-37);
+      static constexpr int max_exponent = 128;
+      static constexpr int max_exponent10 = 38;
+
+      static constexpr bool has_infinity = 1;
+      static constexpr bool has_quiet_NaN = 1;
+      static constexpr bool has_signaling_NaN = has_quiet_NaN;
+      static constexpr float_denorm_style has_denorm
+ = bool(1) ? denorm_present : denorm_absent;
+      static constexpr bool has_denorm_loss
+       = false;
+
+      static constexpr float
+      infinity() noexcept { return __builtin_huge_valf(); }
+
+      static constexpr float
+      quiet_NaN() noexcept { return __builtin_nanf(""); }
+
+      static constexpr float
+      signaling_NaN() noexcept { return __builtin_nansf(""); }
+
+      static constexpr float
+      denorm_min() noexcept { return 1.40129846432481707092372958328991613e-45F; }
+
+      static constexpr bool is_iec559
+ = has_infinity && has_quiet_NaN && has_denorm == denorm_present;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = false;
+
+      static constexpr bool traps = false;
+      static constexpr bool tinyness_before
+       = false;
+      static constexpr float_round_style round_style
+       = round_to_nearest;
+    };
+
+
+
+
+
+
+  template<>
+    struct numeric_limits<double>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr double
+      min() noexcept { return double(2.22507385850720138309023271733240406e-308L); }
+
+      static constexpr double
+      max() noexcept { return double(1.79769313486231570814527423731704357e+308L); }
+
+
+      static constexpr double
+      lowest() noexcept { return -double(1.79769313486231570814527423731704357e+308L); }
+
+
+      static constexpr int digits = 53;
+      static constexpr int digits10 = 15;
+
+      static constexpr int max_digits10
+  = (2 + (53) * 643L / 2136);
+
+      static constexpr bool is_signed = true;
+      static constexpr bool is_integer = false;
+      static constexpr bool is_exact = false;
+      static constexpr int radix = 2;
+
+      static constexpr double
+      epsilon() noexcept { return double(2.22044604925031308084726333618164062e-16L); }
+
+      static constexpr double
+      round_error() noexcept { return 0.5; }
+
+      static constexpr int min_exponent = (-1021);
+      static constexpr int min_exponent10 = (-307);
+      static constexpr int max_exponent = 1024;
+      static constexpr int max_exponent10 = 308;
+
+      static constexpr bool has_infinity = 1;
+      static constexpr bool has_quiet_NaN = 1;
+      static constexpr bool has_signaling_NaN = has_quiet_NaN;
+      static constexpr float_denorm_style has_denorm
+ = bool(1) ? denorm_present : denorm_absent;
+      static constexpr bool has_denorm_loss
+        = false;
+
+      static constexpr double
+      infinity() noexcept { return __builtin_huge_val(); }
+
+      static constexpr double
+      quiet_NaN() noexcept { return __builtin_nan(""); }
+
+      static constexpr double
+      signaling_NaN() noexcept { return __builtin_nans(""); }
+
+      static constexpr double
+      denorm_min() noexcept { return double(4.94065645841246544176568792868221372e-324L); }
+
+      static constexpr bool is_iec559
+ = has_infinity && has_quiet_NaN && has_denorm == denorm_present;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = false;
+
+      static constexpr bool traps = false;
+      static constexpr bool tinyness_before
+       = false;
+      static constexpr float_round_style round_style
+       = round_to_nearest;
+    };
+
+
+
+
+
+
+  template<>
+    struct numeric_limits<long double>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr long double
+      min() noexcept { return 3.36210314311209350626267781732175260e-4932L; }
+
+      static constexpr long double
+      max() noexcept { return 1.18973149535723176502126385303097021e+4932L; }
+
+
+      static constexpr long double
+      lowest() noexcept { return -1.18973149535723176502126385303097021e+4932L; }
+
+
+      static constexpr int digits = 64;
+      static constexpr int digits10 = 18;
+
+      static constexpr int max_digits10
+  = (2 + (64) * 643L / 2136);
+
+      static constexpr bool is_signed = true;
+      static constexpr bool is_integer = false;
+      static constexpr bool is_exact = false;
+      static constexpr int radix = 2;
+
+      static constexpr long double
+      epsilon() noexcept { return 1.08420217248550443400745280086994171e-19L; }
+
+      static constexpr long double
+      round_error() noexcept { return 0.5L; }
+
+      static constexpr int min_exponent = (-16381);
+      static constexpr int min_exponent10 = (-4931);
+      static constexpr int max_exponent = 16384;
+      static constexpr int max_exponent10 = 4932;
+
+      static constexpr bool has_infinity = 1;
+      static constexpr bool has_quiet_NaN = 1;
+      static constexpr bool has_signaling_NaN = has_quiet_NaN;
+      static constexpr float_denorm_style has_denorm
+ = bool(1) ? denorm_present : denorm_absent;
+      static constexpr bool has_denorm_loss
+ = false;
+
+      static constexpr long double
+      infinity() noexcept { return __builtin_huge_vall(); }
+
+      static constexpr long double
+      quiet_NaN() noexcept { return __builtin_nanl(""); }
+
+      static constexpr long double
+      signaling_NaN() noexcept { return __builtin_nansl(""); }
+
+      static constexpr long double
+      denorm_min() noexcept { return 3.64519953188247460252840593361941982e-4951L; }
+
+      static constexpr bool is_iec559
+ = has_infinity && has_quiet_NaN && has_denorm == denorm_present;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = false;
+
+      static constexpr bool traps = false;
+      static constexpr bool tinyness_before =
+      false;
+      static constexpr float_round_style round_style =
+            round_to_nearest;
+    };
+# 1993 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
+__extension__ template<> struct numeric_limits<_Float16> { static constexpr bool is_specialized = true; static constexpr _Float16 min() noexcept { return 6.10351562500000000000000000000000000e-5F16; } static constexpr _Float16 max() noexcept { return 6.55040000000000000000000000000000000e+4F16; } static constexpr _Float16 lowest() noexcept { return -6.55040000000000000000000000000000000e+4F16; } static constexpr int digits = 11; static constexpr int digits10 = 3; static constexpr int max_digits10 = (2 + (11) * 643L / 2136); static constexpr bool is_signed = true; static constexpr bool is_integer = false; static constexpr bool is_exact = false; static constexpr int radix = 2; static constexpr _Float16 epsilon() noexcept { return 9.76562500000000000000000000000000000e-4F16; } static constexpr _Float16 round_error() noexcept { return 0.5F16; } static constexpr int min_exponent = (-13); static constexpr int min_exponent10 = (-4); static constexpr int max_exponent = 16; static constexpr int max_exponent10 = 4; static constexpr bool has_infinity = 1; static constexpr bool has_quiet_NaN = 1; static constexpr bool has_signaling_NaN = has_quiet_NaN; static constexpr float_denorm_style has_denorm = bool(1) ? denorm_present : denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr _Float16 infinity() noexcept { return __builtin_huge_valf16(); } static constexpr _Float16 quiet_NaN() noexcept { return __builtin_nanf16(""); } static constexpr _Float16 signaling_NaN() noexcept { return __builtin_nansf16(""); } static constexpr _Float16 denorm_min() noexcept { return 5.96046447753906250000000000000000000e-8F16; } static constexpr bool is_iec559 = has_infinity && has_quiet_NaN && has_denorm == denorm_present; static constexpr bool is_bounded = true; static constexpr bool is_modulo = false; static constexpr bool traps = false; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_to_nearest; };
+
+
+__extension__ template<> struct numeric_limits<_Float32> { static constexpr bool is_specialized = true; static constexpr _Float32 min() noexcept { return 1.17549435082228750796873653722224568e-38F32; } static constexpr _Float32 max() noexcept { return 3.40282346638528859811704183484516925e+38F32; } static constexpr _Float32 lowest() noexcept { return -3.40282346638528859811704183484516925e+38F32; } static constexpr int digits = 24; static constexpr int digits10 = 6; static constexpr int max_digits10 = (2 + (24) * 643L / 2136); static constexpr bool is_signed = true; static constexpr bool is_integer = false; static constexpr bool is_exact = false; static constexpr int radix = 2; static constexpr _Float32 epsilon() noexcept { return 1.19209289550781250000000000000000000e-7F32; } static constexpr _Float32 round_error() noexcept { return 0.5F32; } static constexpr int min_exponent = (-125); static constexpr int min_exponent10 = (-37); static constexpr int max_exponent = 128; static constexpr int max_exponent10 = 38; static constexpr bool has_infinity = 1; static constexpr bool has_quiet_NaN = 1; static constexpr bool has_signaling_NaN = has_quiet_NaN; static constexpr float_denorm_style has_denorm = bool(1) ? denorm_present : denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr _Float32 infinity() noexcept { return __builtin_huge_valf32(); } static constexpr _Float32 quiet_NaN() noexcept { return __builtin_nanf32(""); } static constexpr _Float32 signaling_NaN() noexcept { return __builtin_nansf32(""); } static constexpr _Float32 denorm_min() noexcept { return 1.40129846432481707092372958328991613e-45F32; } static constexpr bool is_iec559 = has_infinity && has_quiet_NaN && has_denorm == denorm_present; static constexpr bool is_bounded = true; static constexpr bool is_modulo = false; static constexpr bool traps = false; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_to_nearest; };
+
+
+__extension__ template<> struct numeric_limits<_Float64> { static constexpr bool is_specialized = true; static constexpr _Float64 min() noexcept { return 2.22507385850720138309023271733240406e-308F64; } static constexpr _Float64 max() noexcept { return 1.79769313486231570814527423731704357e+308F64; } static constexpr _Float64 lowest() noexcept { return -1.79769313486231570814527423731704357e+308F64; } static constexpr int digits = 53; static constexpr int digits10 = 15; static constexpr int max_digits10 = (2 + (53) * 643L / 2136); static constexpr bool is_signed = true; static constexpr bool is_integer = false; static constexpr bool is_exact = false; static constexpr int radix = 2; static constexpr _Float64 epsilon() noexcept { return 2.22044604925031308084726333618164062e-16F64; } static constexpr _Float64 round_error() noexcept { return 0.5F64; } static constexpr int min_exponent = (-1021); static constexpr int min_exponent10 = (-307); static constexpr int max_exponent = 1024; static constexpr int max_exponent10 = 308; static constexpr bool has_infinity = 1; static constexpr bool has_quiet_NaN = 1; static constexpr bool has_signaling_NaN = has_quiet_NaN; static constexpr float_denorm_style has_denorm = bool(1) ? denorm_present : denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr _Float64 infinity() noexcept { return __builtin_huge_valf64(); } static constexpr _Float64 quiet_NaN() noexcept { return __builtin_nanf64(""); } static constexpr _Float64 signaling_NaN() noexcept { return __builtin_nansf64(""); } static constexpr _Float64 denorm_min() noexcept { return 4.94065645841246544176568792868221372e-324F64; } static constexpr bool is_iec559 = has_infinity && has_quiet_NaN && has_denorm == denorm_present; static constexpr bool is_bounded = true; static constexpr bool is_modulo = false; static constexpr bool traps = false; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_to_nearest; };
+
+
+__extension__ template<> struct numeric_limits<_Float128> { static constexpr bool is_specialized = true; static constexpr _Float128 min() noexcept { return 3.36210314311209350626267781732175260e-4932F128; } static constexpr _Float128 max() noexcept { return 1.18973149535723176508575932662800702e+4932F128; } static constexpr _Float128 lowest() noexcept { return -1.18973149535723176508575932662800702e+4932F128; } static constexpr int digits = 113; static constexpr int digits10 = 33; static constexpr int max_digits10 = (2 + (113) * 643L / 2136); static constexpr bool is_signed = true; static constexpr bool is_integer = false; static constexpr bool is_exact = false; static constexpr int radix = 2; static constexpr _Float128 epsilon() noexcept { return 1.92592994438723585305597794258492732e-34F128; } static constexpr _Float128 round_error() noexcept { return 0.5F128; } static constexpr int min_exponent = (-16381); static constexpr int min_exponent10 = (-4931); static constexpr int max_exponent = 16384; static constexpr int max_exponent10 = 4932; static constexpr bool has_infinity = 1; static constexpr bool has_quiet_NaN = 1; static constexpr bool has_signaling_NaN = has_quiet_NaN; static constexpr float_denorm_style has_denorm = bool(1) ? denorm_present : denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr _Float128 infinity() noexcept { return __builtin_huge_valf128(); } static constexpr _Float128 quiet_NaN() noexcept { return __builtin_nanf128(""); } static constexpr _Float128 signaling_NaN() noexcept { return __builtin_nansf128(""); } static constexpr _Float128 denorm_min() noexcept { return 6.47517511943802511092443895822764655e-4966F128; } static constexpr bool is_iec559 = has_infinity && has_quiet_NaN && has_denorm == denorm_present; static constexpr bool is_bounded = true; static constexpr bool is_modulo = false; static constexpr bool traps = false; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_to_nearest; };
+# 2013 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
+  __extension__
+  template<>
+    struct numeric_limits<__gnu_cxx::__bfloat16_t>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr __gnu_cxx::__bfloat16_t
+      min() noexcept
+      { return 1.17549435082228750796873653722224568e-38BF16; }
+
+      static constexpr __gnu_cxx::__bfloat16_t
+      max() noexcept
+      { return 3.38953138925153547590470800371487867e+38BF16; }
+
+      static constexpr __gnu_cxx::__bfloat16_t
+      lowest() noexcept
+      { return -3.38953138925153547590470800371487867e+38BF16; }
+
+      static constexpr int digits = 8;
+      static constexpr int digits10 = 2;
+
+      static constexpr int max_digits10
+ = (2 + (8) * 643L / 2136);
+
+      static constexpr bool is_signed = true;
+      static constexpr bool is_integer = false;
+      static constexpr bool is_exact = false;
+      static constexpr int radix = 2;
+
+      static constexpr __gnu_cxx::__bfloat16_t
+      epsilon() noexcept
+      { return 7.81250000000000000000000000000000000e-3BF16; }
+
+      static constexpr __gnu_cxx::__bfloat16_t
+      round_error() noexcept { return 0.5BF16; }
+
+      static constexpr int min_exponent = (-125);
+      static constexpr int min_exponent10 = (-37);
+      static constexpr int max_exponent = 128;
+      static constexpr int max_exponent10 = 38;
+
+      static constexpr bool has_infinity
+ = 1;
+      static constexpr bool has_quiet_NaN
+ = 1;
+      static constexpr bool has_signaling_NaN = has_quiet_NaN;
+      static constexpr float_denorm_style has_denorm
+ = bool(1) ? denorm_present : denorm_absent;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr __gnu_cxx::__bfloat16_t
+      infinity() noexcept
+      { return __gnu_cxx::__bfloat16_t(__builtin_huge_valf()); }
+
+      static constexpr __gnu_cxx::__bfloat16_t
+      quiet_NaN() noexcept
+      { return __gnu_cxx::__bfloat16_t(__builtin_nanf("")); }
+
+      static constexpr __gnu_cxx::__bfloat16_t
+      signaling_NaN() noexcept
+      { return __builtin_nansf16b(""); }
+
+      static constexpr __gnu_cxx::__bfloat16_t
+      denorm_min() noexcept
+      { return 9.18354961579912115600575419704879436e-41BF16; }
+
+      static constexpr bool is_iec559
+ = has_infinity && has_quiet_NaN && has_denorm == denorm_present;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = false;
+
+      static constexpr bool traps = false;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+ = round_to_nearest;
+    };
+
+
+
+
+
+  __extension__
+  template<>
+    struct numeric_limits<__float128>
+    {
+      static constexpr bool is_specialized = true;
+
+      static constexpr __float128
+      min() noexcept
+      {
+
+
+
+
+ return __extension__ 0x1.0p-16382Q;
+
+      }
+
+      static constexpr __float128
+      max() noexcept
+      {
+
+
+
+
+
+
+
+ return __extension__ 0x1.ffffffffffffffffffffffffffffp+16383Q;
+
+      }
+
+      static constexpr __float128
+      lowest() noexcept
+      { return -max(); }
+
+      static constexpr int digits = 113;
+      static constexpr int digits10 = 33;
+
+      static constexpr int max_digits10 = 35;
+
+      static constexpr bool is_signed = true;
+      static constexpr bool is_integer = false;
+      static constexpr bool is_exact = false;
+      static constexpr int radix = 2;
+
+      static constexpr __float128
+      epsilon() noexcept
+      { return double(1.9259299443872359e-34); }
+
+      static constexpr __float128
+      round_error() noexcept { return 0.5; }
+
+      static constexpr int min_exponent = -16381;
+      static constexpr int min_exponent10 = -4931;
+      static constexpr int max_exponent = 16384;
+      static constexpr int max_exponent10 = 4932;
+
+      static constexpr bool has_infinity = 1;
+      static constexpr bool has_quiet_NaN = 1;
+
+
+      static constexpr bool has_signaling_NaN = true;
+
+
+
+      static constexpr float_denorm_style has_denorm
+ = denorm_present;
+      static constexpr bool has_denorm_loss = false;
+
+      static constexpr __float128
+      infinity() noexcept
+      { return __builtin_huge_val(); }
+
+      static constexpr __float128
+      quiet_NaN() noexcept
+      { return __builtin_nan(""); }
+
+      static constexpr __float128
+      signaling_NaN() noexcept
+      {
+
+ return __builtin_nansq("");
+
+
+
+
+
+      }
+
+      static constexpr __float128
+      denorm_min() noexcept
+      {
+
+
+
+
+ return __extension__ 0x1.0p-16494Q;
+
+      }
+
+      static constexpr bool is_iec559 = has_signaling_NaN;
+      static constexpr bool is_bounded = true;
+      static constexpr bool is_modulo = false;
+
+      static constexpr bool traps = false;
+      static constexpr bool tinyness_before = false;
+      static constexpr float_round_style round_style
+ = round_to_nearest;
+# 2225 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
+    };
+
+
+
+
+}
+# 2239 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
+#pragma GCC diagnostic pop
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp" 2
+
+
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp"
+namespace glm{
+namespace detail
+{
+ template <typename T, bool isFloat>
+ struct compute_equal
+ {
+  inline constexpr static bool call(T a, T b)
+  {
+   return a == b;
+  }
+ };
+# 29 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp"
+}
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl" 2
+
+namespace glm
+{
+# 25 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr vec<2, T, Q>::vec(vec<2, T, P> const& v)
+  : x(v.x), y(v.y)
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q>::vec(T scalar)
+  : x(scalar), y(scalar)
+ {}
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q>::vec(T _x, T _y)
+  : x(_x), y(_y)
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<2, T, Q>::vec(vec<1, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B>
+ inline constexpr vec<2, T, Q>::vec(A _x, B _y)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B>
+ inline constexpr vec<2, T, Q>::vec(vec<1, A, Q> const& _x, B _y)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B>
+ inline constexpr vec<2, T, Q>::vec(A _x, vec<1, B, Q> const& _y)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B>
+ inline constexpr vec<2, T, Q>::vec(vec<1, A, Q> const& _x, vec<1, B, Q> const& _y)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y.x))
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<2, T, Q>::vec(vec<2, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<2, T, Q>::vec(vec<3, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<2, T, Q>::vec(vec<4, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.y))
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr T & vec<2, T, Q>::operator[](typename vec<2, T, Q>::length_type i)
+ {
+  (
+# 108 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl" 3
+ ((void)0)
+# 108 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl"
+ );
+  switch(i)
+  {
+  default:
+  case 0:
+   return x;
+  case 1:
+   return y;
+  }
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr T const& vec<2, T, Q>::operator[](typename vec<2, T, Q>::length_type i) const
+ {
+  (
+# 122 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl" 3
+ ((void)0)
+# 122 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl"
+ );
+  switch(i)
+  {
+  default:
+  case 0:
+   return x;
+  case 1:
+   return y;
+  }
+ }
+# 145 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl"
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator=(vec<2, U, Q> const& v)
+ {
+  this->x = static_cast<T>(v.x);
+  this->y = static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator+=(U scalar)
+ {
+  this->x += static_cast<T>(scalar);
+  this->y += static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator+=(vec<1, U, Q> const& v)
+ {
+  this->x += static_cast<T>(v.x);
+  this->y += static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator+=(vec<2, U, Q> const& v)
+ {
+  this->x += static_cast<T>(v.x);
+  this->y += static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator-=(U scalar)
+ {
+  this->x -= static_cast<T>(scalar);
+  this->y -= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator-=(vec<1, U, Q> const& v)
+ {
+  this->x -= static_cast<T>(v.x);
+  this->y -= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator-=(vec<2, U, Q> const& v)
+ {
+  this->x -= static_cast<T>(v.x);
+  this->y -= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator*=(U scalar)
+ {
+  this->x *= static_cast<T>(scalar);
+  this->y *= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator*=(vec<1, U, Q> const& v)
+ {
+  this->x *= static_cast<T>(v.x);
+  this->y *= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator*=(vec<2, U, Q> const& v)
+ {
+  this->x *= static_cast<T>(v.x);
+  this->y *= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator/=(U scalar)
+ {
+  this->x /= static_cast<T>(scalar);
+  this->y /= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator/=(vec<1, U, Q> const& v)
+ {
+  this->x /= static_cast<T>(v.x);
+  this->y /= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator/=(vec<2, U, Q> const& v)
+ {
+  this->x /= static_cast<T>(v.x);
+  this->y /= static_cast<T>(v.y);
+  return *this;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator++()
+ {
+  ++this->x;
+  ++this->y;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator--()
+ {
+  --this->x;
+  --this->y;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> vec<2, T, Q>::operator++(int)
+ {
+  vec<2, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> vec<2, T, Q>::operator--(int)
+ {
+  vec<2, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator%=(U scalar)
+ {
+  this->x %= static_cast<T>(scalar);
+  this->y %= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator%=(vec<1, U, Q> const& v)
+ {
+  this->x %= static_cast<T>(v.x);
+  this->y %= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator%=(vec<2, U, Q> const& v)
+ {
+  this->x %= static_cast<T>(v.x);
+  this->y %= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator&=(U scalar)
+ {
+  this->x &= static_cast<T>(scalar);
+  this->y &= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator&=(vec<1, U, Q> const& v)
+ {
+  this->x &= static_cast<T>(v.x);
+  this->y &= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator&=(vec<2, U, Q> const& v)
+ {
+  this->x &= static_cast<T>(v.x);
+  this->y &= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator|=(U scalar)
+ {
+  this->x |= static_cast<T>(scalar);
+  this->y |= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator|=(vec<1, U, Q> const& v)
+ {
+  this->x |= static_cast<T>(v.x);
+  this->y |= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator|=(vec<2, U, Q> const& v)
+ {
+  this->x |= static_cast<T>(v.x);
+  this->y |= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator^=(U scalar)
+ {
+  this->x ^= static_cast<T>(scalar);
+  this->y ^= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator^=(vec<1, U, Q> const& v)
+ {
+  this->x ^= static_cast<T>(v.x);
+  this->y ^= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator^=(vec<2, U, Q> const& v)
+ {
+  this->x ^= static_cast<T>(v.x);
+  this->y ^= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator<<=(U scalar)
+ {
+  this->x <<= static_cast<T>(scalar);
+  this->y <<= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator<<=(vec<1, U, Q> const& v)
+ {
+  this->x <<= static_cast<T>(v.x);
+  this->y <<= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator<<=(vec<2, U, Q> const& v)
+ {
+  this->x <<= static_cast<T>(v.x);
+  this->y <<= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator>>=(U scalar)
+ {
+  this->x >>= static_cast<T>(scalar);
+  this->y >>= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator>>=(vec<1, U, Q> const& v)
+ {
+  this->x >>= static_cast<T>(v.x);
+  this->y >>= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator>>=(vec<2, U, Q> const& v)
+ {
+  this->x >>= static_cast<T>(v.x);
+  this->y >>= static_cast<T>(v.y);
+  return *this;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v)
+ {
+  return v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   -v.x,
+   -v.y);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x + scalar,
+   v.y + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x + v2.x,
+   v1.y + v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator+(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar + v.x,
+   scalar + v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator+(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x + v2.x,
+   v1.x + v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x + v2.x,
+   v1.y + v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x - scalar,
+   v.y - scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x - v2.x,
+   v1.y - v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator-(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar - v.x,
+   scalar - v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator-(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x - v2.x,
+   v1.x - v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x - v2.x,
+   v1.y - v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x * scalar,
+   v.y * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x * v2.x,
+   v1.y * v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator*(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar * v.x,
+   scalar * v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator*(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x * v2.x,
+   v1.x * v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x * v2.x,
+   v1.y * v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x / scalar,
+   v.y / scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x / v2.x,
+   v1.y / v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator/(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar / v.x,
+   scalar / v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator/(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x / v2.x,
+   v1.x / v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x / v2.x,
+   v1.y / v2.y);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x % scalar,
+   v.y % scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x % v2.x,
+   v1.y % v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator%(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar % v.x,
+   scalar % v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator%(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x % v2.x,
+   v1.x % v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x % v2.x,
+   v1.y % v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x & scalar,
+   v.y & scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x & v2.x,
+   v1.y & v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator&(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar & v.x,
+   scalar & v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator&(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x & v2.x,
+   v1.x & v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x & v2.x,
+   v1.y & v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x | scalar,
+   v.y | scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x | v2.x,
+   v1.y | v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator|(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar | v.x,
+   scalar | v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator|(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x | v2.x,
+   v1.x | v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x | v2.x,
+   v1.y | v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x ^ scalar,
+   v.y ^ scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x ^ v2.x,
+   v1.y ^ v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator^(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar ^ v.x,
+   scalar ^ v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator^(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x ^ v2.x,
+   v1.x ^ v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x ^ v2.x,
+   v1.y ^ v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x << scalar,
+   v.y << scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x << v2.x,
+   v1.y << v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator<<(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar << v.x,
+   scalar << v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator<<(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x << v2.x,
+   v1.x << v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x << v2.x,
+   v1.y << v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x >> scalar,
+   v.y >> scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x >> v2.x,
+   v1.y >> v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator>>(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar >> v.x,
+   scalar >> v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator>>(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x >> v2.x,
+   v1.x >> v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x >> v2.x,
+   v1.y >> v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator~(vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   ~v.x,
+   ~v.y);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return
+   detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.x, v2.x) &&
+   detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.y, v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return !(v1 == v2);
+ }
+
+ template<qualifier Q>
+ inline constexpr vec<2, bool, Q> operator&&(vec<2, bool, Q> const& v1, vec<2, bool, Q> const& v2)
+ {
+  return vec<2, bool, Q>(v1.x && v2.x, v1.y && v2.y);
+ }
+
+ template<qualifier Q>
+ inline constexpr vec<2, bool, Q> operator||(vec<2, bool, Q> const& v1, vec<2, bool, Q> const& v2)
+ {
+  return vec<2, bool, Q>(v1.x || v2.x, v1.y || v2.y);
+ }
+}
+# 406 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, bool, defaultp> bvec2;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef vec<2, bool, highp> highp_bvec2;
+
+
+
+
+
+ typedef vec<2, bool, mediump> mediump_bvec2;
+
+
+
+
+
+ typedef vec<2, bool, lowp> lowp_bvec2;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float2.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, float, defaultp> vec2;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float2_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef vec<2, float, highp> highp_vec2;
+
+
+
+
+
+ typedef vec<2, float, mediump> mediump_vec2;
+
+
+
+
+
+ typedef vec<2, float, lowp> lowp_vec2;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double2.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, double, defaultp> dvec2;
+
+
+}
+# 10 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double2_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef vec<2, double, highp> highp_dvec2;
+
+
+
+
+
+ typedef vec<2, double, mediump> mediump_dvec2;
+
+
+
+
+
+ typedef vec<2, double, lowp> lowp_dvec2;
+
+
+}
+# 11 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, int, defaultp> ivec2;
+
+
+}
+# 12 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2_sized.hpp" 1
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2_sized.hpp"
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_int_sized.hpp" 1
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_int_sized.hpp"
+       
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_int_sized.hpp" 2
+
+
+
+
+
+namespace glm{
+namespace detail
+{
+
+  typedef std::int8_t int8;
+  typedef std::int16_t int16;
+  typedef std::int32_t int32;
+
+
+
+
+
+
+ template<>
+ struct is_int<int8>
+ {
+  enum test {value = ~0};
+ };
+
+ template<>
+ struct is_int<int16>
+ {
+  enum test {value = ~0};
+ };
+
+ template<>
+ struct is_int<int64>
+ {
+  enum test {value = ~0};
+ };
+}
+
+
+
+
+
+
+ typedef detail::int8 int8;
+
+
+ typedef detail::int16 int16;
+
+
+ typedef detail::int32 int32;
+
+
+ typedef detail::int64 int64;
+
+
+}
+# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2_sized.hpp" 2
+
+
+
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, int8, defaultp> i8vec2;
+
+
+
+
+ typedef vec<2, int16, defaultp> i16vec2;
+
+
+
+
+ typedef vec<2, int32, defaultp> i32vec2;
+
+
+
+
+ typedef vec<2, int64, defaultp> i64vec2;
+
+
+}
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, unsigned int, defaultp> uvec2;
+
+
+}
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2_sized.hpp" 1
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2_sized.hpp"
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_uint_sized.hpp" 1
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_uint_sized.hpp"
+       
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_uint_sized.hpp" 2
+
+
+
+
+
+namespace glm{
+namespace detail
+{
+
+  typedef std::uint8_t uint8;
+  typedef std::uint16_t uint16;
+  typedef std::uint32_t uint32;
+
+
+
+
+
+
+ template<>
+ struct is_int<uint8>
+ {
+  enum test {value = ~0};
+ };
+
+ template<>
+ struct is_int<uint16>
+ {
+  enum test {value = ~0};
+ };
+
+ template<>
+ struct is_int<uint64>
+ {
+  enum test {value = ~0};
+ };
+}
+
+
+
+
+
+
+ typedef detail::uint8 uint8;
+
+
+ typedef detail::uint16 uint16;
+
+
+ typedef detail::uint32 uint32;
+
+
+ typedef detail::uint64 uint64;
+
+
+}
+# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2_sized.hpp" 2
+
+
+
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, uint8, defaultp> u8vec2;
+
+
+
+
+ typedef vec<2, uint16, defaultp> u16vec2;
+
+
+
+
+ typedef vec<2, uint32, defaultp> u32vec2;
+
+
+
+
+ typedef vec<2, uint64, defaultp> u64vec2;
+
+
+}
+# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/frameBuffer.h" 2
+
+namespace Neon::RHI
+{
+class Framebuffer
+{
+public:
+    virtual ~Framebuffer() = default;
+
+    [[nodiscard]] virtual uint32_t getWidth() const = 0;
+    [[nodiscard]] virtual uint32_t getHeight() const = 0;
+};
+}
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/pipeline.h" 1
+       
+
+namespace Neon::RHI
+{
+class Pipeline
+{
+public:
+    virtual ~Pipeline() = default;
+};
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/buffer.h" 1
+       
+
+namespace Neon::RHI
+{
+class Buffer
+{
+public:
+    virtual ~Buffer() = default;
+};
+}
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/texture.h" 1
+       
+
 
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelFormat.h" 1
        
 
-
-# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelFormat.h"
 namespace Neon::RHI
 {
     enum class PixelFormat
@@ -33659,18 +37314,21 @@ class Texture
 public:
     virtual ~Texture() = default;
 
-    virtual uint32_t getWidth() = 0;
-    virtual uint32_t getHeight() = 0;
-    virtual uint32_t getDepth() = 0;
+    [[nodiscard]] virtual uint32_t getWidth() const = 0;
+    [[nodiscard]] virtual uint32_t getHeight() const = 0;
+    [[nodiscard]] virtual uint32_t getDepth() const = 0;
 
-    virtual uint32_t getMipLevels() = 0;
-    virtual uint32_t getArrayLayers() = 0;
-    virtual PixelFormat getFormat() = 0;
+    [[nodiscard]] virtual uint32_t getMipLevels() const = 0;
+    [[nodiscard]] virtual uint32_t getArrayLayers() const = 0;
+    [[nodiscard]] virtual PixelFormat getFormat() const = 0;
 };
 }
-# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/textureView.h" 1
        
+
+
+
 
 namespace Neon::RHI
 {
@@ -33678,6 +37336,26 @@ class TextureView
 {
 public:
     virtual ~TextureView() = default;
+
+    [[nodiscard]] virtual uint32_t getWidth() const = 0;
+    [[nodiscard]] virtual uint32_t getHeight() const = 0;
+    [[nodiscard]] virtual uint32_t getDepth() const = 0;
+
+    [[nodiscard]] virtual uint32_t getMipLevels() const = 0;
+    [[nodiscard]] virtual uint32_t getArrayLayers() const = 0;
+    [[nodiscard]] virtual PixelFormat getFormat() const = 0;
+};
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/sampler.h" 1
+       
+
+namespace Neon::RHI
+{
+class Sampler
+{
+public:
+    virtual ~Sampler() = default;
 };
 }
 # 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
@@ -37483,1742 +41161,7 @@ namespace std
 # 37 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
 # 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
 # 38 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
-
-
-
-
-
-
-# 1 "C:/msys64/mingw64/include/c++/15.2.0/limits" 1 3
-# 44 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#pragma GCC diagnostic ignored "-Wlong-long"
-#pragma GCC diagnostic ignored "-Wc++23-extensions"
-# 165 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
-namespace std
-{
-
-
-
-
-
-
-
-  enum float_round_style
-  {
-    round_indeterminate = -1,
-    round_toward_zero = 0,
-    round_to_nearest = 1,
-    round_toward_infinity = 2,
-    round_toward_neg_infinity = 3
-  };
-
-
-
-
-
-
-
-  enum float_denorm_style
-  {
-
-    denorm_indeterminate = -1,
-
-    denorm_absent = 0,
-
-    denorm_present = 1
-  };
-# 209 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
-  struct __numeric_limits_base
-  {
-
-
-    static constexpr bool is_specialized = false;
-
-
-
-
-    static constexpr int digits = 0;
-
-
-    static constexpr int digits10 = 0;
-
-
-
-
-    static constexpr int max_digits10 = 0;
-
-
-
-    static constexpr bool is_signed = false;
-
-
-    static constexpr bool is_integer = false;
-
-
-
-
-    static constexpr bool is_exact = false;
-
-
-
-    static constexpr int radix = 0;
-
-
-
-    static constexpr int min_exponent = 0;
-
-
-
-    static constexpr int min_exponent10 = 0;
-
-
-
-
-    static constexpr int max_exponent = 0;
-
-
-
-    static constexpr int max_exponent10 = 0;
-
-
-    static constexpr bool has_infinity = false;
-
-
-
-    static constexpr bool has_quiet_NaN = false;
-
-
-
-    static constexpr bool has_signaling_NaN = false;
-
-
-    static constexpr float_denorm_style has_denorm = denorm_absent;
-
-
-
-    static constexpr bool has_denorm_loss = false;
-
-
-
-    static constexpr bool is_iec559 = false;
-
-
-
-
-    static constexpr bool is_bounded = false;
-# 295 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
-    static constexpr bool is_modulo = false;
-
-
-    static constexpr bool traps = false;
-
-
-    static constexpr bool tinyness_before = false;
-
-
-
-
-    static constexpr float_round_style round_style =
-          round_toward_zero;
-  };
-# 318 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
-  template<typename _Tp>
-    struct numeric_limits : public __numeric_limits_base
-    {
-
-
-      static constexpr _Tp
-      min() noexcept { return _Tp(); }
-
-
-      static constexpr _Tp
-      max() noexcept { return _Tp(); }
-
-
-
-
-      static constexpr _Tp
-      lowest() noexcept { return _Tp(); }
-
-
-
-
-      static constexpr _Tp
-      epsilon() noexcept { return _Tp(); }
-
-
-      static constexpr _Tp
-      round_error() noexcept { return _Tp(); }
-
-
-      static constexpr _Tp
-      infinity() noexcept { return _Tp(); }
-
-
-
-      static constexpr _Tp
-      quiet_NaN() noexcept { return _Tp(); }
-
-
-
-      static constexpr _Tp
-      signaling_NaN() noexcept { return _Tp(); }
-
-
-
-
-      static constexpr _Tp
-      denorm_min() noexcept { return _Tp(); }
-    };
-
-
-
-
-  template<typename _Tp>
-    struct numeric_limits<const _Tp>
-    : public numeric_limits<_Tp> { };
-
-  template<typename _Tp>
-    struct numeric_limits<volatile _Tp>
-    : public numeric_limits<_Tp> { };
-
-  template<typename _Tp>
-    struct numeric_limits<const volatile _Tp>
-    : public numeric_limits<_Tp> { };
-# 390 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
-  template<>
-    struct numeric_limits<bool>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr bool
-      min() noexcept { return false; }
-
-      static constexpr bool
-      max() noexcept { return true; }
-
-
-      static constexpr bool
-      lowest() noexcept { return min(); }
-
-      static constexpr int digits = 1;
-      static constexpr int digits10 = 0;
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = false;
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr bool
-      epsilon() noexcept { return false; }
-
-      static constexpr bool
-      round_error() noexcept { return false; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr bool
-      infinity() noexcept { return false; }
-
-      static constexpr bool
-      quiet_NaN() noexcept { return false; }
-
-      static constexpr bool
-      signaling_NaN() noexcept { return false; }
-
-      static constexpr bool
-      denorm_min() noexcept { return false; }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = false;
-
-
-
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-
-
-  template<>
-    struct numeric_limits<char>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr char
-      min() noexcept { return (((char)(-1) < 0) ? -(((char)(-1) < 0) ? (((((char)1 << ((sizeof(char) * 8 - ((char)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char)0) - 1 : (char)0); }
-
-      static constexpr char
-      max() noexcept { return (((char)(-1) < 0) ? (((((char)1 << ((sizeof(char) * 8 - ((char)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char)0); }
-
-
-      static constexpr char
-      lowest() noexcept { return min(); }
-
-
-      static constexpr int digits = (sizeof(char) * 8 - ((char)(-1) < 0));
-      static constexpr int digits10 = ((sizeof(char) * 8 - ((char)(-1) < 0)) * 643L / 2136);
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = ((char)(-1) < 0);
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr char
-      epsilon() noexcept { return 0; }
-
-      static constexpr char
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr
-      char infinity() noexcept { return char(); }
-
-      static constexpr char
-      quiet_NaN() noexcept { return char(); }
-
-      static constexpr char
-      signaling_NaN() noexcept { return char(); }
-
-      static constexpr char
-      denorm_min() noexcept { return static_cast<char>(0); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = !is_signed;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-
-
-  template<>
-    struct numeric_limits<signed char>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr signed char
-      min() noexcept { return -0x7f - 1; }
-
-      static constexpr signed char
-      max() noexcept { return 0x7f; }
-
-
-      static constexpr signed char
-      lowest() noexcept { return min(); }
-
-
-      static constexpr int digits = (sizeof(signed char) * 8 - ((signed char)(-1) < 0));
-      static constexpr int digits10
-       = ((sizeof(signed char) * 8 - ((signed char)(-1) < 0)) * 643L / 2136);
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = true;
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr signed char
-      epsilon() noexcept { return 0; }
-
-      static constexpr signed char
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr signed char
-      infinity() noexcept { return static_cast<signed char>(0); }
-
-      static constexpr signed char
-      quiet_NaN() noexcept { return static_cast<signed char>(0); }
-
-      static constexpr signed char
-      signaling_NaN() noexcept
-      { return static_cast<signed char>(0); }
-
-      static constexpr signed char
-      denorm_min() noexcept
-      { return static_cast<signed char>(0); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = false;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-
-
-  template<>
-    struct numeric_limits<unsigned char>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr unsigned char
-      min() noexcept { return 0; }
-
-      static constexpr unsigned char
-      max() noexcept { return 0x7f * 2U + 1; }
-
-
-      static constexpr unsigned char
-      lowest() noexcept { return min(); }
-
-
-      static constexpr int digits
-       = (sizeof(unsigned char) * 8 - ((unsigned char)(-1) < 0));
-      static constexpr int digits10
-       = ((sizeof(unsigned char) * 8 - ((unsigned char)(-1) < 0)) * 643L / 2136);
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = false;
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr unsigned char
-      epsilon() noexcept { return 0; }
-
-      static constexpr unsigned char
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr unsigned char
-      infinity() noexcept
-      { return static_cast<unsigned char>(0); }
-
-      static constexpr unsigned char
-      quiet_NaN() noexcept
-      { return static_cast<unsigned char>(0); }
-
-      static constexpr unsigned char
-      signaling_NaN() noexcept
-      { return static_cast<unsigned char>(0); }
-
-      static constexpr unsigned char
-      denorm_min() noexcept
-      { return static_cast<unsigned char>(0); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = true;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-
-
-  template<>
-    struct numeric_limits<wchar_t>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr wchar_t
-      min() noexcept { return (((wchar_t)(-1) < 0) ? -(((wchar_t)(-1) < 0) ? (((((wchar_t)1 << ((sizeof(wchar_t) * 8 - ((wchar_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(wchar_t)0) - 1 : (wchar_t)0); }
-
-      static constexpr wchar_t
-      max() noexcept { return (((wchar_t)(-1) < 0) ? (((((wchar_t)1 << ((sizeof(wchar_t) * 8 - ((wchar_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(wchar_t)0); }
-
-
-      static constexpr wchar_t
-      lowest() noexcept { return min(); }
-
-
-      static constexpr int digits = (sizeof(wchar_t) * 8 - ((wchar_t)(-1) < 0));
-      static constexpr int digits10
-       = ((sizeof(wchar_t) * 8 - ((wchar_t)(-1) < 0)) * 643L / 2136);
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = ((wchar_t)(-1) < 0);
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr wchar_t
-      epsilon() noexcept { return 0; }
-
-      static constexpr wchar_t
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr wchar_t
-      infinity() noexcept { return wchar_t(); }
-
-      static constexpr wchar_t
-      quiet_NaN() noexcept { return wchar_t(); }
-
-      static constexpr wchar_t
-      signaling_NaN() noexcept { return wchar_t(); }
-
-      static constexpr wchar_t
-      denorm_min() noexcept { return wchar_t(); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = !is_signed;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-
-
-
-  template<>
-    struct numeric_limits<char8_t>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr char8_t
-      min() noexcept { return (((char8_t)(-1) < 0) ? -(((char8_t)(-1) < 0) ? (((((char8_t)1 << ((sizeof(char8_t) * 8 - ((char8_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char8_t)0) - 1 : (char8_t)0); }
-
-      static constexpr char8_t
-      max() noexcept { return (((char8_t)(-1) < 0) ? (((((char8_t)1 << ((sizeof(char8_t) * 8 - ((char8_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char8_t)0); }
-
-      static constexpr char8_t
-      lowest() noexcept { return min(); }
-
-      static constexpr int digits = (sizeof(char8_t) * 8 - ((char8_t)(-1) < 0));
-      static constexpr int digits10 = ((sizeof(char8_t) * 8 - ((char8_t)(-1) < 0)) * 643L / 2136);
-      static constexpr int max_digits10 = 0;
-      static constexpr bool is_signed = ((char8_t)(-1) < 0);
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr char8_t
-      epsilon() noexcept { return 0; }
-
-      static constexpr char8_t
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
- = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr char8_t
-      infinity() noexcept { return char8_t(); }
-
-      static constexpr char8_t
-      quiet_NaN() noexcept { return char8_t(); }
-
-      static constexpr char8_t
-      signaling_NaN() noexcept { return char8_t(); }
-
-      static constexpr char8_t
-      denorm_min() noexcept { return char8_t(); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = !is_signed;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
- = round_toward_zero;
-    };
-
-
-
-
-  template<>
-    struct numeric_limits<char16_t>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr char16_t
-      min() noexcept { return (((char16_t)(-1) < 0) ? -(((char16_t)(-1) < 0) ? (((((char16_t)1 << ((sizeof(char16_t) * 8 - ((char16_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char16_t)0) - 1 : (char16_t)0); }
-
-      static constexpr char16_t
-      max() noexcept { return (((char16_t)(-1) < 0) ? (((((char16_t)1 << ((sizeof(char16_t) * 8 - ((char16_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char16_t)0); }
-
-      static constexpr char16_t
-      lowest() noexcept { return min(); }
-
-      static constexpr int digits = (sizeof(char16_t) * 8 - ((char16_t)(-1) < 0));
-      static constexpr int digits10 = ((sizeof(char16_t) * 8 - ((char16_t)(-1) < 0)) * 643L / 2136);
-      static constexpr int max_digits10 = 0;
-      static constexpr bool is_signed = ((char16_t)(-1) < 0);
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr char16_t
-      epsilon() noexcept { return 0; }
-
-      static constexpr char16_t
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr char16_t
-      infinity() noexcept { return char16_t(); }
-
-      static constexpr char16_t
-      quiet_NaN() noexcept { return char16_t(); }
-
-      static constexpr char16_t
-      signaling_NaN() noexcept { return char16_t(); }
-
-      static constexpr char16_t
-      denorm_min() noexcept { return char16_t(); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = !is_signed;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style = round_toward_zero;
-    };
-
-
-  template<>
-    struct numeric_limits<char32_t>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr char32_t
-      min() noexcept { return (((char32_t)(-1) < 0) ? -(((char32_t)(-1) < 0) ? (((((char32_t)1 << ((sizeof(char32_t) * 8 - ((char32_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char32_t)0) - 1 : (char32_t)0); }
-
-      static constexpr char32_t
-      max() noexcept { return (((char32_t)(-1) < 0) ? (((((char32_t)1 << ((sizeof(char32_t) * 8 - ((char32_t)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(char32_t)0); }
-
-      static constexpr char32_t
-      lowest() noexcept { return min(); }
-
-      static constexpr int digits = (sizeof(char32_t) * 8 - ((char32_t)(-1) < 0));
-      static constexpr int digits10 = ((sizeof(char32_t) * 8 - ((char32_t)(-1) < 0)) * 643L / 2136);
-      static constexpr int max_digits10 = 0;
-      static constexpr bool is_signed = ((char32_t)(-1) < 0);
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr char32_t
-      epsilon() noexcept { return 0; }
-
-      static constexpr char32_t
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr char32_t
-      infinity() noexcept { return char32_t(); }
-
-      static constexpr char32_t
-      quiet_NaN() noexcept { return char32_t(); }
-
-      static constexpr char32_t
-      signaling_NaN() noexcept { return char32_t(); }
-
-      static constexpr char32_t
-      denorm_min() noexcept { return char32_t(); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = !is_signed;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style = round_toward_zero;
-    };
-
-
-
-  template<>
-    struct numeric_limits<short>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr short
-      min() noexcept { return -0x7fff - 1; }
-
-      static constexpr short
-      max() noexcept { return 0x7fff; }
-
-
-      static constexpr short
-      lowest() noexcept { return min(); }
-
-
-      static constexpr int digits = (sizeof(short) * 8 - ((short)(-1) < 0));
-      static constexpr int digits10 = ((sizeof(short) * 8 - ((short)(-1) < 0)) * 643L / 2136);
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = true;
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr short
-      epsilon() noexcept { return 0; }
-
-      static constexpr short
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr short
-      infinity() noexcept { return short(); }
-
-      static constexpr short
-      quiet_NaN() noexcept { return short(); }
-
-      static constexpr short
-      signaling_NaN() noexcept { return short(); }
-
-      static constexpr short
-      denorm_min() noexcept { return short(); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = false;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-
-
-  template<>
-    struct numeric_limits<unsigned short>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr unsigned short
-      min() noexcept { return 0; }
-
-      static constexpr unsigned short
-      max() noexcept { return 0x7fff * 2U + 1; }
-
-
-      static constexpr unsigned short
-      lowest() noexcept { return min(); }
-
-
-      static constexpr int digits
-       = (sizeof(unsigned short) * 8 - ((unsigned short)(-1) < 0));
-      static constexpr int digits10
-       = ((sizeof(unsigned short) * 8 - ((unsigned short)(-1) < 0)) * 643L / 2136);
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = false;
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr unsigned short
-      epsilon() noexcept { return 0; }
-
-      static constexpr unsigned short
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr unsigned short
-      infinity() noexcept
-      { return static_cast<unsigned short>(0); }
-
-      static constexpr unsigned short
-      quiet_NaN() noexcept
-      { return static_cast<unsigned short>(0); }
-
-      static constexpr unsigned short
-      signaling_NaN() noexcept
-      { return static_cast<unsigned short>(0); }
-
-      static constexpr unsigned short
-      denorm_min() noexcept
-      { return static_cast<unsigned short>(0); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = true;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-
-
-  template<>
-    struct numeric_limits<int>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr int
-      min() noexcept { return -0x7fffffff - 1; }
-
-      static constexpr int
-      max() noexcept { return 0x7fffffff; }
-
-
-      static constexpr int
-      lowest() noexcept { return min(); }
-
-
-      static constexpr int digits = (sizeof(int) * 8 - ((int)(-1) < 0));
-      static constexpr int digits10 = ((sizeof(int) * 8 - ((int)(-1) < 0)) * 643L / 2136);
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = true;
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr int
-      epsilon() noexcept { return 0; }
-
-      static constexpr int
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr int
-      infinity() noexcept { return static_cast<int>(0); }
-
-      static constexpr int
-      quiet_NaN() noexcept { return static_cast<int>(0); }
-
-      static constexpr int
-      signaling_NaN() noexcept { return static_cast<int>(0); }
-
-      static constexpr int
-      denorm_min() noexcept { return static_cast<int>(0); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = false;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-
-
-  template<>
-    struct numeric_limits<unsigned int>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr unsigned int
-      min() noexcept { return 0; }
-
-      static constexpr unsigned int
-      max() noexcept { return 0x7fffffff * 2U + 1; }
-
-
-      static constexpr unsigned int
-      lowest() noexcept { return min(); }
-
-
-      static constexpr int digits
-       = (sizeof(unsigned int) * 8 - ((unsigned int)(-1) < 0));
-      static constexpr int digits10
-       = ((sizeof(unsigned int) * 8 - ((unsigned int)(-1) < 0)) * 643L / 2136);
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = false;
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr unsigned int
-      epsilon() noexcept { return 0; }
-
-      static constexpr unsigned int
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr unsigned int
-      infinity() noexcept { return static_cast<unsigned int>(0); }
-
-      static constexpr unsigned int
-      quiet_NaN() noexcept
-      { return static_cast<unsigned int>(0); }
-
-      static constexpr unsigned int
-      signaling_NaN() noexcept
-      { return static_cast<unsigned int>(0); }
-
-      static constexpr unsigned int
-      denorm_min() noexcept
-      { return static_cast<unsigned int>(0); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = true;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-
-
-  template<>
-    struct numeric_limits<long>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr long
-      min() noexcept { return -0x7fffffffL - 1; }
-
-      static constexpr long
-      max() noexcept { return 0x7fffffffL; }
-
-
-      static constexpr long
-      lowest() noexcept { return min(); }
-
-
-      static constexpr int digits = (sizeof(long) * 8 - ((long)(-1) < 0));
-      static constexpr int digits10 = ((sizeof(long) * 8 - ((long)(-1) < 0)) * 643L / 2136);
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = true;
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr long
-      epsilon() noexcept { return 0; }
-
-      static constexpr long
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr long
-      infinity() noexcept { return static_cast<long>(0); }
-
-      static constexpr long
-      quiet_NaN() noexcept { return static_cast<long>(0); }
-
-      static constexpr long
-      signaling_NaN() noexcept { return static_cast<long>(0); }
-
-      static constexpr long
-      denorm_min() noexcept { return static_cast<long>(0); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = false;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-
-
-  template<>
-    struct numeric_limits<unsigned long>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr unsigned long
-      min() noexcept { return 0; }
-
-      static constexpr unsigned long
-      max() noexcept { return 0x7fffffffL * 2UL + 1; }
-
-
-      static constexpr unsigned long
-      lowest() noexcept { return min(); }
-
-
-      static constexpr int digits
-       = (sizeof(unsigned long) * 8 - ((unsigned long)(-1) < 0));
-      static constexpr int digits10
-       = ((sizeof(unsigned long) * 8 - ((unsigned long)(-1) < 0)) * 643L / 2136);
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = false;
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr unsigned long
-      epsilon() noexcept { return 0; }
-
-      static constexpr unsigned long
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr unsigned long
-      infinity() noexcept
-      { return static_cast<unsigned long>(0); }
-
-      static constexpr unsigned long
-      quiet_NaN() noexcept
-      { return static_cast<unsigned long>(0); }
-
-      static constexpr unsigned long
-      signaling_NaN() noexcept
-      { return static_cast<unsigned long>(0); }
-
-      static constexpr unsigned long
-      denorm_min() noexcept
-      { return static_cast<unsigned long>(0); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = true;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-
-
-  template<>
-    struct numeric_limits<long long>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr long long
-      min() noexcept { return -0x7fffffffffffffffLL - 1; }
-
-      static constexpr long long
-      max() noexcept { return 0x7fffffffffffffffLL; }
-
-
-      static constexpr long long
-      lowest() noexcept { return min(); }
-
-
-      static constexpr int digits
-       = (sizeof(long long) * 8 - ((long long)(-1) < 0));
-      static constexpr int digits10
-       = ((sizeof(long long) * 8 - ((long long)(-1) < 0)) * 643L / 2136);
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = true;
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr long long
-      epsilon() noexcept { return 0; }
-
-      static constexpr long long
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr long long
-      infinity() noexcept { return static_cast<long long>(0); }
-
-      static constexpr long long
-      quiet_NaN() noexcept { return static_cast<long long>(0); }
-
-      static constexpr long long
-      signaling_NaN() noexcept
-      { return static_cast<long long>(0); }
-
-      static constexpr long long
-      denorm_min() noexcept { return static_cast<long long>(0); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = false;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-
-
-  template<>
-    struct numeric_limits<unsigned long long>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr unsigned long long
-      min() noexcept { return 0; }
-
-      static constexpr unsigned long long
-      max() noexcept { return 0x7fffffffffffffffLL * 2ULL + 1; }
-
-
-      static constexpr unsigned long long
-      lowest() noexcept { return min(); }
-
-
-      static constexpr int digits
-       = (sizeof(unsigned long long) * 8 - ((unsigned long long)(-1) < 0));
-      static constexpr int digits10
-       = ((sizeof(unsigned long long) * 8 - ((unsigned long long)(-1) < 0)) * 643L / 2136);
-
-      static constexpr int max_digits10 = 0;
-
-      static constexpr bool is_signed = false;
-      static constexpr bool is_integer = true;
-      static constexpr bool is_exact = true;
-      static constexpr int radix = 2;
-
-      static constexpr unsigned long long
-      epsilon() noexcept { return 0; }
-
-      static constexpr unsigned long long
-      round_error() noexcept { return 0; }
-
-      static constexpr int min_exponent = 0;
-      static constexpr int min_exponent10 = 0;
-      static constexpr int max_exponent = 0;
-      static constexpr int max_exponent10 = 0;
-
-      static constexpr bool has_infinity = false;
-      static constexpr bool has_quiet_NaN = false;
-      static constexpr bool has_signaling_NaN = false;
-      static constexpr float_denorm_style has_denorm
-       = denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr unsigned long long
-      infinity() noexcept
-      { return static_cast<unsigned long long>(0); }
-
-      static constexpr unsigned long long
-      quiet_NaN() noexcept
-      { return static_cast<unsigned long long>(0); }
-
-      static constexpr unsigned long long
-      signaling_NaN() noexcept
-      { return static_cast<unsigned long long>(0); }
-
-      static constexpr unsigned long long
-      denorm_min() noexcept
-      { return static_cast<unsigned long long>(0); }
-
-      static constexpr bool is_iec559 = false;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = true;
-
-      static constexpr bool traps = true;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
-       = round_toward_zero;
-    };
-# 1644 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
-  __extension__ template<> struct numeric_limits<__int128> { static constexpr bool is_specialized = true; static constexpr __int128 min() noexcept { return (((__int128)(-1) < 0) ? -(((__int128)(-1) < 0) ? (((((__int128)1 << ((128 - ((__int128)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(__int128)0) - 1 : (__int128)0); } static constexpr __int128 max() noexcept { return (((__int128)(-1) < 0) ? (((((__int128)1 << ((128 - ((__int128)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(__int128)0); } static constexpr int digits = 128 - 1; static constexpr int digits10 = (128 - 1) * 643L / 2136; static constexpr bool is_signed = true; static constexpr bool is_integer = true; static constexpr bool is_exact = true; static constexpr int radix = 2; static constexpr __int128 epsilon() noexcept { return 0; } static constexpr __int128 round_error() noexcept { return 0; } static constexpr __int128 lowest() noexcept { return min(); } static constexpr int max_digits10 = 0; static constexpr int min_exponent = 0; static constexpr int min_exponent10 = 0; static constexpr int max_exponent = 0; static constexpr int max_exponent10 = 0; static constexpr bool has_infinity = false; static constexpr bool has_quiet_NaN = false; static constexpr bool has_signaling_NaN = false; static constexpr float_denorm_style has_denorm = denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr __int128 infinity() noexcept { return static_cast<__int128>(0); } static constexpr __int128 quiet_NaN() noexcept { return static_cast<__int128>(0); } static constexpr __int128 signaling_NaN() noexcept { return static_cast<__int128>(0); } static constexpr __int128 denorm_min() noexcept { return static_cast<__int128>(0); } static constexpr bool is_iec559 = false; static constexpr bool is_bounded = true; static constexpr bool is_modulo = false; static constexpr bool traps = true; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_toward_zero; }; __extension__ template<> struct numeric_limits<unsigned __int128> { static constexpr bool is_specialized = true; static constexpr unsigned __int128 min() noexcept { return 0; } static constexpr unsigned __int128 max() noexcept { return (((unsigned __int128)(-1) < 0) ? (((((unsigned __int128)1 << ((128 - ((unsigned __int128)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(unsigned __int128)0); } static constexpr unsigned __int128 lowest() noexcept { return min(); } static constexpr int max_digits10 = 0; static constexpr int digits = 128; static constexpr int digits10 = 128 * 643L / 2136; static constexpr bool is_signed = false; static constexpr bool is_integer = true; static constexpr bool is_exact = true; static constexpr int radix = 2; static constexpr unsigned __int128 epsilon() noexcept { return 0; } static constexpr unsigned __int128 round_error() noexcept { return 0; } static constexpr int min_exponent = 0; static constexpr int min_exponent10 = 0; static constexpr int max_exponent = 0; static constexpr int max_exponent10 = 0; static constexpr bool has_infinity = false; static constexpr bool has_quiet_NaN = false; static constexpr bool has_signaling_NaN = false; static constexpr float_denorm_style has_denorm = denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr unsigned __int128 infinity() noexcept { return static_cast<unsigned __int128>(0); } static constexpr unsigned __int128 quiet_NaN() noexcept { return static_cast<unsigned __int128>(0); } static constexpr unsigned __int128 signaling_NaN() noexcept { return static_cast<unsigned __int128>(0); } static constexpr unsigned __int128 denorm_min() noexcept { return static_cast<unsigned __int128>(0); } static constexpr bool is_iec559 = false; static constexpr bool is_bounded = true; static constexpr bool is_modulo = true; static constexpr bool traps = true; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_toward_zero; };
-# 1676 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
-  template<>
-    struct numeric_limits<float>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr float
-      min() noexcept { return 1.17549435082228750796873653722224568e-38F; }
-
-      static constexpr float
-      max() noexcept { return 3.40282346638528859811704183484516925e+38F; }
-
-
-      static constexpr float
-      lowest() noexcept { return -3.40282346638528859811704183484516925e+38F; }
-
-
-      static constexpr int digits = 24;
-      static constexpr int digits10 = 6;
-
-      static constexpr int max_digits10
-  = (2 + (24) * 643L / 2136);
-
-      static constexpr bool is_signed = true;
-      static constexpr bool is_integer = false;
-      static constexpr bool is_exact = false;
-      static constexpr int radix = 2;
-
-      static constexpr float
-      epsilon() noexcept { return 1.19209289550781250000000000000000000e-7F; }
-
-      static constexpr float
-      round_error() noexcept { return 0.5F; }
-
-      static constexpr int min_exponent = (-125);
-      static constexpr int min_exponent10 = (-37);
-      static constexpr int max_exponent = 128;
-      static constexpr int max_exponent10 = 38;
-
-      static constexpr bool has_infinity = 1;
-      static constexpr bool has_quiet_NaN = 1;
-      static constexpr bool has_signaling_NaN = has_quiet_NaN;
-      static constexpr float_denorm_style has_denorm
- = bool(1) ? denorm_present : denorm_absent;
-      static constexpr bool has_denorm_loss
-       = false;
-
-      static constexpr float
-      infinity() noexcept { return __builtin_huge_valf(); }
-
-      static constexpr float
-      quiet_NaN() noexcept { return __builtin_nanf(""); }
-
-      static constexpr float
-      signaling_NaN() noexcept { return __builtin_nansf(""); }
-
-      static constexpr float
-      denorm_min() noexcept { return 1.40129846432481707092372958328991613e-45F; }
-
-      static constexpr bool is_iec559
- = has_infinity && has_quiet_NaN && has_denorm == denorm_present;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = false;
-
-      static constexpr bool traps = false;
-      static constexpr bool tinyness_before
-       = false;
-      static constexpr float_round_style round_style
-       = round_to_nearest;
-    };
-
-
-
-
-
-
-  template<>
-    struct numeric_limits<double>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr double
-      min() noexcept { return double(2.22507385850720138309023271733240406e-308L); }
-
-      static constexpr double
-      max() noexcept { return double(1.79769313486231570814527423731704357e+308L); }
-
-
-      static constexpr double
-      lowest() noexcept { return -double(1.79769313486231570814527423731704357e+308L); }
-
-
-      static constexpr int digits = 53;
-      static constexpr int digits10 = 15;
-
-      static constexpr int max_digits10
-  = (2 + (53) * 643L / 2136);
-
-      static constexpr bool is_signed = true;
-      static constexpr bool is_integer = false;
-      static constexpr bool is_exact = false;
-      static constexpr int radix = 2;
-
-      static constexpr double
-      epsilon() noexcept { return double(2.22044604925031308084726333618164062e-16L); }
-
-      static constexpr double
-      round_error() noexcept { return 0.5; }
-
-      static constexpr int min_exponent = (-1021);
-      static constexpr int min_exponent10 = (-307);
-      static constexpr int max_exponent = 1024;
-      static constexpr int max_exponent10 = 308;
-
-      static constexpr bool has_infinity = 1;
-      static constexpr bool has_quiet_NaN = 1;
-      static constexpr bool has_signaling_NaN = has_quiet_NaN;
-      static constexpr float_denorm_style has_denorm
- = bool(1) ? denorm_present : denorm_absent;
-      static constexpr bool has_denorm_loss
-        = false;
-
-      static constexpr double
-      infinity() noexcept { return __builtin_huge_val(); }
-
-      static constexpr double
-      quiet_NaN() noexcept { return __builtin_nan(""); }
-
-      static constexpr double
-      signaling_NaN() noexcept { return __builtin_nans(""); }
-
-      static constexpr double
-      denorm_min() noexcept { return double(4.94065645841246544176568792868221372e-324L); }
-
-      static constexpr bool is_iec559
- = has_infinity && has_quiet_NaN && has_denorm == denorm_present;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = false;
-
-      static constexpr bool traps = false;
-      static constexpr bool tinyness_before
-       = false;
-      static constexpr float_round_style round_style
-       = round_to_nearest;
-    };
-
-
-
-
-
-
-  template<>
-    struct numeric_limits<long double>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr long double
-      min() noexcept { return 3.36210314311209350626267781732175260e-4932L; }
-
-      static constexpr long double
-      max() noexcept { return 1.18973149535723176502126385303097021e+4932L; }
-
-
-      static constexpr long double
-      lowest() noexcept { return -1.18973149535723176502126385303097021e+4932L; }
-
-
-      static constexpr int digits = 64;
-      static constexpr int digits10 = 18;
-
-      static constexpr int max_digits10
-  = (2 + (64) * 643L / 2136);
-
-      static constexpr bool is_signed = true;
-      static constexpr bool is_integer = false;
-      static constexpr bool is_exact = false;
-      static constexpr int radix = 2;
-
-      static constexpr long double
-      epsilon() noexcept { return 1.08420217248550443400745280086994171e-19L; }
-
-      static constexpr long double
-      round_error() noexcept { return 0.5L; }
-
-      static constexpr int min_exponent = (-16381);
-      static constexpr int min_exponent10 = (-4931);
-      static constexpr int max_exponent = 16384;
-      static constexpr int max_exponent10 = 4932;
-
-      static constexpr bool has_infinity = 1;
-      static constexpr bool has_quiet_NaN = 1;
-      static constexpr bool has_signaling_NaN = has_quiet_NaN;
-      static constexpr float_denorm_style has_denorm
- = bool(1) ? denorm_present : denorm_absent;
-      static constexpr bool has_denorm_loss
- = false;
-
-      static constexpr long double
-      infinity() noexcept { return __builtin_huge_vall(); }
-
-      static constexpr long double
-      quiet_NaN() noexcept { return __builtin_nanl(""); }
-
-      static constexpr long double
-      signaling_NaN() noexcept { return __builtin_nansl(""); }
-
-      static constexpr long double
-      denorm_min() noexcept { return 3.64519953188247460252840593361941982e-4951L; }
-
-      static constexpr bool is_iec559
- = has_infinity && has_quiet_NaN && has_denorm == denorm_present;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = false;
-
-      static constexpr bool traps = false;
-      static constexpr bool tinyness_before =
-      false;
-      static constexpr float_round_style round_style =
-            round_to_nearest;
-    };
-# 1993 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
-__extension__ template<> struct numeric_limits<_Float16> { static constexpr bool is_specialized = true; static constexpr _Float16 min() noexcept { return 6.10351562500000000000000000000000000e-5F16; } static constexpr _Float16 max() noexcept { return 6.55040000000000000000000000000000000e+4F16; } static constexpr _Float16 lowest() noexcept { return -6.55040000000000000000000000000000000e+4F16; } static constexpr int digits = 11; static constexpr int digits10 = 3; static constexpr int max_digits10 = (2 + (11) * 643L / 2136); static constexpr bool is_signed = true; static constexpr bool is_integer = false; static constexpr bool is_exact = false; static constexpr int radix = 2; static constexpr _Float16 epsilon() noexcept { return 9.76562500000000000000000000000000000e-4F16; } static constexpr _Float16 round_error() noexcept { return 0.5F16; } static constexpr int min_exponent = (-13); static constexpr int min_exponent10 = (-4); static constexpr int max_exponent = 16; static constexpr int max_exponent10 = 4; static constexpr bool has_infinity = 1; static constexpr bool has_quiet_NaN = 1; static constexpr bool has_signaling_NaN = has_quiet_NaN; static constexpr float_denorm_style has_denorm = bool(1) ? denorm_present : denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr _Float16 infinity() noexcept { return __builtin_huge_valf16(); } static constexpr _Float16 quiet_NaN() noexcept { return __builtin_nanf16(""); } static constexpr _Float16 signaling_NaN() noexcept { return __builtin_nansf16(""); } static constexpr _Float16 denorm_min() noexcept { return 5.96046447753906250000000000000000000e-8F16; } static constexpr bool is_iec559 = has_infinity && has_quiet_NaN && has_denorm == denorm_present; static constexpr bool is_bounded = true; static constexpr bool is_modulo = false; static constexpr bool traps = false; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_to_nearest; };
-
-
-__extension__ template<> struct numeric_limits<_Float32> { static constexpr bool is_specialized = true; static constexpr _Float32 min() noexcept { return 1.17549435082228750796873653722224568e-38F32; } static constexpr _Float32 max() noexcept { return 3.40282346638528859811704183484516925e+38F32; } static constexpr _Float32 lowest() noexcept { return -3.40282346638528859811704183484516925e+38F32; } static constexpr int digits = 24; static constexpr int digits10 = 6; static constexpr int max_digits10 = (2 + (24) * 643L / 2136); static constexpr bool is_signed = true; static constexpr bool is_integer = false; static constexpr bool is_exact = false; static constexpr int radix = 2; static constexpr _Float32 epsilon() noexcept { return 1.19209289550781250000000000000000000e-7F32; } static constexpr _Float32 round_error() noexcept { return 0.5F32; } static constexpr int min_exponent = (-125); static constexpr int min_exponent10 = (-37); static constexpr int max_exponent = 128; static constexpr int max_exponent10 = 38; static constexpr bool has_infinity = 1; static constexpr bool has_quiet_NaN = 1; static constexpr bool has_signaling_NaN = has_quiet_NaN; static constexpr float_denorm_style has_denorm = bool(1) ? denorm_present : denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr _Float32 infinity() noexcept { return __builtin_huge_valf32(); } static constexpr _Float32 quiet_NaN() noexcept { return __builtin_nanf32(""); } static constexpr _Float32 signaling_NaN() noexcept { return __builtin_nansf32(""); } static constexpr _Float32 denorm_min() noexcept { return 1.40129846432481707092372958328991613e-45F32; } static constexpr bool is_iec559 = has_infinity && has_quiet_NaN && has_denorm == denorm_present; static constexpr bool is_bounded = true; static constexpr bool is_modulo = false; static constexpr bool traps = false; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_to_nearest; };
-
-
-__extension__ template<> struct numeric_limits<_Float64> { static constexpr bool is_specialized = true; static constexpr _Float64 min() noexcept { return 2.22507385850720138309023271733240406e-308F64; } static constexpr _Float64 max() noexcept { return 1.79769313486231570814527423731704357e+308F64; } static constexpr _Float64 lowest() noexcept { return -1.79769313486231570814527423731704357e+308F64; } static constexpr int digits = 53; static constexpr int digits10 = 15; static constexpr int max_digits10 = (2 + (53) * 643L / 2136); static constexpr bool is_signed = true; static constexpr bool is_integer = false; static constexpr bool is_exact = false; static constexpr int radix = 2; static constexpr _Float64 epsilon() noexcept { return 2.22044604925031308084726333618164062e-16F64; } static constexpr _Float64 round_error() noexcept { return 0.5F64; } static constexpr int min_exponent = (-1021); static constexpr int min_exponent10 = (-307); static constexpr int max_exponent = 1024; static constexpr int max_exponent10 = 308; static constexpr bool has_infinity = 1; static constexpr bool has_quiet_NaN = 1; static constexpr bool has_signaling_NaN = has_quiet_NaN; static constexpr float_denorm_style has_denorm = bool(1) ? denorm_present : denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr _Float64 infinity() noexcept { return __builtin_huge_valf64(); } static constexpr _Float64 quiet_NaN() noexcept { return __builtin_nanf64(""); } static constexpr _Float64 signaling_NaN() noexcept { return __builtin_nansf64(""); } static constexpr _Float64 denorm_min() noexcept { return 4.94065645841246544176568792868221372e-324F64; } static constexpr bool is_iec559 = has_infinity && has_quiet_NaN && has_denorm == denorm_present; static constexpr bool is_bounded = true; static constexpr bool is_modulo = false; static constexpr bool traps = false; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_to_nearest; };
-
-
-__extension__ template<> struct numeric_limits<_Float128> { static constexpr bool is_specialized = true; static constexpr _Float128 min() noexcept { return 3.36210314311209350626267781732175260e-4932F128; } static constexpr _Float128 max() noexcept { return 1.18973149535723176508575932662800702e+4932F128; } static constexpr _Float128 lowest() noexcept { return -1.18973149535723176508575932662800702e+4932F128; } static constexpr int digits = 113; static constexpr int digits10 = 33; static constexpr int max_digits10 = (2 + (113) * 643L / 2136); static constexpr bool is_signed = true; static constexpr bool is_integer = false; static constexpr bool is_exact = false; static constexpr int radix = 2; static constexpr _Float128 epsilon() noexcept { return 1.92592994438723585305597794258492732e-34F128; } static constexpr _Float128 round_error() noexcept { return 0.5F128; } static constexpr int min_exponent = (-16381); static constexpr int min_exponent10 = (-4931); static constexpr int max_exponent = 16384; static constexpr int max_exponent10 = 4932; static constexpr bool has_infinity = 1; static constexpr bool has_quiet_NaN = 1; static constexpr bool has_signaling_NaN = has_quiet_NaN; static constexpr float_denorm_style has_denorm = bool(1) ? denorm_present : denorm_absent; static constexpr bool has_denorm_loss = false; static constexpr _Float128 infinity() noexcept { return __builtin_huge_valf128(); } static constexpr _Float128 quiet_NaN() noexcept { return __builtin_nanf128(""); } static constexpr _Float128 signaling_NaN() noexcept { return __builtin_nansf128(""); } static constexpr _Float128 denorm_min() noexcept { return 6.47517511943802511092443895822764655e-4966F128; } static constexpr bool is_iec559 = has_infinity && has_quiet_NaN && has_denorm == denorm_present; static constexpr bool is_bounded = true; static constexpr bool is_modulo = false; static constexpr bool traps = false; static constexpr bool tinyness_before = false; static constexpr float_round_style round_style = round_to_nearest; };
-# 2013 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
-  __extension__
-  template<>
-    struct numeric_limits<__gnu_cxx::__bfloat16_t>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr __gnu_cxx::__bfloat16_t
-      min() noexcept
-      { return 1.17549435082228750796873653722224568e-38BF16; }
-
-      static constexpr __gnu_cxx::__bfloat16_t
-      max() noexcept
-      { return 3.38953138925153547590470800371487867e+38BF16; }
-
-      static constexpr __gnu_cxx::__bfloat16_t
-      lowest() noexcept
-      { return -3.38953138925153547590470800371487867e+38BF16; }
-
-      static constexpr int digits = 8;
-      static constexpr int digits10 = 2;
-
-      static constexpr int max_digits10
- = (2 + (8) * 643L / 2136);
-
-      static constexpr bool is_signed = true;
-      static constexpr bool is_integer = false;
-      static constexpr bool is_exact = false;
-      static constexpr int radix = 2;
-
-      static constexpr __gnu_cxx::__bfloat16_t
-      epsilon() noexcept
-      { return 7.81250000000000000000000000000000000e-3BF16; }
-
-      static constexpr __gnu_cxx::__bfloat16_t
-      round_error() noexcept { return 0.5BF16; }
-
-      static constexpr int min_exponent = (-125);
-      static constexpr int min_exponent10 = (-37);
-      static constexpr int max_exponent = 128;
-      static constexpr int max_exponent10 = 38;
-
-      static constexpr bool has_infinity
- = 1;
-      static constexpr bool has_quiet_NaN
- = 1;
-      static constexpr bool has_signaling_NaN = has_quiet_NaN;
-      static constexpr float_denorm_style has_denorm
- = bool(1) ? denorm_present : denorm_absent;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr __gnu_cxx::__bfloat16_t
-      infinity() noexcept
-      { return __gnu_cxx::__bfloat16_t(__builtin_huge_valf()); }
-
-      static constexpr __gnu_cxx::__bfloat16_t
-      quiet_NaN() noexcept
-      { return __gnu_cxx::__bfloat16_t(__builtin_nanf("")); }
-
-      static constexpr __gnu_cxx::__bfloat16_t
-      signaling_NaN() noexcept
-      { return __builtin_nansf16b(""); }
-
-      static constexpr __gnu_cxx::__bfloat16_t
-      denorm_min() noexcept
-      { return 9.18354961579912115600575419704879436e-41BF16; }
-
-      static constexpr bool is_iec559
- = has_infinity && has_quiet_NaN && has_denorm == denorm_present;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = false;
-
-      static constexpr bool traps = false;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
- = round_to_nearest;
-    };
-
-
-
-
-
-  __extension__
-  template<>
-    struct numeric_limits<__float128>
-    {
-      static constexpr bool is_specialized = true;
-
-      static constexpr __float128
-      min() noexcept
-      {
-
-
-
-
- return __extension__ 0x1.0p-16382Q;
-
-      }
-
-      static constexpr __float128
-      max() noexcept
-      {
-
-
-
-
-
-
-
- return __extension__ 0x1.ffffffffffffffffffffffffffffp+16383Q;
-
-      }
-
-      static constexpr __float128
-      lowest() noexcept
-      { return -max(); }
-
-      static constexpr int digits = 113;
-      static constexpr int digits10 = 33;
-
-      static constexpr int max_digits10 = 35;
-
-      static constexpr bool is_signed = true;
-      static constexpr bool is_integer = false;
-      static constexpr bool is_exact = false;
-      static constexpr int radix = 2;
-
-      static constexpr __float128
-      epsilon() noexcept
-      { return double(1.9259299443872359e-34); }
-
-      static constexpr __float128
-      round_error() noexcept { return 0.5; }
-
-      static constexpr int min_exponent = -16381;
-      static constexpr int min_exponent10 = -4931;
-      static constexpr int max_exponent = 16384;
-      static constexpr int max_exponent10 = 4932;
-
-      static constexpr bool has_infinity = 1;
-      static constexpr bool has_quiet_NaN = 1;
-
-
-      static constexpr bool has_signaling_NaN = true;
-
-
-
-      static constexpr float_denorm_style has_denorm
- = denorm_present;
-      static constexpr bool has_denorm_loss = false;
-
-      static constexpr __float128
-      infinity() noexcept
-      { return __builtin_huge_val(); }
-
-      static constexpr __float128
-      quiet_NaN() noexcept
-      { return __builtin_nan(""); }
-
-      static constexpr __float128
-      signaling_NaN() noexcept
-      {
-
- return __builtin_nansq("");
-
-
-
-
-
-      }
-
-      static constexpr __float128
-      denorm_min() noexcept
-      {
-
-
-
-
- return __extension__ 0x1.0p-16494Q;
-
-      }
-
-      static constexpr bool is_iec559 = has_signaling_NaN;
-      static constexpr bool is_bounded = true;
-      static constexpr bool is_modulo = false;
-
-      static constexpr bool traps = false;
-      static constexpr bool tinyness_before = false;
-      static constexpr float_round_style round_style
- = round_to_nearest;
-# 2225 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
-    };
-
-
-
-
-}
-# 2239 "C:/msys64/mingw64/include/c++/15.2.0/limits" 3
-#pragma GCC diagnostic pop
-# 45 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
-
-
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
 # 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 1 3
 # 49 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
 # 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/special_function_util.h" 1 3
@@ -43066,147 +45009,6 @@ namespace __gnu_cxx
 # 105 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
 
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
-
-
-# 1 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 1 3
-# 46 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 3
-# 1 "C:/msys64/mingw64/include/assert.h" 1 3
-# 17 "C:/msys64/mingw64/include/assert.h" 3
-# 1 "C:/msys64/mingw64/include/c++/15.2.0/stdlib.h" 1 3
-# 38 "C:/msys64/mingw64/include/c++/15.2.0/stdlib.h" 3
-using std::abort;
-using std::atexit;
-using std::exit;
-# 49 "C:/msys64/mingw64/include/c++/15.2.0/stdlib.h" 3
-  using std::_Exit;
-
-
-
-
-using std::div_t;
-using std::ldiv_t;
-
-using std::abs;
-using std::atof;
-using std::atoi;
-using std::atol;
-using std::bsearch;
-using std::calloc;
-using std::div;
-using std::free;
-using std::getenv;
-using std::labs;
-using std::ldiv;
-using std::malloc;
-
-using std::mblen;
-using std::mbstowcs;
-using std::mbtowc;
-
-using std::qsort;
-using std::rand;
-using std::realloc;
-using std::srand;
-using std::strtod;
-using std::strtol;
-using std::strtoul;
-using std::system;
-
-using std::wcstombs;
-using std::wctomb;
-# 18 "C:/msys64/mingw64/include/assert.h" 2 3
-
-
-
-extern "C" {
-
-
-__attribute__ ((__dllimport__)) void __attribute__((__cdecl__)) __attribute__ ((__noreturn__)) _wassert(const wchar_t *_Message,const wchar_t *_File,unsigned _Line);
-__attribute__ ((__dllimport__)) void __attribute__((__cdecl__)) __attribute__ ((__noreturn__)) _assert (const char *_Message, const char *_File, unsigned _Line);
-
-
-}
-# 47 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 2 3
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 2
-# 42 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/simd/platform.h" 1
-       
-# 43 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 2
-# 632 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
-
-# 632 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
-namespace glm
-{
- using std::size_t;
-
-
-
-  typedef int length_t;
-
-}
-
-
-
-
-
-
-
- namespace glm
- {
-  template<typename T, std::size_t N>
-  constexpr std::size_t countof(T const (&)[N])
-  {
-   return N;
-  }
- }
-# 670 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
-namespace glm{
-namespace detail
-{
- template<typename T>
- struct is_int
- {
-  enum test {value = 0};
- };
-
- template<>
- struct is_int<unsigned int>
- {
-  enum test {value = ~0};
- };
-
- template<>
- struct is_int<signed int>
- {
-  enum test {value = ~0};
- };
-}
-
- typedef unsigned int uint;
-}
-# 702 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
-namespace glm{
-namespace detail
-{
-
-  typedef std::uint64_t uint64;
-  typedef std::int64_t int64;
-# 726 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
-}
-}
-
-
-
-
-
-
-
-namespace glm{
-namespace detail
-{
- using std::make_unsigned;
-}
-}
 # 107 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
 
        
@@ -43266,134 +45068,10 @@ __attribute__ ((__dllimport__)) int * __attribute__((__cdecl__)) __attribute__ (
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/fwd.hpp" 1
        
 
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp" 1
-       
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp" 2
-
-
-# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp"
-namespace glm
-{
-
- enum qualifier
- {
-  packed_highp,
-  packed_mediump,
-  packed_lowp,
-# 21 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp"
-  highp = packed_highp,
-  mediump = packed_mediump,
-  lowp = packed_lowp,
-  packed = packed_highp,
 
 
 
-
-   defaultp = highp
-
- };
-
- typedef qualifier precision;
-
- template<length_t L, typename T, qualifier Q = defaultp> struct vec;
- template<length_t C, length_t R, typename T, qualifier Q = defaultp> struct mat;
- template<typename T, qualifier Q = defaultp> struct qua;
-
-
-  template <typename T, qualifier Q = defaultp> using tvec1 = vec<1, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tvec2 = vec<2, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tvec3 = vec<3, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tvec4 = vec<4, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tmat2x2 = mat<2, 2, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tmat2x3 = mat<2, 3, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tmat2x4 = mat<2, 4, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tmat3x2 = mat<3, 2, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tmat3x3 = mat<3, 3, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tmat3x4 = mat<3, 4, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tmat4x2 = mat<4, 2, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tmat4x3 = mat<4, 3, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tmat4x4 = mat<4, 4, T, Q>;
-  template <typename T, qualifier Q = defaultp> using tquat = qua<T, Q>;
-
-
-namespace detail
-{
- template<glm::qualifier P>
- struct is_aligned
- {
-  static const bool value = false;
- };
-# 84 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp"
- template<length_t L, typename T, bool is_aligned>
- struct storage
- {
-  typedef struct type {
-   T data[L];
-  } type;
- };
-
-
-  template<length_t L, typename T>
-  struct storage<L, T, true>
-  {
-   typedef struct alignas(L * sizeof(T)) type {
-    T data[L];
-   } type;
-  };
-
-  template<typename T>
-  struct storage<3, T, true>
-  {
-   typedef struct alignas(4 * sizeof(T)) type {
-    T data[4];
-   } type;
-  };
-# 255 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp"
- enum genTypeEnum
- {
-  GENTYPE_VEC,
-  GENTYPE_MAT,
-  GENTYPE_QUAT
- };
-
- template <typename genType>
- struct genTypeTrait
- {};
-
- template <length_t C, length_t R, typename T>
- struct genTypeTrait<mat<C, R, T> >
- {
-  static const genTypeEnum GENTYPE = GENTYPE_MAT;
- };
-
- template<typename genType, genTypeEnum type>
- struct init_gentype
- {
- };
-
- template<typename genType>
- struct init_gentype<genType, GENTYPE_QUAT>
- {
-  inline constexpr static genType identity()
-  {
-   return genType(1, 0, 0, 0);
-  }
- };
-
- template<typename genType>
- struct init_gentype<genType, GENTYPE_MAT>
- {
-  inline constexpr static genType identity()
-  {
-   return genType(1);
-  }
- };
-}
-}
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/fwd.hpp" 2
-
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/fwd.hpp"
 namespace glm
 {
 
@@ -44610,1663 +46288,7 @@ namespace glm
 }
 # 116 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
 
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 1
 
-
-
-       
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2.hpp" 1
-
-
-
-       
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp" 1
-
-
-
-       
-# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
-namespace glm
-{
- template<typename T, qualifier Q>
- struct vec<2, T, Q>
- {
-
-
-  typedef T value_type;
-  typedef vec<2, T, Q> type;
-  typedef vec<2, bool, Q> bool_type;
-  enum is_aligned
-  {
-   value = false
-  };
-
-
-
-
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-# 72 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
-   union {T x, r, s;};
-   union {T y, g, t;};
-# 84 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
-#pragma GCC diagnostic pop
-# 93 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
-  typedef length_t length_type;
-  [[nodiscard]] static constexpr length_type length(){return 2;}
-
-  [[nodiscard]] constexpr T& operator[](length_type i);
-  [[nodiscard]] constexpr T const& operator[](length_type i) const;
-
-
-
-  constexpr vec() = default;
-  constexpr vec(vec const& v) = default;
-  template<qualifier P>
-  constexpr vec(vec<2, T, P> const& v);
-
-
-
-  constexpr explicit vec(T scalar);
-  constexpr vec(T x, T y);
-
-
-
-  template<typename U, qualifier P>
-  constexpr explicit vec(vec<1, U, P> const& v);
-
-
-  template<typename A, typename B>
-  constexpr vec(A x, B y);
-  template<typename A, typename B>
-  constexpr vec(vec<1, A, Q> const& x, B y);
-  template<typename A, typename B>
-  constexpr vec(A x, vec<1, B, Q> const& y);
-  template<typename A, typename B>
-  constexpr vec(vec<1, A, Q> const& x, vec<1, B, Q> const& y);
-
-
-
-
-  template<typename U, qualifier P>
-  constexpr vec(vec<3, U, P> const& v);
-
-  template<typename U, qualifier P>
-  constexpr vec(vec<4, U, P> const& v);
-
-
-  template<typename U, qualifier P>
-  constexpr vec(vec<2, U, P> const& v);
-# 150 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
-  constexpr vec<2, T, Q> & operator=(vec const& v) = default;
-
-  template<typename U>
-  constexpr vec<2, T, Q> & operator=(vec<2, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator+=(U scalar);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator+=(vec<1, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator+=(vec<2, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator-=(U scalar);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator-=(vec<1, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator-=(vec<2, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator*=(U scalar);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator*=(vec<1, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator*=(vec<2, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator/=(U scalar);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator/=(vec<1, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator/=(vec<2, U, Q> const& v);
-
-
-
-  constexpr vec<2, T, Q> & operator++();
-  constexpr vec<2, T, Q> & operator--();
-  [[nodiscard]] constexpr vec<2, T, Q> operator++(int);
-  [[nodiscard]] constexpr vec<2, T, Q> operator--(int);
-
-
-
-  template<typename U>
-  constexpr vec<2, T, Q> & operator%=(U scalar);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator%=(vec<1, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator%=(vec<2, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator&=(U scalar);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator&=(vec<1, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator&=(vec<2, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator|=(U scalar);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator|=(vec<1, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator|=(vec<2, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator^=(U scalar);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator^=(vec<1, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator^=(vec<2, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator<<=(U scalar);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator<<=(vec<1, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator<<=(vec<2, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator>>=(U scalar);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator>>=(vec<1, U, Q> const& v);
-  template<typename U>
-  constexpr vec<2, T, Q> & operator>>=(vec<2, U, Q> const& v);
- };
-
-
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v);
-
-
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v, T scalar);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator+(T scalar, vec<2, T, Q> const& v);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v, T scalar);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator-(T scalar, vec<2, T, Q> const& v);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v, T scalar);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator*(T scalar, vec<2, T, Q> const& v);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator*(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v, T scalar);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator/(T scalar, vec<2, T, Q> const& v);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator/(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v, T scalar);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator%(T scalar, vec<2, T, Q> const& v);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator%(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v, T scalar);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator&(T scalar, vec<2, T, Q> const& v);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator&(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v, T scalar);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator|(T scalar, vec<2, T, Q> const& v);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator|(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v, T scalar);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator^(T scalar, vec<2, T, Q> const& v);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator^(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v, T scalar);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator<<(T scalar, vec<2, T, Q> const& v);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator<<(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v, T scalar);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator>>(T scalar, vec<2, T, Q> const& v);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator>>(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr vec<2, T, Q> operator~(vec<2, T, Q> const& v);
-
-
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr bool operator==(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<typename T, qualifier Q>
- [[nodiscard]] constexpr bool operator!=(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
-
- template<qualifier Q>
- [[nodiscard]] constexpr vec<2, bool, Q> operator&&(vec<2, bool, Q> const& v1, vec<2, bool, Q> const& v2);
-
- template<qualifier Q>
- [[nodiscard]] constexpr vec<2, bool, Q> operator||(vec<2, bool, Q> const& v1, vec<2, bool, Q> const& v2);
-}
-
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl" 1
-
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp" 1
-       
-
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
-# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp" 2
-
-
-namespace glm{
-namespace detail
-{
- template <typename T, bool isFloat>
- struct compute_equal
- {
-  inline constexpr static bool call(T a, T b)
-  {
-   return a == b;
-  }
- };
-# 29 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp"
-}
-}
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl" 2
-
-namespace glm
-{
-# 25 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl"
- template<typename T, qualifier Q>
- template<qualifier P>
- inline constexpr vec<2, T, Q>::vec(vec<2, T, P> const& v)
-  : x(v.x), y(v.y)
- {}
-
-
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q>::vec(T scalar)
-  : x(scalar), y(scalar)
- {}
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q>::vec(T _x, T _y)
-  : x(_x), y(_y)
- {}
-
-
-
- template<typename T, qualifier Q>
- template<typename U, qualifier P>
- inline constexpr vec<2, T, Q>::vec(vec<1, U, P> const& v)
-  : x(static_cast<T>(v.x))
-  , y(static_cast<T>(v.x))
- {}
-
- template<typename T, qualifier Q>
- template<typename A, typename B>
- inline constexpr vec<2, T, Q>::vec(A _x, B _y)
-  : x(static_cast<T>(_x))
-  , y(static_cast<T>(_y))
- {}
-
- template<typename T, qualifier Q>
- template<typename A, typename B>
- inline constexpr vec<2, T, Q>::vec(vec<1, A, Q> const& _x, B _y)
-  : x(static_cast<T>(_x.x))
-  , y(static_cast<T>(_y))
- {}
-
- template<typename T, qualifier Q>
- template<typename A, typename B>
- inline constexpr vec<2, T, Q>::vec(A _x, vec<1, B, Q> const& _y)
-  : x(static_cast<T>(_x))
-  , y(static_cast<T>(_y.x))
- {}
-
- template<typename T, qualifier Q>
- template<typename A, typename B>
- inline constexpr vec<2, T, Q>::vec(vec<1, A, Q> const& _x, vec<1, B, Q> const& _y)
-  : x(static_cast<T>(_x.x))
-  , y(static_cast<T>(_y.x))
- {}
-
-
-
- template<typename T, qualifier Q>
- template<typename U, qualifier P>
- inline constexpr vec<2, T, Q>::vec(vec<2, U, P> const& v)
-  : x(static_cast<T>(v.x))
-  , y(static_cast<T>(v.y))
- {}
-
- template<typename T, qualifier Q>
- template<typename U, qualifier P>
- inline constexpr vec<2, T, Q>::vec(vec<3, U, P> const& v)
-  : x(static_cast<T>(v.x))
-  , y(static_cast<T>(v.y))
- {}
-
- template<typename T, qualifier Q>
- template<typename U, qualifier P>
- inline constexpr vec<2, T, Q>::vec(vec<4, U, P> const& v)
-  : x(static_cast<T>(v.x))
-  , y(static_cast<T>(v.y))
- {}
-
-
-
- template<typename T, qualifier Q>
- inline constexpr T & vec<2, T, Q>::operator[](typename vec<2, T, Q>::length_type i)
- {
-  (
-# 108 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl" 3
- ((void)0)
-# 108 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl"
- );
-  switch(i)
-  {
-  default:
-  case 0:
-   return x;
-  case 1:
-   return y;
-  }
- }
-
- template<typename T, qualifier Q>
- inline constexpr T const& vec<2, T, Q>::operator[](typename vec<2, T, Q>::length_type i) const
- {
-  (
-# 122 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl" 3
- ((void)0)
-# 122 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl"
- );
-  switch(i)
-  {
-  default:
-  case 0:
-   return x;
-  case 1:
-   return y;
-  }
- }
-# 145 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl"
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator=(vec<2, U, Q> const& v)
- {
-  this->x = static_cast<T>(v.x);
-  this->y = static_cast<T>(v.y);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator+=(U scalar)
- {
-  this->x += static_cast<T>(scalar);
-  this->y += static_cast<T>(scalar);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator+=(vec<1, U, Q> const& v)
- {
-  this->x += static_cast<T>(v.x);
-  this->y += static_cast<T>(v.x);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator+=(vec<2, U, Q> const& v)
- {
-  this->x += static_cast<T>(v.x);
-  this->y += static_cast<T>(v.y);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator-=(U scalar)
- {
-  this->x -= static_cast<T>(scalar);
-  this->y -= static_cast<T>(scalar);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator-=(vec<1, U, Q> const& v)
- {
-  this->x -= static_cast<T>(v.x);
-  this->y -= static_cast<T>(v.x);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator-=(vec<2, U, Q> const& v)
- {
-  this->x -= static_cast<T>(v.x);
-  this->y -= static_cast<T>(v.y);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator*=(U scalar)
- {
-  this->x *= static_cast<T>(scalar);
-  this->y *= static_cast<T>(scalar);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator*=(vec<1, U, Q> const& v)
- {
-  this->x *= static_cast<T>(v.x);
-  this->y *= static_cast<T>(v.x);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator*=(vec<2, U, Q> const& v)
- {
-  this->x *= static_cast<T>(v.x);
-  this->y *= static_cast<T>(v.y);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator/=(U scalar)
- {
-  this->x /= static_cast<T>(scalar);
-  this->y /= static_cast<T>(scalar);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator/=(vec<1, U, Q> const& v)
- {
-  this->x /= static_cast<T>(v.x);
-  this->y /= static_cast<T>(v.x);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator/=(vec<2, U, Q> const& v)
- {
-  this->x /= static_cast<T>(v.x);
-  this->y /= static_cast<T>(v.y);
-  return *this;
- }
-
-
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator++()
- {
-  ++this->x;
-  ++this->y;
-  return *this;
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator--()
- {
-  --this->x;
-  --this->y;
-  return *this;
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> vec<2, T, Q>::operator++(int)
- {
-  vec<2, T, Q> Result(*this);
-  ++*this;
-  return Result;
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> vec<2, T, Q>::operator--(int)
- {
-  vec<2, T, Q> Result(*this);
-  --*this;
-  return Result;
- }
-
-
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator%=(U scalar)
- {
-  this->x %= static_cast<T>(scalar);
-  this->y %= static_cast<T>(scalar);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator%=(vec<1, U, Q> const& v)
- {
-  this->x %= static_cast<T>(v.x);
-  this->y %= static_cast<T>(v.x);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator%=(vec<2, U, Q> const& v)
- {
-  this->x %= static_cast<T>(v.x);
-  this->y %= static_cast<T>(v.y);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator&=(U scalar)
- {
-  this->x &= static_cast<T>(scalar);
-  this->y &= static_cast<T>(scalar);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator&=(vec<1, U, Q> const& v)
- {
-  this->x &= static_cast<T>(v.x);
-  this->y &= static_cast<T>(v.x);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator&=(vec<2, U, Q> const& v)
- {
-  this->x &= static_cast<T>(v.x);
-  this->y &= static_cast<T>(v.y);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator|=(U scalar)
- {
-  this->x |= static_cast<T>(scalar);
-  this->y |= static_cast<T>(scalar);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator|=(vec<1, U, Q> const& v)
- {
-  this->x |= static_cast<T>(v.x);
-  this->y |= static_cast<T>(v.x);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator|=(vec<2, U, Q> const& v)
- {
-  this->x |= static_cast<T>(v.x);
-  this->y |= static_cast<T>(v.y);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator^=(U scalar)
- {
-  this->x ^= static_cast<T>(scalar);
-  this->y ^= static_cast<T>(scalar);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator^=(vec<1, U, Q> const& v)
- {
-  this->x ^= static_cast<T>(v.x);
-  this->y ^= static_cast<T>(v.x);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator^=(vec<2, U, Q> const& v)
- {
-  this->x ^= static_cast<T>(v.x);
-  this->y ^= static_cast<T>(v.y);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator<<=(U scalar)
- {
-  this->x <<= static_cast<T>(scalar);
-  this->y <<= static_cast<T>(scalar);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator<<=(vec<1, U, Q> const& v)
- {
-  this->x <<= static_cast<T>(v.x);
-  this->y <<= static_cast<T>(v.x);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator<<=(vec<2, U, Q> const& v)
- {
-  this->x <<= static_cast<T>(v.x);
-  this->y <<= static_cast<T>(v.y);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator>>=(U scalar)
- {
-  this->x >>= static_cast<T>(scalar);
-  this->y >>= static_cast<T>(scalar);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator>>=(vec<1, U, Q> const& v)
- {
-  this->x >>= static_cast<T>(v.x);
-  this->y >>= static_cast<T>(v.x);
-  return *this;
- }
-
- template<typename T, qualifier Q>
- template<typename U>
- inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator>>=(vec<2, U, Q> const& v)
- {
-  this->x >>= static_cast<T>(v.x);
-  this->y >>= static_cast<T>(v.y);
-  return *this;
- }
-
-
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v)
- {
-  return v;
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v)
- {
-  return vec<2, T, Q>(
-   -v.x,
-   -v.y);
- }
-
-
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v, T scalar)
- {
-  return vec<2, T, Q>(
-   v.x + scalar,
-   v.y + scalar);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x + v2.x,
-   v1.y + v2.x);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator+(T scalar, vec<2, T, Q> const& v)
- {
-  return vec<2, T, Q>(
-   scalar + v.x,
-   scalar + v.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator+(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x + v2.x,
-   v1.x + v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x + v2.x,
-   v1.y + v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v, T scalar)
- {
-  return vec<2, T, Q>(
-   v.x - scalar,
-   v.y - scalar);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x - v2.x,
-   v1.y - v2.x);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator-(T scalar, vec<2, T, Q> const& v)
- {
-  return vec<2, T, Q>(
-   scalar - v.x,
-   scalar - v.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator-(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x - v2.x,
-   v1.x - v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x - v2.x,
-   v1.y - v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v, T scalar)
- {
-  return vec<2, T, Q>(
-   v.x * scalar,
-   v.y * scalar);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x * v2.x,
-   v1.y * v2.x);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator*(T scalar, vec<2, T, Q> const& v)
- {
-  return vec<2, T, Q>(
-   scalar * v.x,
-   scalar * v.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator*(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x * v2.x,
-   v1.x * v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x * v2.x,
-   v1.y * v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v, T scalar)
- {
-  return vec<2, T, Q>(
-   v.x / scalar,
-   v.y / scalar);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x / v2.x,
-   v1.y / v2.x);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator/(T scalar, vec<2, T, Q> const& v)
- {
-  return vec<2, T, Q>(
-   scalar / v.x,
-   scalar / v.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator/(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x / v2.x,
-   v1.x / v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x / v2.x,
-   v1.y / v2.y);
- }
-
-
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v, T scalar)
- {
-  return vec<2, T, Q>(
-   v.x % scalar,
-   v.y % scalar);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x % v2.x,
-   v1.y % v2.x);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator%(T scalar, vec<2, T, Q> const& v)
- {
-  return vec<2, T, Q>(
-   scalar % v.x,
-   scalar % v.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator%(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x % v2.x,
-   v1.x % v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x % v2.x,
-   v1.y % v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v, T scalar)
- {
-  return vec<2, T, Q>(
-   v.x & scalar,
-   v.y & scalar);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x & v2.x,
-   v1.y & v2.x);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator&(T scalar, vec<2, T, Q> const& v)
- {
-  return vec<2, T, Q>(
-   scalar & v.x,
-   scalar & v.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator&(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x & v2.x,
-   v1.x & v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x & v2.x,
-   v1.y & v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v, T scalar)
- {
-  return vec<2, T, Q>(
-   v.x | scalar,
-   v.y | scalar);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x | v2.x,
-   v1.y | v2.x);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator|(T scalar, vec<2, T, Q> const& v)
- {
-  return vec<2, T, Q>(
-   scalar | v.x,
-   scalar | v.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator|(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x | v2.x,
-   v1.x | v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x | v2.x,
-   v1.y | v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v, T scalar)
- {
-  return vec<2, T, Q>(
-   v.x ^ scalar,
-   v.y ^ scalar);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x ^ v2.x,
-   v1.y ^ v2.x);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator^(T scalar, vec<2, T, Q> const& v)
- {
-  return vec<2, T, Q>(
-   scalar ^ v.x,
-   scalar ^ v.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator^(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x ^ v2.x,
-   v1.x ^ v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x ^ v2.x,
-   v1.y ^ v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v, T scalar)
- {
-  return vec<2, T, Q>(
-   v.x << scalar,
-   v.y << scalar);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x << v2.x,
-   v1.y << v2.x);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator<<(T scalar, vec<2, T, Q> const& v)
- {
-  return vec<2, T, Q>(
-   scalar << v.x,
-   scalar << v.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator<<(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x << v2.x,
-   v1.x << v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x << v2.x,
-   v1.y << v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v, T scalar)
- {
-  return vec<2, T, Q>(
-   v.x >> scalar,
-   v.y >> scalar);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x >> v2.x,
-   v1.y >> v2.x);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator>>(T scalar, vec<2, T, Q> const& v)
- {
-  return vec<2, T, Q>(
-   scalar >> v.x,
-   scalar >> v.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator>>(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x >> v2.x,
-   v1.x >> v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return vec<2, T, Q>(
-   v1.x >> v2.x,
-   v1.y >> v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr vec<2, T, Q> operator~(vec<2, T, Q> const& v)
- {
-  return vec<2, T, Q>(
-   ~v.x,
-   ~v.y);
- }
-
-
-
- template<typename T, qualifier Q>
- inline constexpr bool operator==(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return
-   detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.x, v2.x) &&
-   detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.y, v2.y);
- }
-
- template<typename T, qualifier Q>
- inline constexpr bool operator!=(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
- {
-  return !(v1 == v2);
- }
-
- template<qualifier Q>
- inline constexpr vec<2, bool, Q> operator&&(vec<2, bool, Q> const& v1, vec<2, bool, Q> const& v2)
- {
-  return vec<2, bool, Q>(v1.x && v2.x, v1.y && v2.y);
- }
-
- template<qualifier Q>
- inline constexpr vec<2, bool, Q> operator||(vec<2, bool, Q> const& v1, vec<2, bool, Q> const& v2)
- {
-  return vec<2, bool, Q>(v1.x || v2.x, v1.y || v2.y);
- }
-}
-# 406 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp" 2
-# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2.hpp" 2
-
-namespace glm
-{
-
-
-
-
-
-
- typedef vec<2, bool, defaultp> bvec2;
-
-
-}
-# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2_precision.hpp" 1
-
-
-
-       
-
-
-namespace glm
-{
-
-
-
-
-
-
-
- typedef vec<2, bool, highp> highp_bvec2;
-
-
-
-
-
- typedef vec<2, bool, mediump> mediump_bvec2;
-
-
-
-
-
- typedef vec<2, bool, lowp> lowp_bvec2;
-
-
-}
-# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float2.hpp" 1
-
-
-
-       
-
-
-namespace glm
-{
-
-
-
-
-
-
- typedef vec<2, float, defaultp> vec2;
-
-
-}
-# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float2_precision.hpp" 1
-
-
-
-       
-
-
-namespace glm
-{
-
-
-
-
-
-
-
- typedef vec<2, float, highp> highp_vec2;
-
-
-
-
-
- typedef vec<2, float, mediump> mediump_vec2;
-
-
-
-
-
- typedef vec<2, float, lowp> lowp_vec2;
-
-
-}
-# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double2.hpp" 1
-
-
-
-       
-
-
-namespace glm
-{
-
-
-
-
-
-
- typedef vec<2, double, defaultp> dvec2;
-
-
-}
-# 10 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double2_precision.hpp" 1
-
-
-
-       
-
-
-namespace glm
-{
-
-
-
-
-
-
-
- typedef vec<2, double, highp> highp_dvec2;
-
-
-
-
-
- typedef vec<2, double, mediump> mediump_dvec2;
-
-
-
-
-
- typedef vec<2, double, lowp> lowp_dvec2;
-
-
-}
-# 11 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2.hpp" 1
-
-
-
-       
-
-
-namespace glm
-{
-
-
-
-
-
-
- typedef vec<2, int, defaultp> ivec2;
-
-
-}
-# 12 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2_sized.hpp" 1
-# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2_sized.hpp"
-       
-
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_int_sized.hpp" 1
-# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_int_sized.hpp"
-       
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
-# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_int_sized.hpp" 2
-
-
-
-
-
-namespace glm{
-namespace detail
-{
-
-  typedef std::int8_t int8;
-  typedef std::int16_t int16;
-  typedef std::int32_t int32;
-
-
-
-
-
-
- template<>
- struct is_int<int8>
- {
-  enum test {value = ~0};
- };
-
- template<>
- struct is_int<int16>
- {
-  enum test {value = ~0};
- };
-
- template<>
- struct is_int<int64>
- {
-  enum test {value = ~0};
- };
-}
-
-
-
-
-
-
- typedef detail::int8 int8;
-
-
- typedef detail::int16 int16;
-
-
- typedef detail::int32 int32;
-
-
- typedef detail::int64 int64;
-
-
-}
-# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2_sized.hpp" 2
-
-
-
-
-
-namespace glm
-{
-
-
-
-
-
-
- typedef vec<2, int8, defaultp> i8vec2;
-
-
-
-
- typedef vec<2, int16, defaultp> i16vec2;
-
-
-
-
- typedef vec<2, int32, defaultp> i32vec2;
-
-
-
-
- typedef vec<2, int64, defaultp> i64vec2;
-
-
-}
-# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2.hpp" 1
-
-
-
-       
-
-
-namespace glm
-{
-
-
-
-
-
-
- typedef vec<2, unsigned int, defaultp> uvec2;
-
-
-}
-# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2_sized.hpp" 1
-# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2_sized.hpp"
-       
-
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_uint_sized.hpp" 1
-# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_uint_sized.hpp"
-       
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
-# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_uint_sized.hpp" 2
-
-
-
-
-
-namespace glm{
-namespace detail
-{
-
-  typedef std::uint8_t uint8;
-  typedef std::uint16_t uint16;
-  typedef std::uint32_t uint32;
-
-
-
-
-
-
- template<>
- struct is_int<uint8>
- {
-  enum test {value = ~0};
- };
-
- template<>
- struct is_int<uint16>
- {
-  enum test {value = ~0};
- };
-
- template<>
- struct is_int<uint64>
- {
-  enum test {value = ~0};
- };
-}
-
-
-
-
-
-
- typedef detail::uint8 uint8;
-
-
- typedef detail::uint16 uint16;
-
-
- typedef detail::uint32 uint32;
-
-
- typedef detail::uint64 uint64;
-
-
-}
-# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2_sized.hpp" 2
-
-
-
-
-
-namespace glm
-{
-
-
-
-
-
-
- typedef vec<2, uint8, defaultp> u8vec2;
-
-
-
-
- typedef vec<2, uint16, defaultp> u16vec2;
-
-
-
-
- typedef vec<2, uint32, defaultp> u32vec2;
-
-
-
-
- typedef vec<2, uint64, defaultp> u64vec2;
-
-
-}
-# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
-# 118 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp" 1
 
 
@@ -77400,399 +77422,9 @@ enum class IndexFormat
 # 11 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
 
 
-
-namespace Neon::RHI
-{
-class CommandList
-{
-public:
-    virtual ~CommandList() = default;
-
-    virtual void begin() = 0;
-
-    virtual void setUniformBuffer(const std::string& name, Buffer* buffer) = 0;
-
-    virtual void setTexture(const std::string& name, TextureView* texture) = 0;
-    virtual void setSampler(const std::string& name, Sampler* sampler) = 0;
-
-    virtual void setPipeline(Pipeline* pipeline) = 0;
-    virtual void setFramebuffer(Framebuffer* frameBuffer) = 0;
-
-    virtual void setVertexBuffer(uint32_t index, Buffer* vertexBuffer) = 0;
-    virtual void setIndexBuffer(Buffer* indexBuffer, IndexFormat indexFormat) = 0;
-
-    virtual void clearColorTarget(uint32_t target, glm::vec4 color) = 0;
-    virtual void clearDepthStencil(float value) = 0;
-
-    virtual void updateTexture(Texture* texture, TextureUploadDescription uploadDescription) = 0;
-    virtual void generateMipmaps(Texture* texture) = 0;
-
-    virtual void reserveBuffer(Buffer* buffer, size_t size) = 0;
-
-    virtual void dispatch(const glm::ivec3& numGroups) = 0;
-
-    template<typename T>
-    void updateBuffer(Buffer* buffer, T& data)
-    {
-        updateBufferImpl(buffer, &data, sizeof(T));
-    }
-
-    template<typename T>
-    void updateBuffer(Buffer* buffer, std::vector<T> data)
-    {
-        updateBufferImpl(buffer, data.data(), sizeof(T)*data.size());
-    }
-
-    template<typename T>
-    void updateBuffer(Buffer* buffer, T* data)
-    {
-        updateBufferImpl(buffer, data, sizeof(T));
-    }
-
-    void draw(const uint32_t vertexCount, const uint32_t instanceCount = 1, const uint32_t firstVertex = 0, const uint32_t firstInstance = 0)
-    {
-        drawImpl(vertexCount, instanceCount, firstVertex, firstInstance);
-    };
-
-    void drawIndexed(const uint32_t indexCount, const uint32_t instanceCount = 1, const uint32_t firstIndex = 0, const int vertexOffset = 0, const uint32_t firstInstance = 0)
-    {
-        drawIndexedImpl(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
-    };
-protected:
-    virtual void drawImpl(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) = 0;
-    virtual void drawIndexedImpl(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int vertexOffset, uint32_t firstInstance) = 0;
-    virtual void updateBufferImpl(Buffer* buffer, void* data, uint32_t size) = 0;
-};
-}
-# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/shader.h" 1
-       
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/shaderReflection.h" 1
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h" 1
        
 
-
-
-
-namespace Neon::RHI
-{
-    enum class ShaderBaseType
-    {
-        Unknown,
-        Float,
-        Int,
-        UInt,
-        Bool,
-        Double
-    };
-
-    struct ShaderUniformBlockProperty
-    {
-        std::string name;
-        uint32_t offset;
-        uint32_t size;
-        ShaderBaseType baseType;
-        uint32_t vectorComponentCount;
-        uint32_t matrixColumnCount;
-        bool isArray;
-        uint32_t arraySize;
-    };
-
-    struct ShaderUniformBlock
-    {
-        std::string blockName;
-        uint32_t blockSize;
-        std::vector<ShaderUniformBlockProperty> members;
-    };
-
-    struct ShaderSampler
-    {
-        std::string name;
-        uint32_t set = 0;
-        uint32_t binding = 0;
-        uint32_t arraySize = 0;
-    };
-
-    struct ShaderImage
-    {
-        std::string name;
-        uint32_t set = 0;
-        uint32_t binding = 0;
-        bool writeable = true;
-    };
-
-
-
-    struct ShaderReflection
-    {
-        std::vector<ShaderUniformBlock> uniformBlocks{};
-        std::vector<ShaderSampler> samplers{};
-        std::vector<ShaderImage> images{};
-    };
-    ;
-}
-# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/shader.h" 2
-
-namespace Neon::RHI
-{
-class Shader
-{
-public:
-    virtual ~Shader() = default;
-
-    virtual void compile() = 0;
-    virtual void dispose() = 0;
-
-    virtual ShaderReflection getShaderReflection() = 0;
-};
-}
-# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 1
-       
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/depthState.h" 1
-       
-
-namespace Neon::RHI
-{
-struct DepthState
-{
-    bool hasDepthTarget = false;
-    bool enableDepthTest = false;
-};
-}
-# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/inputLayout.h" 1
-       
-
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexAttribute.h" 1
-       
-
-
-
-namespace Neon::RHI
-{
-    struct VertexAttribute
-    {
-        uint32_t location;
-        uint32_t slot;
-        uint32_t size;
-        const std::type_info* type;
-
-        VertexAttribute(const uint32_t loc, const uint32_t slot, const uint32_t size, const std::type_info& t_info) : location(loc), slot(slot), size(size), type(&t_info) { }
-    };
-}
-# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/inputLayout.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexBufferDescription.h" 1
-       
-
-
-namespace Neon::RHI
-{
-    struct VertexBufferDescription
-    {
-        uint32_t slot;
-        uint32_t size;
-    };
-}
-# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/inputLayout.h" 2
-
-namespace Neon::RHI
-{
-class InputLayout
-{
-public:
-    template<typename T>
-    void addVertexBuffer(uint32_t slot)
-    {
-        stride = sizeof(T);
-        vertexBuffers.emplace_back(slot, sizeof(T));
-    }
-
-    template<typename T>
-    void addVertexAttribute(uint32_t slot, const uint32_t location)
-    {
-        vertexAttributes.emplace_back(location, slot, sizeof(T), typeid(T));
-    }
-
-    [[nodiscard]] const std::vector<VertexAttribute>& getVertexAttributes() const
-    {
-        return vertexAttributes;
-    }
-
-    [[nodiscard]] const std::vector<VertexBufferDescription>& getVertexBuffers() const
-    {
-        return vertexBuffers;
-    }
-
-    [[nodiscard]] uint32_t getStride() const
-    {
-        return stride;
-    }
-private:
-    uint32_t stride{};
-    std::vector<VertexAttribute> vertexAttributes;
-    std::vector<VertexBufferDescription> vertexBuffers;
-};
-}
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/primitiveType.h" 1
-       
-
-namespace Neon::RHI
-{
-enum class PrimitiveType
-{
-    TriangleList,
-    TriangleStrip,
-    LineList,
-    LineStrip,
-    PointList
-};
-}
-# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/fillMode.h" 1
-       
-
-namespace Neon::RHI
-{
-enum class FillMode
-{
-    Fill,
-    Line,
-};
-}
-# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/cullMode.h" 1
-       
-
-namespace Neon::RHI
-{
-enum class CullMode
-{
-    Back,
-    Front,
-    None,
-};
-}
-# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/renderTargetsDescription.h" 1
-       
-
-
-
-namespace Neon::RHI
-{
-struct RenderTargetsDescription
-{
-    std::vector<PixelFormat> colorTargetFormats = {};
-    PixelFormat depthTargetFormat = PixelFormat::Invalid;
-};
-}
-# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
-
-
-namespace Neon::RHI
-{
-    struct GraphicsPipelineDescription
-    {
-        Shader* shader = nullptr;
-        PrimitiveType primitiveType = PrimitiveType::TriangleList;
-        FillMode fillMode = FillMode::Fill;
-        CullMode cullMode = CullMode::None;
-        InputLayout inputLayout{};
-        DepthState depthState{};
-        RenderTargetsDescription targetsDescription{};
-    };
-}
-# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
-
-
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/computePipelineDescription.h" 1
-       
-
-
-
-
-namespace Neon::RHI
-{
-struct ComputePipelineDescription
-{
-    Shader* shader = nullptr;
-
-    glm::ivec3 threadGroupSize{1};
-};
-}
-# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h" 1
-       
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/mipmapFilter.h" 1
-       
-
-namespace Neon::RHI
-{
-    enum class MipmapFilter
-    {
-        None,
-        Nearest,
-        Linear
-    };
-}
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureFilter.h" 1
-       
-
-namespace Neon::RHI
-{
-    enum class TextureFilter
-    {
-        Nearest,
-        Linear
-    };
-}
-# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureWrap.h" 1
-       
-
-namespace Neon::RHI
-{
-    enum class TextureWrap
-    {
-        Repeat,
-        MirroredRepeat,
-        ClampToEdge,
-        ClampToBorder
-    };
-}
-# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h" 2
-
-namespace Neon::RHI
-{
-struct SamplerDescription
-{
-    TextureFilter minFilter = TextureFilter::Linear;
-    TextureFilter magFilter = TextureFilter::Linear;
-    MipmapFilter mipmapFilter = MipmapFilter::Linear;
-
-    struct WrapMode
-    {
-        TextureWrap x = TextureWrap::Repeat;
-        TextureWrap y = TextureWrap::Repeat;
-        TextureWrap z = TextureWrap::Repeat;
-    };
-
-    WrapMode wrapMode = WrapMode{};
-
-    float lodBias = 0.0f;
-};
-}
-# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/util/memory.h" 1
-       
 # 1 "C:/msys64/mingw64/include/c++/15.2.0/memory" 1 3
 # 68 "C:/msys64/mingw64/include/c++/15.2.0/memory" 3
 # 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_tempbuf.h" 1 3
@@ -95557,31 +95189,727 @@ uninitialized_value_construct_n(_ExecutionPolicy&& __exec, _ForwardIterator __fi
 
 }
 # 175 "C:/msys64/mingw64/include/c++/15.2.0/memory" 2 3
-# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/util/memory.h" 2
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h" 2
 
 
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/util/memory.h"
-namespace Neon::RHI
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h"
+namespace Neon
 {
+    template<typename T>
+    using Rc = std::shared_ptr<T>;
 
     template<typename T>
-    using Ref = std::shared_ptr<T>;
-
-    template<typename T>
-    using Scope = std::unique_ptr<T>;
-
+    using Box = std::unique_ptr<T>;
 
     template<typename T, typename... Args>
-    constexpr Ref<T> makeRef(Args&&... args) {
+    constexpr Rc<T> makeRc(Args&&... args)
+    {
         return std::make_shared<T>(std::forward<Args>(args)...);
     }
 
     template<typename T, typename... Args>
-    constexpr Scope<T> makeScope(Args&&... args) {
+    constexpr Box<T> makeBox(Args&&... args)
+    {
         return std::make_unique<T>(std::forward<Args>(args)...);
     }
 }
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/scissorRect.h" 1
+       
+
+struct ScissorRect
+{
+    int x;
+    int y;
+    int width;
+    int height;
+};
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
+
+namespace Neon::RHI
+{
+class CommandList
+{
+public:
+    virtual ~CommandList() = default;
+
+    virtual void begin() = 0;
+
+    virtual void setUniformBuffer(const std::string& name, const Rc<Buffer>& buffer) = 0;
+
+    virtual void setTexture(const std::string& name, const Rc<TextureView>& texture) = 0;
+    virtual void setSampler(const std::string& name, const Rc<Sampler>& sampler) = 0;
+
+    virtual void setPipeline(const Rc<Pipeline>& pipeline) = 0;
+    virtual void setFramebuffer(const Rc<Framebuffer>& frameBuffer) = 0;
+
+    virtual void setVertexBuffer(uint32_t index, const Rc<Buffer>& vertexBuffer) = 0;
+    virtual void setIndexBuffer(const Rc<Buffer>& indexBuffer, IndexFormat indexFormat) = 0;
+
+    virtual void clearColorTarget(uint32_t target, glm::vec4 color) = 0;
+    virtual void clearDepthStencil(float value) = 0;
+
+    virtual void setScissor(ScissorRect rect) = 0;
+    void setScissor(const int x, const int y, const int width, const int height)
+    {
+        setScissor(ScissorRect{ x, y, width, height });
+    }
+
+    virtual void updateTexture(const Rc<Texture>& texture, TextureUploadDescription uploadDescription) = 0;
+    virtual void generateMipmaps(const Rc<Texture>& texture) = 0;
+
+    virtual void reserveBuffer(const Rc<Buffer>& buffer, size_t size) = 0;
+
+    virtual void dispatch(const glm::ivec3& numGroups) = 0;
+
+    template<typename T>
+    void updateBuffer(const Rc<Buffer>& buffer, T& data)
+    {
+        updateBufferImpl(buffer, &data, sizeof(T));
+    }
+
+    template<typename T>
+    void updateBuffer(const Rc<Buffer>& buffer, std::vector<T> data)
+    {
+        updateBufferImpl(buffer, data.data(), sizeof(T)*data.size());
+    }
+
+    template<typename T>
+    void updateBuffer(const Rc<Buffer>& buffer, T* data)
+    {
+        updateBufferImpl(buffer, data, sizeof(T));
+    }
+
+    void draw(const uint32_t vertexCount, const uint32_t instanceCount = 1, const uint32_t firstVertex = 0, const uint32_t firstInstance = 0)
+    {
+        drawImpl(vertexCount, instanceCount, firstVertex, firstInstance);
+    };
+
+    void drawIndexed(const uint32_t indexCount, const uint32_t instanceCount = 1, const uint32_t firstIndex = 0, const int vertexOffset = 0, const uint32_t firstInstance = 0)
+    {
+        drawIndexedImpl(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+    };
+protected:
+    virtual void drawImpl(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) = 0;
+    virtual void drawIndexedImpl(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int vertexOffset, uint32_t firstInstance) = 0;
+    virtual void updateBufferImpl(const Rc<Buffer>& buffer, void* data, uint32_t size) = 0;
+};
+}
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/shader.h" 1
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/shaderReflection.h" 1
+       
+
+
+
+
+namespace Neon::RHI
+{
+    enum class ShaderBaseType
+    {
+        Unknown,
+        Float,
+        Int,
+        UInt,
+        Bool,
+        Double
+    };
+
+    struct ShaderUniformBlockProperty
+    {
+        std::string name;
+        uint32_t offset;
+        uint32_t size;
+        ShaderBaseType baseType;
+        uint32_t vectorComponentCount;
+        uint32_t matrixColumnCount;
+        bool isArray;
+        uint32_t arraySize;
+    };
+
+    struct ShaderUniformBlock
+    {
+        std::string blockName;
+        uint32_t blockSize;
+        std::vector<ShaderUniformBlockProperty> members;
+    };
+
+    struct ShaderSampler
+    {
+        std::string name;
+        uint32_t set = 0;
+        uint32_t binding = 0;
+        uint32_t arraySize = 0;
+    };
+
+    struct ShaderImage
+    {
+        std::string name;
+        uint32_t set = 0;
+        uint32_t binding = 0;
+        bool writeable = true;
+    };
+
+
+
+    struct ShaderReflection
+    {
+        std::vector<ShaderUniformBlock> uniformBlocks{};
+        std::vector<ShaderSampler> samplers{};
+        std::vector<ShaderImage> images{};
+    };
+    ;
+}
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/shader.h" 2
+
+namespace Neon::RHI
+{
+class Shader
+{
+public:
+    virtual ~Shader() = default;
+
+    virtual void compile() = 0;
+    virtual void dispose() = 0;
+
+    virtual ShaderReflection getShaderReflection() = 0;
+};
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 1
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/blendState.h" 1
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendFactor.h" 1
+       
+
+
+namespace Neon::RHI
+{
+    enum class BlendFactor
+    {
+        One,
+        Zero,
+        SrcAlpha,
+        InvSrcAlpha,
+    };
+}
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/blendState.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendOp.h" 1
+       
+
+namespace Neon::RHI
+{
+    enum class BlendOp
+    {
+        Add,
+        Subtract,
+        RevSubtract,
+        Min,
+        Max
+    };
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/blendState.h" 2
+
+namespace Neon::RHI
+{
+    struct BlendState
+    {
+        bool enableBlend = false;
+
+        BlendFactor srcColorFactor = BlendFactor::SrcAlpha;
+        BlendFactor dstColorFactor = BlendFactor::InvSrcAlpha;
+        BlendOp colorOp = BlendOp::Add;
+
+        BlendFactor srcAlphaFactor = BlendFactor::One;
+        BlendFactor dstAlphaFactor = BlendFactor::InvSrcAlpha;
+        BlendOp alphaOp = BlendOp::Add;
+    };
+}
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/depthState.h" 1
+       
+
+namespace Neon::RHI
+{
+struct DepthState
+{
+    bool hasDepthTarget = false;
+    bool enableDepthTest = false;
+    bool enableDepthWrite = false;
+};
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/inputLayout.h" 1
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexAttribute.h" 1
+       
+
+
+
+namespace Neon::RHI
+{
+    struct VertexAttribute
+    {
+        uint32_t location;
+        uint32_t slot;
+        uint32_t size;
+        const std::type_info* type;
+
+        VertexAttribute(const uint32_t loc, const uint32_t slot, const uint32_t size, const std::type_info& t_info) : location(loc), slot(slot), size(size), type(&t_info) { }
+    };
+}
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/inputLayout.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexBufferDescription.h" 1
+       
+
+
+namespace Neon::RHI
+{
+    struct VertexBufferDescription
+    {
+        uint32_t slot;
+        uint32_t size;
+    };
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/inputLayout.h" 2
+
+namespace Neon::RHI
+{
+class InputLayout
+{
+public:
+    template<typename T>
+    void addVertexBuffer(uint32_t slot)
+    {
+        stride = sizeof(T);
+        vertexBuffers.emplace_back(slot, sizeof(T));
+    }
+
+    template<typename T>
+    void addVertexAttribute(uint32_t slot, const uint32_t location)
+    {
+        vertexAttributes.emplace_back(location, slot, sizeof(T), typeid(T));
+    }
+
+    [[nodiscard]] const std::vector<VertexAttribute>& getVertexAttributes() const
+    {
+        return vertexAttributes;
+    }
+
+    [[nodiscard]] const std::vector<VertexBufferDescription>& getVertexBuffers() const
+    {
+        return vertexBuffers;
+    }
+
+    [[nodiscard]] uint32_t getStride() const
+    {
+        return stride;
+    }
+private:
+    uint32_t stride{};
+    std::vector<VertexAttribute> vertexAttributes;
+    std::vector<VertexBufferDescription> vertexBuffers;
+};
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/rasterizerState.h" 1
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/cullMode.h" 1
+       
+
+namespace Neon::RHI
+{
+enum class CullMode
+{
+    Back,
+    Front,
+    None,
+};
+}
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/rasterizerState.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/fillMode.h" 1
+       
+
+namespace Neon::RHI
+{
+enum class FillMode
+{
+    Fill,
+    Line,
+};
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/rasterizerState.h" 2
+
+namespace Neon::RHI
+{
+    struct RasterizerState
+    {
+        FillMode fillMode = FillMode::Fill;
+        CullMode cullMode = CullMode::None;
+        bool enableScissorTest = false;
+    };
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/primitiveType.h" 1
+       
+
+namespace Neon::RHI
+{
+enum class PrimitiveType
+{
+    TriangleList,
+    TriangleStrip,
+    LineList,
+    LineStrip,
+    PointList
+};
+}
+# 10 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/renderTargetsDescription.h" 1
+       
+
+
+
+namespace Neon::RHI
+{
+struct RenderTargetsDescription
+{
+    std::vector<PixelFormat> colorTargetFormats = {};
+    PixelFormat depthTargetFormat = PixelFormat::Invalid;
+};
+}
+# 11 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
+
+namespace Neon::RHI
+{
+    struct GraphicsPipelineDescription
+    {
+        Rc<Shader> shader = nullptr;
+        PrimitiveType primitiveType = PrimitiveType::TriangleList;
+        InputLayout inputLayout{};
+        DepthState depthState{};
+        RenderTargetsDescription targetsDescription{};
+        RasterizerState rasterizerState{};
+        BlendState blendState{};
+    };
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/swapchain.h" 1
+       
+
+
+
+namespace Neon::RHI
+{
+class Swapchain
+{
+public:
+    virtual ~Swapchain() = default;
+
+    virtual void resize(uint32_t width, uint32_t height) = 0;
+    [[nodiscard]] virtual uint32_t acquireNextImage() = 0;
+    [[nodiscard]] virtual const std::vector<Rc<Texture>>& getTextures() const = 0;
+
+    virtual void present(uint32_t imageIndex) = 0;
+};
+}
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/computePipelineDescription.h" 1
+       
+
+
+
+
+
+namespace Neon::RHI
+{
+struct ComputePipelineDescription
+{
+    Rc<Shader> shader = nullptr;
+
+    glm::ivec3 threadGroupSize{1};
+};
+}
 # 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/framebufferDescription.h" 1
+       
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/utility" 1 3
+# 70 "C:/msys64/mingw64/include/c++/15.2.0/utility" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 1 3
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 3
+
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 3
+namespace std
+{
+
+
+  namespace rel_ops __attribute__ ((__deprecated__ ("use '" "<=>" "' instead")))
+  {
+# 86 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 3
+    template <class _Tp>
+      inline bool
+      operator!=(const _Tp& __x, const _Tp& __y)
+      { return !(__x == __y); }
+# 99 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 3
+    template <class _Tp>
+      inline bool
+      operator>(const _Tp& __x, const _Tp& __y)
+      { return __y < __x; }
+# 112 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 3
+    template <class _Tp>
+      inline bool
+      operator<=(const _Tp& __x, const _Tp& __y)
+      { return !(__y < __x); }
+# 125 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 3
+    template <class _Tp>
+      inline bool
+      operator>=(const _Tp& __x, const _Tp& __y)
+      { return !(__x < __y); }
+  }
+
+
+}
+# 71 "C:/msys64/mingw64/include/c++/15.2.0/utility" 2 3
+# 103 "C:/msys64/mingw64/include/c++/15.2.0/utility" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 104 "C:/msys64/mingw64/include/c++/15.2.0/utility" 2 3
+
+namespace std
+{
+
+
+
+
+  template <typename _Tp, typename _Up = _Tp>
+    constexpr
+    inline _Tp
+    exchange(_Tp& __obj, _Up&& __new_val)
+    noexcept(__and_<is_nothrow_move_constructible<_Tp>,
+      is_nothrow_assignable<_Tp&, _Up>>::value)
+    { return std::__exchange(__obj, std::forward<_Up>(__new_val)); }
+
+
+
+  template<typename _Tp>
+    [[nodiscard]]
+    constexpr add_const_t<_Tp>&
+    as_const(_Tp& __t) noexcept
+    { return __t; }
+
+  template<typename _Tp>
+    void as_const(const _Tp&&) = delete;
+
+
+
+  template<typename _Tp, typename _Up>
+    constexpr bool
+    cmp_equal(_Tp __t, _Up __u) noexcept
+    {
+      static_assert(__is_standard_integer<_Tp>::value);
+      static_assert(__is_standard_integer<_Up>::value);
+
+      if constexpr (is_signed_v<_Tp> == is_signed_v<_Up>)
+ return __t == __u;
+      else if constexpr (is_signed_v<_Tp>)
+ return __t >= 0 && make_unsigned_t<_Tp>(__t) == __u;
+      else
+ return __u >= 0 && __t == make_unsigned_t<_Up>(__u);
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr bool
+    cmp_not_equal(_Tp __t, _Up __u) noexcept
+    { return !std::cmp_equal(__t, __u); }
+
+  template<typename _Tp, typename _Up>
+    constexpr bool
+    cmp_less(_Tp __t, _Up __u) noexcept
+    {
+      static_assert(__is_standard_integer<_Tp>::value);
+      static_assert(__is_standard_integer<_Up>::value);
+
+      if constexpr (is_signed_v<_Tp> == is_signed_v<_Up>)
+ return __t < __u;
+      else if constexpr (is_signed_v<_Tp>)
+ return __t < 0 || make_unsigned_t<_Tp>(__t) < __u;
+      else
+ return __u >= 0 && __t < make_unsigned_t<_Up>(__u);
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr bool
+    cmp_greater(_Tp __t, _Up __u) noexcept
+    { return std::cmp_less(__u, __t); }
+
+  template<typename _Tp, typename _Up>
+    constexpr bool
+    cmp_less_equal(_Tp __t, _Up __u) noexcept
+    { return !std::cmp_less(__u, __t); }
+
+  template<typename _Tp, typename _Up>
+    constexpr bool
+    cmp_greater_equal(_Tp __t, _Up __u) noexcept
+    { return !std::cmp_less(__t, __u); }
+
+  template<typename _Res, typename _Tp>
+    constexpr bool
+    in_range(_Tp __t) noexcept
+    {
+      static_assert(__is_standard_integer<_Res>::value);
+      static_assert(__is_standard_integer<_Tp>::value);
+      using __gnu_cxx::__int_traits;
+
+      if constexpr (is_signed_v<_Tp> == is_signed_v<_Res>)
+ return __int_traits<_Res>::__min <= __t
+   && __t <= __int_traits<_Res>::__max;
+      else if constexpr (is_signed_v<_Tp>)
+ return __t >= 0
+   && make_unsigned_t<_Tp>(__t) <= __int_traits<_Res>::__max;
+      else
+ return __t <= make_unsigned_t<_Res>(__int_traits<_Res>::__max);
+    }
+
+
+
+
+  template<typename _Tp>
+    [[nodiscard]]
+    constexpr underlying_type_t<_Tp>
+    to_underlying(_Tp __value) noexcept
+    { return static_cast<underlying_type_t<_Tp>>(__value); }
+# 223 "C:/msys64/mingw64/include/c++/15.2.0/utility" 3
+  [[noreturn,__gnu__::__always_inline__]]
+  inline void
+  unreachable()
+  {
+
+
+
+
+
+    __builtin_unreachable();
+
+  }
+
+
+
+}
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/framebufferDescription.h" 2
+
+
+
+
+
+
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/framebufferDescription.h"
+namespace Neon::RHI
+{
+struct FramebufferDescription
+{
+    Rc<TextureView> depthTarget{};
+    std::vector<Rc<TextureView>> colorTargets{};
+
+    FramebufferDescription() = default;
+
+    template<std::same_as<Rc<TextureView>>... Colors>
+    explicit FramebufferDescription(Rc<TextureView> depth, Colors... colors) : depthTarget(std::move(depth)), colorTargets{colors...}
+    {
+
+    }
+};
+}
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h" 1
+       
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/mipmapFilter.h" 1
+       
+
+namespace Neon::RHI
+{
+    enum class MipmapFilter
+    {
+        None,
+        Nearest,
+        Linear
+    };
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureFilter.h" 1
+       
+
+namespace Neon::RHI
+{
+    enum class TextureFilter
+    {
+        Nearest,
+        Linear
+    };
+}
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureWrap.h" 1
+       
+
+namespace Neon::RHI
+{
+    enum class TextureWrap
+    {
+        Repeat,
+        MirroredRepeat,
+        ClampToEdge,
+        ClampToBorder
+    };
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h" 2
+
+namespace Neon::RHI
+{
+struct SamplerDescription
+{
+    TextureFilter minFilter = TextureFilter::Linear;
+    TextureFilter magFilter = TextureFilter::Linear;
+    MipmapFilter mipmapFilter = MipmapFilter::Linear;
+
+    struct WrapMode
+    {
+        TextureWrap x = TextureWrap::Repeat;
+        TextureWrap y = TextureWrap::Repeat;
+        TextureWrap z = TextureWrap::Repeat;
+    };
+
+    WrapMode wrapMode = WrapMode{};
+
+    float lodBias = 0.0f;
+};
+}
+# 17 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/swapchainDescription.h" 1
+       
+
+namespace Neon::RHI
+{
+    class Window;
+
+    struct SwapchainDescription
+    {
+        Rc<Window> window;
+    };
+}
+# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureDescription.h" 1
        
 
@@ -95605,14 +95933,14 @@ enum class TextureType
 
 namespace Neon::RHI
 {
-    enum class TextureUsage : uint32_t {
-        Sampler = 1u << 0,
+    enum class TextureUsage : uint32_t
+    {
+        Sampled = 1u << 0,
         ColorTarget = 1u << 1,
         DepthStencilTarget = 1u << 2,
         GraphicsStorageRead = 1u << 3,
         ComputeStorageRead = 1u << 4,
         ComputeStorageWrite = 1u << 5,
-        ComputeStorageSimultaneousReadWrite = 1u << 6
     };
 
     constexpr TextureUsage operator|(TextureUsage a, TextureUsage b) {
@@ -95631,12 +95959,14 @@ namespace Neon::RHI
 {
 struct TextureDescription
 {
-    glm::uvec3 dimensions{};
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t depth = 0;
 
     uint32_t arrayLayers = 1;
 
     PixelFormat format = PixelFormat::Invalid;
-    TextureUsage usage = TextureUsage::Sampler;
+    TextureUsage usage = TextureUsage::Sampled;
     TextureType type = TextureType::Texture2D;
 
     uint32_t numMipmaps{};
@@ -95644,13 +95974,13 @@ struct TextureDescription
     static TextureDescription Texture1D(
         const uint32_t width,
         const PixelFormat format,
-        const TextureUsage usage = TextureUsage::Sampler,
+        const TextureUsage usage = TextureUsage::Sampled,
         const uint32_t numMipmaps = 1,
         const uint32_t arrayLayers = 1)
     {
         TextureDescription desc;
         desc.type = TextureType::Texture1D;
-        desc.dimensions = glm::uvec3(width, 1, 1);
+        desc.width = width;
         desc.arrayLayers = arrayLayers;
         desc.format = format;
         desc.usage = usage;
@@ -95662,13 +95992,14 @@ struct TextureDescription
         const uint32_t width,
         const uint32_t height,
         const PixelFormat format,
-        const TextureUsage usage = TextureUsage::Sampler,
+        const TextureUsage usage = TextureUsage::Sampled,
         const uint32_t numMipmaps = 1,
         const uint32_t arrayLayers = 1)
     {
         TextureDescription desc;
         desc.type = TextureType::Texture2D;
-        desc.dimensions = glm::uvec3(width, height, 1);
+        desc.width = width;
+        desc.height = height;
         desc.arrayLayers = arrayLayers;
         desc.format = format;
         desc.usage = usage;
@@ -95681,13 +96012,15 @@ struct TextureDescription
         const uint32_t height,
         const uint32_t depth,
         const PixelFormat format,
-        const TextureUsage usage = TextureUsage::Sampler,
+        const TextureUsage usage = TextureUsage::Sampled,
         const uint32_t numMipmaps = 1,
         const uint32_t arrayLayers = 1)
     {
         TextureDescription desc;
         desc.type = TextureType::Texture3D;
-        desc.dimensions = glm::uvec3(width, height, depth);
+        desc.width = width;
+        desc.height = height;
+        desc.depth = depth;
         desc.arrayLayers = arrayLayers;
         desc.format = format;
         desc.usage = usage;
@@ -95696,7 +96029,7 @@ struct TextureDescription
     }
 };
 }
-# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 19 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureViewDescription.h" 1
        
 
@@ -95706,7 +96039,7 @@ namespace Neon::RHI
 {
 struct TextureViewDescription
 {
-    Texture* target{};
+    Rc<Texture> target = nullptr;
 
     uint32_t baseMipLevel = 0;
     uint32_t mipLevels = 1;
@@ -95715,7 +96048,9 @@ struct TextureViewDescription
 
     PixelFormat format = PixelFormat::R8G8B8A8Unorm;
 
-    explicit TextureViewDescription(Texture* target)
+    TextureViewDescription() = default;
+
+    explicit TextureViewDescription(const Rc<Texture>& target)
     {
         this->target = target;
         baseMipLevel = 0;
@@ -95725,7 +96060,7 @@ struct TextureViewDescription
         format = target->getFormat();
     }
 
-    TextureViewDescription(Texture* target, const PixelFormat format)
+    TextureViewDescription(const Rc<Texture>& target, const PixelFormat format)
     {
         this->target = target;
         baseMipLevel = 0;
@@ -95735,7 +96070,7 @@ struct TextureViewDescription
         this->format = format;
     }
 
-    TextureViewDescription(Texture* target, const uint32_t baseMipLevel, const uint32_t mipLevels, const uint32_t baseArrayLayer, const uint32_t arrayLayers)
+    TextureViewDescription(const Rc<Texture>& target, const uint32_t baseMipLevel, const uint32_t mipLevels, const uint32_t baseArrayLayer, const uint32_t arrayLayers)
     {
         this->target = target;
         this->baseMipLevel = baseMipLevel;
@@ -95744,7 +96079,8 @@ struct TextureViewDescription
         this->arrayLayers = arrayLayers;
         format = target->getFormat();
     }
-    TextureViewDescription(Texture* target, const PixelFormat format, const uint32_t baseMipLevel, const uint32_t mipLevels, const uint32_t baseArrayLayer, const uint32_t arrayLayers)
+
+    TextureViewDescription(const Rc<Texture>& target, const PixelFormat format, const uint32_t baseMipLevel, const uint32_t mipLevels, const uint32_t baseArrayLayer, const uint32_t arrayLayers)
     {
         this->target = target;
         this->baseMipLevel = baseMipLevel;
@@ -95755,7 +96091,7 @@ struct TextureViewDescription
     }
 };
 }
-# 17 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 20 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/shaderType.h" 1
        
 
@@ -95766,7 +96102,8 @@ enum class ShaderType
     Compute, Fragment, Vertex
 };
 }
-# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 21 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+
 
 namespace Neon::RHI
 {
@@ -95775,28 +96112,28 @@ class Device
 public:
     virtual ~Device() = default;
 
-    virtual Pipeline* createPipeline(const GraphicsPipelineDescription& description) = 0;
-    virtual Pipeline* createPipeline(const ComputePipelineDescription& description) = 0;
+    virtual Rc<Pipeline> createPipeline(const GraphicsPipelineDescription& description) = 0;
+    virtual Rc<Pipeline> createPipeline(const ComputePipelineDescription& description) = 0;
 
-    virtual CommandList* createCommandList() = 0;
+    virtual Rc<Swapchain> createSwapchain(const SwapchainDescription& description) = 0;
 
-    virtual Texture* createTexture(const TextureDescription& description) = 0;
-    virtual Sampler* createSampler(const SamplerDescription& description) = 0;
-    virtual TextureView* createTextureView(const TextureViewDescription& description) = 0;
+    virtual Rc<CommandList> createCommandList() = 0;
 
-    Shader* createShaderFromSource(const std::string &source, const std::string &filepath = "");
+    virtual Rc<Texture> createTexture(const TextureDescription& description) = 0;
+    virtual Rc<Sampler> createSampler(const SamplerDescription& description) = 0;
+    virtual Rc<TextureView> createTextureView(const TextureViewDescription& description) = 0;
 
-    virtual Buffer* createIndexBuffer() = 0;
-    virtual Buffer* createUniformBuffer() = 0;
-    virtual Buffer* createVertexBuffer() = 0;
+    virtual Rc<Framebuffer> createFramebuffer(const FramebufferDescription& description) = 0;
 
-    virtual void submit(CommandList* commandList) = 0;
+    Rc<Shader> createShaderFromSource(const std::string &source, const std::string &filepath = "");
 
-    virtual void swapBuffers() = 0;
+    virtual Rc<Buffer> createIndexBuffer() = 0;
+    virtual Rc<Buffer> createUniformBuffer() = 0;
+    virtual Rc<Buffer> createVertexBuffer() = 0;
 
-    virtual Framebuffer* getSwapChainFramebuffer() = 0;
+    virtual void submit(const Rc<CommandList>& commandList) = 0;
 protected:
-    virtual Shader* createShaderFromSpirvImpl(std::unordered_map<ShaderType, std::vector<uint32_t>> spirv) = 0;
+    virtual Rc<Shader> createShaderFromSpirvImpl(std::unordered_map<ShaderType, std::vector<uint32_t>> spirv) = 0;
 };
 }
 # 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/window.h" 2
@@ -96154,7 +96491,7 @@ namespace Neon::RHI
 
         struct TextInputEvent
         {
-            char text[32];
+            uint32_t codepoint;
         };
 
         Type type;
@@ -96209,7 +96546,7 @@ public:
 
   static Window* createWindow(const WindowCreationOptions& creationOptions, BackendAPI backendApi = BackendAPI::OpenGL);
 
-  virtual Device* createDevice() = 0;
+  virtual Rc<Device> createDevice() = 0;
 
   virtual void run() = 0;
   virtual void close() = 0;
@@ -96228,6 +96565,8 @@ public:
 
   virtual void setCursorLocked(bool locked) = 0;
   virtual void setCursorVisible(bool visible) = 0;
+
+  virtual void swapBuffers() = 0;
 };
 }
 # 2 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/window.cpp" 2
@@ -96634,7 +96973,7 @@ class WindowOGL final : public Window
 {
 public:
     explicit WindowOGL(const WindowCreationOptions& creationOptions);
-    Device* createDevice() override;
+    Rc<Device> createDevice() override;
 
     void run() override;
     void close() override;
@@ -96651,10 +96990,10 @@ public:
     std::string getTitle() override;
     void setTitle(std::string title) override;
 
-    void swapBuffers() const;
-
     void setCursorLocked(bool locked) override;
     void setCursorVisible(bool visible) override;
+
+    void swapBuffers() override;
 private:
     WindowCreationOptions creationOptions;
     GLFWwindow* handle{};
@@ -96670,6 +97009,8 @@ private:
     static void cursorPosCallback(GLFWwindow* window, double xPos, double yPos);
     static void windowSizeCallback(GLFWwindow* window, int width, int height);
     static void windowCloseCallback(GLFWwindow* window);
+    static void charCallback(GLFWwindow* windowGLFW, unsigned int codepoint);
+    static void scrollCallback(GLFWwindow *windowGLFW, double xOffset, double yOffset);
 };
 }
 # 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/window.cpp" 2

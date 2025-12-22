@@ -21,4 +21,19 @@ namespace Neon
         }
         return filePath;
     }
+
+    std::vector<AssetHandle> AssetManager::getAllAssetHandles()
+    {
+        return assetHandles;
+    }
+
+    std::string AssetManager::getName(const AssetHandle handle)
+    {
+        return assets.at(handle).name;
+    }
+
+    std::type_index AssetManager::getType(const AssetHandle handle) const
+    {
+        return assets.at(handle).type;
+    }
 }

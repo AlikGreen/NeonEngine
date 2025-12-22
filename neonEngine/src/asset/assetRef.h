@@ -60,6 +60,12 @@ public:
         updateCachedAsset();
         return cachedAsset != other;
     }
+
+    operator bool() const
+    {
+        updateCachedAsset();
+        return cachedAsset != nullptr;
+    }
 private:
     friend class AssetManager;
     void updateCachedAsset() const

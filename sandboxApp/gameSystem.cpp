@@ -12,11 +12,11 @@ void GameSystem::startup()
     auto& scene = Neon::Engine::getSceneManager().getCurrentScene();
 
     Neon::AssetManager& assetManager = Neon::Engine::getAssetManager();
-    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/monkey.glb");
+    const Neon::AssetHandle modelHandle = assetManager.loadAsset<Neon::Prefab>("models/testScene.glb");
     auto& model = assetManager.getAsset<Neon::Prefab>(modelHandle);
 
     Neon::ECS::Entity modelEntity = scene.import(model);
-    modelEntity.get<Neon::Transform>().setScale(glm::vec3(1.0f));
+    modelEntity.get<Neon::Transform>().setScale(glm::vec3(0.05f));
 
     // Player/Camera entity
     Neon::ECS::Entity cameraEntity = scene.createEntity();
@@ -34,6 +34,8 @@ void GameSystem::startup()
     auto& pointLight = lightEntity.get<Neon::PointLight>();
     pointLight.power = 10.0f;
     pointLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
+
+    Neon::Log::info("Light created");
 
     // const Neon::AssetHandle songHandle = assetManager->loadAsset<Neon::AudioClip>("city-bgm-336601.mp3");
     // auto *song = assetManager->getAsset<Neon::AudioClip>(songHandle);

@@ -28,6 +28,9 @@ neonEngine\dependencies\neonrhi\CMakeFiles\neonRHI.dir\src\implementations\openg
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureFilter.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureType.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureWrap.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendFactor.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendOp.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/indexFormat.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/input/keyCodes.h \
  C:/msys64/mingw64/include/c++/15.2.0/cstdint \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp \

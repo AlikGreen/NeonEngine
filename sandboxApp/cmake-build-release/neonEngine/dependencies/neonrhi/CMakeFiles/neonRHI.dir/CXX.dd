@@ -17,6 +17,8 @@ build neonEngine/dependencies/neonrhi/CMakeFiles/neonRHI.dir/src/implementations
 
 build neonEngine/dependencies/neonrhi/CMakeFiles/neonRHI.dir/src/implementations/opengl/shaderOGL.cpp.obj: dyndep
 
+build neonEngine/dependencies/neonrhi/CMakeFiles/neonRHI.dir/src/implementations/opengl/swapchainOGL.cpp.obj: dyndep
+
 build neonEngine/dependencies/neonrhi/CMakeFiles/neonRHI.dir/src/implementations/opengl/textureOGL.cpp.obj: dyndep
 
 build neonEngine/dependencies/neonrhi/CMakeFiles/neonRHI.dir/src/implementations/opengl/textureViewOGL.cpp.obj: dyndep

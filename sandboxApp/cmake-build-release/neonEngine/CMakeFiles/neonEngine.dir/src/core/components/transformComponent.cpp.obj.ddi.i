@@ -10,7 +10,7 @@
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/common.h" 1 3
 # 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/common.h" 3
        
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/dependencies/neonCore/src/neonCore/memory.h" 1 3
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h" 1 3
        
 
 # 1 "C:/msys64/mingw64/include/c++/15.2.0/memory" 1 3
@@ -52494,7 +52494,7 @@ uninitialized_value_construct_n(_ExecutionPolicy&& __exec, _ForwardIterator __fi
 
 }
 # 175 "C:/msys64/mingw64/include/c++/15.2.0/memory" 2 3
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/dependencies/neonCore/src/neonCore/memory.h" 2 3
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h" 2 3
 
 namespace Neon
 {
@@ -121700,7 +121700,7 @@ public:
     Registry(Registry&&) = default;
     Registry& operator=(Registry&&) = default;
 
-    void merge(Registry const& other);
+    std::vector<Entity> merge(Registry const& other);
     Entity createEntity();
 
     template<typename T, typename... Args>
@@ -121789,6 +121789,12 @@ public:
         return registry->get<T>(id);
     }
 
+    template<typename T>
+    [[nodiscard]] bool has() const
+    {
+        return registry->has<T>(id);
+    }
+
     template<typename T, typename... Args>
     T& emplace(Args&&... args)
     {
@@ -121799,6 +121805,21 @@ public:
     void remove() const
     {
         registry->remove<T>(id);
+    }
+
+    bool operator==(const Entity& other) const
+    {
+        return id == other.id;
+    }
+
+    bool operator!=(const Entity& other) const
+    {
+        return !(*this == other);
+    }
+
+    [[nodiscard]] size_t getId() const
+    {
+        return id;
     }
 private:
     friend class Registry;
@@ -121855,6 +121876,15 @@ void Registry::remove(const Entity entity)
 }
 
 }
+
+template<>
+struct std::hash<Neon::ECS::Entity>
+{
+    size_t operator()(const Neon::ECS::Entity& e) const noexcept
+    {
+        return e.getId();
+    }
+};
 # 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/view.h" 2
 
 

@@ -3,6 +3,7 @@
 #include "window.h"
 #include "core/engine.h"
 #include "core/eventManager.h"
+#include "events/dropFileEvent.h"
 #include "events/quitEvent.h"
 #include "events/rhiWindowEvent.h"
 #include "events/windowResizeEvent.h"
@@ -20,6 +21,24 @@ namespace Neon
     GraphicsSystem::GraphicsSystem(const RHI::WindowCreationOptions &windowOptions)
     {
         m_window = Box<RHI::Window>(RHI::Window::createWindow(windowOptions));
+    }
+
+    void GraphicsSystem::updateSwapchainFramebuffers()
+    {
+        std::vector<Rc<RHI::Texture>> textures = m_swapchain->getTextures();
+        m_framebuffers.clear();
+
+        for(const auto& texture : textures)
+        {
+            const RHI::TextureViewDescription viewDesc(texture);
+            Rc<RHI::TextureView> colView = m_device->createTextureView(viewDesc);
+
+            RHI::FramebufferDescription framebufferDesc{};
+            framebufferDesc.colorTargets.push_back(colView);
+
+            Rc<RHI::Framebuffer> framebuffer = m_device->createFramebuffer(framebufferDesc);
+            m_framebuffers.push_back(framebuffer);
+        }
     }
 
     void GraphicsSystem::preStartup()
@@ -74,19 +93,7 @@ namespace Neon
 
         m_pipeline = m_device->createPipeline(pipelineDescription);
 
-        std::vector<Rc<RHI::Texture>> textures = m_swapchain->getTextures();
-
-        for(const auto& texture : textures)
-        {
-            const RHI::TextureViewDescription viewDesc(texture);
-            Rc<RHI::TextureView> colView = m_device->createTextureView(viewDesc);
-
-            RHI::FramebufferDescription framebufferDesc{};
-            framebufferDesc.colorTargets.push_back(colView);
-
-            Rc<RHI::Framebuffer> framebuffer = m_device->createFramebuffer(framebufferDesc);
-            m_framebuffers.push_back(framebuffer);
-        }
+        updateSwapchainFramebuffers();
 
         m_vertexBuffer = m_device->createVertexBuffer();
         m_indexBuffer = m_device->createIndexBuffer();
@@ -121,6 +128,8 @@ namespace Neon
                 break;
                 case RHI::Event::Type::WindowResize:
                     eventManager.queueEvent(new WindowResizeEvent(event.window.width, event.window.height));
+                    m_swapchain->resize(event.window.width, event.window.height);
+                    updateSwapchainFramebuffers();
                 break;
                 case RHI::Event::Type::KeyDown:
                     eventManager.queueEvent(new KeyDownEvent(event.key.key, event.key.repeat));
@@ -142,6 +151,9 @@ namespace Neon
                 break;
                 case RHI::Event::Type::TextInput:
                     eventManager.queueEvent(new TextInputEvent(event.text.codepoint));
+                break;
+                case RHI::Event::Type::DropFile:
+                    eventManager.queueEvent(new DropFileEvent(event.drop.path));
                 break;
             }
         }

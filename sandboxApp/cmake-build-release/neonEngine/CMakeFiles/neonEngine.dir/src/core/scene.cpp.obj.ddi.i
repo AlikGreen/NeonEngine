@@ -10,7 +10,7 @@
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/common.h" 1 3
 # 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/common.h" 3
        
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/dependencies/neonCore/src/neonCore/memory.h" 1 3
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h" 1 3
        
 
 # 1 "C:/msys64/mingw64/include/c++/15.2.0/memory" 1 3
@@ -52494,7 +52494,7 @@ uninitialized_value_construct_n(_ExecutionPolicy&& __exec, _ForwardIterator __fi
 
 }
 # 175 "C:/msys64/mingw64/include/c++/15.2.0/memory" 2 3
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/dependencies/neonCore/src/neonCore/memory.h" 2 3
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h" 2 3
 
 namespace Neon
 {
@@ -90231,7 +90231,7 @@ public:
     Registry(Registry&&) = default;
     Registry& operator=(Registry&&) = default;
 
-    void merge(Registry const& other);
+    std::vector<Entity> merge(Registry const& other);
     Entity createEntity();
 
     template<typename T, typename... Args>
@@ -90320,6 +90320,12 @@ public:
         return registry->get<T>(id);
     }
 
+    template<typename T>
+    [[nodiscard]] bool has() const
+    {
+        return registry->has<T>(id);
+    }
+
     template<typename T, typename... Args>
     T& emplace(Args&&... args)
     {
@@ -90330,6 +90336,21 @@ public:
     void remove() const
     {
         registry->remove<T>(id);
+    }
+
+    bool operator==(const Entity& other) const
+    {
+        return id == other.id;
+    }
+
+    bool operator!=(const Entity& other) const
+    {
+        return !(*this == other);
+    }
+
+    [[nodiscard]] size_t getId() const
+    {
+        return id;
     }
 private:
     friend class Registry;
@@ -90386,6 +90407,15 @@ void Registry::remove(const Entity entity)
 }
 
 }
+
+template<>
+struct std::hash<Neon::ECS::Entity>
+{
+    size_t operator()(const Neon::ECS::Entity& e) const noexcept
+    {
+        return e.getId();
+    }
+};
 # 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/view.h" 2
 
 
@@ -90616,22 +90646,31634 @@ const View<Components...>& Registry::view()
 # 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/include/neonECS/neonECS.h" 2
 # 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/scene.h" 2
 
+
 namespace Neon
 {
-class Scene
+    class Prefab;
+
+    class Scene
 {
 public:
-    [[nodiscard]] ECS::Registry& getWorld() const;
+    [[nodiscard]] ECS::Registry& getRegistry();
+    ECS::Entity createEntity(const std::string& name = "Entity");
+    ECS::Entity import(Prefab& prefab);
 private:
-    ECS::Registry* registry = new ECS::Registry();
+    ECS::Registry registry = ECS::Registry();
 };
 }
 # 2 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/scene.cpp" 2
 
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/prefab.h" 1
+       
+
+
+
+
+
 namespace Neon
 {
-    ECS::Registry & Scene::getWorld() const
+struct PrefabComponent
+{
+    uint32_t temp{};
+};
+
+class Prefab
+{
+public:
+    Scene scene{};
+    std::string name;
+};
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/scene.cpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/components/parentComponent.h" 1
+       
+
+
+namespace Neon
+{
+    class Parent
     {
-        return *registry;
+    public:
+        [[nodiscard]] bool hasParent() const
+        {
+            return parent.has_value();
+        }
+
+        [[nodiscard]] ECS::Entity getParent() const
+        {
+            return parent.value();
+        }
+
+        void setParent(const ECS::Entity parent)
+        {
+            this->parent = parent;
+        }
+    private:
+        std::optional<ECS::Entity> parent;
+    };
+}
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/scene.cpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/components/tagComponent.h" 1
+       
+
+
+
+
+namespace Neon
+{
+    struct Tag
+    {
+        explicit Tag(std::string name) : name(std::move(name)) { };
+        std::string name{};
+        std::vector<std::string> tags{};
+    };
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/scene.cpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/components/transformComponent.h" 1
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 1
+# 104 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp"
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/_fixes.hpp" 1
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 1 3
+# 52 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 3
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
+# 1 "C:/msys64/mingw64/include/math.h" 1 3
+# 10 "C:/msys64/mingw64/include/math.h" 3
+       
+# 11 "C:/msys64/mingw64/include/math.h" 3
+
+
+
+
+struct _exception;
+
+#pragma pack(push,_CRT_PACKING)
+# 75 "C:/msys64/mingw64/include/math.h" 3
+extern "C++" {
+template <typename type1, typename type2> struct __mingw_types_compatible_p {
+  static const bool result = false;
+};
+
+template <typename type1> struct __mingw_types_compatible_p<type1, type1> {
+ static const bool result = true;
+};
+
+template <typename type1> struct __mingw_types_compatible_p<const type1, type1> {
+  static const bool result = true;
+};
+
+template <typename type1> struct __mingw_types_compatible_p<type1, const type1> {
+  static const bool result = true;
+};
+}
+# 109 "C:/msys64/mingw64/include/math.h" 3
+extern "C" {
+
+
+
+
+
+
+
+  typedef union __mingw_dbl_type_t {
+    double x;
+    unsigned long long val;
+    __extension__ struct {
+      unsigned int low, high;
+    } lh;
+  } __mingw_dbl_type_t;
+
+  typedef union __mingw_flt_type_t {
+    float x;
+    unsigned int val;
+  } __mingw_flt_type_t;
+
+  typedef union __mingw_ldbl_type_t
+  {
+    long double x;
+    __extension__ struct {
+      unsigned int low, high;
+      int sign_exponent : 16;
+      int res1 : 16;
+      int res0 : 32;
+    } lh;
+  } __mingw_ldbl_type_t;
+
+
+
+
+  extern double * __imp__HUGE;
+# 156 "C:/msys64/mingw64/include/math.h" 3
+  struct _exception {
+    int type;
+    const char *name;
+    double arg1;
+    double arg2;
+    double retval;
+  };
+
+  void __mingw_raise_matherr (int typ, const char *name, double a1, double a2,
+         double rslt);
+  void __mingw_setusermatherr (int (__attribute__((__cdecl__)) *)(struct _exception *));
+  __attribute__ ((__dllimport__)) void __setusermatherr(int (__attribute__((__cdecl__)) *)(struct _exception *));
+# 182 "C:/msys64/mingw64/include/math.h" 3
+  double __attribute__((__cdecl__)) sin(double _X);
+  double __attribute__((__cdecl__)) cos(double _X);
+  double __attribute__((__cdecl__)) tan(double _X);
+  double __attribute__((__cdecl__)) sinh(double _X);
+  double __attribute__((__cdecl__)) cosh(double _X);
+  double __attribute__((__cdecl__)) tanh(double _X);
+  double __attribute__((__cdecl__)) asin(double _X);
+  double __attribute__((__cdecl__)) acos(double _X);
+  double __attribute__((__cdecl__)) atan(double _X);
+  double __attribute__((__cdecl__)) atan2(double _Y,double _X);
+  double __attribute__((__cdecl__)) exp(double _X);
+  double __attribute__((__cdecl__)) log(double _X);
+  double __attribute__((__cdecl__)) log10(double _X);
+  double __attribute__((__cdecl__)) pow(double _X,double _Y);
+  double __attribute__((__cdecl__)) sqrt(double _X);
+  double __attribute__((__cdecl__)) ceil(double _X);
+  double __attribute__((__cdecl__)) floor(double _X);
+
+
+  extern float __attribute__((__cdecl__)) fabsf (float x);
+  extern long double __attribute__((__cdecl__)) fabsl (long double);
+  extern double __attribute__((__cdecl__)) fabs (double _X);
+
+
+
+  inline float __attribute__((__cdecl__)) fabsf (float x)
+  {
+
+    return __builtin_fabsf (x);
+
+
+
+
+
+  }
+
+  inline long double __attribute__((__cdecl__)) fabsl (long double x)
+  {
+
+
+
+    long double res = 0.0l;
+    __asm__ __volatile__ ("fabs;" : "=t" (res) : "0" (x));
+    return res;
+
+  }
+
+  inline double __attribute__((__cdecl__)) fabs (double x)
+  {
+
+    return __builtin_fabs (x);
+
+
+
+
+
+  }
+
+
+
+  double __attribute__((__cdecl__)) ldexp(double _X,int _Y);
+  double __attribute__((__cdecl__)) frexp(double _X,int *_Y);
+  double __attribute__((__cdecl__)) modf(double _X,double *_Y);
+  double __attribute__((__cdecl__)) fmod(double _X,double _Y);
+
+  void __attribute__((__cdecl__)) sincos (double __x, double *p_sin, double *p_cos);
+  void __attribute__((__cdecl__)) sincosl (long double __x, long double *p_sin, long double *p_cos);
+  void __attribute__((__cdecl__)) sincosf (float __x, float *p_sin, float *p_cos);
+# 267 "C:/msys64/mingw64/include/math.h" 3
+  struct _complex {
+    double x;
+    double y;
+  };
+
+
+  double __attribute__((__cdecl__)) _cabs(struct _complex _ComplexA);
+  double __attribute__((__cdecl__)) _hypot(double _X,double _Y);
+  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _j0(double _X);
+  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _j1(double _X);
+  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _jn(int _X,double _Y);
+  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _y0(double _X);
+  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _y1(double _X);
+  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _yn(int _X,double _Y);
+
+
+  __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _matherr (struct _exception *);
+# 294 "C:/msys64/mingw64/include/math.h" 3
+  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _chgsign (double _X);
+  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _copysign (double _Number,double _Sign);
+  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _logb (double);
+  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _nextafter (double, double);
+  __attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) _scalb (double, long);
+  __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _finite (double);
+  __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _fpclass (double);
+  __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _isnan (double);
+
+
+
+
+
+
+__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) j0 (double) ;
+__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) j1 (double) ;
+__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) jn (int, double) ;
+__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) y0 (double) ;
+__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) y1 (double) ;
+__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) yn (int, double) ;
+
+
+
+__attribute__ ((__dllimport__)) double __attribute__((__cdecl__)) chgsign (double);
+# 326 "C:/msys64/mingw64/include/math.h" 3
+  __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) finite (double);
+  __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) fpclass (double);
+# 370 "C:/msys64/mingw64/include/math.h" 3
+typedef float float_t;
+typedef double double_t;
+# 405 "C:/msys64/mingw64/include/math.h" 3
+  extern int __attribute__((__cdecl__)) __fpclassifyl (long double);
+  extern int __attribute__((__cdecl__)) __fpclassifyf (float);
+  extern int __attribute__((__cdecl__)) __fpclassify (double);
+
+
+  inline int __attribute__((__cdecl__)) __fpclassifyl (long double x) {
+
+
+
+    __mingw_ldbl_type_t hlp;
+    unsigned int e;
+    hlp.x = x;
+    e = hlp.lh.sign_exponent & 0x7fff;
+    if (!e)
+      {
+        unsigned int h = hlp.lh.high;
+        if (!(hlp.lh.low | h))
+          return 0x4000;
+        else if (!(h & 0x80000000))
+          return (0x0400 | 0x4000);
+      }
+    else if (e == 0x7fff)
+      return (((hlp.lh.high & 0x7fffffff) | hlp.lh.low) == 0 ?
+              (0x0100 | 0x0400) : 0x0100);
+    return 0x0400;
+
+
+
+
+
+  }
+  inline int __attribute__((__cdecl__)) __fpclassify (double x) {
+
+    __mingw_dbl_type_t hlp;
+    unsigned int l, h;
+
+    hlp.x = x;
+    h = hlp.lh.high;
+    l = hlp.lh.low | (h & 0xfffff);
+    h &= 0x7ff00000;
+    if ((h | l) == 0)
+      return 0x4000;
+    if (!h)
+      return (0x0400 | 0x4000);
+    if (h == 0x7ff00000)
+      return (l ? 0x0100 : (0x0100 | 0x0400));
+    return 0x0400;
+
+
+
+
+
+  }
+  inline int __attribute__((__cdecl__)) __fpclassifyf (float x) {
+
+    __mingw_flt_type_t hlp;
+
+    hlp.x = x;
+    hlp.val &= 0x7fffffff;
+    if (hlp.val == 0)
+      return 0x4000;
+    if (hlp.val < 0x800000)
+      return (0x0400 | 0x4000);
+    if (hlp.val >= 0x7f800000)
+      return (hlp.val > 0x7f800000 ? 0x0100 : (0x0100 | 0x0400));
+    return 0x0400;
+
+
+
+
+
+  }
+# 518 "C:/msys64/mingw64/include/math.h" 3
+  extern int __attribute__((__cdecl__)) __isnan (double);
+  extern int __attribute__((__cdecl__)) __isnanf (float);
+  extern int __attribute__((__cdecl__)) __isnanl (long double);
+
+
+  inline int __attribute__((__cdecl__)) __isnan (double _x)
+  {
+
+    __mingw_dbl_type_t hlp;
+    unsigned int l, h;
+
+    hlp.x = _x;
+    l = hlp.lh.low;
+    h = hlp.lh.high & 0x7fffffff;
+    h |= (l | -l) >> 31;
+    h = 0x7ff00000 - h;
+    return (int) h >> 31;
+
+
+
+
+
+
+
+  }
+
+  inline int __attribute__((__cdecl__)) __isnanf (float _x)
+  {
+
+    __mingw_flt_type_t hlp;
+    unsigned int i;
+
+    hlp.x = _x;
+    i = hlp.val & 0x7fffffff;
+    i = 0x7f800000 - i;
+    return (int) (i >> 31);
+
+
+
+
+
+
+
+  }
+
+  inline int __attribute__((__cdecl__)) __isnanl (long double _x)
+  {
+
+
+
+    __mingw_ldbl_type_t ld;
+    unsigned int xx, signexp;
+
+    ld.x = _x;
+    signexp = (ld.lh.sign_exponent & 0x7fff) << 1;
+    xx = ld.lh.low | (ld.lh.high & 0x7fffffffu);
+    signexp |= (xx | (-xx)) >> 31;
+    signexp = 0xfffe - signexp;
+    return (int) signexp >> 16;
+
+
+
+
+
+
+
+  }
+# 605 "C:/msys64/mingw64/include/math.h" 3
+  extern int __attribute__((__cdecl__)) __signbit (double);
+  extern int __attribute__((__cdecl__)) __signbitf (float);
+  extern int __attribute__((__cdecl__)) __signbitl (long double);
+
+  inline int __attribute__((__cdecl__)) __signbit (double x) {
+
+    __mingw_dbl_type_t hlp;
+
+    hlp.x = x;
+    return ((hlp.lh.high & 0x80000000) != 0);
+
+
+
+
+
+  }
+
+  inline int __attribute__((__cdecl__)) __signbitf (float x) {
+
+    __mingw_flt_type_t hlp;
+    hlp.x = x;
+    return ((hlp.val & 0x80000000) != 0);
+
+
+
+
+
+  }
+
+  inline int __attribute__((__cdecl__)) __signbitl (long double x) {
+
+
+
+    __mingw_ldbl_type_t ld;
+    ld.x = x;
+    return ((ld.lh.sign_exponent & 0x8000) != 0);
+
+
+
+
+
+  }
+# 662 "C:/msys64/mingw64/include/math.h" 3
+  extern float __attribute__((__cdecl__)) sinf(float _X);
+  extern long double __attribute__((__cdecl__)) sinl(long double);
+
+  extern float __attribute__((__cdecl__)) cosf(float _X);
+  extern long double __attribute__((__cdecl__)) cosl(long double);
+
+  extern float __attribute__((__cdecl__)) tanf(float _X);
+  extern long double __attribute__((__cdecl__)) tanl(long double);
+  extern float __attribute__((__cdecl__)) asinf(float _X);
+  extern long double __attribute__((__cdecl__)) asinl(long double);
+
+  extern float __attribute__((__cdecl__)) acosf (float);
+  extern long double __attribute__((__cdecl__)) acosl (long double);
+
+  extern float __attribute__((__cdecl__)) atanf (float);
+  extern long double __attribute__((__cdecl__)) atanl (long double);
+
+  extern float __attribute__((__cdecl__)) atan2f (float, float);
+  extern long double __attribute__((__cdecl__)) atan2l (long double, long double);
+
+
+  extern float __attribute__((__cdecl__)) sinhf(float _X);
+
+  inline float sinhf(float _X) { return ((float)sinh((double)_X)); }
+
+  extern long double __attribute__((__cdecl__)) sinhl(long double);
+
+  extern float __attribute__((__cdecl__)) coshf(float _X);
+
+  inline float coshf(float _X) { return ((float)cosh((double)_X)); }
+
+  extern long double __attribute__((__cdecl__)) coshl(long double);
+
+  extern float __attribute__((__cdecl__)) tanhf(float _X);
+
+  inline float tanhf(float _X) { return ((float)tanh((double)_X)); }
+
+  extern long double __attribute__((__cdecl__)) tanhl(long double);
+
+
+
+  extern double __attribute__((__cdecl__)) acosh (double);
+  extern float __attribute__((__cdecl__)) acoshf (float);
+  extern long double __attribute__((__cdecl__)) acoshl (long double);
+
+
+  extern double __attribute__((__cdecl__)) asinh (double);
+  extern float __attribute__((__cdecl__)) asinhf (float);
+  extern long double __attribute__((__cdecl__)) asinhl (long double);
+
+
+  extern double __attribute__((__cdecl__)) atanh (double);
+  extern float __attribute__((__cdecl__)) atanhf (float);
+  extern long double __attribute__((__cdecl__)) atanhl (long double);
+
+
+
+  extern float __attribute__((__cdecl__)) expf(float _X);
+
+  inline float expf(float _X) { return ((float)exp((double)_X)); }
+
+  extern long double __attribute__((__cdecl__)) expl(long double);
+
+
+  extern double __attribute__((__cdecl__)) exp2(double);
+  extern float __attribute__((__cdecl__)) exp2f(float);
+  extern long double __attribute__((__cdecl__)) exp2l(long double);
+
+
+
+  extern double __attribute__((__cdecl__)) expm1(double);
+  extern float __attribute__((__cdecl__)) expm1f(float);
+  extern long double __attribute__((__cdecl__)) expm1l(long double);
+
+
+  extern float frexpf(float _X,int *_Y);
+
+  inline float frexpf(float _X,int *_Y) { return ((float)frexp((double)_X,_Y)); }
+
+  extern long double __attribute__((__cdecl__)) frexpl(long double,int *);
+
+
+
+
+  extern int __attribute__((__cdecl__)) ilogb (double);
+  extern int __attribute__((__cdecl__)) ilogbf (float);
+  extern int __attribute__((__cdecl__)) ilogbl (long double);
+
+
+  extern float __attribute__((__cdecl__)) ldexpf(float _X,int _Y);
+
+  inline float __attribute__((__cdecl__)) ldexpf (float x, int expn) { return (float) ldexp ((double)x, expn); }
+
+  extern long double __attribute__((__cdecl__)) ldexpl (long double, int);
+
+
+  extern float __attribute__((__cdecl__)) logf (float);
+  extern long double __attribute__((__cdecl__)) logl(long double);
+
+
+  extern float __attribute__((__cdecl__)) log10f (float);
+  extern long double __attribute__((__cdecl__)) log10l(long double);
+
+
+  extern double __attribute__((__cdecl__)) log1p(double);
+  extern float __attribute__((__cdecl__)) log1pf(float);
+  extern long double __attribute__((__cdecl__)) log1pl(long double);
+
+
+  extern double __attribute__((__cdecl__)) log2 (double);
+  extern float __attribute__((__cdecl__)) log2f (float);
+  extern long double __attribute__((__cdecl__)) log2l (long double);
+
+
+  extern double __attribute__((__cdecl__)) logb (double);
+  extern float __attribute__((__cdecl__)) logbf (float);
+  extern long double __attribute__((__cdecl__)) logbl (long double);
+
+
+  extern float __attribute__((__cdecl__)) modff (float, float*);
+  extern long double __attribute__((__cdecl__)) modfl (long double, long double*);
+
+
+  extern double __attribute__((__cdecl__)) scalbn (double, int);
+  extern float __attribute__((__cdecl__)) scalbnf (float, int);
+  extern long double __attribute__((__cdecl__)) scalbnl (long double, int);
+
+  extern double __attribute__((__cdecl__)) scalbln (double, long);
+  extern float __attribute__((__cdecl__)) scalblnf (float, long);
+  extern long double __attribute__((__cdecl__)) scalblnl (long double, long);
+
+
+
+  extern double __attribute__((__cdecl__)) cbrt (double);
+  extern float __attribute__((__cdecl__)) cbrtf (float);
+  extern long double __attribute__((__cdecl__)) cbrtl (long double);
+
+
+  extern double __attribute__((__cdecl__)) hypot (double, double) ;
+  extern float __attribute__((__cdecl__)) hypotf (float x, float y);
+
+  inline float __attribute__((__cdecl__)) hypotf (float x, float y) { return (float) hypot ((double)x, (double)y);}
+
+  extern long double __attribute__((__cdecl__)) hypotl (long double, long double);
+
+
+  extern float __attribute__((__cdecl__)) powf(float _X,float _Y);
+
+  inline float powf(float _X,float _Y) { return ((float)pow((double)_X,(double)_Y)); }
+
+  extern long double __attribute__((__cdecl__)) powl (long double, long double);
+
+
+  extern float __attribute__((__cdecl__)) sqrtf (float);
+  extern long double sqrtl(long double);
+
+
+  extern double __attribute__((__cdecl__)) erf (double);
+  extern float __attribute__((__cdecl__)) erff (float);
+  extern long double __attribute__((__cdecl__)) erfl (long double);
+
+
+  extern double __attribute__((__cdecl__)) erfc (double);
+  extern float __attribute__((__cdecl__)) erfcf (float);
+  extern long double __attribute__((__cdecl__)) erfcl (long double);
+
+
+  extern double __attribute__((__cdecl__)) lgamma (double);
+  extern float __attribute__((__cdecl__)) lgammaf (float);
+  extern long double __attribute__((__cdecl__)) lgammal (long double);
+
+  extern int signgam;
+
+
+  extern double __attribute__((__cdecl__)) tgamma (double);
+  extern float __attribute__((__cdecl__)) tgammaf (float);
+  extern long double __attribute__((__cdecl__)) tgammal (long double);
+
+
+  extern float __attribute__((__cdecl__)) ceilf (float);
+  extern long double __attribute__((__cdecl__)) ceill (long double);
+
+
+  extern float __attribute__((__cdecl__)) floorf (float);
+  extern long double __attribute__((__cdecl__)) floorl (long double);
+
+
+  extern double __attribute__((__cdecl__)) nearbyint ( double);
+  extern float __attribute__((__cdecl__)) nearbyintf (float);
+  extern long double __attribute__((__cdecl__)) nearbyintl (long double);
+
+
+
+extern double __attribute__((__cdecl__)) rint (double);
+extern float __attribute__((__cdecl__)) rintf (float);
+extern long double __attribute__((__cdecl__)) rintl (long double);
+
+
+extern long __attribute__((__cdecl__)) lrint (double);
+extern long __attribute__((__cdecl__)) lrintf (float);
+extern long __attribute__((__cdecl__)) lrintl (long double);
+
+__extension__ long long __attribute__((__cdecl__)) llrint (double);
+__extension__ long long __attribute__((__cdecl__)) llrintf (float);
+__extension__ long long __attribute__((__cdecl__)) llrintl (long double);
+
+
+
+  extern double __attribute__((__cdecl__)) round (double);
+  extern float __attribute__((__cdecl__)) roundf (float);
+  extern long double __attribute__((__cdecl__)) roundl (long double);
+
+
+  extern long __attribute__((__cdecl__)) lround (double);
+  extern long __attribute__((__cdecl__)) lroundf (float);
+  extern long __attribute__((__cdecl__)) lroundl (long double);
+  __extension__ long long __attribute__((__cdecl__)) llround (double);
+  __extension__ long long __attribute__((__cdecl__)) llroundf (float);
+  __extension__ long long __attribute__((__cdecl__)) llroundl (long double);
+
+
+
+  extern double __attribute__((__cdecl__)) trunc (double);
+  extern float __attribute__((__cdecl__)) truncf (float);
+  extern long double __attribute__((__cdecl__)) truncl (long double);
+
+
+  extern float __attribute__((__cdecl__)) fmodf (float, float);
+  extern long double __attribute__((__cdecl__)) fmodl (long double, long double);
+
+
+  extern double __attribute__((__cdecl__)) remainder (double, double);
+  extern float __attribute__((__cdecl__)) remainderf (float, float);
+  extern long double __attribute__((__cdecl__)) remainderl (long double, long double);
+
+
+  extern double __attribute__((__cdecl__)) remquo(double, double, int *);
+  extern float __attribute__((__cdecl__)) remquof(float, float, int *);
+  extern long double __attribute__((__cdecl__)) remquol(long double, long double, int *);
+
+
+  extern double __attribute__((__cdecl__)) copysign (double, double);
+  extern float __attribute__((__cdecl__)) copysignf (float, float);
+  extern long double __attribute__((__cdecl__)) copysignl (long double, long double);
+
+
+
+  inline double __attribute__((__cdecl__)) copysign (double x, double y)
+  {
+    __mingw_dbl_type_t hx, hy;
+    hx.x = x; hy.x = y;
+    hx.lh.high = (hx.lh.high & 0x7fffffff) | (hy.lh.high & 0x80000000);
+    return hx.x;
+  }
+  inline float __attribute__((__cdecl__)) copysignf (float x, float y)
+  {
+    __mingw_flt_type_t hx, hy;
+    hx.x = x; hy.x = y;
+    hx.val = (hx.val & 0x7fffffff) | (hy.val & 0x80000000);
+    return hx.x;
+  }
+
+
+
+
+  extern double __attribute__((__cdecl__)) nan(const char *tagp);
+  extern float __attribute__((__cdecl__)) nanf(const char *tagp);
+  extern long double __attribute__((__cdecl__)) nanl(const char *tagp);
+# 938 "C:/msys64/mingw64/include/math.h" 3
+  extern double __attribute__((__cdecl__)) nextafter (double, double);
+  extern float __attribute__((__cdecl__)) nextafterf (float, float);
+  extern long double __attribute__((__cdecl__)) nextafterl (long double, long double);
+
+
+  extern double __attribute__((__cdecl__)) nexttoward (double, long double);
+  extern float __attribute__((__cdecl__)) nexttowardf (float, long double);
+  extern long double __attribute__((__cdecl__)) nexttowardl (long double, long double);
+
+
+
+  extern double __attribute__((__cdecl__)) fdim (double x, double y);
+  extern float __attribute__((__cdecl__)) fdimf (float x, float y);
+  extern long double __attribute__((__cdecl__)) fdiml (long double x, long double y);
+
+
+
+
+
+
+
+  extern double __attribute__((__cdecl__)) fmax (double, double);
+  extern float __attribute__((__cdecl__)) fmaxf (float, float);
+  extern long double __attribute__((__cdecl__)) fmaxl (long double, long double);
+
+
+  extern double __attribute__((__cdecl__)) fmin (double, double);
+  extern float __attribute__((__cdecl__)) fminf (float, float);
+  extern long double __attribute__((__cdecl__)) fminl (long double, long double);
+
+
+
+  extern double __attribute__((__cdecl__)) fma (double, double, double);
+  extern float __attribute__((__cdecl__)) fmaf (float, float, float);
+  extern long double __attribute__((__cdecl__)) fmal (long double, long double, long double);
+# 1021 "C:/msys64/mingw64/include/math.h" 3
+   __attribute__ ((__dllimport__)) float __attribute__((__cdecl__)) _copysignf (float _Number,float _Sign);
+   __attribute__ ((__dllimport__)) float __attribute__((__cdecl__)) _chgsignf (float _X);
+   __attribute__ ((__dllimport__)) float __attribute__((__cdecl__)) _logbf(float _X);
+   __attribute__ ((__dllimport__)) float __attribute__((__cdecl__)) _nextafterf(float _X,float _Y);
+   __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _finitef(float _X);
+   __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _isnanf(float _X);
+   __attribute__ ((__dllimport__)) int __attribute__((__cdecl__)) _fpclassf(float _X);
+
+
+
+   extern long double __attribute__((__cdecl__)) _chgsignl (long double);
+# 1416 "C:/msys64/mingw64/include/math.h" 3
+}
+
+
+
+
+#pragma pack(pop)
+# 56 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 2 3
+
+#pragma GCC diagnostic pop
+
+
+
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 64 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 2 3
+# 90 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 3
+extern "C++"
+{
+namespace std
+{
+
+
+  using ::acos;
+
+
+  inline constexpr float
+  acos(float __x)
+  { return __builtin_acosf(__x); }
+
+  inline constexpr long double
+  acos(long double __x)
+  { return __builtin_acosl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    acos(_Tp __x)
+    { return __builtin_acos(__x); }
+
+  using ::asin;
+
+
+  inline constexpr float
+  asin(float __x)
+  { return __builtin_asinf(__x); }
+
+  inline constexpr long double
+  asin(long double __x)
+  { return __builtin_asinl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    asin(_Tp __x)
+    { return __builtin_asin(__x); }
+
+  using ::atan;
+
+
+  inline constexpr float
+  atan(float __x)
+  { return __builtin_atanf(__x); }
+
+  inline constexpr long double
+  atan(long double __x)
+  { return __builtin_atanl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    atan(_Tp __x)
+    { return __builtin_atan(__x); }
+
+  using ::atan2;
+
+
+  inline constexpr float
+  atan2(float __y, float __x)
+  { return __builtin_atan2f(__y, __x); }
+
+  inline constexpr long double
+  atan2(long double __y, long double __x)
+  { return __builtin_atan2l(__y, __x); }
+
+
+  using ::ceil;
+
+
+  inline constexpr float
+  ceil(float __x)
+  { return __builtin_ceilf(__x); }
+
+  inline constexpr long double
+  ceil(long double __x)
+  { return __builtin_ceill(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    ceil(_Tp __x)
+    { return __builtin_ceil(__x); }
+
+  using ::cos;
+
+
+  inline constexpr float
+  cos(float __x)
+  { return __builtin_cosf(__x); }
+
+  inline constexpr long double
+  cos(long double __x)
+  { return __builtin_cosl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    cos(_Tp __x)
+    { return __builtin_cos(__x); }
+
+  using ::cosh;
+
+
+  inline constexpr float
+  cosh(float __x)
+  { return __builtin_coshf(__x); }
+
+  inline constexpr long double
+  cosh(long double __x)
+  { return __builtin_coshl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    cosh(_Tp __x)
+    { return __builtin_cosh(__x); }
+
+  using ::exp;
+
+
+  inline constexpr float
+  exp(float __x)
+  { return __builtin_expf(__x); }
+
+  inline constexpr long double
+  exp(long double __x)
+  { return __builtin_expl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    exp(_Tp __x)
+    { return __builtin_exp(__x); }
+
+  using ::fabs;
+
+
+  inline constexpr float
+  fabs(float __x)
+  { return __builtin_fabsf(__x); }
+
+  inline constexpr long double
+  fabs(long double __x)
+  { return __builtin_fabsl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    fabs(_Tp __x)
+    { return __builtin_fabs(__x); }
+
+  using ::floor;
+
+
+  inline constexpr float
+  floor(float __x)
+  { return __builtin_floorf(__x); }
+
+  inline constexpr long double
+  floor(long double __x)
+  { return __builtin_floorl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    floor(_Tp __x)
+    { return __builtin_floor(__x); }
+
+  using ::fmod;
+
+
+  inline constexpr float
+  fmod(float __x, float __y)
+  { return __builtin_fmodf(__x, __y); }
+
+  inline constexpr long double
+  fmod(long double __x, long double __y)
+  { return __builtin_fmodl(__x, __y); }
+
+
+  using ::frexp;
+
+
+  inline float
+  frexp(float __x, int* __exp)
+  { return __builtin_frexpf(__x, __exp); }
+
+  inline long double
+  frexp(long double __x, int* __exp)
+  { return __builtin_frexpl(__x, __exp); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    frexp(_Tp __x, int* __exp)
+    { return __builtin_frexp(__x, __exp); }
+
+  using ::ldexp;
+
+
+  inline constexpr float
+  ldexp(float __x, int __exp)
+  { return __builtin_ldexpf(__x, __exp); }
+
+  inline constexpr long double
+  ldexp(long double __x, int __exp)
+  { return __builtin_ldexpl(__x, __exp); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    ldexp(_Tp __x, int __exp)
+    { return __builtin_ldexp(__x, __exp); }
+
+  using ::log;
+
+
+  inline constexpr float
+  log(float __x)
+  { return __builtin_logf(__x); }
+
+  inline constexpr long double
+  log(long double __x)
+  { return __builtin_logl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    log(_Tp __x)
+    { return __builtin_log(__x); }
+
+  using ::log10;
+
+
+  inline constexpr float
+  log10(float __x)
+  { return __builtin_log10f(__x); }
+
+  inline constexpr long double
+  log10(long double __x)
+  { return __builtin_log10l(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    log10(_Tp __x)
+    { return __builtin_log10(__x); }
+
+  using ::modf;
+
+
+  inline float
+  modf(float __x, float* __iptr)
+  { return __builtin_modff(__x, __iptr); }
+
+  inline long double
+  modf(long double __x, long double* __iptr)
+  { return __builtin_modfl(__x, __iptr); }
+
+
+  using ::pow;
+
+
+  inline constexpr float
+  pow(float __x, float __y)
+  { return __builtin_powf(__x, __y); }
+
+  inline constexpr long double
+  pow(long double __x, long double __y)
+  { return __builtin_powl(__x, __y); }
+# 407 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 3
+  using ::sin;
+
+
+  inline constexpr float
+  sin(float __x)
+  { return __builtin_sinf(__x); }
+
+  inline constexpr long double
+  sin(long double __x)
+  { return __builtin_sinl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    sin(_Tp __x)
+    { return __builtin_sin(__x); }
+
+  using ::sinh;
+
+
+  inline constexpr float
+  sinh(float __x)
+  { return __builtin_sinhf(__x); }
+
+  inline constexpr long double
+  sinh(long double __x)
+  { return __builtin_sinhl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    sinh(_Tp __x)
+    { return __builtin_sinh(__x); }
+
+  using ::sqrt;
+
+
+  inline constexpr float
+  sqrt(float __x)
+  { return __builtin_sqrtf(__x); }
+
+  inline constexpr long double
+  sqrt(long double __x)
+  { return __builtin_sqrtl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    sqrt(_Tp __x)
+    { return __builtin_sqrt(__x); }
+
+  using ::tan;
+
+
+  inline constexpr float
+  tan(float __x)
+  { return __builtin_tanf(__x); }
+
+  inline constexpr long double
+  tan(long double __x)
+  { return __builtin_tanl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    tan(_Tp __x)
+    { return __builtin_tan(__x); }
+
+  using ::tanh;
+
+
+  inline constexpr float
+  tanh(float __x)
+  { return __builtin_tanhf(__x); }
+
+  inline constexpr long double
+  tanh(long double __x)
+  { return __builtin_tanhl(__x); }
+
+
+  template<typename _Tp>
+    inline constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    double>::__type
+    tanh(_Tp __x)
+    { return __builtin_tanh(__x); }
+
+
+  constexpr _Float16
+  acos(_Float16 __x)
+  { return _Float16(__builtin_acosf(__x)); }
+
+  constexpr _Float16
+  asin(_Float16 __x)
+  { return _Float16(__builtin_asinf(__x)); }
+
+  constexpr _Float16
+  atan(_Float16 __x)
+  { return _Float16(__builtin_atanf(__x)); }
+
+  constexpr _Float16
+  atan2(_Float16 __y, _Float16 __x)
+  { return _Float16(__builtin_atan2f(__y, __x)); }
+
+  constexpr _Float16
+  ceil(_Float16 __x)
+  { return _Float16(__builtin_ceilf(__x)); }
+
+  constexpr _Float16
+  cos(_Float16 __x)
+  { return _Float16(__builtin_cosf(__x)); }
+
+  constexpr _Float16
+  cosh(_Float16 __x)
+  { return _Float16(__builtin_coshf(__x)); }
+
+  constexpr _Float16
+  exp(_Float16 __x)
+  { return _Float16(__builtin_expf(__x)); }
+
+  constexpr _Float16
+  fabs(_Float16 __x)
+  { return _Float16(__builtin_fabsf(__x)); }
+
+  constexpr _Float16
+  floor(_Float16 __x)
+  { return _Float16(__builtin_floorf(__x)); }
+
+  constexpr _Float16
+  fmod(_Float16 __x, _Float16 __y)
+  { return _Float16(__builtin_fmodf(__x, __y)); }
+
+  inline _Float16
+  frexp(_Float16 __x, int* __exp)
+  { return _Float16(__builtin_frexpf(__x, __exp)); }
+
+  constexpr _Float16
+  ldexp(_Float16 __x, int __exp)
+  { return _Float16(__builtin_ldexpf(__x, __exp)); }
+
+  constexpr _Float16
+  log(_Float16 __x)
+  { return _Float16(__builtin_logf(__x)); }
+
+  constexpr _Float16
+  log10(_Float16 __x)
+  { return _Float16(__builtin_log10f(__x)); }
+
+  inline _Float16
+  modf(_Float16 __x, _Float16* __iptr)
+  {
+    float __i, __ret = __builtin_modff(__x, &__i);
+    *__iptr = _Float16(__i);
+    return _Float16(__ret);
+  }
+
+  constexpr _Float16
+  pow(_Float16 __x, _Float16 __y)
+  { return _Float16(__builtin_powf(__x, __y)); }
+
+  constexpr _Float16
+  sin(_Float16 __x)
+  { return _Float16(__builtin_sinf(__x)); }
+
+  constexpr _Float16
+  sinh(_Float16 __x)
+  { return _Float16(__builtin_sinhf(__x)); }
+
+  constexpr _Float16
+  sqrt(_Float16 __x)
+  { return _Float16(__builtin_sqrtf(__x)); }
+
+  constexpr _Float16
+  tan(_Float16 __x)
+  { return _Float16(__builtin_tanf(__x)); }
+
+  constexpr _Float16
+  tanh(_Float16 __x)
+  { return _Float16(__builtin_tanhf(__x)); }
+
+
+
+  constexpr _Float32
+  acos(_Float32 __x)
+  { return __builtin_acosf(__x); }
+
+  constexpr _Float32
+  asin(_Float32 __x)
+  { return __builtin_asinf(__x); }
+
+  constexpr _Float32
+  atan(_Float32 __x)
+  { return __builtin_atanf(__x); }
+
+  constexpr _Float32
+  atan2(_Float32 __y, _Float32 __x)
+  { return __builtin_atan2f(__y, __x); }
+
+  constexpr _Float32
+  ceil(_Float32 __x)
+  { return __builtin_ceilf(__x); }
+
+  constexpr _Float32
+  cos(_Float32 __x)
+  { return __builtin_cosf(__x); }
+
+  constexpr _Float32
+  cosh(_Float32 __x)
+  { return __builtin_coshf(__x); }
+
+  constexpr _Float32
+  exp(_Float32 __x)
+  { return __builtin_expf(__x); }
+
+  constexpr _Float32
+  fabs(_Float32 __x)
+  { return __builtin_fabsf(__x); }
+
+  constexpr _Float32
+  floor(_Float32 __x)
+  { return __builtin_floorf(__x); }
+
+  constexpr _Float32
+  fmod(_Float32 __x, _Float32 __y)
+  { return __builtin_fmodf(__x, __y); }
+
+  inline _Float32
+  frexp(_Float32 __x, int* __exp)
+  { return __builtin_frexpf(__x, __exp); }
+
+  constexpr _Float32
+  ldexp(_Float32 __x, int __exp)
+  { return __builtin_ldexpf(__x, __exp); }
+
+  constexpr _Float32
+  log(_Float32 __x)
+  { return __builtin_logf(__x); }
+
+  constexpr _Float32
+  log10(_Float32 __x)
+  { return __builtin_log10f(__x); }
+
+  inline _Float32
+  modf(_Float32 __x, _Float32* __iptr)
+  {
+    float __i, __ret = __builtin_modff(__x, &__i);
+    *__iptr = __i;
+    return __ret;
+  }
+
+  constexpr _Float32
+  pow(_Float32 __x, _Float32 __y)
+  { return __builtin_powf(__x, __y); }
+
+  constexpr _Float32
+  sin(_Float32 __x)
+  { return __builtin_sinf(__x); }
+
+  constexpr _Float32
+  sinh(_Float32 __x)
+  { return __builtin_sinhf(__x); }
+
+  constexpr _Float32
+  sqrt(_Float32 __x)
+  { return __builtin_sqrtf(__x); }
+
+  constexpr _Float32
+  tan(_Float32 __x)
+  { return __builtin_tanf(__x); }
+
+  constexpr _Float32
+  tanh(_Float32 __x)
+  { return __builtin_tanhf(__x); }
+
+
+
+  constexpr _Float64
+  acos(_Float64 __x)
+  { return __builtin_acos(__x); }
+
+  constexpr _Float64
+  asin(_Float64 __x)
+  { return __builtin_asin(__x); }
+
+  constexpr _Float64
+  atan(_Float64 __x)
+  { return __builtin_atan(__x); }
+
+  constexpr _Float64
+  atan2(_Float64 __y, _Float64 __x)
+  { return __builtin_atan2(__y, __x); }
+
+  constexpr _Float64
+  ceil(_Float64 __x)
+  { return __builtin_ceil(__x); }
+
+  constexpr _Float64
+  cos(_Float64 __x)
+  { return __builtin_cos(__x); }
+
+  constexpr _Float64
+  cosh(_Float64 __x)
+  { return __builtin_cosh(__x); }
+
+  constexpr _Float64
+  exp(_Float64 __x)
+  { return __builtin_exp(__x); }
+
+  constexpr _Float64
+  fabs(_Float64 __x)
+  { return __builtin_fabs(__x); }
+
+  constexpr _Float64
+  floor(_Float64 __x)
+  { return __builtin_floor(__x); }
+
+  constexpr _Float64
+  fmod(_Float64 __x, _Float64 __y)
+  { return __builtin_fmod(__x, __y); }
+
+  inline _Float64
+  frexp(_Float64 __x, int* __exp)
+  { return __builtin_frexp(__x, __exp); }
+
+  constexpr _Float64
+  ldexp(_Float64 __x, int __exp)
+  { return __builtin_ldexp(__x, __exp); }
+
+  constexpr _Float64
+  log(_Float64 __x)
+  { return __builtin_log(__x); }
+
+  constexpr _Float64
+  log10(_Float64 __x)
+  { return __builtin_log10(__x); }
+
+  inline _Float64
+  modf(_Float64 __x, _Float64* __iptr)
+  {
+    double __i, __ret = __builtin_modf(__x, &__i);
+    *__iptr = __i;
+    return __ret;
+  }
+
+  constexpr _Float64
+  pow(_Float64 __x, _Float64 __y)
+  { return __builtin_pow(__x, __y); }
+
+  constexpr _Float64
+  sin(_Float64 __x)
+  { return __builtin_sin(__x); }
+
+  constexpr _Float64
+  sinh(_Float64 __x)
+  { return __builtin_sinh(__x); }
+
+  constexpr _Float64
+  sqrt(_Float64 __x)
+  { return __builtin_sqrt(__x); }
+
+  constexpr _Float64
+  tan(_Float64 __x)
+  { return __builtin_tan(__x); }
+
+  constexpr _Float64
+  tanh(_Float64 __x)
+  { return __builtin_tanh(__x); }
+# 967 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 3
+  constexpr __gnu_cxx::__bfloat16_t
+  acos(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_acosf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  asin(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_asinf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  atan(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_atanf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  atan2(__gnu_cxx::__bfloat16_t __y, __gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_atan2f(__y, __x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  ceil(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_ceilf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  cos(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_cosf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  cosh(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_coshf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  exp(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_expf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  fabs(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_fabsf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  floor(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_floorf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  fmod(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __gnu_cxx::__bfloat16_t(__builtin_fmodf(__x, __y)); }
+
+  inline __gnu_cxx::__bfloat16_t
+  frexp(__gnu_cxx::__bfloat16_t __x, int* __exp)
+  { return __gnu_cxx::__bfloat16_t(__builtin_frexpf(__x, __exp)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  ldexp(__gnu_cxx::__bfloat16_t __x, int __exp)
+  { return __gnu_cxx::__bfloat16_t(__builtin_ldexpf(__x, __exp)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  log(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_logf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  log10(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_log10f(__x)); }
+
+  inline __gnu_cxx::__bfloat16_t
+  modf(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t* __iptr)
+  {
+    float __i, __ret = __builtin_modff(__x, &__i);
+    *__iptr = __gnu_cxx::__bfloat16_t(__i);
+    return __gnu_cxx::__bfloat16_t(__ret);
+  }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  pow(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __gnu_cxx::__bfloat16_t(__builtin_powf(__x, __y)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  sin(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_sinf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  sinh(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_sinhf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  sqrt(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_sqrtf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  tan(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_tanf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  tanh(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_tanhf(__x)); }
+
+
+  template<typename _Tp, typename _Up>
+    inline constexpr
+    typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    atan2(_Tp __y, _Up __x)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return atan2(__type(__y), __type(__x));
+    }
+
+  template<typename _Tp, typename _Up>
+    inline constexpr
+    typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    fmod(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return fmod(__type(__x), __type(__y));
+    }
+
+  template<typename _Tp, typename _Up>
+    inline constexpr
+    typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    pow(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return pow(__type(__x), __type(__y));
+    }
+# 1107 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 3
+  constexpr int
+  fpclassify(float __x)
+  { return __builtin_fpclassify(0x0100, (0x0100 | 0x0400), 0x0400,
+    (0x0400 | 0x4000), 0x4000, __x); }
+
+  constexpr int
+  fpclassify(double __x)
+  { return __builtin_fpclassify(0x0100, (0x0100 | 0x0400), 0x0400,
+    (0x0400 | 0x4000), 0x4000, __x); }
+
+  constexpr int
+  fpclassify(long double __x)
+  { return __builtin_fpclassify(0x0100, (0x0100 | 0x0400), 0x0400,
+    (0x0400 | 0x4000), 0x4000, __x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              int>::__type
+    fpclassify(_Tp __x)
+    { return __x != 0 ? 0x0400 : 0x4000; }
+
+
+
+  constexpr bool
+  isfinite(float __x)
+  { return __builtin_isfinite(__x); }
+
+  constexpr bool
+  isfinite(double __x)
+  { return __builtin_isfinite(__x); }
+
+  constexpr bool
+  isfinite(long double __x)
+  { return __builtin_isfinite(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              bool>::__type
+    isfinite(_Tp)
+    { return true; }
+
+
+
+  constexpr bool
+  isinf(float __x)
+  { return __builtin_isinf(__x); }
+
+
+
+
+
+  constexpr bool
+  isinf(double __x)
+  { return __builtin_isinf(__x); }
+
+
+  constexpr bool
+  isinf(long double __x)
+  { return __builtin_isinf(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              bool>::__type
+    isinf(_Tp)
+    { return false; }
+
+
+
+  constexpr bool
+  isnan(float __x)
+  { return __builtin_isnan(__x); }
+
+
+
+
+
+  constexpr bool
+  isnan(double __x)
+  { return __builtin_isnan(__x); }
+
+
+  constexpr bool
+  isnan(long double __x)
+  { return __builtin_isnan(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              bool>::__type
+    isnan(_Tp)
+    { return false; }
+
+
+
+  constexpr bool
+  isnormal(float __x)
+  { return __builtin_isnormal(__x); }
+
+  constexpr bool
+  isnormal(double __x)
+  { return __builtin_isnormal(__x); }
+
+  constexpr bool
+  isnormal(long double __x)
+  { return __builtin_isnormal(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              bool>::__type
+    isnormal(_Tp __x)
+    { return __x != 0 ? true : false; }
+
+
+
+
+  constexpr bool
+  signbit(float __x)
+  { return __builtin_signbit(__x); }
+
+  constexpr bool
+  signbit(double __x)
+  { return __builtin_signbit(__x); }
+
+  constexpr bool
+  signbit(long double __x)
+  { return __builtin_signbit(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              bool>::__type
+    signbit(_Tp __x)
+    { return __x < 0 ? true : false; }
+
+
+
+  constexpr bool
+  isgreater(float __x, float __y)
+  { return __builtin_isgreater(__x, __y); }
+
+  constexpr bool
+  isgreater(double __x, double __y)
+  { return __builtin_isgreater(__x, __y); }
+
+  constexpr bool
+  isgreater(long double __x, long double __y)
+  { return __builtin_isgreater(__x, __y); }
+
+
+
+  template<typename _Tp, typename _Up>
+    constexpr typename
+    __gnu_cxx::__enable_if<(__is_arithmetic<_Tp>::__value
+       && __is_arithmetic<_Up>::__value), bool>::__type
+    isgreater(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return __builtin_isgreater(__type(__x), __type(__y));
+    }
+
+
+
+  constexpr bool
+  isgreaterequal(float __x, float __y)
+  { return __builtin_isgreaterequal(__x, __y); }
+
+  constexpr bool
+  isgreaterequal(double __x, double __y)
+  { return __builtin_isgreaterequal(__x, __y); }
+
+  constexpr bool
+  isgreaterequal(long double __x, long double __y)
+  { return __builtin_isgreaterequal(__x, __y); }
+
+
+
+  template<typename _Tp, typename _Up>
+    constexpr typename
+    __gnu_cxx::__enable_if<(__is_arithmetic<_Tp>::__value
+       && __is_arithmetic<_Up>::__value), bool>::__type
+    isgreaterequal(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return __builtin_isgreaterequal(__type(__x), __type(__y));
+    }
+
+
+
+  constexpr bool
+  isless(float __x, float __y)
+  { return __builtin_isless(__x, __y); }
+
+  constexpr bool
+  isless(double __x, double __y)
+  { return __builtin_isless(__x, __y); }
+
+  constexpr bool
+  isless(long double __x, long double __y)
+  { return __builtin_isless(__x, __y); }
+
+
+
+  template<typename _Tp, typename _Up>
+    constexpr typename
+    __gnu_cxx::__enable_if<(__is_arithmetic<_Tp>::__value
+       && __is_arithmetic<_Up>::__value), bool>::__type
+    isless(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return __builtin_isless(__type(__x), __type(__y));
+    }
+
+
+
+  constexpr bool
+  islessequal(float __x, float __y)
+  { return __builtin_islessequal(__x, __y); }
+
+  constexpr bool
+  islessequal(double __x, double __y)
+  { return __builtin_islessequal(__x, __y); }
+
+  constexpr bool
+  islessequal(long double __x, long double __y)
+  { return __builtin_islessequal(__x, __y); }
+
+
+
+  template<typename _Tp, typename _Up>
+    constexpr typename
+    __gnu_cxx::__enable_if<(__is_arithmetic<_Tp>::__value
+       && __is_arithmetic<_Up>::__value), bool>::__type
+    islessequal(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return __builtin_islessequal(__type(__x), __type(__y));
+    }
+
+
+
+  constexpr bool
+  islessgreater(float __x, float __y)
+  { return __builtin_islessgreater(__x, __y); }
+
+  constexpr bool
+  islessgreater(double __x, double __y)
+  { return __builtin_islessgreater(__x, __y); }
+
+  constexpr bool
+  islessgreater(long double __x, long double __y)
+  { return __builtin_islessgreater(__x, __y); }
+
+
+
+  template<typename _Tp, typename _Up>
+    constexpr typename
+    __gnu_cxx::__enable_if<(__is_arithmetic<_Tp>::__value
+       && __is_arithmetic<_Up>::__value), bool>::__type
+    islessgreater(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return __builtin_islessgreater(__type(__x), __type(__y));
+    }
+
+
+
+  constexpr bool
+  isunordered(float __x, float __y)
+  { return __builtin_isunordered(__x, __y); }
+
+  constexpr bool
+  isunordered(double __x, double __y)
+  { return __builtin_isunordered(__x, __y); }
+
+  constexpr bool
+  isunordered(long double __x, long double __y)
+  { return __builtin_isunordered(__x, __y); }
+
+
+
+  template<typename _Tp, typename _Up>
+    constexpr typename
+    __gnu_cxx::__enable_if<(__is_arithmetic<_Tp>::__value
+       && __is_arithmetic<_Up>::__value), bool>::__type
+    isunordered(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return __builtin_isunordered(__type(__x), __type(__y));
+    }
+# 1522 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 3
+  constexpr int
+  fpclassify(_Float16 __x)
+  { return __builtin_fpclassify(0x0100, (0x0100 | 0x0400), 0x0400,
+    (0x0400 | 0x4000), 0x4000, __x); }
+
+  constexpr bool
+  isfinite(_Float16 __x)
+  { return __builtin_isfinite(__x); }
+
+  constexpr bool
+  isinf(_Float16 __x)
+  { return __builtin_isinf(__x); }
+
+  constexpr bool
+  isnan(_Float16 __x)
+  { return __builtin_isnan(__x); }
+
+  constexpr bool
+  isnormal(_Float16 __x)
+  { return __builtin_isnormal(__x); }
+
+  constexpr bool
+  signbit(_Float16 __x)
+  { return __builtin_signbit(__x); }
+
+  constexpr bool
+  isgreater(_Float16 __x, _Float16 __y)
+  { return __builtin_isgreater(__x, __y); }
+
+  constexpr bool
+  isgreaterequal(_Float16 __x, _Float16 __y)
+  { return __builtin_isgreaterequal(__x, __y); }
+
+  constexpr bool
+  isless(_Float16 __x, _Float16 __y)
+  { return __builtin_isless(__x, __y); }
+
+  constexpr bool
+  islessequal(_Float16 __x, _Float16 __y)
+  { return __builtin_islessequal(__x, __y); }
+
+  constexpr bool
+  islessgreater(_Float16 __x, _Float16 __y)
+  { return __builtin_islessgreater(__x, __y); }
+
+  constexpr bool
+  isunordered(_Float16 __x, _Float16 __y)
+  { return __builtin_isunordered(__x, __y); }
+
+
+
+  constexpr int
+  fpclassify(_Float32 __x)
+  { return __builtin_fpclassify(0x0100, (0x0100 | 0x0400), 0x0400,
+    (0x0400 | 0x4000), 0x4000, __x); }
+
+  constexpr bool
+  isfinite(_Float32 __x)
+  { return __builtin_isfinite(__x); }
+
+  constexpr bool
+  isinf(_Float32 __x)
+  { return __builtin_isinf(__x); }
+
+  constexpr bool
+  isnan(_Float32 __x)
+  { return __builtin_isnan(__x); }
+
+  constexpr bool
+  isnormal(_Float32 __x)
+  { return __builtin_isnormal(__x); }
+
+  constexpr bool
+  signbit(_Float32 __x)
+  { return __builtin_signbit(__x); }
+
+  constexpr bool
+  isgreater(_Float32 __x, _Float32 __y)
+  { return __builtin_isgreater(__x, __y); }
+
+  constexpr bool
+  isgreaterequal(_Float32 __x, _Float32 __y)
+  { return __builtin_isgreaterequal(__x, __y); }
+
+  constexpr bool
+  isless(_Float32 __x, _Float32 __y)
+  { return __builtin_isless(__x, __y); }
+
+  constexpr bool
+  islessequal(_Float32 __x, _Float32 __y)
+  { return __builtin_islessequal(__x, __y); }
+
+  constexpr bool
+  islessgreater(_Float32 __x, _Float32 __y)
+  { return __builtin_islessgreater(__x, __y); }
+
+  constexpr bool
+  isunordered(_Float32 __x, _Float32 __y)
+  { return __builtin_isunordered(__x, __y); }
+
+
+
+  constexpr int
+  fpclassify(_Float64 __x)
+  { return __builtin_fpclassify(0x0100, (0x0100 | 0x0400), 0x0400,
+    (0x0400 | 0x4000), 0x4000, __x); }
+
+  constexpr bool
+  isfinite(_Float64 __x)
+  { return __builtin_isfinite(__x); }
+
+  constexpr bool
+  isinf(_Float64 __x)
+  { return __builtin_isinf(__x); }
+
+  constexpr bool
+  isnan(_Float64 __x)
+  { return __builtin_isnan(__x); }
+
+  constexpr bool
+  isnormal(_Float64 __x)
+  { return __builtin_isnormal(__x); }
+
+  constexpr bool
+  signbit(_Float64 __x)
+  { return __builtin_signbit(__x); }
+
+  constexpr bool
+  isgreater(_Float64 __x, _Float64 __y)
+  { return __builtin_isgreater(__x, __y); }
+
+  constexpr bool
+  isgreaterequal(_Float64 __x, _Float64 __y)
+  { return __builtin_isgreaterequal(__x, __y); }
+
+  constexpr bool
+  isless(_Float64 __x, _Float64 __y)
+  { return __builtin_isless(__x, __y); }
+
+  constexpr bool
+  islessequal(_Float64 __x, _Float64 __y)
+  { return __builtin_islessequal(__x, __y); }
+
+  constexpr bool
+  islessgreater(_Float64 __x, _Float64 __y)
+  { return __builtin_islessgreater(__x, __y); }
+
+  constexpr bool
+  isunordered(_Float64 __x, _Float64 __y)
+  { return __builtin_isunordered(__x, __y); }
+
+
+
+  constexpr int
+  fpclassify(_Float128 __x)
+  { return __builtin_fpclassify(0x0100, (0x0100 | 0x0400), 0x0400,
+    (0x0400 | 0x4000), 0x4000, __x); }
+
+  constexpr bool
+  isfinite(_Float128 __x)
+  { return __builtin_isfinite(__x); }
+
+  constexpr bool
+  isinf(_Float128 __x)
+  { return __builtin_isinf(__x); }
+
+  constexpr bool
+  isnan(_Float128 __x)
+  { return __builtin_isnan(__x); }
+
+  constexpr bool
+  isnormal(_Float128 __x)
+  { return __builtin_isnormal(__x); }
+
+  constexpr bool
+  signbit(_Float128 __x)
+  { return __builtin_signbit(__x); }
+
+  constexpr bool
+  isgreater(_Float128 __x, _Float128 __y)
+  { return __builtin_isgreater(__x, __y); }
+
+  constexpr bool
+  isgreaterequal(_Float128 __x, _Float128 __y)
+  { return __builtin_isgreaterequal(__x, __y); }
+
+  constexpr bool
+  isless(_Float128 __x, _Float128 __y)
+  { return __builtin_isless(__x, __y); }
+
+  constexpr bool
+  islessequal(_Float128 __x, _Float128 __y)
+  { return __builtin_islessequal(__x, __y); }
+
+  constexpr bool
+  islessgreater(_Float128 __x, _Float128 __y)
+  { return __builtin_islessgreater(__x, __y); }
+
+  constexpr bool
+  isunordered(_Float128 __x, _Float128 __y)
+  { return __builtin_isunordered(__x, __y); }
+
+
+
+  constexpr int
+  fpclassify(__gnu_cxx::__bfloat16_t __x)
+  { return __builtin_fpclassify(0x0100, (0x0100 | 0x0400), 0x0400,
+    (0x0400 | 0x4000), 0x4000, __x); }
+
+  constexpr bool
+  isfinite(__gnu_cxx::__bfloat16_t __x)
+  { return __builtin_isfinite(__x); }
+
+  constexpr bool
+  isinf(__gnu_cxx::__bfloat16_t __x)
+  { return __builtin_isinf(__x); }
+
+  constexpr bool
+  isnan(__gnu_cxx::__bfloat16_t __x)
+  { return __builtin_isnan(__x); }
+
+  constexpr bool
+  isnormal(__gnu_cxx::__bfloat16_t __x)
+  { return __builtin_isnormal(__x); }
+
+  constexpr bool
+  signbit(__gnu_cxx::__bfloat16_t __x)
+  { return __builtin_signbit(__x); }
+
+  constexpr bool
+  isgreater(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __builtin_isgreater(__x, __y); }
+
+  constexpr bool
+  isgreaterequal(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __builtin_isgreaterequal(__x, __y); }
+
+  constexpr bool
+  isless(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __builtin_isless(__x, __y); }
+
+  constexpr bool
+  islessequal(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __builtin_islessequal(__x, __y); }
+
+  constexpr bool
+  islessgreater(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __builtin_islessgreater(__x, __y); }
+
+  constexpr bool
+  isunordered(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __builtin_isunordered(__x, __y); }
+# 1827 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 3
+  using ::acosf;
+
+
+  using ::acosl;
+
+
+
+  using ::asinf;
+
+
+  using ::asinl;
+
+
+
+  using ::atanf;
+
+
+  using ::atanl;
+
+
+
+  using ::atan2f;
+
+
+  using ::atan2l;
+
+
+
+  using ::ceilf;
+
+
+  using ::ceill;
+
+
+
+  using ::cosf;
+
+
+  using ::cosl;
+
+
+
+  using ::coshf;
+
+
+  using ::coshl;
+
+
+
+  using ::expf;
+
+
+  using ::expl;
+
+
+
+  using ::fabsf;
+
+
+  using ::fabsl;
+
+
+
+  using ::floorf;
+
+
+  using ::floorl;
+
+
+
+  using ::fmodf;
+
+
+  using ::fmodl;
+
+
+
+  using ::frexpf;
+
+
+  using ::frexpl;
+
+
+
+  using ::ldexpf;
+
+
+  using ::ldexpl;
+
+
+
+  using ::logf;
+
+
+  using ::logl;
+
+
+
+  using ::log10f;
+
+
+  using ::log10l;
+
+
+
+  using ::modff;
+
+
+  using ::modfl;
+
+
+
+  using ::powf;
+
+
+  using ::powl;
+
+
+
+  using ::sinf;
+
+
+  using ::sinl;
+
+
+
+  using ::sinhf;
+
+
+  using ::sinhl;
+
+
+
+  using ::sqrtf;
+
+
+  using ::sqrtl;
+
+
+
+  using ::tanf;
+
+
+  using ::tanl;
+
+
+
+  using ::tanhf;
+
+
+  using ::tanhl;
+# 2092 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 3
+  using ::double_t;
+  using ::float_t;
+
+
+
+  using ::acosh;
+  using ::acoshf;
+  using ::acoshl;
+
+  using ::asinh;
+  using ::asinhf;
+  using ::asinhl;
+
+  using ::atanh;
+  using ::atanhf;
+  using ::atanhl;
+
+  using ::cbrt;
+  using ::cbrtf;
+  using ::cbrtl;
+
+  using ::copysign;
+  using ::copysignf;
+  using ::copysignl;
+
+  using ::erf;
+  using ::erff;
+  using ::erfl;
+
+  using ::erfc;
+  using ::erfcf;
+  using ::erfcl;
+
+  using ::exp2;
+  using ::exp2f;
+  using ::exp2l;
+
+  using ::expm1;
+  using ::expm1f;
+  using ::expm1l;
+
+  using ::fdim;
+  using ::fdimf;
+  using ::fdiml;
+
+  using ::fma;
+  using ::fmaf;
+  using ::fmal;
+
+  using ::fmax;
+  using ::fmaxf;
+  using ::fmaxl;
+
+  using ::fmin;
+  using ::fminf;
+  using ::fminl;
+
+  using ::hypot;
+  using ::hypotf;
+  using ::hypotl;
+
+  using ::ilogb;
+  using ::ilogbf;
+  using ::ilogbl;
+
+  using ::lgamma;
+  using ::lgammaf;
+  using ::lgammal;
+
+
+  using ::llrint;
+  using ::llrintf;
+  using ::llrintl;
+
+  using ::llround;
+  using ::llroundf;
+  using ::llroundl;
+
+
+  using ::log1p;
+  using ::log1pf;
+  using ::log1pl;
+
+  using ::log2;
+  using ::log2f;
+  using ::log2l;
+
+  using ::logb;
+  using ::logbf;
+  using ::logbl;
+
+  using ::lrint;
+  using ::lrintf;
+  using ::lrintl;
+
+  using ::lround;
+  using ::lroundf;
+  using ::lroundl;
+
+  using ::nan;
+  using ::nanf;
+  using ::nanl;
+
+  using ::nearbyint;
+  using ::nearbyintf;
+  using ::nearbyintl;
+
+  using ::nextafter;
+  using ::nextafterf;
+  using ::nextafterl;
+
+  using ::nexttoward;
+  using ::nexttowardf;
+  using ::nexttowardl;
+
+  using ::remainder;
+  using ::remainderf;
+  using ::remainderl;
+
+  using ::remquo;
+  using ::remquof;
+  using ::remquol;
+
+  using ::rint;
+  using ::rintf;
+  using ::rintl;
+
+  using ::round;
+  using ::roundf;
+  using ::roundl;
+
+  using ::scalbln;
+  using ::scalblnf;
+  using ::scalblnl;
+
+  using ::scalbn;
+  using ::scalbnf;
+  using ::scalbnl;
+
+  using ::tgamma;
+  using ::tgammaf;
+  using ::tgammal;
+
+  using ::trunc;
+  using ::truncf;
+  using ::truncl;
+
+
+
+  constexpr float
+  acosh(float __x)
+  { return __builtin_acoshf(__x); }
+
+  constexpr long double
+  acosh(long double __x)
+  { return __builtin_acoshl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    acosh(_Tp __x)
+    { return __builtin_acosh(__x); }
+
+
+
+  constexpr float
+  asinh(float __x)
+  { return __builtin_asinhf(__x); }
+
+  constexpr long double
+  asinh(long double __x)
+  { return __builtin_asinhl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    asinh(_Tp __x)
+    { return __builtin_asinh(__x); }
+
+
+
+  constexpr float
+  atanh(float __x)
+  { return __builtin_atanhf(__x); }
+
+  constexpr long double
+  atanh(long double __x)
+  { return __builtin_atanhl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    atanh(_Tp __x)
+    { return __builtin_atanh(__x); }
+
+
+
+  constexpr float
+  cbrt(float __x)
+  { return __builtin_cbrtf(__x); }
+
+  constexpr long double
+  cbrt(long double __x)
+  { return __builtin_cbrtl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    cbrt(_Tp __x)
+    { return __builtin_cbrt(__x); }
+
+
+
+  constexpr float
+  copysign(float __x, float __y)
+  { return __builtin_copysignf(__x, __y); }
+
+  constexpr long double
+  copysign(long double __x, long double __y)
+  { return __builtin_copysignl(__x, __y); }
+
+
+
+  constexpr float
+  erf(float __x)
+  { return __builtin_erff(__x); }
+
+  constexpr long double
+  erf(long double __x)
+  { return __builtin_erfl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    erf(_Tp __x)
+    { return __builtin_erf(__x); }
+
+
+
+  constexpr float
+  erfc(float __x)
+  { return __builtin_erfcf(__x); }
+
+  constexpr long double
+  erfc(long double __x)
+  { return __builtin_erfcl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    erfc(_Tp __x)
+    { return __builtin_erfc(__x); }
+
+
+
+  constexpr float
+  exp2(float __x)
+  { return __builtin_exp2f(__x); }
+
+  constexpr long double
+  exp2(long double __x)
+  { return __builtin_exp2l(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    exp2(_Tp __x)
+    { return __builtin_exp2(__x); }
+
+
+
+  constexpr float
+  expm1(float __x)
+  { return __builtin_expm1f(__x); }
+
+  constexpr long double
+  expm1(long double __x)
+  { return __builtin_expm1l(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    expm1(_Tp __x)
+    { return __builtin_expm1(__x); }
+
+
+
+  constexpr float
+  fdim(float __x, float __y)
+  { return __builtin_fdimf(__x, __y); }
+
+  constexpr long double
+  fdim(long double __x, long double __y)
+  { return __builtin_fdiml(__x, __y); }
+
+
+
+  constexpr float
+  fma(float __x, float __y, float __z)
+  { return __builtin_fmaf(__x, __y, __z); }
+
+  constexpr long double
+  fma(long double __x, long double __y, long double __z)
+  { return __builtin_fmal(__x, __y, __z); }
+
+
+
+  constexpr float
+  fmax(float __x, float __y)
+  { return __builtin_fmaxf(__x, __y); }
+
+  constexpr long double
+  fmax(long double __x, long double __y)
+  { return __builtin_fmaxl(__x, __y); }
+
+
+
+  constexpr float
+  fmin(float __x, float __y)
+  { return __builtin_fminf(__x, __y); }
+
+  constexpr long double
+  fmin(long double __x, long double __y)
+  { return __builtin_fminl(__x, __y); }
+
+
+
+  constexpr float
+  hypot(float __x, float __y)
+  { return __builtin_hypotf(__x, __y); }
+
+  constexpr long double
+  hypot(long double __x, long double __y)
+  { return __builtin_hypotl(__x, __y); }
+
+
+
+  constexpr int
+  ilogb(float __x)
+  { return __builtin_ilogbf(__x); }
+
+  constexpr int
+  ilogb(long double __x)
+  { return __builtin_ilogbl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    int>::__type
+    ilogb(_Tp __x)
+    { return __builtin_ilogb(__x); }
+
+
+
+  constexpr float
+  lgamma(float __x)
+  { return __builtin_lgammaf(__x); }
+
+  constexpr long double
+  lgamma(long double __x)
+  { return __builtin_lgammal(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    lgamma(_Tp __x)
+    { return __builtin_lgamma(__x); }
+
+
+
+  constexpr long long
+  llrint(float __x)
+  { return __builtin_llrintf(__x); }
+
+  constexpr long long
+  llrint(long double __x)
+  { return __builtin_llrintl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              long long>::__type
+    llrint(_Tp __x)
+    { return __builtin_llrint(__x); }
+
+
+
+  constexpr long long
+  llround(float __x)
+  { return __builtin_llroundf(__x); }
+
+  constexpr long long
+  llround(long double __x)
+  { return __builtin_llroundl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              long long>::__type
+    llround(_Tp __x)
+    { return __builtin_llround(__x); }
+
+
+
+  constexpr float
+  log1p(float __x)
+  { return __builtin_log1pf(__x); }
+
+  constexpr long double
+  log1p(long double __x)
+  { return __builtin_log1pl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    log1p(_Tp __x)
+    { return __builtin_log1p(__x); }
+
+
+
+
+  constexpr float
+  log2(float __x)
+  { return __builtin_log2f(__x); }
+
+  constexpr long double
+  log2(long double __x)
+  { return __builtin_log2l(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    log2(_Tp __x)
+    { return __builtin_log2(__x); }
+
+
+
+  constexpr float
+  logb(float __x)
+  { return __builtin_logbf(__x); }
+
+  constexpr long double
+  logb(long double __x)
+  { return __builtin_logbl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    logb(_Tp __x)
+    { return __builtin_logb(__x); }
+
+
+
+  constexpr long
+  lrint(float __x)
+  { return __builtin_lrintf(__x); }
+
+  constexpr long
+  lrint(long double __x)
+  { return __builtin_lrintl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              long>::__type
+    lrint(_Tp __x)
+    { return __builtin_lrint(__x); }
+
+
+
+  constexpr long
+  lround(float __x)
+  { return __builtin_lroundf(__x); }
+
+  constexpr long
+  lround(long double __x)
+  { return __builtin_lroundl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              long>::__type
+    lround(_Tp __x)
+    { return __builtin_lround(__x); }
+
+
+
+  constexpr float
+  nearbyint(float __x)
+  { return __builtin_nearbyintf(__x); }
+
+  constexpr long double
+  nearbyint(long double __x)
+  { return __builtin_nearbyintl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    nearbyint(_Tp __x)
+    { return __builtin_nearbyint(__x); }
+
+
+
+  constexpr float
+  nextafter(float __x, float __y)
+  { return __builtin_nextafterf(__x, __y); }
+
+  constexpr long double
+  nextafter(long double __x, long double __y)
+  { return __builtin_nextafterl(__x, __y); }
+
+
+
+  constexpr float
+  nexttoward(float __x, long double __y)
+  { return __builtin_nexttowardf(__x, __y); }
+
+  constexpr long double
+  nexttoward(long double __x, long double __y)
+  { return __builtin_nexttowardl(__x, __y); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    nexttoward(_Tp __x, long double __y)
+    { return __builtin_nexttoward(__x, __y); }
+
+
+
+  constexpr float
+  remainder(float __x, float __y)
+  { return __builtin_remainderf(__x, __y); }
+
+  constexpr long double
+  remainder(long double __x, long double __y)
+  { return __builtin_remainderl(__x, __y); }
+
+
+
+  inline float
+  remquo(float __x, float __y, int* __pquo)
+  { return __builtin_remquof(__x, __y, __pquo); }
+
+  inline long double
+  remquo(long double __x, long double __y, int* __pquo)
+  { return __builtin_remquol(__x, __y, __pquo); }
+
+
+
+  constexpr float
+  rint(float __x)
+  { return __builtin_rintf(__x); }
+
+  constexpr long double
+  rint(long double __x)
+  { return __builtin_rintl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    rint(_Tp __x)
+    { return __builtin_rint(__x); }
+
+
+
+  constexpr float
+  round(float __x)
+  { return __builtin_roundf(__x); }
+
+  constexpr long double
+  round(long double __x)
+  { return __builtin_roundl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    round(_Tp __x)
+    { return __builtin_round(__x); }
+
+
+
+  constexpr float
+  scalbln(float __x, long __ex)
+  { return __builtin_scalblnf(__x, __ex); }
+
+  constexpr long double
+  scalbln(long double __x, long __ex)
+  { return __builtin_scalblnl(__x, __ex); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    scalbln(_Tp __x, long __ex)
+    { return __builtin_scalbln(__x, __ex); }
+
+
+
+  constexpr float
+  scalbn(float __x, int __ex)
+  { return __builtin_scalbnf(__x, __ex); }
+
+  constexpr long double
+  scalbn(long double __x, int __ex)
+  { return __builtin_scalbnl(__x, __ex); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    scalbn(_Tp __x, int __ex)
+    { return __builtin_scalbn(__x, __ex); }
+
+
+
+  constexpr float
+  tgamma(float __x)
+  { return __builtin_tgammaf(__x); }
+
+  constexpr long double
+  tgamma(long double __x)
+  { return __builtin_tgammal(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    tgamma(_Tp __x)
+    { return __builtin_tgamma(__x); }
+
+
+
+  constexpr float
+  trunc(float __x)
+  { return __builtin_truncf(__x); }
+
+  constexpr long double
+  trunc(long double __x)
+  { return __builtin_truncl(__x); }
+
+
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    trunc(_Tp __x)
+    { return __builtin_trunc(__x); }
+
+
+
+  constexpr _Float16
+  acosh(_Float16 __x)
+  { return _Float16(__builtin_acoshf(__x)); }
+
+  constexpr _Float16
+  asinh(_Float16 __x)
+  { return _Float16(__builtin_asinhf(__x)); }
+
+  constexpr _Float16
+  atanh(_Float16 __x)
+  { return _Float16(__builtin_atanhf(__x)); }
+
+  constexpr _Float16
+  cbrt(_Float16 __x)
+  { return _Float16(__builtin_cbrtf(__x)); }
+
+  constexpr _Float16
+  copysign(_Float16 __x, _Float16 __y)
+  { return __builtin_copysignf16(__x, __y); }
+
+  constexpr _Float16
+  erf(_Float16 __x)
+  { return _Float16(__builtin_erff(__x)); }
+
+  constexpr _Float16
+  erfc(_Float16 __x)
+  { return _Float16(__builtin_erfcf(__x)); }
+
+  constexpr _Float16
+  exp2(_Float16 __x)
+  { return _Float16(__builtin_exp2f(__x)); }
+
+  constexpr _Float16
+  expm1(_Float16 __x)
+  { return _Float16(__builtin_expm1f(__x)); }
+
+  constexpr _Float16
+  fdim(_Float16 __x, _Float16 __y)
+  { return _Float16(__builtin_fdimf(__x, __y)); }
+
+  constexpr _Float16
+  fma(_Float16 __x, _Float16 __y, _Float16 __z)
+  { return _Float16(__builtin_fmaf(__x, __y, __z)); }
+
+  constexpr _Float16
+  fmax(_Float16 __x, _Float16 __y)
+  { return _Float16(__builtin_fmaxf(__x, __y)); }
+
+  constexpr _Float16
+  fmin(_Float16 __x, _Float16 __y)
+  { return _Float16(__builtin_fminf(__x, __y)); }
+
+  constexpr _Float16
+  hypot(_Float16 __x, _Float16 __y)
+  { return _Float16(__builtin_hypotf(__x, __y)); }
+
+  constexpr int
+  ilogb(_Float16 __x)
+  { return __builtin_ilogbf(__x); }
+
+  constexpr _Float16
+  lgamma(_Float16 __x)
+  { return _Float16(__builtin_lgammaf(__x)); }
+
+  constexpr long long
+  llrint(_Float16 __x)
+  { return __builtin_llrintf(__x); }
+
+  constexpr long long
+  llround(_Float16 __x)
+  { return __builtin_llroundf(__x); }
+
+  constexpr _Float16
+  log1p(_Float16 __x)
+  { return _Float16(__builtin_log1pf(__x)); }
+
+
+  constexpr _Float16
+  log2(_Float16 __x)
+  { return _Float16(__builtin_log2f(__x)); }
+
+  constexpr _Float16
+  logb(_Float16 __x)
+  { return _Float16(__builtin_logbf(__x)); }
+
+  constexpr long
+  lrint(_Float16 __x)
+  { return __builtin_lrintf(__x); }
+
+  constexpr long
+  lround(_Float16 __x)
+  { return __builtin_lroundf(__x); }
+
+  constexpr _Float16
+  nearbyint(_Float16 __x)
+  { return _Float16(__builtin_nearbyintf(__x)); }
+
+  constexpr _Float16
+  nextafter(_Float16 __x, _Float16 __y)
+  {
+
+
+
+
+    if consteval { return __builtin_nextafterf16(__x, __y); }
+
+
+    using __float16_int_type = short int;
+
+
+
+    __float16_int_type __hx, __hy, __ix, __iy;
+    __builtin_memcpy(&__hx, &__x, sizeof(__x));
+    __builtin_memcpy(&__hy, &__y, sizeof(__x));
+    __ix = __hx & 0x7fff;
+    __iy = __hy & 0x7fff;
+    if (__ix > 0x7c00 || __iy > 0x7c00)
+      return __x + __y;
+    if (__x == __y)
+      return __y;
+    if (__ix == 0)
+      {
+ __hy = (__hy & 0x8000) | 1;
+ __builtin_memcpy(&__x, &__hy, sizeof(__x));
+ __builtin_nextafterf(0.0f, 1.0f);
+ return __x;
+      }
+    if (__hx >= 0)
+      {
+ if (__hx > __hy)
+   --__hx;
+ else
+   ++__hx;
+      }
+    else
+      {
+ if (__hy >= 0 || __hx > __hy)
+   --__hx;
+ else
+   ++__hx;
+      }
+    __hy = __hx & 0x7c00;
+    if (__hy >= 0x7c00)
+      __builtin_nextafterf(3.40282346638528859811704183484516925e+38F, __builtin_inff());
+    else if (__hy < 0x0400)
+      __builtin_nextafterf(1.17549435082228750796873653722224568e-38F, 0.0f);
+    __builtin_memcpy(&__x, &__hx, sizeof(__x));
+    return __x;
+  }
+
+  constexpr _Float16
+  remainder(_Float16 __x, _Float16 __y)
+  { return _Float16(__builtin_remainderf(__x, __y)); }
+
+  inline _Float16
+  remquo(_Float16 __x, _Float16 __y, int* __pquo)
+  { return _Float16(__builtin_remquof(__x, __y, __pquo)); }
+
+  constexpr _Float16
+  rint(_Float16 __x)
+  { return _Float16(__builtin_rintf(__x)); }
+
+  constexpr _Float16
+  round(_Float16 __x)
+  { return _Float16(__builtin_roundf(__x)); }
+
+  constexpr _Float16
+  scalbln(_Float16 __x, long __ex)
+  { return _Float16(__builtin_scalblnf(__x, __ex)); }
+
+  constexpr _Float16
+  scalbn(_Float16 __x, int __ex)
+  { return _Float16(__builtin_scalbnf(__x, __ex)); }
+
+  constexpr _Float16
+  tgamma(_Float16 __x)
+  { return _Float16(__builtin_tgammaf(__x)); }
+
+  constexpr _Float16
+  trunc(_Float16 __x)
+  { return _Float16(__builtin_truncf(__x)); }
+
+
+
+  constexpr _Float32
+  acosh(_Float32 __x)
+  { return __builtin_acoshf(__x); }
+
+  constexpr _Float32
+  asinh(_Float32 __x)
+  { return __builtin_asinhf(__x); }
+
+  constexpr _Float32
+  atanh(_Float32 __x)
+  { return __builtin_atanhf(__x); }
+
+  constexpr _Float32
+  cbrt(_Float32 __x)
+  { return __builtin_cbrtf(__x); }
+
+  constexpr _Float32
+  copysign(_Float32 __x, _Float32 __y)
+  { return __builtin_copysignf(__x, __y); }
+
+  constexpr _Float32
+  erf(_Float32 __x)
+  { return __builtin_erff(__x); }
+
+  constexpr _Float32
+  erfc(_Float32 __x)
+  { return __builtin_erfcf(__x); }
+
+  constexpr _Float32
+  exp2(_Float32 __x)
+  { return __builtin_exp2f(__x); }
+
+  constexpr _Float32
+  expm1(_Float32 __x)
+  { return __builtin_expm1f(__x); }
+
+  constexpr _Float32
+  fdim(_Float32 __x, _Float32 __y)
+  { return __builtin_fdimf(__x, __y); }
+
+  constexpr _Float32
+  fma(_Float32 __x, _Float32 __y, _Float32 __z)
+  { return __builtin_fmaf(__x, __y, __z); }
+
+  constexpr _Float32
+  fmax(_Float32 __x, _Float32 __y)
+  { return __builtin_fmaxf(__x, __y); }
+
+  constexpr _Float32
+  fmin(_Float32 __x, _Float32 __y)
+  { return __builtin_fminf(__x, __y); }
+
+  constexpr _Float32
+  hypot(_Float32 __x, _Float32 __y)
+  { return __builtin_hypotf(__x, __y); }
+
+  constexpr int
+  ilogb(_Float32 __x)
+  { return __builtin_ilogbf(__x); }
+
+  constexpr _Float32
+  lgamma(_Float32 __x)
+  { return __builtin_lgammaf(__x); }
+
+  constexpr long long
+  llrint(_Float32 __x)
+  { return __builtin_llrintf(__x); }
+
+  constexpr long long
+  llround(_Float32 __x)
+  { return __builtin_llroundf(__x); }
+
+  constexpr _Float32
+  log1p(_Float32 __x)
+  { return __builtin_log1pf(__x); }
+
+
+  constexpr _Float32
+  log2(_Float32 __x)
+  { return __builtin_log2f(__x); }
+
+  constexpr _Float32
+  logb(_Float32 __x)
+  { return __builtin_logbf(__x); }
+
+  constexpr long
+  lrint(_Float32 __x)
+  { return __builtin_lrintf(__x); }
+
+  constexpr long
+  lround(_Float32 __x)
+  { return __builtin_lroundf(__x); }
+
+  constexpr _Float32
+  nearbyint(_Float32 __x)
+  { return __builtin_nearbyintf(__x); }
+
+  constexpr _Float32
+  nextafter(_Float32 __x, _Float32 __y)
+  { return __builtin_nextafterf(__x, __y); }
+
+  constexpr _Float32
+  remainder(_Float32 __x, _Float32 __y)
+  { return __builtin_remainderf(__x, __y); }
+
+  inline _Float32
+  remquo(_Float32 __x, _Float32 __y, int* __pquo)
+  { return __builtin_remquof(__x, __y, __pquo); }
+
+  constexpr _Float32
+  rint(_Float32 __x)
+  { return __builtin_rintf(__x); }
+
+  constexpr _Float32
+  round(_Float32 __x)
+  { return __builtin_roundf(__x); }
+
+  constexpr _Float32
+  scalbln(_Float32 __x, long __ex)
+  { return __builtin_scalblnf(__x, __ex); }
+
+  constexpr _Float32
+  scalbn(_Float32 __x, int __ex)
+  { return __builtin_scalbnf(__x, __ex); }
+
+  constexpr _Float32
+  tgamma(_Float32 __x)
+  { return __builtin_tgammaf(__x); }
+
+  constexpr _Float32
+  trunc(_Float32 __x)
+  { return __builtin_truncf(__x); }
+
+
+
+  constexpr _Float64
+  acosh(_Float64 __x)
+  { return __builtin_acosh(__x); }
+
+  constexpr _Float64
+  asinh(_Float64 __x)
+  { return __builtin_asinh(__x); }
+
+  constexpr _Float64
+  atanh(_Float64 __x)
+  { return __builtin_atanh(__x); }
+
+  constexpr _Float64
+  cbrt(_Float64 __x)
+  { return __builtin_cbrt(__x); }
+
+  constexpr _Float64
+  copysign(_Float64 __x, _Float64 __y)
+  { return __builtin_copysign(__x, __y); }
+
+  constexpr _Float64
+  erf(_Float64 __x)
+  { return __builtin_erf(__x); }
+
+  constexpr _Float64
+  erfc(_Float64 __x)
+  { return __builtin_erfc(__x); }
+
+  constexpr _Float64
+  exp2(_Float64 __x)
+  { return __builtin_exp2(__x); }
+
+  constexpr _Float64
+  expm1(_Float64 __x)
+  { return __builtin_expm1(__x); }
+
+  constexpr _Float64
+  fdim(_Float64 __x, _Float64 __y)
+  { return __builtin_fdim(__x, __y); }
+
+  constexpr _Float64
+  fma(_Float64 __x, _Float64 __y, _Float64 __z)
+  { return __builtin_fma(__x, __y, __z); }
+
+  constexpr _Float64
+  fmax(_Float64 __x, _Float64 __y)
+  { return __builtin_fmax(__x, __y); }
+
+  constexpr _Float64
+  fmin(_Float64 __x, _Float64 __y)
+  { return __builtin_fmin(__x, __y); }
+
+  constexpr _Float64
+  hypot(_Float64 __x, _Float64 __y)
+  { return __builtin_hypot(__x, __y); }
+
+  constexpr int
+  ilogb(_Float64 __x)
+  { return __builtin_ilogb(__x); }
+
+  constexpr _Float64
+  lgamma(_Float64 __x)
+  { return __builtin_lgamma(__x); }
+
+  constexpr long long
+  llrint(_Float64 __x)
+  { return __builtin_llrint(__x); }
+
+  constexpr long long
+  llround(_Float64 __x)
+  { return __builtin_llround(__x); }
+
+  constexpr _Float64
+  log1p(_Float64 __x)
+  { return __builtin_log1p(__x); }
+
+
+  constexpr _Float64
+  log2(_Float64 __x)
+  { return __builtin_log2(__x); }
+
+  constexpr _Float64
+  logb(_Float64 __x)
+  { return __builtin_logb(__x); }
+
+  constexpr long
+  lrint(_Float64 __x)
+  { return __builtin_lrint(__x); }
+
+  constexpr long
+  lround(_Float64 __x)
+  { return __builtin_lround(__x); }
+
+  constexpr _Float64
+  nearbyint(_Float64 __x)
+  { return __builtin_nearbyint(__x); }
+
+  constexpr _Float64
+  nextafter(_Float64 __x, _Float64 __y)
+  { return __builtin_nextafter(__x, __y); }
+
+  constexpr _Float64
+  remainder(_Float64 __x, _Float64 __y)
+  { return __builtin_remainder(__x, __y); }
+
+  inline _Float64
+  remquo(_Float64 __x, _Float64 __y, int* __pquo)
+  { return __builtin_remquo(__x, __y, __pquo); }
+
+  constexpr _Float64
+  rint(_Float64 __x)
+  { return __builtin_rint(__x); }
+
+  constexpr _Float64
+  round(_Float64 __x)
+  { return __builtin_round(__x); }
+
+  constexpr _Float64
+  scalbln(_Float64 __x, long __ex)
+  { return __builtin_scalbln(__x, __ex); }
+
+  constexpr _Float64
+  scalbn(_Float64 __x, int __ex)
+  { return __builtin_scalbn(__x, __ex); }
+
+  constexpr _Float64
+  tgamma(_Float64 __x)
+  { return __builtin_tgamma(__x); }
+
+  constexpr _Float64
+  trunc(_Float64 __x)
+  { return __builtin_trunc(__x); }
+# 3505 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 3
+  constexpr __gnu_cxx::__bfloat16_t
+  acosh(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_acoshf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  asinh(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_asinhf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  atanh(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_atanhf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  cbrt(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_cbrtf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  copysign(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __gnu_cxx::__bfloat16_t(__builtin_copysignf(__x, __y)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  erf(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_erff(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  erfc(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_erfcf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  exp2(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_exp2f(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  expm1(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_expm1f(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  fdim(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __gnu_cxx::__bfloat16_t(__builtin_fdimf(__x, __y)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  fma(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y, __gnu_cxx::__bfloat16_t __z)
+  { return __gnu_cxx::__bfloat16_t(__builtin_fmaf(__x, __y, __z)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  fmax(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __gnu_cxx::__bfloat16_t(__builtin_fmaxf(__x, __y)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  fmin(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __gnu_cxx::__bfloat16_t(__builtin_fminf(__x, __y)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  hypot(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __gnu_cxx::__bfloat16_t(__builtin_hypotf(__x, __y)); }
+
+  constexpr int
+  ilogb(__gnu_cxx::__bfloat16_t __x)
+  { return __builtin_ilogbf(__x); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  lgamma(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_lgammaf(__x)); }
+
+  constexpr long long
+  llrint(__gnu_cxx::__bfloat16_t __x)
+  { return __builtin_llrintf(__x); }
+
+  constexpr long long
+  llround(__gnu_cxx::__bfloat16_t __x)
+  { return __builtin_llroundf(__x); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  log1p(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_log1pf(__x)); }
+
+
+  constexpr __gnu_cxx::__bfloat16_t
+  log2(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_log2f(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  logb(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_logbf(__x)); }
+
+  constexpr long
+  lrint(__gnu_cxx::__bfloat16_t __x)
+  { return __builtin_lrintf(__x); }
+
+  constexpr long
+  lround(__gnu_cxx::__bfloat16_t __x)
+  { return __builtin_lroundf(__x); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  nearbyint(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_nearbyintf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  nextafter(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  {
+
+
+
+
+    if consteval { return __builtin_nextafterf16b(__x, __y); }
+
+
+    using __bfloat16_int_type = short int;
+
+
+
+    __bfloat16_int_type __hx, __hy, __ix, __iy;
+    __builtin_memcpy(&__hx, &__x, sizeof(__x));
+    __builtin_memcpy(&__hy, &__y, sizeof(__x));
+    __ix = __hx & 0x7fff;
+    __iy = __hy & 0x7fff;
+    if (__ix > 0x7f80 || __iy > 0x7f80)
+      return __x + __y;
+    if (__x == __y)
+      return __y;
+    if (__ix == 0)
+      {
+ __hy = (__hy & 0x8000) | 1;
+ __builtin_memcpy(&__x, &__hy, sizeof(__x));
+ __builtin_nextafterf(0.0f, 1.0f);
+ return __x;
+      }
+    if (__hx >= 0)
+      {
+ if (__hx > __hy)
+   --__hx;
+ else
+   ++__hx;
+      }
+    else
+      {
+ if (__hy >= 0 || __hx > __hy)
+   --__hx;
+ else
+   ++__hx;
+      }
+    __hy = __hx & 0x7f80;
+    if (__hy >= 0x7f80)
+      __builtin_nextafterf(3.40282346638528859811704183484516925e+38F, __builtin_inff());
+    else if (__hy < 0x0080)
+      __builtin_nextafterf(1.17549435082228750796873653722224568e-38F, 0.0f);
+    __builtin_memcpy(&__x, &__hx, sizeof(__x));
+    return __x;
+  }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  remainder(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y)
+  { return __gnu_cxx::__bfloat16_t(__builtin_remainderf(__x, __y)); }
+
+  inline __gnu_cxx::__bfloat16_t
+  remquo(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y, int* __pquo)
+  { return __gnu_cxx::__bfloat16_t(__builtin_remquof(__x, __y, __pquo)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  rint(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_rintf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  round(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_roundf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  scalbln(__gnu_cxx::__bfloat16_t __x, long __ex)
+  { return __gnu_cxx::__bfloat16_t(__builtin_scalblnf(__x, __ex)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  scalbn(__gnu_cxx::__bfloat16_t __x, int __ex)
+  { return __gnu_cxx::__bfloat16_t(__builtin_scalbnf(__x, __ex)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  tgamma(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_tgammaf(__x)); }
+
+  constexpr __gnu_cxx::__bfloat16_t
+  trunc(__gnu_cxx::__bfloat16_t __x)
+  { return __gnu_cxx::__bfloat16_t(__builtin_truncf(__x)); }
+
+
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    copysign(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return copysign(__type(__x), __type(__y));
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    fdim(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return fdim(__type(__x), __type(__y));
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    fmax(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return fmax(__type(__x), __type(__y));
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    fmin(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return fmin(__type(__x), __type(__y));
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    hypot(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return hypot(__type(__x), __type(__y));
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    nextafter(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return nextafter(__type(__x), __type(__y));
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    remainder(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return remainder(__type(__x), __type(__y));
+    }
+
+  template<typename _Tp, typename _Up>
+    inline typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    remquo(_Tp __x, _Up __y, int* __pquo)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return remquo(__type(__x), __type(__y), __pquo);
+    }
+
+  template<typename _Tp, typename _Up, typename _Vp>
+    constexpr typename __gnu_cxx::__promote_3<_Tp, _Up, _Vp>::__type
+    fma(_Tp __x, _Up __y, _Vp __z)
+    {
+      typedef typename __gnu_cxx::__promote_3<_Tp, _Up, _Vp>::__type __type;
+      return fma(__type(__x), __type(__y), __type(__z));
+    }
+
+
+
+
+
+
+
+  template<typename _Tp>
+    inline _Tp
+    __hypot3(_Tp __x, _Tp __y, _Tp __z)
+    {
+      __x = std::abs(__x);
+      __y = std::abs(__y);
+      __z = std::abs(__z);
+      if (_Tp __a = __x < __y ? __y < __z ? __z : __y : __x < __z ? __z : __x)
+ return __a * std::sqrt((__x / __a) * (__x / __a)
+          + (__y / __a) * (__y / __a)
+          + (__z / __a) * (__z / __a));
+      else
+ return {};
+    }
+
+  inline float
+  hypot(float __x, float __y, float __z)
+  { return std::__hypot3<float>(__x, __y, __z); }
+
+  inline double
+  hypot(double __x, double __y, double __z)
+  { return std::__hypot3<double>(__x, __y, __z); }
+
+  inline long double
+  hypot(long double __x, long double __y, long double __z)
+  { return std::__hypot3<long double>(__x, __y, __z); }
+
+  template<typename _Tp, typename _Up, typename _Vp>
+    __gnu_cxx::__promoted_t<_Tp, _Up, _Vp>
+    hypot(_Tp __x, _Up __y, _Vp __z)
+    {
+      using __type = __gnu_cxx::__promoted_t<_Tp, _Up, _Vp>;
+      return std::__hypot3<__type>(__x, __y, __z);
+    }
+
+
+  inline _Float16
+  hypot(_Float16 __x, _Float16 __y, _Float16 __z)
+  { return std::__hypot3<_Float16>(__x, __y, __z); }
+
+
+
+  inline _Float32
+  hypot(_Float32 __x, _Float32 __y, _Float32 __z)
+  { return std::__hypot3<_Float32>(__x, __y, __z); }
+
+
+
+  inline _Float64
+  hypot(_Float64 __x, _Float64 __y, _Float64 __z)
+  { return std::__hypot3<_Float64>(__x, __y, __z); }
+# 3829 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 3
+  inline __gnu_cxx::__bfloat16_t
+  hypot(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y, __gnu_cxx::__bfloat16_t __z)
+  { return std::__hypot3<__gnu_cxx::__bfloat16_t>(__x, __y, __z); }
+
+
+
+
+
+
+  template<typename _Fp>
+    constexpr _Fp
+    __lerp(_Fp __a, _Fp __b, _Fp __t) noexcept
+    {
+      if ((__a <= 0 && __b >= 0) || (__a >= 0 && __b <= 0))
+ return __t * __b + (1 - __t) * __a;
+
+      if (__t == 1)
+ return __b;
+
+
+
+      const _Fp __x = __a + __t * (__b - __a);
+      return (__t > 1) == (__b > __a)
+ ? (__b < __x ? __x : __b)
+ : (__b > __x ? __x : __b);
+    }
+
+  constexpr float
+  lerp(float __a, float __b, float __t) noexcept
+  { return std::__lerp(__a, __b, __t); }
+
+  constexpr double
+  lerp(double __a, double __b, double __t) noexcept
+  { return std::__lerp(__a, __b, __t); }
+
+  constexpr long double
+  lerp(long double __a, long double __b, long double __t) noexcept
+  { return std::__lerp(__a, __b, __t); }
+
+  template<typename _Tp, typename _Up, typename _Vp>
+    constexpr __gnu_cxx::__promoted_t<_Tp, _Up, _Vp>
+    lerp(_Tp __x, _Up __y, _Vp __z) noexcept
+    {
+      using __type = __gnu_cxx::__promoted_t<_Tp, _Up, _Vp>;
+      return std::__lerp<__type>(__x, __y, __z);
+    }
+
+
+  inline _Float16
+  lerp(_Float16 __x, _Float16 __y, _Float16 __z) noexcept
+  { return std::__lerp<_Float16>(__x, __y, __z); }
+
+
+
+  inline _Float32
+  lerp(_Float32 __x, _Float32 __y, _Float32 __z) noexcept
+  { return std::__lerp<_Float32>(__x, __y, __z); }
+
+
+
+  inline _Float64
+  lerp(_Float64 __x, _Float64 __y, _Float64 __z) noexcept
+  { return std::__lerp<_Float64>(__x, __y, __z); }
+# 3903 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 3
+  inline __gnu_cxx::__bfloat16_t
+  lerp(__gnu_cxx::__bfloat16_t __x, __gnu_cxx::__bfloat16_t __y, __gnu_cxx::__bfloat16_t __z) noexcept
+  { return std::__lerp<__gnu_cxx::__bfloat16_t>(__x, __y, __z); }
+
+
+
+
+}
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 1 3
+# 37 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 38 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 1 3
+# 49 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/special_function_util.h" 1 3
+# 39 "C:/msys64/mingw64/include/c++/15.2.0/tr1/special_function_util.h" 3
+namespace std
+{
+
+# 50 "C:/msys64/mingw64/include/c++/15.2.0/tr1/special_function_util.h" 3
+  namespace __detail
+  {
+
+
+
+    template<typename _Tp>
+    struct __floating_point_constant
+    {
+      static const _Tp __value;
+    };
+
+
+
+    template<typename _Tp>
+      struct __numeric_constants
+      {
+
+        static _Tp __pi() throw()
+        { return static_cast<_Tp>(3.1415926535897932384626433832795029L); }
+
+        static _Tp __pi_2() throw()
+        { return static_cast<_Tp>(1.5707963267948966192313216916397514L); }
+
+        static _Tp __pi_3() throw()
+        { return static_cast<_Tp>(1.0471975511965977461542144610931676L); }
+
+        static _Tp __pi_4() throw()
+        { return static_cast<_Tp>(0.7853981633974483096156608458198757L); }
+
+        static _Tp __1_pi() throw()
+        { return static_cast<_Tp>(0.3183098861837906715377675267450287L); }
+
+        static _Tp __2_sqrtpi() throw()
+        { return static_cast<_Tp>(1.1283791670955125738961589031215452L); }
+
+        static _Tp __sqrt2() throw()
+        { return static_cast<_Tp>(1.4142135623730950488016887242096981L); }
+
+        static _Tp __sqrt3() throw()
+        { return static_cast<_Tp>(1.7320508075688772935274463415058723L); }
+
+        static _Tp __sqrtpio2() throw()
+        { return static_cast<_Tp>(1.2533141373155002512078826424055226L); }
+
+        static _Tp __sqrt1_2() throw()
+        { return static_cast<_Tp>(0.7071067811865475244008443621048490L); }
+
+        static _Tp __lnpi() throw()
+        { return static_cast<_Tp>(1.1447298858494001741434273513530587L); }
+
+        static _Tp __gamma_e() throw()
+        { return static_cast<_Tp>(0.5772156649015328606065120900824024L); }
+
+        static _Tp __euler() throw()
+        { return static_cast<_Tp>(2.7182818284590452353602874713526625L); }
+      };
+# 114 "C:/msys64/mingw64/include/c++/15.2.0/tr1/special_function_util.h" 3
+    template<typename _Tp>
+    inline bool __isnan(_Tp __x)
+    { return std::isnan(__x); }
+# 133 "C:/msys64/mingw64/include/c++/15.2.0/tr1/special_function_util.h" 3
+  }
+
+
+
+
+
+}
+# 50 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 2 3
+
+namespace std
+{
+
+# 65 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+  namespace __detail
+  {
+# 76 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template <typename _Tp>
+    _Tp
+    __bernoulli_series(unsigned int __n)
+    {
+
+      static const _Tp __num[28] = {
+        _Tp(1UL), -_Tp(1UL) / _Tp(2UL),
+        _Tp(1UL) / _Tp(6UL), _Tp(0UL),
+        -_Tp(1UL) / _Tp(30UL), _Tp(0UL),
+        _Tp(1UL) / _Tp(42UL), _Tp(0UL),
+        -_Tp(1UL) / _Tp(30UL), _Tp(0UL),
+        _Tp(5UL) / _Tp(66UL), _Tp(0UL),
+        -_Tp(691UL) / _Tp(2730UL), _Tp(0UL),
+        _Tp(7UL) / _Tp(6UL), _Tp(0UL),
+        -_Tp(3617UL) / _Tp(510UL), _Tp(0UL),
+        _Tp(43867UL) / _Tp(798UL), _Tp(0UL),
+        -_Tp(174611) / _Tp(330UL), _Tp(0UL),
+        _Tp(854513UL) / _Tp(138UL), _Tp(0UL),
+        -_Tp(236364091UL) / _Tp(2730UL), _Tp(0UL),
+        _Tp(8553103UL) / _Tp(6UL), _Tp(0UL)
+      };
+
+      if (__n == 0)
+        return _Tp(1);
+
+      if (__n == 1)
+        return -_Tp(1) / _Tp(2);
+
+
+      if (__n % 2 == 1)
+        return _Tp(0);
+
+
+      if (__n < 28)
+        return __num[__n];
+
+
+      _Tp __fact = _Tp(1);
+      if ((__n / 2) % 2 == 0)
+        __fact *= _Tp(-1);
+      for (unsigned int __k = 1; __k <= __n; ++__k)
+        __fact *= __k / (_Tp(2) * __numeric_constants<_Tp>::__pi());
+      __fact *= _Tp(2);
+
+      _Tp __sum = _Tp(0);
+      for (unsigned int __i = 1; __i < 1000; ++__i)
+        {
+          _Tp __term = std::pow(_Tp(__i), -_Tp(__n));
+          if (__term < std::numeric_limits<_Tp>::epsilon())
+            break;
+          __sum += __term;
+        }
+
+      return __fact * __sum;
+    }
+# 139 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template<typename _Tp>
+    inline _Tp
+    __bernoulli(int __n)
+    { return __bernoulli_series<_Tp>(__n); }
+# 153 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __log_gamma_bernoulli(_Tp __x)
+    {
+      _Tp __lg = (__x - _Tp(0.5L)) * std::log(__x) - __x
+               + _Tp(0.5L) * std::log(_Tp(2)
+               * __numeric_constants<_Tp>::__pi());
+
+      const _Tp __xx = __x * __x;
+      _Tp __help = _Tp(1) / __x;
+      for ( unsigned int __i = 1; __i < 20; ++__i )
+        {
+          const _Tp __2i = _Tp(2 * __i);
+          __help /= __2i * (__2i - _Tp(1)) * __xx;
+          __lg += __bernoulli<_Tp>(2 * __i) * __help;
+        }
+
+      return __lg;
+    }
+# 181 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __log_gamma_lanczos(_Tp __x)
+    {
+      const _Tp __xm1 = __x - _Tp(1);
+
+      static const _Tp __lanczos_cheb_7[9] = {
+       _Tp( 0.99999999999980993227684700473478L),
+       _Tp( 676.520368121885098567009190444019L),
+       _Tp(-1259.13921672240287047156078755283L),
+       _Tp( 771.3234287776530788486528258894L),
+       _Tp(-176.61502916214059906584551354L),
+       _Tp( 12.507343278686904814458936853L),
+       _Tp(-0.13857109526572011689554707L),
+       _Tp( 9.984369578019570859563e-6L),
+       _Tp( 1.50563273514931155834e-7L)
+      };
+
+      static const _Tp __LOGROOT2PI
+          = _Tp(0.9189385332046727417803297364056176L);
+
+      _Tp __sum = __lanczos_cheb_7[0];
+      for(unsigned int __k = 1; __k < 9; ++__k)
+        __sum += __lanczos_cheb_7[__k] / (__xm1 + __k);
+
+      const _Tp __term1 = (__xm1 + _Tp(0.5L))
+                        * std::log((__xm1 + _Tp(7.5L))
+                       / __numeric_constants<_Tp>::__euler());
+      const _Tp __term2 = __LOGROOT2PI + std::log(__sum);
+      const _Tp __result = __term1 + (__term2 - _Tp(7));
+
+      return __result;
+    }
+# 225 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __log_gamma(_Tp __x)
+    {
+      if (__x > _Tp(0.5L))
+        return __log_gamma_lanczos(__x);
+      else
+        {
+          const _Tp __sin_fact
+                 = std::abs(std::sin(__numeric_constants<_Tp>::__pi() * __x));
+          if (__sin_fact == _Tp(0))
+            std::__throw_domain_error(("Argument is nonpositive integer " "in __log_gamma")
+                                                           );
+          return __numeric_constants<_Tp>::__lnpi()
+                     - std::log(__sin_fact)
+                     - __log_gamma_lanczos(_Tp(1) - __x);
+        }
+    }
+# 252 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __log_gamma_sign(_Tp __x)
+    {
+      if (__x > _Tp(0))
+        return _Tp(1);
+      else
+        {
+          const _Tp __sin_fact
+                  = std::sin(__numeric_constants<_Tp>::__pi() * __x);
+          if (__sin_fact > _Tp(0))
+            return (1);
+          else if (__sin_fact < _Tp(0))
+            return -_Tp(1);
+          else
+            return _Tp(0);
+        }
+    }
+# 283 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __log_bincoef(unsigned int __n, unsigned int __k)
+    {
+
+      static const _Tp __max_bincoeff
+                      = std::numeric_limits<_Tp>::max_exponent10
+                      * std::log(_Tp(10)) - _Tp(1);
+
+      _Tp __coeff = ::std::lgamma(_Tp(1 + __n))
+                  - ::std::lgamma(_Tp(1 + __k))
+                  - ::std::lgamma(_Tp(1 + __n - __k));
+
+
+
+
+
+    }
+# 314 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __bincoef(unsigned int __n, unsigned int __k)
+    {
+
+      static const _Tp __max_bincoeff
+                      = std::numeric_limits<_Tp>::max_exponent10
+                      * std::log(_Tp(10)) - _Tp(1);
+
+      const _Tp __log_coeff = __log_bincoef<_Tp>(__n, __k);
+      if (__log_coeff > __max_bincoeff)
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else
+        return std::exp(__log_coeff);
+    }
+# 337 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template<typename _Tp>
+    inline _Tp
+    __gamma(_Tp __x)
+    { return std::exp(__log_gamma(__x)); }
+# 356 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __psi_series(_Tp __x)
+    {
+      _Tp __sum = -__numeric_constants<_Tp>::__gamma_e() - _Tp(1) / __x;
+      const unsigned int __max_iter = 100000;
+      for (unsigned int __k = 1; __k < __max_iter; ++__k)
+        {
+          const _Tp __term = __x / (__k * (__k + __x));
+          __sum += __term;
+          if (std::abs(__term / __sum) < std::numeric_limits<_Tp>::epsilon())
+            break;
+        }
+      return __sum;
+    }
+# 386 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __psi_asymp(_Tp __x)
+    {
+      _Tp __sum = std::log(__x) - _Tp(0.5L) / __x;
+      const _Tp __xx = __x * __x;
+      _Tp __xp = __xx;
+      const unsigned int __max_iter = 100;
+      for (unsigned int __k = 1; __k < __max_iter; ++__k)
+        {
+          const _Tp __term = __bernoulli<_Tp>(2 * __k) / (2 * __k * __xp);
+          __sum -= __term;
+          if (std::abs(__term / __sum) < std::numeric_limits<_Tp>::epsilon())
+            break;
+          __xp *= __xx;
+        }
+      return __sum;
+    }
+# 417 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __psi(_Tp __x)
+    {
+      const int __n = static_cast<int>(__x + 0.5L);
+      const _Tp __eps = _Tp(4) * std::numeric_limits<_Tp>::epsilon();
+      if (__n <= 0 && std::abs(__x - _Tp(__n)) < __eps)
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__x < _Tp(0))
+        {
+          const _Tp __pi = __numeric_constants<_Tp>::__pi();
+          return __psi(_Tp(1) - __x)
+               - __pi * std::cos(__pi * __x) / std::sin(__pi * __x);
+        }
+      else if (__x > _Tp(100))
+        return __psi_asymp(__x);
+      else
+        return __psi_series(__x);
+    }
+# 446 "C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __psi(unsigned int __n, _Tp __x)
+    {
+      if (__x <= _Tp(0))
+        std::__throw_domain_error(("Argument out of range " "in __psi")
+                                                 );
+      else if (__n == 0)
+        return __psi(__x);
+      else
+        {
+          const _Tp __hzeta = __hurwitz_zeta(_Tp(__n + 1), __x);
+
+          const _Tp __ln_nfact = ::std::lgamma(_Tp(__n + 1));
+
+
+
+          _Tp __result = std::exp(__ln_nfact) * __hzeta;
+          if (__n % 2 == 1)
+            __result = -__result;
+          return __result;
+        }
+    }
+  }
+
+
+
+
+
+
+}
+# 48 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc" 1 3
+# 55 "C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc" 3
+namespace std
+{
+
+# 71 "C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc" 3
+  namespace __detail
+  {
+# 98 "C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc" 3
+    template <typename _Tp>
+    void
+    __gamma_temme(_Tp __mu,
+                  _Tp & __gam1, _Tp & __gam2, _Tp & __gampl, _Tp & __gammi)
+    {
+
+      __gampl = _Tp(1) / ::std::tgamma(_Tp(1) + __mu);
+      __gammi = _Tp(1) / ::std::tgamma(_Tp(1) - __mu);
+
+
+
+
+
+      if (std::abs(__mu) < std::numeric_limits<_Tp>::epsilon())
+        __gam1 = -_Tp(__numeric_constants<_Tp>::__gamma_e());
+      else
+        __gam1 = (__gammi - __gampl) / (_Tp(2) * __mu);
+
+      __gam2 = (__gammi + __gampl) / (_Tp(2));
+
+      return;
+    }
+# 136 "C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc" 3
+    template <typename _Tp>
+    void
+    __bessel_jn(_Tp __nu, _Tp __x,
+                _Tp & __Jnu, _Tp & __Nnu, _Tp & __Jpnu, _Tp & __Npnu)
+    {
+      if (__x == _Tp(0))
+        {
+          if (__nu == _Tp(0))
+            {
+              __Jnu = _Tp(1);
+              __Jpnu = _Tp(0);
+            }
+          else if (__nu == _Tp(1))
+            {
+              __Jnu = _Tp(0);
+              __Jpnu = _Tp(0.5L);
+            }
+          else
+            {
+              __Jnu = _Tp(0);
+              __Jpnu = _Tp(0);
+            }
+          __Nnu = -std::numeric_limits<_Tp>::infinity();
+          __Npnu = std::numeric_limits<_Tp>::infinity();
+          return;
+        }
+
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+
+
+
+
+      const _Tp __fp_min = std::sqrt(std::numeric_limits<_Tp>::min());
+      const int __max_iter = 15000;
+      const _Tp __x_min = _Tp(2);
+
+      const int __nl = (__x < __x_min
+                    ? static_cast<int>(__nu + _Tp(0.5L))
+                    : std::max(0, static_cast<int>(__nu - __x + _Tp(1.5L))));
+
+      const _Tp __mu = __nu - __nl;
+      const _Tp __mu2 = __mu * __mu;
+      const _Tp __xi = _Tp(1) / __x;
+      const _Tp __xi2 = _Tp(2) * __xi;
+      _Tp __w = __xi2 / __numeric_constants<_Tp>::__pi();
+      int __isign = 1;
+      _Tp __h = __nu * __xi;
+      if (__h < __fp_min)
+        __h = __fp_min;
+      _Tp __b = __xi2 * __nu;
+      _Tp __d = _Tp(0);
+      _Tp __c = __h;
+      int __i;
+      for (__i = 1; __i <= __max_iter; ++__i)
+        {
+          __b += __xi2;
+          __d = __b - __d;
+          if (std::abs(__d) < __fp_min)
+            __d = __fp_min;
+          __c = __b - _Tp(1) / __c;
+          if (std::abs(__c) < __fp_min)
+            __c = __fp_min;
+          __d = _Tp(1) / __d;
+          const _Tp __del = __c * __d;
+          __h *= __del;
+          if (__d < _Tp(0))
+            __isign = -__isign;
+          if (std::abs(__del - _Tp(1)) < __eps)
+            break;
+        }
+      if (__i > __max_iter)
+        std::__throw_runtime_error(("Argument x too large in __bessel_jn; " "try asymptotic expansion.")
+                                                                   );
+      _Tp __Jnul = __isign * __fp_min;
+      _Tp __Jpnul = __h * __Jnul;
+      _Tp __Jnul1 = __Jnul;
+      _Tp __Jpnu1 = __Jpnul;
+      _Tp __fact = __nu * __xi;
+      for ( int __l = __nl; __l >= 1; --__l )
+        {
+          const _Tp __Jnutemp = __fact * __Jnul + __Jpnul;
+          __fact -= __xi;
+          __Jpnul = __fact * __Jnutemp - __Jnul;
+          __Jnul = __Jnutemp;
+        }
+      if (__Jnul == _Tp(0))
+        __Jnul = __eps;
+      _Tp __f= __Jpnul / __Jnul;
+      _Tp __Nmu, __Nnu1, __Npmu, __Jmu;
+      if (__x < __x_min)
+        {
+          const _Tp __x2 = __x / _Tp(2);
+          const _Tp __pimu = __numeric_constants<_Tp>::__pi() * __mu;
+          _Tp __fact = (std::abs(__pimu) < __eps
+                      ? _Tp(1) : __pimu / std::sin(__pimu));
+          _Tp __d = -std::log(__x2);
+          _Tp __e = __mu * __d;
+          _Tp __fact2 = (std::abs(__e) < __eps
+                       ? _Tp(1) : std::sinh(__e) / __e);
+          _Tp __gam1, __gam2, __gampl, __gammi;
+          __gamma_temme(__mu, __gam1, __gam2, __gampl, __gammi);
+          _Tp __ff = (_Tp(2) / __numeric_constants<_Tp>::__pi())
+                   * __fact * (__gam1 * std::cosh(__e) + __gam2 * __fact2 * __d);
+          __e = std::exp(__e);
+          _Tp __p = __e / (__numeric_constants<_Tp>::__pi() * __gampl);
+          _Tp __q = _Tp(1) / (__e * __numeric_constants<_Tp>::__pi() * __gammi);
+          const _Tp __pimu2 = __pimu / _Tp(2);
+          _Tp __fact3 = (std::abs(__pimu2) < __eps
+                       ? _Tp(1) : std::sin(__pimu2) / __pimu2 );
+          _Tp __r = __numeric_constants<_Tp>::__pi() * __pimu2 * __fact3 * __fact3;
+          _Tp __c = _Tp(1);
+          __d = -__x2 * __x2;
+          _Tp __sum = __ff + __r * __q;
+          _Tp __sum1 = __p;
+          for (__i = 1; __i <= __max_iter; ++__i)
+            {
+              __ff = (__i * __ff + __p + __q) / (__i * __i - __mu2);
+              __c *= __d / _Tp(__i);
+              __p /= _Tp(__i) - __mu;
+              __q /= _Tp(__i) + __mu;
+              const _Tp __del = __c * (__ff + __r * __q);
+              __sum += __del;
+              const _Tp __del1 = __c * __p - __i * __del;
+              __sum1 += __del1;
+              if ( std::abs(__del) < __eps * (_Tp(1) + std::abs(__sum)) )
+                break;
+            }
+          if ( __i > __max_iter )
+            std::__throw_runtime_error(("Bessel y series failed to converge " "in __bessel_jn.")
+                                                             );
+          __Nmu = -__sum;
+          __Nnu1 = -__sum1 * __xi2;
+          __Npmu = __mu * __xi * __Nmu - __Nnu1;
+          __Jmu = __w / (__Npmu - __f * __Nmu);
+        }
+      else
+        {
+          _Tp __a = _Tp(0.25L) - __mu2;
+          _Tp __q = _Tp(1);
+          _Tp __p = -__xi / _Tp(2);
+          _Tp __br = _Tp(2) * __x;
+          _Tp __bi = _Tp(2);
+          _Tp __fact = __a * __xi / (__p * __p + __q * __q);
+          _Tp __cr = __br + __q * __fact;
+          _Tp __ci = __bi + __p * __fact;
+          _Tp __den = __br * __br + __bi * __bi;
+          _Tp __dr = __br / __den;
+          _Tp __di = -__bi / __den;
+          _Tp __dlr = __cr * __dr - __ci * __di;
+          _Tp __dli = __cr * __di + __ci * __dr;
+          _Tp __temp = __p * __dlr - __q * __dli;
+          __q = __p * __dli + __q * __dlr;
+          __p = __temp;
+          int __i;
+          for (__i = 2; __i <= __max_iter; ++__i)
+            {
+              __a += _Tp(2 * (__i - 1));
+              __bi += _Tp(2);
+              __dr = __a * __dr + __br;
+              __di = __a * __di + __bi;
+              if (std::abs(__dr) + std::abs(__di) < __fp_min)
+                __dr = __fp_min;
+              __fact = __a / (__cr * __cr + __ci * __ci);
+              __cr = __br + __cr * __fact;
+              __ci = __bi - __ci * __fact;
+              if (std::abs(__cr) + std::abs(__ci) < __fp_min)
+                __cr = __fp_min;
+              __den = __dr * __dr + __di * __di;
+              __dr /= __den;
+              __di /= -__den;
+              __dlr = __cr * __dr - __ci * __di;
+              __dli = __cr * __di + __ci * __dr;
+              __temp = __p * __dlr - __q * __dli;
+              __q = __p * __dli + __q * __dlr;
+              __p = __temp;
+              if (std::abs(__dlr - _Tp(1)) + std::abs(__dli) < __eps)
+                break;
+          }
+          if (__i > __max_iter)
+            std::__throw_runtime_error(("Lentz's method failed " "in __bessel_jn.")
+                                                             );
+          const _Tp __gam = (__p - __f) / __q;
+          __Jmu = std::sqrt(__w / ((__p - __f) * __gam + __q));
+
+          __Jmu = ::std::copysign(__Jmu, __Jnul);
+
+
+
+
+          __Nmu = __gam * __Jmu;
+          __Npmu = (__p + __q / __gam) * __Nmu;
+          __Nnu1 = __mu * __xi * __Nmu - __Npmu;
+      }
+      __fact = __Jmu / __Jnul;
+      __Jnu = __fact * __Jnul1;
+      __Jpnu = __fact * __Jpnu1;
+      for (__i = 1; __i <= __nl; ++__i)
+        {
+          const _Tp __Nnutemp = (__mu + __i) * __xi2 * __Nnu1 - __Nmu;
+          __Nmu = __Nnu1;
+          __Nnu1 = __Nnutemp;
+        }
+      __Nnu = __Nmu;
+      __Npnu = __nu * __xi * __Nmu - __Nnu1;
+
+      return;
+    }
+# 361 "C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc" 3
+    template <typename _Tp>
+    void
+    __cyl_bessel_jn_asymp(_Tp __nu, _Tp __x, _Tp & __Jnu, _Tp & __Nnu)
+    {
+      const _Tp __mu = _Tp(4) * __nu * __nu;
+      const _Tp __8x = _Tp(8) * __x;
+
+      _Tp __P = _Tp(0);
+      _Tp __Q = _Tp(0);
+
+      _Tp __k = _Tp(0);
+      _Tp __term = _Tp(1);
+
+      int __epsP = 0;
+      int __epsQ = 0;
+
+      _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+
+      do
+        {
+          __term *= (__k == 0
+                     ? _Tp(1)
+                     : -(__mu - (2 * __k - 1) * (2 * __k - 1)) / (__k * __8x));
+
+          __epsP = std::abs(__term) < __eps * std::abs(__P);
+          __P += __term;
+
+          __k++;
+
+          __term *= (__mu - (2 * __k - 1) * (2 * __k - 1)) / (__k * __8x);
+          __epsQ = std::abs(__term) < __eps * std::abs(__Q);
+          __Q += __term;
+
+          if (__epsP && __epsQ && __k > (__nu / 2.))
+            break;
+
+          __k++;
+        }
+      while (__k < 1000);
+
+      const _Tp __chi = __x - (__nu + _Tp(0.5L))
+                             * __numeric_constants<_Tp>::__pi_2();
+
+      const _Tp __c = std::cos(__chi);
+      const _Tp __s = std::sin(__chi);
+
+      const _Tp __coef = std::sqrt(_Tp(2)
+                             / (__numeric_constants<_Tp>::__pi() * __x));
+
+      __Jnu = __coef * (__c * __P - __s * __Q);
+      __Nnu = __coef * (__s * __P + __c * __Q);
+
+      return;
+    }
+# 444 "C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc" 3
+    template <typename _Tp>
+    _Tp
+    __cyl_bessel_ij_series(_Tp __nu, _Tp __x, _Tp __sgn,
+                           unsigned int __max_iter)
+    {
+      if (__x == _Tp(0))
+ return __nu == _Tp(0) ? _Tp(1) : _Tp(0);
+
+      const _Tp __x2 = __x / _Tp(2);
+      _Tp __fact = __nu * std::log(__x2);
+
+      __fact -= ::std::lgamma(__nu + _Tp(1));
+
+
+
+      __fact = std::exp(__fact);
+      const _Tp __xx4 = __sgn * __x2 * __x2;
+      _Tp __Jn = _Tp(1);
+      _Tp __term = _Tp(1);
+
+      for (unsigned int __i = 1; __i < __max_iter; ++__i)
+        {
+          __term *= __xx4 / (_Tp(__i) * (__nu + _Tp(__i)));
+          __Jn += __term;
+          if (std::abs(__term / __Jn) < std::numeric_limits<_Tp>::epsilon())
+            break;
+        }
+
+      return __fact * __Jn;
+    }
+# 490 "C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __cyl_bessel_j(_Tp __nu, _Tp __x)
+    {
+      if (__nu < _Tp(0) || __x < _Tp(0))
+        std::__throw_domain_error(("Bad argument " "in __cyl_bessel_j.")
+                                                           );
+      else if (__isnan(__nu) || __isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__x * __x < _Tp(10) * (__nu + _Tp(1)))
+        return __cyl_bessel_ij_series(__nu, __x, -_Tp(1), 200);
+      else if (__x > _Tp(1000))
+        {
+          _Tp __J_nu, __N_nu;
+          __cyl_bessel_jn_asymp(__nu, __x, __J_nu, __N_nu);
+          return __J_nu;
+        }
+      else
+        {
+          _Tp __J_nu, __N_nu, __Jp_nu, __Np_nu;
+          __bessel_jn(__nu, __x, __J_nu, __N_nu, __Jp_nu, __Np_nu);
+          return __J_nu;
+        }
+    }
+# 532 "C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __cyl_neumann_n(_Tp __nu, _Tp __x)
+    {
+      if (__nu < _Tp(0) || __x < _Tp(0))
+        std::__throw_domain_error(("Bad argument " "in __cyl_neumann_n.")
+                                                            );
+      else if (__isnan(__nu) || __isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__x > _Tp(1000))
+        {
+          _Tp __J_nu, __N_nu;
+          __cyl_bessel_jn_asymp(__nu, __x, __J_nu, __N_nu);
+          return __N_nu;
+        }
+      else
+        {
+          _Tp __J_nu, __N_nu, __Jp_nu, __Np_nu;
+          __bessel_jn(__nu, __x, __J_nu, __N_nu, __Jp_nu, __Np_nu);
+          return __N_nu;
+        }
+    }
+# 569 "C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc" 3
+    template <typename _Tp>
+    void
+    __sph_bessel_jn(unsigned int __n, _Tp __x,
+                    _Tp & __j_n, _Tp & __n_n, _Tp & __jp_n, _Tp & __np_n)
+    {
+      const _Tp __nu = _Tp(__n) + _Tp(0.5L);
+
+      _Tp __J_nu, __N_nu, __Jp_nu, __Np_nu;
+      __bessel_jn(__nu, __x, __J_nu, __N_nu, __Jp_nu, __Np_nu);
+
+      const _Tp __factor = __numeric_constants<_Tp>::__sqrtpio2()
+                         / std::sqrt(__x);
+
+      __j_n = __factor * __J_nu;
+      __n_n = __factor * __N_nu;
+      __jp_n = __factor * __Jp_nu - __j_n / (_Tp(2) * __x);
+      __np_n = __factor * __Np_nu - __n_n / (_Tp(2) * __x);
+
+      return;
+    }
+# 604 "C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc" 3
+    template <typename _Tp>
+    _Tp
+    __sph_bessel(unsigned int __n, _Tp __x)
+    {
+      if (__x < _Tp(0))
+        std::__throw_domain_error(("Bad argument " "in __sph_bessel.")
+                                                         );
+      else if (__isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__x == _Tp(0))
+        {
+          if (__n == 0)
+            return _Tp(1);
+          else
+            return _Tp(0);
+        }
+      else
+        {
+          _Tp __j_n, __n_n, __jp_n, __np_n;
+          __sph_bessel_jn(__n, __x, __j_n, __n_n, __jp_n, __np_n);
+          return __j_n;
+        }
+    }
+# 642 "C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc" 3
+    template <typename _Tp>
+    _Tp
+    __sph_neumann(unsigned int __n, _Tp __x)
+    {
+      if (__x < _Tp(0))
+        std::__throw_domain_error(("Bad argument " "in __sph_neumann.")
+                                                          );
+      else if (__isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__x == _Tp(0))
+        return -std::numeric_limits<_Tp>::infinity();
+      else
+        {
+          _Tp __j_n, __n_n, __jp_n, __np_n;
+          __sph_bessel_jn(__n, __x, __j_n, __n_n, __jp_n, __np_n);
+          return __n_n;
+        }
+    }
+  }
+
+
+
+
+
+
+}
+# 49 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/beta_function.tcc" 1 3
+# 49 "C:/msys64/mingw64/include/c++/15.2.0/tr1/beta_function.tcc" 3
+namespace std
+{
+
+# 65 "C:/msys64/mingw64/include/c++/15.2.0/tr1/beta_function.tcc" 3
+  namespace __detail
+  {
+# 79 "C:/msys64/mingw64/include/c++/15.2.0/tr1/beta_function.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __beta_gamma(_Tp __x, _Tp __y)
+    {
+
+      _Tp __bet;
+
+      if (__x > __y)
+        {
+          __bet = ::std::tgamma(__x)
+                / ::std::tgamma(__x + __y);
+          __bet *= ::std::tgamma(__y);
+        }
+      else
+        {
+          __bet = ::std::tgamma(__y)
+                / ::std::tgamma(__x + __y);
+          __bet *= ::std::tgamma(__x);
+        }
+# 111 "C:/msys64/mingw64/include/c++/15.2.0/tr1/beta_function.tcc" 3
+      return __bet;
+    }
+# 127 "C:/msys64/mingw64/include/c++/15.2.0/tr1/beta_function.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __beta_lgamma(_Tp __x, _Tp __y)
+    {
+
+      _Tp __bet = ::std::lgamma(__x)
+                + ::std::lgamma(__y)
+                - ::std::lgamma(__x + __y);
+
+
+
+
+
+      __bet = std::exp(__bet);
+      return __bet;
+    }
+# 158 "C:/msys64/mingw64/include/c++/15.2.0/tr1/beta_function.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __beta_product(_Tp __x, _Tp __y)
+    {
+
+      _Tp __bet = (__x + __y) / (__x * __y);
+
+      unsigned int __max_iter = 1000000;
+      for (unsigned int __k = 1; __k < __max_iter; ++__k)
+        {
+          _Tp __term = (_Tp(1) + (__x + __y) / __k)
+                     / ((_Tp(1) + __x / __k) * (_Tp(1) + __y / __k));
+          __bet *= __term;
+        }
+
+      return __bet;
+    }
+# 189 "C:/msys64/mingw64/include/c++/15.2.0/tr1/beta_function.tcc" 3
+    template<typename _Tp>
+    inline _Tp
+    __beta(_Tp __x, _Tp __y)
+    {
+      if (__isnan(__x) || __isnan(__y))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else
+        return __beta_lgamma(__x, __y);
+    }
+  }
+
+
+
+
+
+
+}
+# 50 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 1 3
+# 45 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+namespace std
+{
+
+# 59 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+  namespace __detail
+  {
+# 76 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __ellint_rf(_Tp __x, _Tp __y, _Tp __z)
+    {
+      const _Tp __min = std::numeric_limits<_Tp>::min();
+      const _Tp __lolim = _Tp(5) * __min;
+
+      if (__x < _Tp(0) || __y < _Tp(0) || __z < _Tp(0))
+        std::__throw_domain_error(("Argument less than zero " "in __ellint_rf.")
+                                                        );
+      else if (__x + __y < __lolim || __x + __z < __lolim
+            || __y + __z < __lolim)
+        std::__throw_domain_error(("Argument too small in __ellint_rf"));
+      else
+        {
+          const _Tp __c0 = _Tp(1) / _Tp(4);
+          const _Tp __c1 = _Tp(1) / _Tp(24);
+          const _Tp __c2 = _Tp(1) / _Tp(10);
+          const _Tp __c3 = _Tp(3) / _Tp(44);
+          const _Tp __c4 = _Tp(1) / _Tp(14);
+
+          _Tp __xn = __x;
+          _Tp __yn = __y;
+          _Tp __zn = __z;
+
+          const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+          const _Tp __errtol = std::pow(__eps, _Tp(1) / _Tp(6));
+          _Tp __mu;
+          _Tp __xndev, __yndev, __zndev;
+
+          const unsigned int __max_iter = 100;
+          for (unsigned int __iter = 0; __iter < __max_iter; ++__iter)
+            {
+              __mu = (__xn + __yn + __zn) / _Tp(3);
+              __xndev = 2 - (__mu + __xn) / __mu;
+              __yndev = 2 - (__mu + __yn) / __mu;
+              __zndev = 2 - (__mu + __zn) / __mu;
+              _Tp __epsilon = std::max(std::abs(__xndev), std::abs(__yndev));
+              __epsilon = std::max(__epsilon, std::abs(__zndev));
+              if (__epsilon < __errtol)
+                break;
+              const _Tp __xnroot = std::sqrt(__xn);
+              const _Tp __ynroot = std::sqrt(__yn);
+              const _Tp __znroot = std::sqrt(__zn);
+              const _Tp __lambda = __xnroot * (__ynroot + __znroot)
+                                 + __ynroot * __znroot;
+              __xn = __c0 * (__xn + __lambda);
+              __yn = __c0 * (__yn + __lambda);
+              __zn = __c0 * (__zn + __lambda);
+            }
+
+          const _Tp __e2 = __xndev * __yndev - __zndev * __zndev;
+          const _Tp __e3 = __xndev * __yndev * __zndev;
+          const _Tp __s = _Tp(1) + (__c1 * __e2 - __c2 - __c3 * __e3) * __e2
+                   + __c4 * __e3;
+
+          return __s / std::sqrt(__mu);
+        }
+    }
+# 153 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __comp_ellint_1_series(_Tp __k)
+    {
+
+      const _Tp __kk = __k * __k;
+
+      _Tp __term = __kk / _Tp(4);
+      _Tp __sum = _Tp(1) + __term;
+
+      const unsigned int __max_iter = 1000;
+      for (unsigned int __i = 2; __i < __max_iter; ++__i)
+        {
+          __term *= (2 * __i - 1) * __kk / (2 * __i);
+          if (__term < std::numeric_limits<_Tp>::epsilon())
+            break;
+          __sum += __term;
+        }
+
+      return __numeric_constants<_Tp>::__pi_2() * __sum;
+    }
+# 191 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __comp_ellint_1(_Tp __k)
+    {
+
+      if (__isnan(__k))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (std::abs(__k) >= _Tp(1))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else
+        return __ellint_rf(_Tp(0), _Tp(1) - __k * __k, _Tp(1));
+    }
+# 219 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __ellint_1(_Tp __k, _Tp __phi)
+    {
+
+      if (__isnan(__k) || __isnan(__phi))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (std::abs(__k) > _Tp(1))
+        std::__throw_domain_error(("Bad argument in __ellint_1."));
+      else
+        {
+
+          const int __n = std::floor(__phi / __numeric_constants<_Tp>::__pi()
+                                   + _Tp(0.5L));
+          const _Tp __phi_red = __phi
+                              - __n * __numeric_constants<_Tp>::__pi();
+
+          const _Tp __s = std::sin(__phi_red);
+          const _Tp __c = std::cos(__phi_red);
+
+          const _Tp __F = __s
+                        * __ellint_rf(__c * __c,
+                                _Tp(1) - __k * __k * __s * __s, _Tp(1));
+
+          if (__n == 0)
+            return __F;
+          else
+            return __F + _Tp(2) * __n * __comp_ellint_1(__k);
+        }
+    }
+# 266 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __comp_ellint_2_series(_Tp __k)
+    {
+
+      const _Tp __kk = __k * __k;
+
+      _Tp __term = __kk;
+      _Tp __sum = __term;
+
+      const unsigned int __max_iter = 1000;
+      for (unsigned int __i = 2; __i < __max_iter; ++__i)
+        {
+          const _Tp __i2m = 2 * __i - 1;
+          const _Tp __i2 = 2 * __i;
+          __term *= __i2m * __i2m * __kk / (__i2 * __i2);
+          if (__term < std::numeric_limits<_Tp>::epsilon())
+            break;
+          __sum += __term / __i2m;
+        }
+
+      return __numeric_constants<_Tp>::__pi_2() * (_Tp(1) - __sum);
+    }
+# 314 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __ellint_rd(_Tp __x, _Tp __y, _Tp __z)
+    {
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+      const _Tp __errtol = std::pow(__eps / _Tp(8), _Tp(1) / _Tp(6));
+      const _Tp __max = std::numeric_limits<_Tp>::max();
+      const _Tp __lolim = _Tp(2) / std::pow(__max, _Tp(2) / _Tp(3));
+
+      if (__x < _Tp(0) || __y < _Tp(0))
+        std::__throw_domain_error(("Argument less than zero " "in __ellint_rd.")
+                                                        );
+      else if (__x + __y < __lolim || __z < __lolim)
+        std::__throw_domain_error(("Argument too small " "in __ellint_rd.")
+                                                        );
+      else
+        {
+          const _Tp __c0 = _Tp(1) / _Tp(4);
+          const _Tp __c1 = _Tp(3) / _Tp(14);
+          const _Tp __c2 = _Tp(1) / _Tp(6);
+          const _Tp __c3 = _Tp(9) / _Tp(22);
+          const _Tp __c4 = _Tp(3) / _Tp(26);
+
+          _Tp __xn = __x;
+          _Tp __yn = __y;
+          _Tp __zn = __z;
+          _Tp __sigma = _Tp(0);
+          _Tp __power4 = _Tp(1);
+
+          _Tp __mu;
+          _Tp __xndev, __yndev, __zndev;
+
+          const unsigned int __max_iter = 100;
+          for (unsigned int __iter = 0; __iter < __max_iter; ++__iter)
+            {
+              __mu = (__xn + __yn + _Tp(3) * __zn) / _Tp(5);
+              __xndev = (__mu - __xn) / __mu;
+              __yndev = (__mu - __yn) / __mu;
+              __zndev = (__mu - __zn) / __mu;
+              _Tp __epsilon = std::max(std::abs(__xndev), std::abs(__yndev));
+              __epsilon = std::max(__epsilon, std::abs(__zndev));
+              if (__epsilon < __errtol)
+                break;
+              _Tp __xnroot = std::sqrt(__xn);
+              _Tp __ynroot = std::sqrt(__yn);
+              _Tp __znroot = std::sqrt(__zn);
+              _Tp __lambda = __xnroot * (__ynroot + __znroot)
+                           + __ynroot * __znroot;
+              __sigma += __power4 / (__znroot * (__zn + __lambda));
+              __power4 *= __c0;
+              __xn = __c0 * (__xn + __lambda);
+              __yn = __c0 * (__yn + __lambda);
+              __zn = __c0 * (__zn + __lambda);
+            }
+
+          _Tp __ea = __xndev * __yndev;
+          _Tp __eb = __zndev * __zndev;
+          _Tp __ec = __ea - __eb;
+          _Tp __ed = __ea - _Tp(6) * __eb;
+          _Tp __ef = __ed + __ec + __ec;
+          _Tp __s1 = __ed * (-__c1 + __c3 * __ed
+                                   / _Tp(3) - _Tp(3) * __c4 * __zndev * __ef
+                                   / _Tp(2));
+          _Tp __s2 = __zndev
+                   * (__c2 * __ef
+                    + __zndev * (-__c3 * __ec - __zndev * __c4 - __ea));
+
+          return _Tp(3) * __sigma + __power4 * (_Tp(1) + __s1 + __s2)
+                                        / (__mu * std::sqrt(__mu));
+        }
+    }
+# 399 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __comp_ellint_2(_Tp __k)
+    {
+
+      if (__isnan(__k))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (std::abs(__k) == 1)
+        return _Tp(1);
+      else if (std::abs(__k) > _Tp(1))
+        std::__throw_domain_error(("Bad argument in __comp_ellint_2."));
+      else
+        {
+          const _Tp __kk = __k * __k;
+
+          return __ellint_rf(_Tp(0), _Tp(1) - __kk, _Tp(1))
+               - __kk * __ellint_rd(_Tp(0), _Tp(1) - __kk, _Tp(1)) / _Tp(3);
+        }
+    }
+# 433 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __ellint_2(_Tp __k, _Tp __phi)
+    {
+
+      if (__isnan(__k) || __isnan(__phi))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (std::abs(__k) > _Tp(1))
+        std::__throw_domain_error(("Bad argument in __ellint_2."));
+      else
+        {
+
+          const int __n = std::floor(__phi / __numeric_constants<_Tp>::__pi()
+                                   + _Tp(0.5L));
+          const _Tp __phi_red = __phi
+                              - __n * __numeric_constants<_Tp>::__pi();
+
+          const _Tp __kk = __k * __k;
+          const _Tp __s = std::sin(__phi_red);
+          const _Tp __ss = __s * __s;
+          const _Tp __sss = __ss * __s;
+          const _Tp __c = std::cos(__phi_red);
+          const _Tp __cc = __c * __c;
+
+          const _Tp __E = __s
+                        * __ellint_rf(__cc, _Tp(1) - __kk * __ss, _Tp(1))
+                        - __kk * __sss
+                        * __ellint_rd(__cc, _Tp(1) - __kk * __ss, _Tp(1))
+                        / _Tp(3);
+
+          if (__n == 0)
+            return __E;
+          else
+            return __E + _Tp(2) * __n * __comp_ellint_2(__k);
+        }
+    }
+# 492 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __ellint_rc(_Tp __x, _Tp __y)
+    {
+      const _Tp __min = std::numeric_limits<_Tp>::min();
+      const _Tp __lolim = _Tp(5) * __min;
+
+      if (__x < _Tp(0) || __y < _Tp(0) || __x + __y < __lolim)
+        std::__throw_domain_error(("Argument less than zero " "in __ellint_rc.")
+                                                        );
+      else
+        {
+          const _Tp __c0 = _Tp(1) / _Tp(4);
+          const _Tp __c1 = _Tp(1) / _Tp(7);
+          const _Tp __c2 = _Tp(9) / _Tp(22);
+          const _Tp __c3 = _Tp(3) / _Tp(10);
+          const _Tp __c4 = _Tp(3) / _Tp(8);
+
+          _Tp __xn = __x;
+          _Tp __yn = __y;
+
+          const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+          const _Tp __errtol = std::pow(__eps / _Tp(30), _Tp(1) / _Tp(6));
+          _Tp __mu;
+          _Tp __sn;
+
+          const unsigned int __max_iter = 100;
+          for (unsigned int __iter = 0; __iter < __max_iter; ++__iter)
+            {
+              __mu = (__xn + _Tp(2) * __yn) / _Tp(3);
+              __sn = (__yn + __mu) / __mu - _Tp(2);
+              if (std::abs(__sn) < __errtol)
+                break;
+              const _Tp __lambda = _Tp(2) * std::sqrt(__xn) * std::sqrt(__yn)
+                             + __yn;
+              __xn = __c0 * (__xn + __lambda);
+              __yn = __c0 * (__yn + __lambda);
+            }
+
+          _Tp __s = __sn * __sn
+                  * (__c3 + __sn*(__c1 + __sn * (__c4 + __sn * __c2)));
+
+          return (_Tp(1) + __s) / std::sqrt(__mu);
+        }
+    }
+# 561 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __ellint_rj(_Tp __x, _Tp __y, _Tp __z, _Tp __p)
+    {
+      const _Tp __min = std::numeric_limits<_Tp>::min();
+      const _Tp __lolim = std::pow(_Tp(5) * __min, _Tp(1)/_Tp(3));
+
+      if (__x < _Tp(0) || __y < _Tp(0) || __z < _Tp(0))
+        std::__throw_domain_error(("Argument less than zero " "in __ellint_rj.")
+                                                        );
+      else if (__x + __y < __lolim || __x + __z < __lolim
+            || __y + __z < __lolim || __p < __lolim)
+        std::__throw_domain_error(("Argument too small " "in __ellint_rj")
+                                                       );
+      else
+        {
+          const _Tp __c0 = _Tp(1) / _Tp(4);
+          const _Tp __c1 = _Tp(3) / _Tp(14);
+          const _Tp __c2 = _Tp(1) / _Tp(3);
+          const _Tp __c3 = _Tp(3) / _Tp(22);
+          const _Tp __c4 = _Tp(3) / _Tp(26);
+
+          _Tp __xn = __x;
+          _Tp __yn = __y;
+          _Tp __zn = __z;
+          _Tp __pn = __p;
+          _Tp __sigma = _Tp(0);
+          _Tp __power4 = _Tp(1);
+
+          const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+          const _Tp __errtol = std::pow(__eps / _Tp(8), _Tp(1) / _Tp(6));
+
+          _Tp __mu;
+          _Tp __xndev, __yndev, __zndev, __pndev;
+
+          const unsigned int __max_iter = 100;
+          for (unsigned int __iter = 0; __iter < __max_iter; ++__iter)
+            {
+              __mu = (__xn + __yn + __zn + _Tp(2) * __pn) / _Tp(5);
+              __xndev = (__mu - __xn) / __mu;
+              __yndev = (__mu - __yn) / __mu;
+              __zndev = (__mu - __zn) / __mu;
+              __pndev = (__mu - __pn) / __mu;
+              _Tp __epsilon = std::max(std::abs(__xndev), std::abs(__yndev));
+              __epsilon = std::max(__epsilon, std::abs(__zndev));
+              __epsilon = std::max(__epsilon, std::abs(__pndev));
+              if (__epsilon < __errtol)
+                break;
+              const _Tp __xnroot = std::sqrt(__xn);
+              const _Tp __ynroot = std::sqrt(__yn);
+              const _Tp __znroot = std::sqrt(__zn);
+              const _Tp __lambda = __xnroot * (__ynroot + __znroot)
+                                 + __ynroot * __znroot;
+              const _Tp __alpha1 = __pn * (__xnroot + __ynroot + __znroot)
+                                + __xnroot * __ynroot * __znroot;
+              const _Tp __alpha2 = __alpha1 * __alpha1;
+              const _Tp __beta = __pn * (__pn + __lambda)
+                                      * (__pn + __lambda);
+              __sigma += __power4 * __ellint_rc(__alpha2, __beta);
+              __power4 *= __c0;
+              __xn = __c0 * (__xn + __lambda);
+              __yn = __c0 * (__yn + __lambda);
+              __zn = __c0 * (__zn + __lambda);
+              __pn = __c0 * (__pn + __lambda);
+            }
+
+          _Tp __ea = __xndev * (__yndev + __zndev) + __yndev * __zndev;
+          _Tp __eb = __xndev * __yndev * __zndev;
+          _Tp __ec = __pndev * __pndev;
+          _Tp __e2 = __ea - _Tp(3) * __ec;
+          _Tp __e3 = __eb + _Tp(2) * __pndev * (__ea - __ec);
+          _Tp __s1 = _Tp(1) + __e2 * (-__c1 + _Tp(3) * __c3 * __e2 / _Tp(4)
+                            - _Tp(3) * __c4 * __e3 / _Tp(2));
+          _Tp __s2 = __eb * (__c2 / _Tp(2)
+                   + __pndev * (-__c3 - __c3 + __pndev * __c4));
+          _Tp __s3 = __pndev * __ea * (__c2 - __pndev * __c3)
+                   - __c2 * __pndev * __ec;
+
+          return _Tp(3) * __sigma + __power4 * (__s1 + __s2 + __s3)
+                                             / (__mu * std::sqrt(__mu));
+        }
+    }
+# 661 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __comp_ellint_3(_Tp __k, _Tp __nu)
+    {
+
+      if (__isnan(__k) || __isnan(__nu))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__nu == _Tp(1))
+        return std::numeric_limits<_Tp>::infinity();
+      else if (std::abs(__k) > _Tp(1))
+        std::__throw_domain_error(("Bad argument in __comp_ellint_3."));
+      else
+        {
+          const _Tp __kk = __k * __k;
+
+          return __ellint_rf(_Tp(0), _Tp(1) - __kk, _Tp(1))
+               + __nu
+               * __ellint_rj(_Tp(0), _Tp(1) - __kk, _Tp(1), _Tp(1) - __nu)
+               / _Tp(3);
+        }
+    }
+# 701 "C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __ellint_3(_Tp __k, _Tp __nu, _Tp __phi)
+    {
+
+      if (__isnan(__k) || __isnan(__nu) || __isnan(__phi))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (std::abs(__k) > _Tp(1))
+        std::__throw_domain_error(("Bad argument in __ellint_3."));
+      else
+        {
+
+          const int __n = std::floor(__phi / __numeric_constants<_Tp>::__pi()
+                                   + _Tp(0.5L));
+          const _Tp __phi_red = __phi
+                              - __n * __numeric_constants<_Tp>::__pi();
+
+          const _Tp __kk = __k * __k;
+          const _Tp __s = std::sin(__phi_red);
+          const _Tp __ss = __s * __s;
+          const _Tp __sss = __ss * __s;
+          const _Tp __c = std::cos(__phi_red);
+          const _Tp __cc = __c * __c;
+
+          const _Tp __Pi = __s
+                         * __ellint_rf(__cc, _Tp(1) - __kk * __ss, _Tp(1))
+                         + __nu * __sss
+                         * __ellint_rj(__cc, _Tp(1) - __kk * __ss, _Tp(1),
+                                       _Tp(1) - __nu * __ss) / _Tp(3);
+
+          if (__n == 0)
+            return __Pi;
+          else
+            return __Pi + _Tp(2) * __n * __comp_ellint_3(__k, __nu);
+        }
+    }
+  }
+
+
+
+
+
+}
+# 51 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 1 3
+# 50 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+namespace std
+{
+
+# 64 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+  namespace __detail
+  {
+    template<typename _Tp> _Tp __expint_E1(_Tp);
+# 81 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __expint_E1_series(_Tp __x)
+    {
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+      _Tp __term = _Tp(1);
+      _Tp __esum = _Tp(0);
+      _Tp __osum = _Tp(0);
+      const unsigned int __max_iter = 1000;
+      for (unsigned int __i = 1; __i < __max_iter; ++__i)
+        {
+          __term *= - __x / __i;
+          if (std::abs(__term) < __eps)
+            break;
+          if (__term >= _Tp(0))
+            __esum += __term / __i;
+          else
+            __osum += __term / __i;
+        }
+
+      return - __esum - __osum
+             - __numeric_constants<_Tp>::__gamma_e() - std::log(__x);
+    }
+# 118 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __expint_E1_asymp(_Tp __x)
+    {
+      _Tp __term = _Tp(1);
+      _Tp __esum = _Tp(1);
+      _Tp __osum = _Tp(0);
+      const unsigned int __max_iter = 1000;
+      for (unsigned int __i = 1; __i < __max_iter; ++__i)
+        {
+          _Tp __prev = __term;
+          __term *= - __i / __x;
+          if (std::abs(__term) > std::abs(__prev))
+            break;
+          if (__term >= _Tp(0))
+            __esum += __term;
+          else
+            __osum += __term;
+        }
+
+      return std::exp(- __x) * (__esum + __osum) / __x;
+    }
+# 155 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __expint_En_series(unsigned int __n, _Tp __x)
+    {
+      const unsigned int __max_iter = 1000;
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+      const int __nm1 = __n - 1;
+      _Tp __ans = (__nm1 != 0
+                ? _Tp(1) / __nm1 : -std::log(__x)
+                                   - __numeric_constants<_Tp>::__gamma_e());
+      _Tp __fact = _Tp(1);
+      for (int __i = 1; __i <= __max_iter; ++__i)
+        {
+          __fact *= -__x / _Tp(__i);
+          _Tp __del;
+          if ( __i != __nm1 )
+            __del = -__fact / _Tp(__i - __nm1);
+          else
+            {
+              _Tp __psi = -__numeric_constants<_Tp>::gamma_e();
+              for (int __ii = 1; __ii <= __nm1; ++__ii)
+                __psi += _Tp(1) / _Tp(__ii);
+              __del = __fact * (__psi - std::log(__x));
+            }
+          __ans += __del;
+          if (std::abs(__del) < __eps * std::abs(__ans))
+            return __ans;
+        }
+      std::__throw_runtime_error(("Series summation failed " "in __expint_En_series.")
+                                                              );
+    }
+# 201 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __expint_En_cont_frac(unsigned int __n, _Tp __x)
+    {
+      const unsigned int __max_iter = 1000;
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+      const _Tp __fp_min = std::numeric_limits<_Tp>::min();
+      const int __nm1 = __n - 1;
+      _Tp __b = __x + _Tp(__n);
+      _Tp __c = _Tp(1) / __fp_min;
+      _Tp __d = _Tp(1) / __b;
+      _Tp __h = __d;
+      for ( unsigned int __i = 1; __i <= __max_iter; ++__i )
+        {
+          _Tp __a = -_Tp(__i * (__nm1 + __i));
+          __b += _Tp(2);
+          __d = _Tp(1) / (__a * __d + __b);
+          __c = __b + __a / __c;
+          const _Tp __del = __c * __d;
+          __h *= __del;
+          if (std::abs(__del - _Tp(1)) < __eps)
+            {
+              const _Tp __ans = __h * std::exp(-__x);
+              return __ans;
+            }
+        }
+      std::__throw_runtime_error(("Continued fraction failed " "in __expint_En_cont_frac.")
+                                                                 );
+    }
+# 246 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __expint_En_recursion(unsigned int __n, _Tp __x)
+    {
+      _Tp __En;
+      _Tp __E1 = __expint_E1(__x);
+      if (__x < _Tp(__n))
+        {
+
+          __En = __E1;
+          for (unsigned int __j = 2; __j < __n; ++__j)
+            __En = (std::exp(-__x) - __x * __En) / _Tp(__j - 1);
+        }
+      else
+        {
+
+          __En = _Tp(1);
+          const int __N = __n + 20;
+          _Tp __save = _Tp(0);
+          for (int __j = __N; __j > 0; --__j)
+            {
+              __En = (std::exp(-__x) - __j * __En) / __x;
+              if (__j == __n)
+                __save = __En;
+            }
+            _Tp __norm = __En / __E1;
+            __En /= __norm;
+        }
+
+      return __En;
+    }
+# 290 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __expint_Ei_series(_Tp __x)
+    {
+      _Tp __term = _Tp(1);
+      _Tp __sum = _Tp(0);
+      const unsigned int __max_iter = 1000;
+      for (unsigned int __i = 1; __i < __max_iter; ++__i)
+        {
+          __term *= __x / __i;
+          __sum += __term / __i;
+          if (__term < std::numeric_limits<_Tp>::epsilon() * __sum)
+            break;
+        }
+
+      return __numeric_constants<_Tp>::__gamma_e() + __sum + std::log(__x);
+    }
+# 321 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __expint_Ei_asymp(_Tp __x)
+    {
+      _Tp __term = _Tp(1);
+      _Tp __sum = _Tp(1);
+      const unsigned int __max_iter = 1000;
+      for (unsigned int __i = 1; __i < __max_iter; ++__i)
+        {
+          _Tp __prev = __term;
+          __term *= __i / __x;
+          if (__term < std::numeric_limits<_Tp>::epsilon())
+            break;
+          if (__term >= __prev)
+            break;
+          __sum += __term;
+        }
+
+      return std::exp(__x) * __sum / __x;
+    }
+# 354 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __expint_Ei(_Tp __x)
+    {
+      if (__x < _Tp(0))
+        return -__expint_E1(-__x);
+      else if (__x < -std::log(std::numeric_limits<_Tp>::epsilon()))
+        return __expint_Ei_series(__x);
+      else
+        return __expint_Ei_asymp(__x);
+    }
+# 378 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __expint_E1(_Tp __x)
+    {
+      if (__x < _Tp(0))
+        return -__expint_Ei(-__x);
+      else if (__x < _Tp(1))
+        return __expint_E1_series(__x);
+      else if (__x < _Tp(100))
+        return __expint_En_cont_frac(1, __x);
+      else
+        return __expint_E1_asymp(__x);
+    }
+# 408 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __expint_asymp(unsigned int __n, _Tp __x)
+    {
+      _Tp __term = _Tp(1);
+      _Tp __sum = _Tp(1);
+      for (unsigned int __i = 1; __i <= __n; ++__i)
+        {
+          _Tp __prev = __term;
+          __term *= -(__n - __i + 1) / __x;
+          if (std::abs(__term) > std::abs(__prev))
+            break;
+          __sum += __term;
+        }
+
+      return std::exp(-__x) * __sum / __x;
+    }
+# 442 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __expint_large_n(unsigned int __n, _Tp __x)
+    {
+      const _Tp __xpn = __x + __n;
+      const _Tp __xpn2 = __xpn * __xpn;
+      _Tp __term = _Tp(1);
+      _Tp __sum = _Tp(1);
+      for (unsigned int __i = 1; __i <= __n; ++__i)
+        {
+          _Tp __prev = __term;
+          __term *= (__n - 2 * (__i - 1) * __x) / __xpn2;
+          if (std::abs(__term) < std::numeric_limits<_Tp>::epsilon())
+            break;
+          __sum += __term;
+        }
+
+      return std::exp(-__x) * __sum / __xpn;
+    }
+# 476 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __expint(unsigned int __n, _Tp __x)
+    {
+
+      if (__isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__n <= 1 && __x == _Tp(0))
+        return std::numeric_limits<_Tp>::infinity();
+      else
+        {
+          _Tp __E0 = std::exp(__x) / __x;
+          if (__n == 0)
+            return __E0;
+
+          _Tp __E1 = __expint_E1(__x);
+          if (__n == 1)
+            return __E1;
+
+          if (__x == _Tp(0))
+            return _Tp(1) / static_cast<_Tp>(__n - 1);
+
+          _Tp __En = __expint_En_recursion(__n, __x);
+
+          return __En;
+        }
+    }
+# 516 "C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc" 3
+    template<typename _Tp>
+    inline _Tp
+    __expint(_Tp __x)
+    {
+      if (__isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else
+        return __expint_Ei(__x);
+    }
+  }
+
+
+
+
+
+}
+# 52 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/hypergeometric.tcc" 1 3
+# 44 "C:/msys64/mingw64/include/c++/15.2.0/tr1/hypergeometric.tcc" 3
+namespace std
+{
+
+# 60 "C:/msys64/mingw64/include/c++/15.2.0/tr1/hypergeometric.tcc" 3
+  namespace __detail
+  {
+# 83 "C:/msys64/mingw64/include/c++/15.2.0/tr1/hypergeometric.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __conf_hyperg_series(_Tp __a, _Tp __c, _Tp __x)
+    {
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+
+      _Tp __term = _Tp(1);
+      _Tp __Fac = _Tp(1);
+      const unsigned int __max_iter = 100000;
+      unsigned int __i;
+      for (__i = 0; __i < __max_iter; ++__i)
+        {
+          __term *= (__a + _Tp(__i)) * __x
+                  / ((__c + _Tp(__i)) * _Tp(1 + __i));
+          if (std::abs(__term) < __eps)
+            {
+              break;
+            }
+          __Fac += __term;
+        }
+      if (__i == __max_iter)
+        std::__throw_runtime_error(("Series failed to converge " "in __conf_hyperg_series.")
+                                                                  );
+
+      return __Fac;
+    }
+# 120 "C:/msys64/mingw64/include/c++/15.2.0/tr1/hypergeometric.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __conf_hyperg_luke(_Tp __a, _Tp __c, _Tp __xin)
+    {
+      const _Tp __big = std::pow(std::numeric_limits<_Tp>::max(), _Tp(0.16L));
+      const int __nmax = 20000;
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+      const _Tp __x = -__xin;
+      const _Tp __x3 = __x * __x * __x;
+      const _Tp __t0 = __a / __c;
+      const _Tp __t1 = (__a + _Tp(1)) / (_Tp(2) * __c);
+      const _Tp __t2 = (__a + _Tp(2)) / (_Tp(2) * (__c + _Tp(1)));
+      _Tp __F = _Tp(1);
+      _Tp __prec;
+
+      _Tp __Bnm3 = _Tp(1);
+      _Tp __Bnm2 = _Tp(1) + __t1 * __x;
+      _Tp __Bnm1 = _Tp(1) + __t2 * __x * (_Tp(1) + __t1 / _Tp(3) * __x);
+
+      _Tp __Anm3 = _Tp(1);
+      _Tp __Anm2 = __Bnm2 - __t0 * __x;
+      _Tp __Anm1 = __Bnm1 - __t0 * (_Tp(1) + __t2 * __x) * __x
+                 + __t0 * __t1 * (__c / (__c + _Tp(1))) * __x * __x;
+
+      int __n = 3;
+      while(1)
+        {
+          _Tp __npam1 = _Tp(__n - 1) + __a;
+          _Tp __npcm1 = _Tp(__n - 1) + __c;
+          _Tp __npam2 = _Tp(__n - 2) + __a;
+          _Tp __npcm2 = _Tp(__n - 2) + __c;
+          _Tp __tnm1 = _Tp(2 * __n - 1);
+          _Tp __tnm3 = _Tp(2 * __n - 3);
+          _Tp __tnm5 = _Tp(2 * __n - 5);
+          _Tp __F1 = (_Tp(__n - 2) - __a) / (_Tp(2) * __tnm3 * __npcm1);
+          _Tp __F2 = (_Tp(__n) + __a) * __npam1
+                   / (_Tp(4) * __tnm1 * __tnm3 * __npcm2 * __npcm1);
+          _Tp __F3 = -__npam2 * __npam1 * (_Tp(__n - 2) - __a)
+                   / (_Tp(8) * __tnm3 * __tnm3 * __tnm5
+                   * (_Tp(__n - 3) + __c) * __npcm2 * __npcm1);
+          _Tp __E = -__npam1 * (_Tp(__n - 1) - __c)
+                   / (_Tp(2) * __tnm3 * __npcm2 * __npcm1);
+
+          _Tp __An = (_Tp(1) + __F1 * __x) * __Anm1
+                   + (__E + __F2 * __x) * __x * __Anm2 + __F3 * __x3 * __Anm3;
+          _Tp __Bn = (_Tp(1) + __F1 * __x) * __Bnm1
+                   + (__E + __F2 * __x) * __x * __Bnm2 + __F3 * __x3 * __Bnm3;
+          _Tp __r = __An / __Bn;
+
+          __prec = std::abs((__F - __r) / __F);
+          __F = __r;
+
+          if (__prec < __eps || __n > __nmax)
+            break;
+
+          if (std::abs(__An) > __big || std::abs(__Bn) > __big)
+            {
+              __An /= __big;
+              __Bn /= __big;
+              __Anm1 /= __big;
+              __Bnm1 /= __big;
+              __Anm2 /= __big;
+              __Bnm2 /= __big;
+              __Anm3 /= __big;
+              __Bnm3 /= __big;
+            }
+          else if (std::abs(__An) < _Tp(1) / __big
+                || std::abs(__Bn) < _Tp(1) / __big)
+            {
+              __An *= __big;
+              __Bn *= __big;
+              __Anm1 *= __big;
+              __Bnm1 *= __big;
+              __Anm2 *= __big;
+              __Bnm2 *= __big;
+              __Anm3 *= __big;
+              __Bnm3 *= __big;
+            }
+
+          ++__n;
+          __Bnm3 = __Bnm2;
+          __Bnm2 = __Bnm1;
+          __Bnm1 = __Bn;
+          __Anm3 = __Anm2;
+          __Anm2 = __Anm1;
+          __Anm1 = __An;
+        }
+
+      if (__n >= __nmax)
+        std::__throw_runtime_error(("Iteration failed to converge " "in __conf_hyperg_luke.")
+                                                                );
+
+      return __F;
+    }
+# 227 "C:/msys64/mingw64/include/c++/15.2.0/tr1/hypergeometric.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __conf_hyperg(_Tp __a, _Tp __c, _Tp __x)
+    {
+
+      const _Tp __c_nint = ::std::nearbyint(__c);
+
+
+
+      if (__isnan(__a) || __isnan(__c) || __isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__c_nint == __c && __c_nint <= 0)
+        return std::numeric_limits<_Tp>::infinity();
+      else if (__a == _Tp(0))
+        return _Tp(1);
+      else if (__c == __a)
+        return std::exp(__x);
+      else if (__x < _Tp(0))
+        return __conf_hyperg_luke(__a, __c, __x);
+      else
+        return __conf_hyperg_series(__a, __c, __x);
+    }
+# 271 "C:/msys64/mingw64/include/c++/15.2.0/tr1/hypergeometric.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __hyperg_series(_Tp __a, _Tp __b, _Tp __c, _Tp __x)
+    {
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+
+      _Tp __term = _Tp(1);
+      _Tp __Fabc = _Tp(1);
+      const unsigned int __max_iter = 100000;
+      unsigned int __i;
+      for (__i = 0; __i < __max_iter; ++__i)
+        {
+          __term *= (__a + _Tp(__i)) * (__b + _Tp(__i)) * __x
+                  / ((__c + _Tp(__i)) * _Tp(1 + __i));
+          if (std::abs(__term) < __eps)
+            {
+              break;
+            }
+          __Fabc += __term;
+        }
+      if (__i == __max_iter)
+        std::__throw_runtime_error(("Series failed to converge " "in __hyperg_series.")
+                                                             );
+
+      return __Fabc;
+    }
+
+
+
+
+
+
+
+    template<typename _Tp>
+    _Tp
+    __hyperg_luke(_Tp __a, _Tp __b, _Tp __c, _Tp __xin)
+    {
+      const _Tp __big = std::pow(std::numeric_limits<_Tp>::max(), _Tp(0.16L));
+      const int __nmax = 20000;
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+      const _Tp __x = -__xin;
+      const _Tp __x3 = __x * __x * __x;
+      const _Tp __t0 = __a * __b / __c;
+      const _Tp __t1 = (__a + _Tp(1)) * (__b + _Tp(1)) / (_Tp(2) * __c);
+      const _Tp __t2 = (__a + _Tp(2)) * (__b + _Tp(2))
+                     / (_Tp(2) * (__c + _Tp(1)));
+
+      _Tp __F = _Tp(1);
+
+      _Tp __Bnm3 = _Tp(1);
+      _Tp __Bnm2 = _Tp(1) + __t1 * __x;
+      _Tp __Bnm1 = _Tp(1) + __t2 * __x * (_Tp(1) + __t1 / _Tp(3) * __x);
+
+      _Tp __Anm3 = _Tp(1);
+      _Tp __Anm2 = __Bnm2 - __t0 * __x;
+      _Tp __Anm1 = __Bnm1 - __t0 * (_Tp(1) + __t2 * __x) * __x
+                 + __t0 * __t1 * (__c / (__c + _Tp(1))) * __x * __x;
+
+      int __n = 3;
+      while (1)
+        {
+          const _Tp __npam1 = _Tp(__n - 1) + __a;
+          const _Tp __npbm1 = _Tp(__n - 1) + __b;
+          const _Tp __npcm1 = _Tp(__n - 1) + __c;
+          const _Tp __npam2 = _Tp(__n - 2) + __a;
+          const _Tp __npbm2 = _Tp(__n - 2) + __b;
+          const _Tp __npcm2 = _Tp(__n - 2) + __c;
+          const _Tp __tnm1 = _Tp(2 * __n - 1);
+          const _Tp __tnm3 = _Tp(2 * __n - 3);
+          const _Tp __tnm5 = _Tp(2 * __n - 5);
+          const _Tp __n2 = __n * __n;
+          const _Tp __F1 = (_Tp(3) * __n2 + (__a + __b - _Tp(6)) * __n
+                         + _Tp(2) - __a * __b - _Tp(2) * (__a + __b))
+                         / (_Tp(2) * __tnm3 * __npcm1);
+          const _Tp __F2 = -(_Tp(3) * __n2 - (__a + __b + _Tp(6)) * __n
+                         + _Tp(2) - __a * __b) * __npam1 * __npbm1
+                         / (_Tp(4) * __tnm1 * __tnm3 * __npcm2 * __npcm1);
+          const _Tp __F3 = (__npam2 * __npam1 * __npbm2 * __npbm1
+                         * (_Tp(__n - 2) - __a) * (_Tp(__n - 2) - __b))
+                         / (_Tp(8) * __tnm3 * __tnm3 * __tnm5
+                         * (_Tp(__n - 3) + __c) * __npcm2 * __npcm1);
+          const _Tp __E = -__npam1 * __npbm1 * (_Tp(__n - 1) - __c)
+                         / (_Tp(2) * __tnm3 * __npcm2 * __npcm1);
+
+          _Tp __An = (_Tp(1) + __F1 * __x) * __Anm1
+                   + (__E + __F2 * __x) * __x * __Anm2 + __F3 * __x3 * __Anm3;
+          _Tp __Bn = (_Tp(1) + __F1 * __x) * __Bnm1
+                   + (__E + __F2 * __x) * __x * __Bnm2 + __F3 * __x3 * __Bnm3;
+          const _Tp __r = __An / __Bn;
+
+          const _Tp __prec = std::abs((__F - __r) / __F);
+          __F = __r;
+
+          if (__prec < __eps || __n > __nmax)
+            break;
+
+          if (std::abs(__An) > __big || std::abs(__Bn) > __big)
+            {
+              __An /= __big;
+              __Bn /= __big;
+              __Anm1 /= __big;
+              __Bnm1 /= __big;
+              __Anm2 /= __big;
+              __Bnm2 /= __big;
+              __Anm3 /= __big;
+              __Bnm3 /= __big;
+            }
+          else if (std::abs(__An) < _Tp(1) / __big
+                || std::abs(__Bn) < _Tp(1) / __big)
+            {
+              __An *= __big;
+              __Bn *= __big;
+              __Anm1 *= __big;
+              __Bnm1 *= __big;
+              __Anm2 *= __big;
+              __Bnm2 *= __big;
+              __Anm3 *= __big;
+              __Bnm3 *= __big;
+            }
+
+          ++__n;
+          __Bnm3 = __Bnm2;
+          __Bnm2 = __Bnm1;
+          __Bnm1 = __Bn;
+          __Anm3 = __Anm2;
+          __Anm2 = __Anm1;
+          __Anm1 = __An;
+        }
+
+      if (__n >= __nmax)
+        std::__throw_runtime_error(("Iteration failed to converge " "in __hyperg_luke.")
+                                                           );
+
+      return __F;
+    }
+# 438 "C:/msys64/mingw64/include/c++/15.2.0/tr1/hypergeometric.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __hyperg_reflect(_Tp __a, _Tp __b, _Tp __c, _Tp __x)
+    {
+      const _Tp __d = __c - __a - __b;
+      const int __intd = std::floor(__d + _Tp(0.5L));
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+      const _Tp __toler = _Tp(1000) * __eps;
+      const _Tp __log_max = std::log(std::numeric_limits<_Tp>::max());
+      const bool __d_integer = (std::abs(__d - __intd) < __toler);
+
+      if (__d_integer)
+        {
+          const _Tp __ln_omx = std::log(_Tp(1) - __x);
+          const _Tp __ad = std::abs(__d);
+          _Tp __F1, __F2;
+
+          _Tp __d1, __d2;
+          if (__d >= _Tp(0))
+            {
+              __d1 = __d;
+              __d2 = _Tp(0);
+            }
+          else
+            {
+              __d1 = _Tp(0);
+              __d2 = __d;
+            }
+
+          const _Tp __lng_c = __log_gamma(__c);
+
+
+          if (__ad < __eps)
+            {
+
+              __F1 = _Tp(0);
+            }
+          else
+            {
+
+              bool __ok_d1 = true;
+              _Tp __lng_ad, __lng_ad1, __lng_bd1;
+              try
+                {
+                  __lng_ad = __log_gamma(__ad);
+                  __lng_ad1 = __log_gamma(__a + __d1);
+                  __lng_bd1 = __log_gamma(__b + __d1);
+                }
+              catch(...)
+                {
+                  __ok_d1 = false;
+                }
+
+              if (__ok_d1)
+                {
+
+
+
+                  _Tp __sum1 = _Tp(1);
+                  _Tp __term = _Tp(1);
+                  _Tp __ln_pre1 = __lng_ad + __lng_c + __d2 * __ln_omx
+                                - __lng_ad1 - __lng_bd1;
+
+
+
+                  for (int __i = 1; __i < __ad; ++__i)
+                    {
+                      const int __j = __i - 1;
+                      __term *= (__a + __d2 + __j) * (__b + __d2 + __j)
+                              / (_Tp(1) + __d2 + __j) / __i * (_Tp(1) - __x);
+                      __sum1 += __term;
+                    }
+
+                  if (__ln_pre1 > __log_max)
+                    std::__throw_runtime_error(("Overflow of gamma functions" " in __hyperg_luke.")
+                                                                        );
+                  else
+                    __F1 = std::exp(__ln_pre1) * __sum1;
+                }
+              else
+                {
+
+
+                  __F1 = _Tp(0);
+                }
+            }
+
+
+          bool __ok_d2 = true;
+          _Tp __lng_ad2, __lng_bd2;
+          try
+            {
+              __lng_ad2 = __log_gamma(__a + __d2);
+              __lng_bd2 = __log_gamma(__b + __d2);
+            }
+          catch(...)
+            {
+              __ok_d2 = false;
+            }
+
+          if (__ok_d2)
+            {
+
+
+              const int __maxiter = 2000;
+              const _Tp __psi_1 = -__numeric_constants<_Tp>::__gamma_e();
+              const _Tp __psi_1pd = __psi(_Tp(1) + __ad);
+              const _Tp __psi_apd1 = __psi(__a + __d1);
+              const _Tp __psi_bpd1 = __psi(__b + __d1);
+
+              _Tp __psi_term = __psi_1 + __psi_1pd - __psi_apd1
+                             - __psi_bpd1 - __ln_omx;
+              _Tp __fact = _Tp(1);
+              _Tp __sum2 = __psi_term;
+              _Tp __ln_pre2 = __lng_c + __d1 * __ln_omx
+                            - __lng_ad2 - __lng_bd2;
+
+
+              int __j;
+              for (__j = 1; __j < __maxiter; ++__j)
+                {
+
+
+                  const _Tp __term1 = _Tp(1) / _Tp(__j)
+                                    + _Tp(1) / (__ad + __j);
+                  const _Tp __term2 = _Tp(1) / (__a + __d1 + _Tp(__j - 1))
+                                    + _Tp(1) / (__b + __d1 + _Tp(__j - 1));
+                  __psi_term += __term1 - __term2;
+                  __fact *= (__a + __d1 + _Tp(__j - 1))
+                          * (__b + __d1 + _Tp(__j - 1))
+                          / ((__ad + __j) * __j) * (_Tp(1) - __x);
+                  const _Tp __delta = __fact * __psi_term;
+                  __sum2 += __delta;
+                  if (std::abs(__delta) < __eps * std::abs(__sum2))
+                    break;
+                }
+              if (__j == __maxiter)
+                std::__throw_runtime_error(("Sum F2 failed to converge " "in __hyperg_reflect")
+                                                                     );
+
+              if (__sum2 == _Tp(0))
+                __F2 = _Tp(0);
+              else
+                __F2 = std::exp(__ln_pre2) * __sum2;
+            }
+          else
+            {
+
+
+              __F2 = _Tp(0);
+            }
+
+          const _Tp __sgn_2 = (__intd % 2 == 1 ? -_Tp(1) : _Tp(1));
+          const _Tp __F = __F1 + __sgn_2 * __F2;
+
+          return __F;
+        }
+      else
+        {
+
+
+
+
+          bool __ok1 = true;
+          _Tp __sgn_g1ca = _Tp(0), __ln_g1ca = _Tp(0);
+          _Tp __sgn_g1cb = _Tp(0), __ln_g1cb = _Tp(0);
+          try
+            {
+              __sgn_g1ca = __log_gamma_sign(__c - __a);
+              __ln_g1ca = __log_gamma(__c - __a);
+              __sgn_g1cb = __log_gamma_sign(__c - __b);
+              __ln_g1cb = __log_gamma(__c - __b);
+            }
+          catch(...)
+            {
+              __ok1 = false;
+            }
+
+          bool __ok2 = true;
+          _Tp __sgn_g2a = _Tp(0), __ln_g2a = _Tp(0);
+          _Tp __sgn_g2b = _Tp(0), __ln_g2b = _Tp(0);
+          try
+            {
+              __sgn_g2a = __log_gamma_sign(__a);
+              __ln_g2a = __log_gamma(__a);
+              __sgn_g2b = __log_gamma_sign(__b);
+              __ln_g2b = __log_gamma(__b);
+            }
+          catch(...)
+            {
+              __ok2 = false;
+            }
+
+          const _Tp __sgn_gc = __log_gamma_sign(__c);
+          const _Tp __ln_gc = __log_gamma(__c);
+          const _Tp __sgn_gd = __log_gamma_sign(__d);
+          const _Tp __ln_gd = __log_gamma(__d);
+          const _Tp __sgn_gmd = __log_gamma_sign(-__d);
+          const _Tp __ln_gmd = __log_gamma(-__d);
+
+          const _Tp __sgn1 = __sgn_gc * __sgn_gd * __sgn_g1ca * __sgn_g1cb;
+          const _Tp __sgn2 = __sgn_gc * __sgn_gmd * __sgn_g2a * __sgn_g2b;
+
+          _Tp __pre1, __pre2;
+          if (__ok1 && __ok2)
+            {
+              _Tp __ln_pre1 = __ln_gc + __ln_gd - __ln_g1ca - __ln_g1cb;
+              _Tp __ln_pre2 = __ln_gc + __ln_gmd - __ln_g2a - __ln_g2b
+                            + __d * std::log(_Tp(1) - __x);
+              if (__ln_pre1 < __log_max && __ln_pre2 < __log_max)
+                {
+                  __pre1 = std::exp(__ln_pre1);
+                  __pre2 = std::exp(__ln_pre2);
+                  __pre1 *= __sgn1;
+                  __pre2 *= __sgn2;
+                }
+              else
+                {
+                  std::__throw_runtime_error(("Overflow of gamma functions " "in __hyperg_reflect")
+                                                                       );
+                }
+            }
+          else if (__ok1 && !__ok2)
+            {
+              _Tp __ln_pre1 = __ln_gc + __ln_gd - __ln_g1ca - __ln_g1cb;
+              if (__ln_pre1 < __log_max)
+                {
+                  __pre1 = std::exp(__ln_pre1);
+                  __pre1 *= __sgn1;
+                  __pre2 = _Tp(0);
+                }
+              else
+                {
+                  std::__throw_runtime_error(("Overflow of gamma functions " "in __hyperg_reflect")
+                                                                       );
+                }
+            }
+          else if (!__ok1 && __ok2)
+            {
+              _Tp __ln_pre2 = __ln_gc + __ln_gmd - __ln_g2a - __ln_g2b
+                            + __d * std::log(_Tp(1) - __x);
+              if (__ln_pre2 < __log_max)
+                {
+                  __pre1 = _Tp(0);
+                  __pre2 = std::exp(__ln_pre2);
+                  __pre2 *= __sgn2;
+                }
+              else
+                {
+                  std::__throw_runtime_error(("Overflow of gamma functions " "in __hyperg_reflect")
+                                                                       );
+                }
+            }
+          else
+            {
+              __pre1 = _Tp(0);
+              __pre2 = _Tp(0);
+              std::__throw_runtime_error(("Underflow of gamma functions " "in __hyperg_reflect")
+                                                                   );
+            }
+
+          const _Tp __F1 = __hyperg_series(__a, __b, _Tp(1) - __d,
+                                           _Tp(1) - __x);
+          const _Tp __F2 = __hyperg_series(__c - __a, __c - __b, _Tp(1) + __d,
+                                           _Tp(1) - __x);
+
+          const _Tp __F = __pre1 * __F1 + __pre2 * __F2;
+
+          return __F;
+        }
+    }
+# 728 "C:/msys64/mingw64/include/c++/15.2.0/tr1/hypergeometric.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __hyperg(_Tp __a, _Tp __b, _Tp __c, _Tp __x)
+    {
+
+      const _Tp __a_nint = ::std::nearbyint(__a);
+      const _Tp __b_nint = ::std::nearbyint(__b);
+      const _Tp __c_nint = ::std::nearbyint(__c);
+
+
+
+
+
+      const _Tp __toler = _Tp(1000) * std::numeric_limits<_Tp>::epsilon();
+      if (std::abs(__x) >= _Tp(1))
+        std::__throw_domain_error(("Argument outside unit circle " "in __hyperg.")
+                                                     );
+      else if (__isnan(__a) || __isnan(__b)
+            || __isnan(__c) || __isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__c_nint == __c && __c_nint <= _Tp(0))
+        return std::numeric_limits<_Tp>::infinity();
+      else if (std::abs(__c - __b) < __toler || std::abs(__c - __a) < __toler)
+        return std::pow(_Tp(1) - __x, __c - __a - __b);
+      else if (__a >= _Tp(0) && __b >= _Tp(0) && __c >= _Tp(0)
+            && __x >= _Tp(0) && __x < _Tp(0.995L))
+        return __hyperg_series(__a, __b, __c, __x);
+      else if (std::abs(__a) < _Tp(10) && std::abs(__b) < _Tp(10))
+        {
+
+
+          if (__a < _Tp(0) && std::abs(__a - __a_nint) < __toler)
+            return __hyperg_series(__a_nint, __b, __c, __x);
+          else if (__b < _Tp(0) && std::abs(__b - __b_nint) < __toler)
+            return __hyperg_series(__a, __b_nint, __c, __x);
+          else if (__x < -_Tp(0.25L))
+            return __hyperg_luke(__a, __b, __c, __x);
+          else if (__x < _Tp(0.5L))
+            return __hyperg_series(__a, __b, __c, __x);
+          else
+            if (std::abs(__c) > _Tp(10))
+              return __hyperg_series(__a, __b, __c, __x);
+            else
+              return __hyperg_reflect(__a, __b, __c, __x);
+        }
+      else
+        return __hyperg_luke(__a, __b, __c, __x);
+    }
+  }
+
+
+
+
+
+
+}
+# 53 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/legendre_function.tcc" 1 3
+# 49 "C:/msys64/mingw64/include/c++/15.2.0/tr1/legendre_function.tcc" 3
+namespace std
+{
+
+# 65 "C:/msys64/mingw64/include/c++/15.2.0/tr1/legendre_function.tcc" 3
+  namespace __detail
+  {
+# 80 "C:/msys64/mingw64/include/c++/15.2.0/tr1/legendre_function.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __poly_legendre_p(unsigned int __l, _Tp __x)
+    {
+
+      if (__isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__x == +_Tp(1))
+        return +_Tp(1);
+      else if (__x == -_Tp(1))
+        return (__l % 2 == 1 ? -_Tp(1) : +_Tp(1));
+      else
+        {
+          _Tp __p_lm2 = _Tp(1);
+          if (__l == 0)
+            return __p_lm2;
+
+          _Tp __p_lm1 = __x;
+          if (__l == 1)
+            return __p_lm1;
+
+          _Tp __p_l = 0;
+          for (unsigned int __ll = 2; __ll <= __l; ++__ll)
+            {
+
+
+              __p_l = _Tp(2) * __x * __p_lm1 - __p_lm2
+                    - (__x * __p_lm1 - __p_lm2) / _Tp(__ll);
+              __p_lm2 = __p_lm1;
+              __p_lm1 = __p_l;
+            }
+
+          return __p_l;
+        }
+    }
+# 136 "C:/msys64/mingw64/include/c++/15.2.0/tr1/legendre_function.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __assoc_legendre_p(unsigned int __l, unsigned int __m, _Tp __x,
+         _Tp __phase = _Tp(+1))
+    {
+
+      if (__m > __l)
+        return _Tp(0);
+      else if (__isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__m == 0)
+        return __poly_legendre_p(__l, __x);
+      else
+        {
+          _Tp __p_mm = _Tp(1);
+          if (__m > 0)
+            {
+
+
+              _Tp __root = std::sqrt(_Tp(1) - __x) * std::sqrt(_Tp(1) + __x);
+              _Tp __fact = _Tp(1);
+              for (unsigned int __i = 1; __i <= __m; ++__i)
+                {
+                  __p_mm *= __phase * __fact * __root;
+                  __fact += _Tp(2);
+                }
+            }
+          if (__l == __m)
+            return __p_mm;
+
+          _Tp __p_mp1m = _Tp(2 * __m + 1) * __x * __p_mm;
+          if (__l == __m + 1)
+            return __p_mp1m;
+
+          _Tp __p_lm2m = __p_mm;
+          _Tp __P_lm1m = __p_mp1m;
+          _Tp __p_lm = _Tp(0);
+          for (unsigned int __j = __m + 2; __j <= __l; ++__j)
+            {
+              __p_lm = (_Tp(2 * __j - 1) * __x * __P_lm1m
+                      - _Tp(__j + __m - 1) * __p_lm2m) / _Tp(__j - __m);
+              __p_lm2m = __P_lm1m;
+              __P_lm1m = __p_lm;
+            }
+
+          return __p_lm;
+        }
+    }
+# 214 "C:/msys64/mingw64/include/c++/15.2.0/tr1/legendre_function.tcc" 3
+    template <typename _Tp>
+    _Tp
+    __sph_legendre(unsigned int __l, unsigned int __m, _Tp __theta)
+    {
+      if (__isnan(__theta))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+
+      const _Tp __x = std::cos(__theta);
+
+      if (__m > __l)
+        return _Tp(0);
+      else if (__m == 0)
+        {
+          _Tp __P = __poly_legendre_p(__l, __x);
+          _Tp __fact = std::sqrt(_Tp(2 * __l + 1)
+                     / (_Tp(4) * __numeric_constants<_Tp>::__pi()));
+          __P *= __fact;
+          return __P;
+        }
+      else if (__x == _Tp(1) || __x == -_Tp(1))
+        {
+
+          return _Tp(0);
+        }
+      else
+        {
+
+
+
+
+
+          const _Tp __sgn = ( __m % 2 == 1 ? -_Tp(1) : _Tp(1));
+          const _Tp __y_mp1m_factor = __x * std::sqrt(_Tp(2 * __m + 3));
+
+          const _Tp __lncirc = ::std::log1p(-__x * __x);
+
+
+
+
+
+          const _Tp __lnpoch = ::std::lgamma(_Tp(__m + _Tp(0.5L)))
+                             - ::std::lgamma(_Tp(__m));
+
+
+
+
+          const _Tp __lnpre_val =
+                    -_Tp(0.25L) * __numeric_constants<_Tp>::__lnpi()
+                    + _Tp(0.5L) * (__lnpoch + __m * __lncirc);
+          const _Tp __sr = std::sqrt((_Tp(2) + _Tp(1) / __m)
+                         / (_Tp(4) * __numeric_constants<_Tp>::__pi()));
+          _Tp __y_mm = __sgn * __sr * std::exp(__lnpre_val);
+          _Tp __y_mp1m = __y_mp1m_factor * __y_mm;
+
+          if (__l == __m)
+            return __y_mm;
+          else if (__l == __m + 1)
+            return __y_mp1m;
+          else
+            {
+              _Tp __y_lm = _Tp(0);
+
+
+              for (unsigned int __ll = __m + 2; __ll <= __l; ++__ll)
+                {
+                  const _Tp __rat1 = _Tp(__ll - __m) / _Tp(__ll + __m);
+                  const _Tp __rat2 = _Tp(__ll - __m - 1) / _Tp(__ll + __m - 1);
+                  const _Tp __fact1 = std::sqrt(__rat1 * _Tp(2 * __ll + 1)
+                                                       * _Tp(2 * __ll - 1));
+                  const _Tp __fact2 = std::sqrt(__rat1 * __rat2 * _Tp(2 * __ll + 1)
+                                                                / _Tp(2 * __ll - 3));
+                  __y_lm = (__x * __y_mp1m * __fact1
+                         - (__ll + __m - 1) * __y_mm * __fact2) / _Tp(__ll - __m);
+                  __y_mm = __y_mp1m;
+                  __y_mp1m = __y_lm;
+                }
+
+              return __y_lm;
+            }
+        }
+    }
+  }
+
+
+
+
+
+
+}
+# 54 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/modified_bessel_func.tcc" 1 3
+# 51 "C:/msys64/mingw64/include/c++/15.2.0/tr1/modified_bessel_func.tcc" 3
+namespace std
+{
+
+# 65 "C:/msys64/mingw64/include/c++/15.2.0/tr1/modified_bessel_func.tcc" 3
+  namespace __detail
+  {
+# 83 "C:/msys64/mingw64/include/c++/15.2.0/tr1/modified_bessel_func.tcc" 3
+    template <typename _Tp>
+    void
+    __bessel_ik(_Tp __nu, _Tp __x,
+                _Tp & __Inu, _Tp & __Knu, _Tp & __Ipnu, _Tp & __Kpnu)
+    {
+      if (__x == _Tp(0))
+        {
+          if (__nu == _Tp(0))
+            {
+              __Inu = _Tp(1);
+              __Ipnu = _Tp(0);
+            }
+          else if (__nu == _Tp(1))
+            {
+              __Inu = _Tp(0);
+              __Ipnu = _Tp(0.5L);
+            }
+          else
+            {
+              __Inu = _Tp(0);
+              __Ipnu = _Tp(0);
+            }
+          __Knu = std::numeric_limits<_Tp>::infinity();
+          __Kpnu = -std::numeric_limits<_Tp>::infinity();
+          return;
+        }
+
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+      const _Tp __fp_min = _Tp(10) * std::numeric_limits<_Tp>::epsilon();
+      const int __max_iter = 15000;
+      const _Tp __x_min = _Tp(2);
+
+      const int __nl = static_cast<int>(__nu + _Tp(0.5L));
+
+      const _Tp __mu = __nu - __nl;
+      const _Tp __mu2 = __mu * __mu;
+      const _Tp __xi = _Tp(1) / __x;
+      const _Tp __xi2 = _Tp(2) * __xi;
+      _Tp __h = __nu * __xi;
+      if ( __h < __fp_min )
+        __h = __fp_min;
+      _Tp __b = __xi2 * __nu;
+      _Tp __d = _Tp(0);
+      _Tp __c = __h;
+      int __i;
+      for ( __i = 1; __i <= __max_iter; ++__i )
+        {
+          __b += __xi2;
+          __d = _Tp(1) / (__b + __d);
+          __c = __b + _Tp(1) / __c;
+          const _Tp __del = __c * __d;
+          __h *= __del;
+          if (std::abs(__del - _Tp(1)) < __eps)
+            break;
+        }
+      if (__i > __max_iter)
+        std::__throw_runtime_error(("Argument x too large " "in __bessel_ik; " "try asymptotic expansion.")
+
+                                                                   );
+      _Tp __Inul = __fp_min;
+      _Tp __Ipnul = __h * __Inul;
+      _Tp __Inul1 = __Inul;
+      _Tp __Ipnu1 = __Ipnul;
+      _Tp __fact = __nu * __xi;
+      for (int __l = __nl; __l >= 1; --__l)
+        {
+          const _Tp __Inutemp = __fact * __Inul + __Ipnul;
+          __fact -= __xi;
+          __Ipnul = __fact * __Inutemp + __Inul;
+          __Inul = __Inutemp;
+        }
+      _Tp __f = __Ipnul / __Inul;
+      _Tp __Kmu, __Knu1;
+      if (__x < __x_min)
+        {
+          const _Tp __x2 = __x / _Tp(2);
+          const _Tp __pimu = __numeric_constants<_Tp>::__pi() * __mu;
+          const _Tp __fact = (std::abs(__pimu) < __eps
+                            ? _Tp(1) : __pimu / std::sin(__pimu));
+          _Tp __d = -std::log(__x2);
+          _Tp __e = __mu * __d;
+          const _Tp __fact2 = (std::abs(__e) < __eps
+                            ? _Tp(1) : std::sinh(__e) / __e);
+          _Tp __gam1, __gam2, __gampl, __gammi;
+          __gamma_temme(__mu, __gam1, __gam2, __gampl, __gammi);
+          _Tp __ff = __fact
+                   * (__gam1 * std::cosh(__e) + __gam2 * __fact2 * __d);
+          _Tp __sum = __ff;
+          __e = std::exp(__e);
+          _Tp __p = __e / (_Tp(2) * __gampl);
+          _Tp __q = _Tp(1) / (_Tp(2) * __e * __gammi);
+          _Tp __c = _Tp(1);
+          __d = __x2 * __x2;
+          _Tp __sum1 = __p;
+          int __i;
+          for (__i = 1; __i <= __max_iter; ++__i)
+            {
+              __ff = (__i * __ff + __p + __q) / (__i * __i - __mu2);
+              __c *= __d / __i;
+              __p /= __i - __mu;
+              __q /= __i + __mu;
+              const _Tp __del = __c * __ff;
+              __sum += __del;
+              const _Tp __del1 = __c * (__p - __i * __ff);
+              __sum1 += __del1;
+              if (std::abs(__del) < __eps * std::abs(__sum))
+                break;
+            }
+          if (__i > __max_iter)
+            std::__throw_runtime_error(("Bessel k series failed to converge " "in __bessel_ik.")
+                                                             );
+          __Kmu = __sum;
+          __Knu1 = __sum1 * __xi2;
+        }
+      else
+        {
+          _Tp __b = _Tp(2) * (_Tp(1) + __x);
+          _Tp __d = _Tp(1) / __b;
+          _Tp __delh = __d;
+          _Tp __h = __delh;
+          _Tp __q1 = _Tp(0);
+          _Tp __q2 = _Tp(1);
+          _Tp __a1 = _Tp(0.25L) - __mu2;
+          _Tp __q = __c = __a1;
+          _Tp __a = -__a1;
+          _Tp __s = _Tp(1) + __q * __delh;
+          int __i;
+          for (__i = 2; __i <= __max_iter; ++__i)
+            {
+              __a -= 2 * (__i - 1);
+              __c = -__a * __c / __i;
+              const _Tp __qnew = (__q1 - __b * __q2) / __a;
+              __q1 = __q2;
+              __q2 = __qnew;
+              __q += __c * __qnew;
+              __b += _Tp(2);
+              __d = _Tp(1) / (__b + __a * __d);
+              __delh = (__b * __d - _Tp(1)) * __delh;
+              __h += __delh;
+              const _Tp __dels = __q * __delh;
+              __s += __dels;
+              if ( std::abs(__dels / __s) < __eps )
+                break;
+            }
+          if (__i > __max_iter)
+            std::__throw_runtime_error(("Steed's method failed " "in __bessel_ik.")
+                                                             );
+          __h = __a1 * __h;
+          __Kmu = std::sqrt(__numeric_constants<_Tp>::__pi() / (_Tp(2) * __x))
+                * std::exp(-__x) / __s;
+          __Knu1 = __Kmu * (__mu + __x + _Tp(0.5L) - __h) * __xi;
+        }
+
+      _Tp __Kpmu = __mu * __xi * __Kmu - __Knu1;
+      _Tp __Inumu = __xi / (__f * __Kmu - __Kpmu);
+      __Inu = __Inumu * __Inul1 / __Inul;
+      __Ipnu = __Inumu * __Ipnu1 / __Inul;
+      for ( __i = 1; __i <= __nl; ++__i )
+        {
+          const _Tp __Knutemp = (__mu + __i) * __xi2 * __Knu1 + __Kmu;
+          __Kmu = __Knu1;
+          __Knu1 = __Knutemp;
+        }
+      __Knu = __Kmu;
+      __Kpnu = __nu * __xi * __Kmu - __Knu1;
+
+      return;
+    }
+# 267 "C:/msys64/mingw64/include/c++/15.2.0/tr1/modified_bessel_func.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __cyl_bessel_i(_Tp __nu, _Tp __x)
+    {
+      if (__nu < _Tp(0) || __x < _Tp(0))
+        std::__throw_domain_error(("Bad argument " "in __cyl_bessel_i.")
+                                                           );
+      else if (__isnan(__nu) || __isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__x * __x < _Tp(10) * (__nu + _Tp(1)))
+        return __cyl_bessel_ij_series(__nu, __x, +_Tp(1), 200);
+      else
+        {
+          _Tp __I_nu, __K_nu, __Ip_nu, __Kp_nu;
+          __bessel_ik(__nu, __x, __I_nu, __K_nu, __Ip_nu, __Kp_nu);
+          return __I_nu;
+        }
+    }
+# 303 "C:/msys64/mingw64/include/c++/15.2.0/tr1/modified_bessel_func.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __cyl_bessel_k(_Tp __nu, _Tp __x)
+    {
+      if (__nu < _Tp(0) || __x < _Tp(0))
+        std::__throw_domain_error(("Bad argument " "in __cyl_bessel_k.")
+                                                           );
+      else if (__isnan(__nu) || __isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else
+        {
+          _Tp __I_nu, __K_nu, __Ip_nu, __Kp_nu;
+          __bessel_ik(__nu, __x, __I_nu, __K_nu, __Ip_nu, __Kp_nu);
+          return __K_nu;
+        }
+    }
+# 337 "C:/msys64/mingw64/include/c++/15.2.0/tr1/modified_bessel_func.tcc" 3
+    template <typename _Tp>
+    void
+    __sph_bessel_ik(unsigned int __n, _Tp __x,
+                    _Tp & __i_n, _Tp & __k_n, _Tp & __ip_n, _Tp & __kp_n)
+    {
+      const _Tp __nu = _Tp(__n) + _Tp(0.5L);
+
+      _Tp __I_nu, __Ip_nu, __K_nu, __Kp_nu;
+      __bessel_ik(__nu, __x, __I_nu, __K_nu, __Ip_nu, __Kp_nu);
+
+      const _Tp __factor = __numeric_constants<_Tp>::__sqrtpio2()
+                         / std::sqrt(__x);
+
+      __i_n = __factor * __I_nu;
+      __k_n = __factor * __K_nu;
+      __ip_n = __factor * __Ip_nu - __i_n / (_Tp(2) * __x);
+      __kp_n = __factor * __Kp_nu - __k_n / (_Tp(2) * __x);
+
+      return;
+    }
+# 373 "C:/msys64/mingw64/include/c++/15.2.0/tr1/modified_bessel_func.tcc" 3
+    template <typename _Tp>
+    void
+    __airy(_Tp __x, _Tp & __Ai, _Tp & __Bi, _Tp & __Aip, _Tp & __Bip)
+    {
+      const _Tp __absx = std::abs(__x);
+      const _Tp __rootx = std::sqrt(__absx);
+      const _Tp __z = _Tp(2) * __absx * __rootx / _Tp(3);
+      const _Tp _S_inf = std::numeric_limits<_Tp>::infinity();
+
+      if (__isnan(__x))
+        __Bip = __Aip = __Bi = __Ai = std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__z == _S_inf)
+        {
+   __Aip = __Ai = _Tp(0);
+   __Bip = __Bi = _S_inf;
+ }
+      else if (__z == -_S_inf)
+ __Bip = __Aip = __Bi = __Ai = _Tp(0);
+      else if (__x > _Tp(0))
+        {
+          _Tp __I_nu, __Ip_nu, __K_nu, __Kp_nu;
+
+          __bessel_ik(_Tp(1) / _Tp(3), __z, __I_nu, __K_nu, __Ip_nu, __Kp_nu);
+          __Ai = __rootx * __K_nu
+               / (__numeric_constants<_Tp>::__sqrt3()
+                * __numeric_constants<_Tp>::__pi());
+          __Bi = __rootx * (__K_nu / __numeric_constants<_Tp>::__pi()
+                 + _Tp(2) * __I_nu / __numeric_constants<_Tp>::__sqrt3());
+
+          __bessel_ik(_Tp(2) / _Tp(3), __z, __I_nu, __K_nu, __Ip_nu, __Kp_nu);
+          __Aip = -__x * __K_nu
+                / (__numeric_constants<_Tp>::__sqrt3()
+                 * __numeric_constants<_Tp>::__pi());
+          __Bip = __x * (__K_nu / __numeric_constants<_Tp>::__pi()
+                      + _Tp(2) * __I_nu
+                      / __numeric_constants<_Tp>::__sqrt3());
+        }
+      else if (__x < _Tp(0))
+        {
+          _Tp __J_nu, __Jp_nu, __N_nu, __Np_nu;
+
+          __bessel_jn(_Tp(1) / _Tp(3), __z, __J_nu, __N_nu, __Jp_nu, __Np_nu);
+          __Ai = __rootx * (__J_nu
+                    - __N_nu / __numeric_constants<_Tp>::__sqrt3()) / _Tp(2);
+          __Bi = -__rootx * (__N_nu
+                    + __J_nu / __numeric_constants<_Tp>::__sqrt3()) / _Tp(2);
+
+          __bessel_jn(_Tp(2) / _Tp(3), __z, __J_nu, __N_nu, __Jp_nu, __Np_nu);
+          __Aip = __absx * (__N_nu / __numeric_constants<_Tp>::__sqrt3()
+                          + __J_nu) / _Tp(2);
+          __Bip = __absx * (__J_nu / __numeric_constants<_Tp>::__sqrt3()
+                          - __N_nu) / _Tp(2);
+        }
+      else
+        {
+
+
+
+          __Ai = _Tp(0.35502805388781723926L);
+          __Bi = __Ai * __numeric_constants<_Tp>::__sqrt3();
+
+
+
+
+          __Aip = -_Tp(0.25881940379280679840L);
+          __Bip = -__Aip * __numeric_constants<_Tp>::__sqrt3();
+        }
+
+      return;
+    }
+  }
+
+
+
+
+
+}
+# 55 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_hermite.tcc" 1 3
+# 42 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_hermite.tcc" 3
+namespace std
+{
+
+# 56 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_hermite.tcc" 3
+  namespace __detail
+  {
+# 72 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_hermite.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __poly_hermite_recursion(unsigned int __n, _Tp __x)
+    {
+
+      _Tp __H_0 = 1;
+      if (__n == 0)
+        return __H_0;
+
+
+      _Tp __H_1 = 2 * __x;
+      if (__n == 1)
+        return __H_1;
+
+
+      _Tp __H_n, __H_nm1, __H_nm2;
+      unsigned int __i;
+      for (__H_nm2 = __H_0, __H_nm1 = __H_1, __i = 2; __i <= __n; ++__i)
+        {
+          __H_n = 2 * (__x * __H_nm1 - (__i - 1) * __H_nm2);
+          __H_nm2 = __H_nm1;
+          __H_nm1 = __H_n;
+        }
+
+      return __H_n;
+    }
+# 114 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_hermite.tcc" 3
+    template<typename _Tp>
+    inline _Tp
+    __poly_hermite(unsigned int __n, _Tp __x)
+    {
+      if (__isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else
+        return __poly_hermite_recursion(__n, __x);
+    }
+  }
+
+
+
+
+
+}
+# 56 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_laguerre.tcc" 1 3
+# 44 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_laguerre.tcc" 3
+namespace std
+{
+
+# 60 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_laguerre.tcc" 3
+  namespace __detail
+  {
+# 75 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_laguerre.tcc" 3
+    template<typename _Tpa, typename _Tp>
+    _Tp
+    __poly_laguerre_large_n(unsigned __n, _Tpa __alpha1, _Tp __x)
+    {
+      const _Tp __a = -_Tp(__n);
+      const _Tp __b = _Tp(__alpha1) + _Tp(1);
+      const _Tp __eta = _Tp(2) * __b - _Tp(4) * __a;
+      const _Tp __cos2th = __x / __eta;
+      const _Tp __sin2th = _Tp(1) - __cos2th;
+      const _Tp __th = std::acos(std::sqrt(__cos2th));
+      const _Tp __pre_h = __numeric_constants<_Tp>::__pi_2()
+                        * __numeric_constants<_Tp>::__pi_2()
+                        * __eta * __eta * __cos2th * __sin2th;
+
+
+      const _Tp __lg_b = ::std::lgamma(_Tp(__n) + __b);
+      const _Tp __lnfact = ::std::lgamma(_Tp(__n + 1));
+
+
+
+
+
+      _Tp __pre_term1 = _Tp(0.5L) * (_Tp(1) - __b)
+                      * std::log(_Tp(0.25L) * __x * __eta);
+      _Tp __pre_term2 = _Tp(0.25L) * std::log(__pre_h);
+      _Tp __lnpre = __lg_b - __lnfact + _Tp(0.5L) * __x
+                      + __pre_term1 - __pre_term2;
+      _Tp __ser_term1 = std::sin(__a * __numeric_constants<_Tp>::__pi());
+      _Tp __ser_term2 = std::sin(_Tp(0.25L) * __eta
+                              * (_Tp(2) * __th
+                               - std::sin(_Tp(2) * __th))
+                               + __numeric_constants<_Tp>::__pi_4());
+      _Tp __ser = __ser_term1 + __ser_term2;
+
+      return std::exp(__lnpre) * __ser;
+    }
+# 129 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_laguerre.tcc" 3
+    template<typename _Tpa, typename _Tp>
+    _Tp
+    __poly_laguerre_hyperg(unsigned int __n, _Tpa __alpha1, _Tp __x)
+    {
+      const _Tp __b = _Tp(__alpha1) + _Tp(1);
+      const _Tp __mx = -__x;
+      const _Tp __tc_sgn = (__x < _Tp(0) ? _Tp(1)
+                         : ((__n % 2 == 1) ? -_Tp(1) : _Tp(1)));
+
+      _Tp __tc = _Tp(1);
+      const _Tp __ax = std::abs(__x);
+      for (unsigned int __k = 1; __k <= __n; ++__k)
+        __tc *= (__ax / __k);
+
+      _Tp __term = __tc * __tc_sgn;
+      _Tp __sum = __term;
+      for (int __k = int(__n) - 1; __k >= 0; --__k)
+        {
+          __term *= ((__b + _Tp(__k)) / _Tp(int(__n) - __k))
+                  * _Tp(__k + 1) / __mx;
+          __sum += __term;
+        }
+
+      return __sum;
+    }
+# 185 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_laguerre.tcc" 3
+    template<typename _Tpa, typename _Tp>
+    _Tp
+    __poly_laguerre_recursion(unsigned int __n, _Tpa __alpha1, _Tp __x)
+    {
+
+      _Tp __l_0 = _Tp(1);
+      if (__n == 0)
+        return __l_0;
+
+
+      _Tp __l_1 = -__x + _Tp(1) + _Tp(__alpha1);
+      if (__n == 1)
+        return __l_1;
+
+
+      _Tp __l_n2 = __l_0;
+      _Tp __l_n1 = __l_1;
+      _Tp __l_n = _Tp(0);
+      for (unsigned int __nn = 2; __nn <= __n; ++__nn)
+        {
+            __l_n = (_Tp(2 * __nn - 1) + _Tp(__alpha1) - __x)
+                  * __l_n1 / _Tp(__nn)
+                  - (_Tp(__nn - 1) + _Tp(__alpha1)) * __l_n2 / _Tp(__nn);
+            __l_n2 = __l_n1;
+            __l_n1 = __l_n;
+        }
+
+      return __l_n;
+    }
+# 244 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_laguerre.tcc" 3
+    template<typename _Tpa, typename _Tp>
+    _Tp
+    __poly_laguerre(unsigned int __n, _Tpa __alpha1, _Tp __x)
+    {
+      if (__x < _Tp(0))
+        std::__throw_domain_error(("Negative argument " "in __poly_laguerre.")
+                                                            );
+
+      else if (__isnan(__x))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__n == 0)
+        return _Tp(1);
+      else if (__n == 1)
+        return _Tp(1) + _Tp(__alpha1) - __x;
+      else if (__x == _Tp(0))
+        {
+          _Tp __prod = _Tp(__alpha1) + _Tp(1);
+          for (unsigned int __k = 2; __k <= __n; ++__k)
+            __prod *= (_Tp(__alpha1) + _Tp(__k)) / _Tp(__k);
+          return __prod;
+        }
+      else if (__n > 10000000 && _Tp(__alpha1) > -_Tp(1)
+            && __x < _Tp(2) * (_Tp(__alpha1) + _Tp(1)) + _Tp(4 * __n))
+        return __poly_laguerre_large_n(__n, __alpha1, __x);
+      else if (_Tp(__alpha1) >= _Tp(0)
+           || (__x > _Tp(0) && _Tp(__alpha1) < -_Tp(__n + 1)))
+        return __poly_laguerre_recursion(__n, __alpha1, __x);
+      else
+        return __poly_laguerre_hyperg(__n, __alpha1, __x);
+    }
+# 296 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_laguerre.tcc" 3
+    template<typename _Tp>
+    inline _Tp
+    __assoc_laguerre(unsigned int __n, unsigned int __m, _Tp __x)
+    { return __poly_laguerre<unsigned int, _Tp>(__n, __m, __x); }
+# 316 "C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_laguerre.tcc" 3
+    template<typename _Tp>
+    inline _Tp
+    __laguerre(unsigned int __n, _Tp __x)
+    { return __poly_laguerre<unsigned int, _Tp>(__n, 0, __x); }
+  }
+
+
+
+
+
+
+}
+# 57 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc" 1 3
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc" 3
+namespace std
+{
+
+# 63 "C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc" 3
+  namespace __detail
+  {
+# 78 "C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __riemann_zeta_sum(_Tp __s)
+    {
+
+      if (__s < _Tp(1))
+        std::__throw_domain_error(("Bad argument in zeta sum."));
+
+      const unsigned int max_iter = 10000;
+      _Tp __zeta = _Tp(0);
+      for (unsigned int __k = 1; __k < max_iter; ++__k)
+        {
+          _Tp __term = std::pow(static_cast<_Tp>(__k), -__s);
+          if (__term < std::numeric_limits<_Tp>::epsilon())
+            {
+              break;
+            }
+          __zeta += __term;
+        }
+
+      return __zeta;
+    }
+# 115 "C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __riemann_zeta_alt(_Tp __s)
+    {
+      _Tp __sgn = _Tp(1);
+      _Tp __zeta = _Tp(0);
+      for (unsigned int __i = 1; __i < 10000000; ++__i)
+        {
+          _Tp __term = __sgn / std::pow(__i, __s);
+          if (std::abs(__term) < std::numeric_limits<_Tp>::epsilon())
+            break;
+          __zeta += __term;
+          __sgn *= _Tp(-1);
+        }
+      __zeta /= _Tp(1) - std::pow(_Tp(2), _Tp(1) - __s);
+
+      return __zeta;
+    }
+# 157 "C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __riemann_zeta_glob(_Tp __s)
+    {
+      _Tp __zeta = _Tp(0);
+
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+
+      const _Tp __max_bincoeff = std::numeric_limits<_Tp>::max_exponent10
+                               * std::log(_Tp(10)) - _Tp(1);
+
+
+
+      if (__s < _Tp(0))
+        {
+
+          if (::std::fmod(__s,_Tp(2)) == _Tp(0))
+            return _Tp(0);
+          else
+
+            {
+              _Tp __zeta = __riemann_zeta_glob(_Tp(1) - __s);
+              __zeta *= std::pow(_Tp(2)
+                     * __numeric_constants<_Tp>::__pi(), __s)
+                     * std::sin(__numeric_constants<_Tp>::__pi_2() * __s)
+
+                     * std::exp(::std::lgamma(_Tp(1) - __s))
+
+
+
+                     / __numeric_constants<_Tp>::__pi();
+              return __zeta;
+            }
+        }
+
+      _Tp __num = _Tp(0.5L);
+      const unsigned int __maxit = 10000;
+      for (unsigned int __i = 0; __i < __maxit; ++__i)
+        {
+          bool __punt = false;
+          _Tp __sgn = _Tp(1);
+          _Tp __term = _Tp(0);
+          for (unsigned int __j = 0; __j <= __i; ++__j)
+            {
+
+              _Tp __bincoeff = ::std::lgamma(_Tp(1 + __i))
+                              - ::std::lgamma(_Tp(1 + __j))
+                              - ::std::lgamma(_Tp(1 + __i - __j));
+
+
+
+
+
+              if (__bincoeff > __max_bincoeff)
+                {
+
+                  __punt = true;
+                  break;
+                }
+              __bincoeff = std::exp(__bincoeff);
+              __term += __sgn * __bincoeff * std::pow(_Tp(1 + __j), -__s);
+              __sgn *= _Tp(-1);
+            }
+          if (__punt)
+            break;
+          __term *= __num;
+          __zeta += __term;
+          if (std::abs(__term/__zeta) < __eps)
+            break;
+          __num *= _Tp(0.5L);
+        }
+
+      __zeta /= _Tp(1) - std::pow(_Tp(2), _Tp(1) - __s);
+
+      return __zeta;
+    }
+# 252 "C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __riemann_zeta_product(_Tp __s)
+    {
+      static const _Tp __prime[] = {
+        _Tp(2), _Tp(3), _Tp(5), _Tp(7), _Tp(11), _Tp(13), _Tp(17), _Tp(19),
+        _Tp(23), _Tp(29), _Tp(31), _Tp(37), _Tp(41), _Tp(43), _Tp(47),
+        _Tp(53), _Tp(59), _Tp(61), _Tp(67), _Tp(71), _Tp(73), _Tp(79),
+        _Tp(83), _Tp(89), _Tp(97), _Tp(101), _Tp(103), _Tp(107), _Tp(109)
+      };
+      static const unsigned int __num_primes = sizeof(__prime) / sizeof(_Tp);
+
+      _Tp __zeta = _Tp(1);
+      for (unsigned int __i = 0; __i < __num_primes; ++__i)
+        {
+          const _Tp __fact = _Tp(1) - std::pow(__prime[__i], -__s);
+          __zeta *= __fact;
+          if (_Tp(1) - __fact < std::numeric_limits<_Tp>::epsilon())
+            break;
+        }
+
+      __zeta = _Tp(1) / __zeta;
+
+      return __zeta;
+    }
+# 293 "C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __riemann_zeta(_Tp __s)
+    {
+      if (__isnan(__s))
+        return std::numeric_limits<_Tp>::quiet_NaN();
+      else if (__s == _Tp(1))
+        return std::numeric_limits<_Tp>::infinity();
+      else if (__s < -_Tp(19))
+        {
+          _Tp __zeta = __riemann_zeta_product(_Tp(1) - __s);
+          __zeta *= std::pow(_Tp(2) * __numeric_constants<_Tp>::__pi(), __s)
+                 * std::sin(__numeric_constants<_Tp>::__pi_2() * __s)
+
+                 * std::exp(::std::lgamma(_Tp(1) - __s))
+
+
+
+                 / __numeric_constants<_Tp>::__pi();
+          return __zeta;
+        }
+      else if (__s < _Tp(20))
+        {
+
+          bool __glob = true;
+          if (__glob)
+            return __riemann_zeta_glob(__s);
+          else
+            {
+              if (__s > _Tp(1))
+                return __riemann_zeta_sum(__s);
+              else
+                {
+                  _Tp __zeta = std::pow(_Tp(2)
+                                * __numeric_constants<_Tp>::__pi(), __s)
+                         * std::sin(__numeric_constants<_Tp>::__pi_2() * __s)
+
+                             * ::std::tgamma(_Tp(1) - __s)
+
+
+
+                             * __riemann_zeta_sum(_Tp(1) - __s);
+                  return __zeta;
+                }
+            }
+        }
+      else
+        return __riemann_zeta_product(__s);
+    }
+# 365 "C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc" 3
+    template<typename _Tp>
+    _Tp
+    __hurwitz_zeta_glob(_Tp __a, _Tp __s)
+    {
+      _Tp __zeta = _Tp(0);
+
+      const _Tp __eps = std::numeric_limits<_Tp>::epsilon();
+
+      const _Tp __max_bincoeff = std::numeric_limits<_Tp>::max_exponent10
+                               * std::log(_Tp(10)) - _Tp(1);
+
+      const unsigned int __maxit = 10000;
+      for (unsigned int __i = 0; __i < __maxit; ++__i)
+        {
+          bool __punt = false;
+          _Tp __sgn = _Tp(1);
+          _Tp __term = _Tp(0);
+          for (unsigned int __j = 0; __j <= __i; ++__j)
+            {
+
+              _Tp __bincoeff = ::std::lgamma(_Tp(1 + __i))
+                              - ::std::lgamma(_Tp(1 + __j))
+                              - ::std::lgamma(_Tp(1 + __i - __j));
+
+
+
+
+
+              if (__bincoeff > __max_bincoeff)
+                {
+
+                  __punt = true;
+                  break;
+                }
+              __bincoeff = std::exp(__bincoeff);
+              __term += __sgn * __bincoeff * std::pow(_Tp(__a + __j), -__s);
+              __sgn *= _Tp(-1);
+            }
+          if (__punt)
+            break;
+          __term /= _Tp(__i + 1);
+          if (std::abs(__term / __zeta) < __eps)
+            break;
+          __zeta += __term;
+        }
+
+      __zeta /= __s - _Tp(1);
+
+      return __zeta;
+    }
+# 430 "C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc" 3
+    template<typename _Tp>
+    inline _Tp
+    __hurwitz_zeta(_Tp __a, _Tp __s)
+    { return __hurwitz_zeta_glob(__a, __s); }
+  }
+
+
+
+
+
+
+}
+# 58 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 2 3
+
+namespace std
+{
+
+# 203 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  assoc_laguerref(unsigned int __n, unsigned int __m, float __x)
+  { return __detail::__assoc_laguerre<float>(__n, __m, __x); }
+
+
+
+
+
+
+
+  inline long double
+  assoc_laguerrel(unsigned int __n, unsigned int __m, long double __x)
+  { return __detail::__assoc_laguerre<long double>(__n, __m, __x); }
+# 248 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    assoc_laguerre(unsigned int __n, unsigned int __m, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      return __detail::__assoc_laguerre<__type>(__n, __m, __x);
+    }
+# 264 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  assoc_legendref(unsigned int __l, unsigned int __m, float __x)
+  { return __detail::__assoc_legendre_p<float>(__l, __m, __x); }
+
+
+
+
+
+
+  inline long double
+  assoc_legendrel(unsigned int __l, unsigned int __m, long double __x)
+  { return __detail::__assoc_legendre_p<long double>(__l, __m, __x); }
+# 294 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    assoc_legendre(unsigned int __l, unsigned int __m, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      return __detail::__assoc_legendre_p<__type>(__l, __m, __x);
+    }
+# 309 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  betaf(float __a, float __b)
+  { return __detail::__beta<float>(__a, __b); }
+
+
+
+
+
+
+
+  inline long double
+  betal(long double __a, long double __b)
+  { return __detail::__beta<long double>(__a, __b); }
+# 339 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tpa, typename _Tpb>
+    inline typename __gnu_cxx::__promote_2<_Tpa, _Tpb>::__type
+    beta(_Tpa __a, _Tpb __b)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tpa, _Tpb>::__type __type;
+      return __detail::__beta<__type>(__a, __b);
+    }
+# 355 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  comp_ellint_1f(float __k)
+  { return __detail::__comp_ellint_1<float>(__k); }
+
+
+
+
+
+
+
+  inline long double
+  comp_ellint_1l(long double __k)
+  { return __detail::__comp_ellint_1<long double>(__k); }
+# 387 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    comp_ellint_1(_Tp __k)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      return __detail::__comp_ellint_1<__type>(__k);
+    }
+# 403 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  comp_ellint_2f(float __k)
+  { return __detail::__comp_ellint_2<float>(__k); }
+
+
+
+
+
+
+
+  inline long double
+  comp_ellint_2l(long double __k)
+  { return __detail::__comp_ellint_2<long double>(__k); }
+# 434 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    comp_ellint_2(_Tp __k)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      return __detail::__comp_ellint_2<__type>(__k);
+    }
+# 450 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  comp_ellint_3f(float __k, float __nu)
+  { return __detail::__comp_ellint_3<float>(__k, __nu); }
+
+
+
+
+
+
+
+  inline long double
+  comp_ellint_3l(long double __k, long double __nu)
+  { return __detail::__comp_ellint_3<long double>(__k, __nu); }
+# 485 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp, typename _Tpn>
+    inline typename __gnu_cxx::__promote_2<_Tp, _Tpn>::__type
+    comp_ellint_3(_Tp __k, _Tpn __nu)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Tpn>::__type __type;
+      return __detail::__comp_ellint_3<__type>(__k, __nu);
+    }
+# 501 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  cyl_bessel_if(float __nu, float __x)
+  { return __detail::__cyl_bessel_i<float>(__nu, __x); }
+
+
+
+
+
+
+
+  inline long double
+  cyl_bessel_il(long double __nu, long double __x)
+  { return __detail::__cyl_bessel_i<long double>(__nu, __x); }
+# 531 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tpnu, typename _Tp>
+    inline typename __gnu_cxx::__promote_2<_Tpnu, _Tp>::__type
+    cyl_bessel_i(_Tpnu __nu, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tpnu, _Tp>::__type __type;
+      return __detail::__cyl_bessel_i<__type>(__nu, __x);
+    }
+# 547 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  cyl_bessel_jf(float __nu, float __x)
+  { return __detail::__cyl_bessel_j<float>(__nu, __x); }
+
+
+
+
+
+
+
+  inline long double
+  cyl_bessel_jl(long double __nu, long double __x)
+  { return __detail::__cyl_bessel_j<long double>(__nu, __x); }
+# 577 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tpnu, typename _Tp>
+    inline typename __gnu_cxx::__promote_2<_Tpnu, _Tp>::__type
+    cyl_bessel_j(_Tpnu __nu, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tpnu, _Tp>::__type __type;
+      return __detail::__cyl_bessel_j<__type>(__nu, __x);
+    }
+# 593 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  cyl_bessel_kf(float __nu, float __x)
+  { return __detail::__cyl_bessel_k<float>(__nu, __x); }
+
+
+
+
+
+
+
+  inline long double
+  cyl_bessel_kl(long double __nu, long double __x)
+  { return __detail::__cyl_bessel_k<long double>(__nu, __x); }
+# 629 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tpnu, typename _Tp>
+    inline typename __gnu_cxx::__promote_2<_Tpnu, _Tp>::__type
+    cyl_bessel_k(_Tpnu __nu, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tpnu, _Tp>::__type __type;
+      return __detail::__cyl_bessel_k<__type>(__nu, __x);
+    }
+# 645 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  cyl_neumannf(float __nu, float __x)
+  { return __detail::__cyl_neumann_n<float>(__nu, __x); }
+
+
+
+
+
+
+
+  inline long double
+  cyl_neumannl(long double __nu, long double __x)
+  { return __detail::__cyl_neumann_n<long double>(__nu, __x); }
+# 677 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tpnu, typename _Tp>
+    inline typename __gnu_cxx::__promote_2<_Tpnu, _Tp>::__type
+    cyl_neumann(_Tpnu __nu, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tpnu, _Tp>::__type __type;
+      return __detail::__cyl_neumann_n<__type>(__nu, __x);
+    }
+# 693 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  ellint_1f(float __k, float __phi)
+  { return __detail::__ellint_1<float>(__k, __phi); }
+
+
+
+
+
+
+
+  inline long double
+  ellint_1l(long double __k, long double __phi)
+  { return __detail::__ellint_1<long double>(__k, __phi); }
+# 725 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp, typename _Tpp>
+    inline typename __gnu_cxx::__promote_2<_Tp, _Tpp>::__type
+    ellint_1(_Tp __k, _Tpp __phi)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Tpp>::__type __type;
+      return __detail::__ellint_1<__type>(__k, __phi);
+    }
+# 741 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  ellint_2f(float __k, float __phi)
+  { return __detail::__ellint_2<float>(__k, __phi); }
+
+
+
+
+
+
+
+  inline long double
+  ellint_2l(long double __k, long double __phi)
+  { return __detail::__ellint_2<long double>(__k, __phi); }
+# 773 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp, typename _Tpp>
+    inline typename __gnu_cxx::__promote_2<_Tp, _Tpp>::__type
+    ellint_2(_Tp __k, _Tpp __phi)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Tpp>::__type __type;
+      return __detail::__ellint_2<__type>(__k, __phi);
+    }
+# 789 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  ellint_3f(float __k, float __nu, float __phi)
+  { return __detail::__ellint_3<float>(__k, __nu, __phi); }
+
+
+
+
+
+
+
+  inline long double
+  ellint_3l(long double __k, long double __nu, long double __phi)
+  { return __detail::__ellint_3<long double>(__k, __nu, __phi); }
+# 826 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp, typename _Tpn, typename _Tpp>
+    inline typename __gnu_cxx::__promote_3<_Tp, _Tpn, _Tpp>::__type
+    ellint_3(_Tp __k, _Tpn __nu, _Tpp __phi)
+    {
+      typedef typename __gnu_cxx::__promote_3<_Tp, _Tpn, _Tpp>::__type __type;
+      return __detail::__ellint_3<__type>(__k, __nu, __phi);
+    }
+# 841 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  expintf(float __x)
+  { return __detail::__expint<float>(__x); }
+
+
+
+
+
+
+
+  inline long double
+  expintl(long double __x)
+  { return __detail::__expint<long double>(__x); }
+# 866 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    expint(_Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      return __detail::__expint<__type>(__x);
+    }
+# 882 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  hermitef(unsigned int __n, float __x)
+  { return __detail::__poly_hermite<float>(__n, __x); }
+
+
+
+
+
+
+
+  inline long double
+  hermitel(unsigned int __n, long double __x)
+  { return __detail::__poly_hermite<long double>(__n, __x); }
+# 914 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    hermite(unsigned int __n, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      return __detail::__poly_hermite<__type>(__n, __x);
+    }
+# 930 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  laguerref(unsigned int __n, float __x)
+  { return __detail::__laguerre<float>(__n, __x); }
+
+
+
+
+
+
+
+  inline long double
+  laguerrel(unsigned int __n, long double __x)
+  { return __detail::__laguerre<long double>(__n, __x); }
+# 958 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    laguerre(unsigned int __n, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      return __detail::__laguerre<__type>(__n, __x);
+    }
+# 974 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  legendref(unsigned int __l, float __x)
+  { return __detail::__poly_legendre_p<float>(__l, __x); }
+
+
+
+
+
+
+
+  inline long double
+  legendrel(unsigned int __l, long double __x)
+  { return __detail::__poly_legendre_p<long double>(__l, __x); }
+# 1003 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    legendre(unsigned int __l, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      return __detail::__poly_legendre_p<__type>(__l, __x);
+    }
+# 1019 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  riemann_zetaf(float __s)
+  { return __detail::__riemann_zeta<float>(__s); }
+
+
+
+
+
+
+
+  inline long double
+  riemann_zetal(long double __s)
+  { return __detail::__riemann_zeta<long double>(__s); }
+# 1054 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    riemann_zeta(_Tp __s)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      return __detail::__riemann_zeta<__type>(__s);
+    }
+# 1070 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  sph_besself(unsigned int __n, float __x)
+  { return __detail::__sph_bessel<float>(__n, __x); }
+
+
+
+
+
+
+
+  inline long double
+  sph_bessell(unsigned int __n, long double __x)
+  { return __detail::__sph_bessel<long double>(__n, __x); }
+# 1098 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    sph_bessel(unsigned int __n, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      return __detail::__sph_bessel<__type>(__n, __x);
+    }
+# 1114 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  sph_legendref(unsigned int __l, unsigned int __m, float __theta)
+  { return __detail::__sph_legendre<float>(__l, __m, __theta); }
+# 1125 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline long double
+  sph_legendrel(unsigned int __l, unsigned int __m, long double __theta)
+  { return __detail::__sph_legendre<long double>(__l, __m, __theta); }
+# 1145 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    sph_legendre(unsigned int __l, unsigned int __m, _Tp __theta)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      return __detail::__sph_legendre<__type>(__l, __m, __theta);
+    }
+# 1161 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  sph_neumannf(unsigned int __n, float __x)
+  { return __detail::__sph_neumann<float>(__n, __x); }
+
+
+
+
+
+
+
+  inline long double
+  sph_neumannl(unsigned int __n, long double __x)
+  { return __detail::__sph_neumann<long double>(__n, __x); }
+# 1189 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    sph_neumann(unsigned int __n, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      return __detail::__sph_neumann<__type>(__n, __x);
+    }
+
+
+
+
+}
+
+
+namespace __gnu_cxx
+{
+
+# 1216 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  airy_aif(float __x)
+  {
+    float __Ai, __Bi, __Aip, __Bip;
+    std::__detail::__airy<float>(__x, __Ai, __Bi, __Aip, __Bip);
+    return __Ai;
+  }
+
+
+
+
+  inline long double
+  airy_ail(long double __x)
+  {
+    long double __Ai, __Bi, __Aip, __Bip;
+    std::__detail::__airy<long double>(__x, __Ai, __Bi, __Aip, __Bip);
+    return __Ai;
+  }
+
+
+
+
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    airy_ai(_Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      __type __Ai, __Bi, __Aip, __Bip;
+      std::__detail::__airy<__type>(__x, __Ai, __Bi, __Aip, __Bip);
+      return __Ai;
+    }
+
+
+
+
+  inline float
+  airy_bif(float __x)
+  {
+    float __Ai, __Bi, __Aip, __Bip;
+    std::__detail::__airy<float>(__x, __Ai, __Bi, __Aip, __Bip);
+    return __Bi;
+  }
+
+
+
+
+  inline long double
+  airy_bil(long double __x)
+  {
+    long double __Ai, __Bi, __Aip, __Bip;
+    std::__detail::__airy<long double>(__x, __Ai, __Bi, __Aip, __Bip);
+    return __Bi;
+  }
+
+
+
+
+  template<typename _Tp>
+    inline typename __gnu_cxx::__promote<_Tp>::__type
+    airy_bi(_Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+      __type __Ai, __Bi, __Aip, __Bip;
+      std::__detail::__airy<__type>(__x, __Ai, __Bi, __Aip, __Bip);
+      return __Bi;
+    }
+# 1292 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  conf_hypergf(float __a, float __c, float __x)
+  { return std::__detail::__conf_hyperg<float>(__a, __c, __x); }
+# 1303 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline long double
+  conf_hypergl(long double __a, long double __c, long double __x)
+  { return std::__detail::__conf_hyperg<long double>(__a, __c, __x); }
+# 1323 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tpa, typename _Tpc, typename _Tp>
+    inline typename __gnu_cxx::__promote_3<_Tpa, _Tpc, _Tp>::__type
+    conf_hyperg(_Tpa __a, _Tpc __c, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote_3<_Tpa, _Tpc, _Tp>::__type __type;
+      return std::__detail::__conf_hyperg<__type>(__a, __c, __x);
+    }
+# 1340 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline float
+  hypergf(float __a, float __b, float __c, float __x)
+  { return std::__detail::__hyperg<float>(__a, __b, __c, __x); }
+# 1351 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  inline long double
+  hypergl(long double __a, long double __b, long double __c, long double __x)
+  { return std::__detail::__hyperg<long double>(__a, __b, __c, __x); }
+# 1372 "C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h" 3
+  template<typename _Tpa, typename _Tpb, typename _Tpc, typename _Tp>
+    inline typename __gnu_cxx::__promote_4<_Tpa, _Tpb, _Tpc, _Tp>::__type
+    hyperg(_Tpa __a, _Tpb __b, _Tpc __c, _Tp __x)
+    {
+      typedef typename __gnu_cxx::__promote_4<_Tpa, _Tpb, _Tpc, _Tp>
+  ::__type __type;
+      return std::__detail::__hyperg<__type>(__a, __b, __c, __x);
+    }
+
+
+
+}
+# 3914 "C:/msys64/mingw64/include/c++/15.2.0/cmath" 2 3
+
+
+}
+# 2 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/_fixes.hpp" 2
+# 105 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 1 3
+# 46 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 3
+# 1 "C:/msys64/mingw64/include/assert.h" 1 3
+# 17 "C:/msys64/mingw64/include/assert.h" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/stdlib.h" 1 3
+# 38 "C:/msys64/mingw64/include/c++/15.2.0/stdlib.h" 3
+using std::abort;
+using std::atexit;
+using std::exit;
+# 49 "C:/msys64/mingw64/include/c++/15.2.0/stdlib.h" 3
+  using std::_Exit;
+
+
+
+
+using std::div_t;
+using std::ldiv_t;
+
+using std::abs;
+using std::atof;
+using std::atoi;
+using std::atol;
+using std::bsearch;
+using std::calloc;
+using std::div;
+using std::free;
+using std::getenv;
+using std::labs;
+using std::ldiv;
+using std::malloc;
+
+using std::mblen;
+using std::mbstowcs;
+using std::mbtowc;
+
+using std::qsort;
+using std::rand;
+using std::realloc;
+using std::srand;
+using std::strtod;
+using std::strtol;
+using std::strtoul;
+using std::system;
+
+using std::wcstombs;
+using std::wctomb;
+# 18 "C:/msys64/mingw64/include/assert.h" 2 3
+
+
+
+extern "C" {
+
+
+__attribute__ ((__dllimport__)) void __attribute__((__cdecl__)) __attribute__ ((__noreturn__)) _wassert(const wchar_t *_Message,const wchar_t *_File,unsigned _Line);
+__attribute__ ((__dllimport__)) void __attribute__((__cdecl__)) __attribute__ ((__noreturn__)) _assert (const char *_Message, const char *_File, unsigned _Line);
+
+
+}
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 2 3
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 2
+# 42 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/simd/platform.h" 1
+       
+# 43 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 2
+# 632 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
+
+# 632 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
+namespace glm
+{
+ using std::size_t;
+
+
+
+  typedef int length_t;
+
+}
+
+
+
+
+
+
+
+ namespace glm
+ {
+  template<typename T, std::size_t N>
+  constexpr std::size_t countof(T const (&)[N])
+  {
+   return N;
+  }
+ }
+# 670 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
+namespace glm{
+namespace detail
+{
+ template<typename T>
+ struct is_int
+ {
+  enum test {value = 0};
+ };
+
+ template<>
+ struct is_int<unsigned int>
+ {
+  enum test {value = ~0};
+ };
+
+ template<>
+ struct is_int<signed int>
+ {
+  enum test {value = ~0};
+ };
+}
+
+ typedef unsigned int uint;
+}
+# 702 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
+namespace glm{
+namespace detail
+{
+
+  typedef std::uint64_t uint64;
+  typedef std::int64_t int64;
+# 726 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp"
+}
+}
+
+
+
+
+
+
+
+namespace glm{
+namespace detail
+{
+ using std::make_unsigned;
+}
+}
+# 107 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+
+       
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/climits" 1 3
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/climits" 3
+# 1 "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/limits.h" 1 3 4
+# 48 "C:/msys64/mingw64/include/c++/15.2.0/climits" 2 3
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wlong-long"
+# 64 "C:/msys64/mingw64/include/c++/15.2.0/climits" 3
+#pragma GCC diagnostic pop
+# 112 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/cfloat" 1 3
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/cfloat" 3
+# 1 "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/float.h" 1 3 4
+# 653 "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/float.h" 3 4
+# 1 "C:/msys64/mingw64/include/float.h" 1 3 4
+# 266 "C:/msys64/mingw64/include/float.h" 3 4
+extern "C" {
+
+
+
+
+
+__attribute__ ((__dllimport__)) unsigned int __attribute__((__cdecl__)) __attribute__ ((__nothrow__)) _controlfp (unsigned int _NewValue, unsigned int _Mask) ;
+__attribute__((dllimport)) errno_t __attribute__((__cdecl__)) _controlfp_s(unsigned int *_CurrentState, unsigned int _NewValue, unsigned int _Mask);
+__attribute__ ((__dllimport__)) unsigned int __attribute__((__cdecl__)) __attribute__ ((__nothrow__)) _control87 (unsigned int _NewValue, unsigned int _Mask);
+
+
+
+
+
+__attribute__ ((__dllimport__)) unsigned int __attribute__((__cdecl__)) __attribute__ ((__nothrow__)) _clearfp (void);
+__attribute__ ((__dllimport__)) unsigned int __attribute__((__cdecl__)) __attribute__ ((__nothrow__)) _statusfp (void);
+# 295 "C:/msys64/mingw64/include/float.h" 3 4
+void __attribute__((__cdecl__)) __attribute__ ((__nothrow__)) _fpreset (void);
+
+void __attribute__((__cdecl__)) __attribute__ ((__nothrow__)) fpreset (void);
+
+
+
+__attribute__ ((__dllimport__)) int * __attribute__((__cdecl__)) __attribute__ ((__nothrow__)) __fpecode(void);
+# 326 "C:/msys64/mingw64/include/float.h" 3 4
+}
+# 654 "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/float.h" 2 3 4
+# 48 "C:/msys64/mingw64/include/c++/15.2.0/cfloat" 2 3
+# 113 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 1 3
+# 46 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 3
+# 1 "C:/msys64/mingw64/include/assert.h" 1 3
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 2 3
+# 115 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/fwd.hpp" 1
+       
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp" 1
+       
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp" 2
+
+
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp"
+namespace glm
+{
+
+ enum qualifier
+ {
+  packed_highp,
+  packed_mediump,
+  packed_lowp,
+# 21 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp"
+  highp = packed_highp,
+  mediump = packed_mediump,
+  lowp = packed_lowp,
+  packed = packed_highp,
+
+
+
+
+   defaultp = highp
+
+ };
+
+ typedef qualifier precision;
+
+ template<length_t L, typename T, qualifier Q = defaultp> struct vec;
+ template<length_t C, length_t R, typename T, qualifier Q = defaultp> struct mat;
+ template<typename T, qualifier Q = defaultp> struct qua;
+
+
+  template <typename T, qualifier Q = defaultp> using tvec1 = vec<1, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tvec2 = vec<2, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tvec3 = vec<3, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tvec4 = vec<4, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat2x2 = mat<2, 2, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat2x3 = mat<2, 3, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat2x4 = mat<2, 4, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat3x2 = mat<3, 2, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat3x3 = mat<3, 3, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat3x4 = mat<3, 4, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat4x2 = mat<4, 2, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat4x3 = mat<4, 3, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tmat4x4 = mat<4, 4, T, Q>;
+  template <typename T, qualifier Q = defaultp> using tquat = qua<T, Q>;
+
+
+namespace detail
+{
+ template<glm::qualifier P>
+ struct is_aligned
+ {
+  static const bool value = false;
+ };
+# 84 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp"
+ template<length_t L, typename T, bool is_aligned>
+ struct storage
+ {
+  typedef struct type {
+   T data[L];
+  } type;
+ };
+
+
+  template<length_t L, typename T>
+  struct storage<L, T, true>
+  {
+   typedef struct alignas(L * sizeof(T)) type {
+    T data[L];
+   } type;
+  };
+
+  template<typename T>
+  struct storage<3, T, true>
+  {
+   typedef struct alignas(4 * sizeof(T)) type {
+    T data[4];
+   } type;
+  };
+# 255 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp"
+ enum genTypeEnum
+ {
+  GENTYPE_VEC,
+  GENTYPE_MAT,
+  GENTYPE_QUAT
+ };
+
+ template <typename genType>
+ struct genTypeTrait
+ {};
+
+ template <length_t C, length_t R, typename T>
+ struct genTypeTrait<mat<C, R, T> >
+ {
+  static const genTypeEnum GENTYPE = GENTYPE_MAT;
+ };
+
+ template<typename genType, genTypeEnum type>
+ struct init_gentype
+ {
+ };
+
+ template<typename genType>
+ struct init_gentype<genType, GENTYPE_QUAT>
+ {
+  inline constexpr static genType identity()
+  {
+   return genType(1, 0, 0, 0);
+  }
+ };
+
+ template<typename genType>
+ struct init_gentype<genType, GENTYPE_MAT>
+ {
+  inline constexpr static genType identity()
+  {
+   return genType(1);
+  }
+ };
+}
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/fwd.hpp" 2
+
+namespace glm
+{
+
+ typedef std::int8_t int8;
+ typedef std::int16_t int16;
+ typedef std::int32_t int32;
+ typedef std::int64_t int64;
+
+ typedef std::uint8_t uint8;
+ typedef std::uint16_t uint16;
+ typedef std::uint32_t uint32;
+ typedef std::uint64_t uint64;
+# 31 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/fwd.hpp"
+ typedef int8 lowp_i8;
+ typedef int8 mediump_i8;
+ typedef int8 highp_i8;
+ typedef int8 i8;
+
+ typedef int8 lowp_int8;
+ typedef int8 mediump_int8;
+ typedef int8 highp_int8;
+
+ typedef int8 lowp_int8_t;
+ typedef int8 mediump_int8_t;
+ typedef int8 highp_int8_t;
+ typedef int8 int8_t;
+
+ typedef int16 lowp_i16;
+ typedef int16 mediump_i16;
+ typedef int16 highp_i16;
+ typedef int16 i16;
+
+ typedef int16 lowp_int16;
+ typedef int16 mediump_int16;
+ typedef int16 highp_int16;
+
+ typedef int16 lowp_int16_t;
+ typedef int16 mediump_int16_t;
+ typedef int16 highp_int16_t;
+ typedef int16 int16_t;
+
+ typedef int32 lowp_i32;
+ typedef int32 mediump_i32;
+ typedef int32 highp_i32;
+ typedef int32 i32;
+
+ typedef int32 lowp_int32;
+ typedef int32 mediump_int32;
+ typedef int32 highp_int32;
+
+ typedef int32 lowp_int32_t;
+ typedef int32 mediump_int32_t;
+ typedef int32 highp_int32_t;
+ typedef int32 int32_t;
+
+ typedef int64 lowp_i64;
+ typedef int64 mediump_i64;
+ typedef int64 highp_i64;
+ typedef int64 i64;
+
+ typedef int64 lowp_int64;
+ typedef int64 mediump_int64;
+ typedef int64 highp_int64;
+
+ typedef int64 lowp_int64_t;
+ typedef int64 mediump_int64_t;
+ typedef int64 highp_int64_t;
+ typedef int64 int64_t;
+
+
+
+ typedef unsigned int uint;
+
+ typedef uint8 lowp_u8;
+ typedef uint8 mediump_u8;
+ typedef uint8 highp_u8;
+ typedef uint8 u8;
+
+ typedef uint8 lowp_uint8;
+ typedef uint8 mediump_uint8;
+ typedef uint8 highp_uint8;
+
+ typedef uint8 lowp_uint8_t;
+ typedef uint8 mediump_uint8_t;
+ typedef uint8 highp_uint8_t;
+ typedef uint8 uint8_t;
+
+ typedef uint16 lowp_u16;
+ typedef uint16 mediump_u16;
+ typedef uint16 highp_u16;
+ typedef uint16 u16;
+
+ typedef uint16 lowp_uint16;
+ typedef uint16 mediump_uint16;
+ typedef uint16 highp_uint16;
+
+ typedef uint16 lowp_uint16_t;
+ typedef uint16 mediump_uint16_t;
+ typedef uint16 highp_uint16_t;
+ typedef uint16 uint16_t;
+
+ typedef uint32 lowp_u32;
+ typedef uint32 mediump_u32;
+ typedef uint32 highp_u32;
+ typedef uint32 u32;
+
+ typedef uint32 lowp_uint32;
+ typedef uint32 mediump_uint32;
+ typedef uint32 highp_uint32;
+
+ typedef uint32 lowp_uint32_t;
+ typedef uint32 mediump_uint32_t;
+ typedef uint32 highp_uint32_t;
+ typedef uint32 uint32_t;
+
+ typedef uint64 lowp_u64;
+ typedef uint64 mediump_u64;
+ typedef uint64 highp_u64;
+ typedef uint64 u64;
+
+ typedef uint64 lowp_uint64;
+ typedef uint64 mediump_uint64;
+ typedef uint64 highp_uint64;
+
+ typedef uint64 lowp_uint64_t;
+ typedef uint64 mediump_uint64_t;
+ typedef uint64 highp_uint64_t;
+ typedef uint64 uint64_t;
+
+
+
+ typedef float lowp_f32;
+ typedef float mediump_f32;
+ typedef float highp_f32;
+ typedef float f32;
+
+ typedef float lowp_float32;
+ typedef float mediump_float32;
+ typedef float highp_float32;
+ typedef float float32;
+
+ typedef float lowp_float32_t;
+ typedef float mediump_float32_t;
+ typedef float highp_float32_t;
+ typedef float float32_t;
+
+
+ typedef double lowp_f64;
+ typedef double mediump_f64;
+ typedef double highp_f64;
+ typedef double f64;
+
+ typedef double lowp_float64;
+ typedef double mediump_float64;
+ typedef double highp_float64;
+ typedef double float64;
+
+ typedef double lowp_float64_t;
+ typedef double mediump_float64_t;
+ typedef double highp_float64_t;
+ typedef double float64_t;
+
+
+
+ typedef vec<1, bool, lowp> lowp_bvec1;
+ typedef vec<2, bool, lowp> lowp_bvec2;
+ typedef vec<3, bool, lowp> lowp_bvec3;
+ typedef vec<4, bool, lowp> lowp_bvec4;
+
+ typedef vec<1, bool, mediump> mediump_bvec1;
+ typedef vec<2, bool, mediump> mediump_bvec2;
+ typedef vec<3, bool, mediump> mediump_bvec3;
+ typedef vec<4, bool, mediump> mediump_bvec4;
+
+ typedef vec<1, bool, highp> highp_bvec1;
+ typedef vec<2, bool, highp> highp_bvec2;
+ typedef vec<3, bool, highp> highp_bvec3;
+ typedef vec<4, bool, highp> highp_bvec4;
+
+ typedef vec<1, bool, defaultp> bvec1;
+ typedef vec<2, bool, defaultp> bvec2;
+ typedef vec<3, bool, defaultp> bvec3;
+ typedef vec<4, bool, defaultp> bvec4;
+
+
+
+ typedef vec<1, int, lowp> lowp_ivec1;
+ typedef vec<2, int, lowp> lowp_ivec2;
+ typedef vec<3, int, lowp> lowp_ivec3;
+ typedef vec<4, int, lowp> lowp_ivec4;
+
+ typedef vec<1, int, mediump> mediump_ivec1;
+ typedef vec<2, int, mediump> mediump_ivec2;
+ typedef vec<3, int, mediump> mediump_ivec3;
+ typedef vec<4, int, mediump> mediump_ivec4;
+
+ typedef vec<1, int, highp> highp_ivec1;
+ typedef vec<2, int, highp> highp_ivec2;
+ typedef vec<3, int, highp> highp_ivec3;
+ typedef vec<4, int, highp> highp_ivec4;
+
+ typedef vec<1, int, defaultp> ivec1;
+ typedef vec<2, int, defaultp> ivec2;
+ typedef vec<3, int, defaultp> ivec3;
+ typedef vec<4, int, defaultp> ivec4;
+
+ typedef vec<1, i8, lowp> lowp_i8vec1;
+ typedef vec<2, i8, lowp> lowp_i8vec2;
+ typedef vec<3, i8, lowp> lowp_i8vec3;
+ typedef vec<4, i8, lowp> lowp_i8vec4;
+
+ typedef vec<1, i8, mediump> mediump_i8vec1;
+ typedef vec<2, i8, mediump> mediump_i8vec2;
+ typedef vec<3, i8, mediump> mediump_i8vec3;
+ typedef vec<4, i8, mediump> mediump_i8vec4;
+
+ typedef vec<1, i8, highp> highp_i8vec1;
+ typedef vec<2, i8, highp> highp_i8vec2;
+ typedef vec<3, i8, highp> highp_i8vec3;
+ typedef vec<4, i8, highp> highp_i8vec4;
+
+ typedef vec<1, i8, defaultp> i8vec1;
+ typedef vec<2, i8, defaultp> i8vec2;
+ typedef vec<3, i8, defaultp> i8vec3;
+ typedef vec<4, i8, defaultp> i8vec4;
+
+ typedef vec<1, i16, lowp> lowp_i16vec1;
+ typedef vec<2, i16, lowp> lowp_i16vec2;
+ typedef vec<3, i16, lowp> lowp_i16vec3;
+ typedef vec<4, i16, lowp> lowp_i16vec4;
+
+ typedef vec<1, i16, mediump> mediump_i16vec1;
+ typedef vec<2, i16, mediump> mediump_i16vec2;
+ typedef vec<3, i16, mediump> mediump_i16vec3;
+ typedef vec<4, i16, mediump> mediump_i16vec4;
+
+ typedef vec<1, i16, highp> highp_i16vec1;
+ typedef vec<2, i16, highp> highp_i16vec2;
+ typedef vec<3, i16, highp> highp_i16vec3;
+ typedef vec<4, i16, highp> highp_i16vec4;
+
+ typedef vec<1, i16, defaultp> i16vec1;
+ typedef vec<2, i16, defaultp> i16vec2;
+ typedef vec<3, i16, defaultp> i16vec3;
+ typedef vec<4, i16, defaultp> i16vec4;
+
+ typedef vec<1, i32, lowp> lowp_i32vec1;
+ typedef vec<2, i32, lowp> lowp_i32vec2;
+ typedef vec<3, i32, lowp> lowp_i32vec3;
+ typedef vec<4, i32, lowp> lowp_i32vec4;
+
+ typedef vec<1, i32, mediump> mediump_i32vec1;
+ typedef vec<2, i32, mediump> mediump_i32vec2;
+ typedef vec<3, i32, mediump> mediump_i32vec3;
+ typedef vec<4, i32, mediump> mediump_i32vec4;
+
+ typedef vec<1, i32, highp> highp_i32vec1;
+ typedef vec<2, i32, highp> highp_i32vec2;
+ typedef vec<3, i32, highp> highp_i32vec3;
+ typedef vec<4, i32, highp> highp_i32vec4;
+
+ typedef vec<1, i32, defaultp> i32vec1;
+ typedef vec<2, i32, defaultp> i32vec2;
+ typedef vec<3, i32, defaultp> i32vec3;
+ typedef vec<4, i32, defaultp> i32vec4;
+
+ typedef vec<1, i64, lowp> lowp_i64vec1;
+ typedef vec<2, i64, lowp> lowp_i64vec2;
+ typedef vec<3, i64, lowp> lowp_i64vec3;
+ typedef vec<4, i64, lowp> lowp_i64vec4;
+
+ typedef vec<1, i64, mediump> mediump_i64vec1;
+ typedef vec<2, i64, mediump> mediump_i64vec2;
+ typedef vec<3, i64, mediump> mediump_i64vec3;
+ typedef vec<4, i64, mediump> mediump_i64vec4;
+
+ typedef vec<1, i64, highp> highp_i64vec1;
+ typedef vec<2, i64, highp> highp_i64vec2;
+ typedef vec<3, i64, highp> highp_i64vec3;
+ typedef vec<4, i64, highp> highp_i64vec4;
+
+ typedef vec<1, i64, defaultp> i64vec1;
+ typedef vec<2, i64, defaultp> i64vec2;
+ typedef vec<3, i64, defaultp> i64vec3;
+ typedef vec<4, i64, defaultp> i64vec4;
+
+
+
+ typedef vec<1, uint, lowp> lowp_uvec1;
+ typedef vec<2, uint, lowp> lowp_uvec2;
+ typedef vec<3, uint, lowp> lowp_uvec3;
+ typedef vec<4, uint, lowp> lowp_uvec4;
+
+ typedef vec<1, uint, mediump> mediump_uvec1;
+ typedef vec<2, uint, mediump> mediump_uvec2;
+ typedef vec<3, uint, mediump> mediump_uvec3;
+ typedef vec<4, uint, mediump> mediump_uvec4;
+
+ typedef vec<1, uint, highp> highp_uvec1;
+ typedef vec<2, uint, highp> highp_uvec2;
+ typedef vec<3, uint, highp> highp_uvec3;
+ typedef vec<4, uint, highp> highp_uvec4;
+
+ typedef vec<1, uint, defaultp> uvec1;
+ typedef vec<2, uint, defaultp> uvec2;
+ typedef vec<3, uint, defaultp> uvec3;
+ typedef vec<4, uint, defaultp> uvec4;
+
+ typedef vec<1, u8, lowp> lowp_u8vec1;
+ typedef vec<2, u8, lowp> lowp_u8vec2;
+ typedef vec<3, u8, lowp> lowp_u8vec3;
+ typedef vec<4, u8, lowp> lowp_u8vec4;
+
+ typedef vec<1, u8, mediump> mediump_u8vec1;
+ typedef vec<2, u8, mediump> mediump_u8vec2;
+ typedef vec<3, u8, mediump> mediump_u8vec3;
+ typedef vec<4, u8, mediump> mediump_u8vec4;
+
+ typedef vec<1, u8, highp> highp_u8vec1;
+ typedef vec<2, u8, highp> highp_u8vec2;
+ typedef vec<3, u8, highp> highp_u8vec3;
+ typedef vec<4, u8, highp> highp_u8vec4;
+
+ typedef vec<1, u8, defaultp> u8vec1;
+ typedef vec<2, u8, defaultp> u8vec2;
+ typedef vec<3, u8, defaultp> u8vec3;
+ typedef vec<4, u8, defaultp> u8vec4;
+
+ typedef vec<1, u16, lowp> lowp_u16vec1;
+ typedef vec<2, u16, lowp> lowp_u16vec2;
+ typedef vec<3, u16, lowp> lowp_u16vec3;
+ typedef vec<4, u16, lowp> lowp_u16vec4;
+
+ typedef vec<1, u16, mediump> mediump_u16vec1;
+ typedef vec<2, u16, mediump> mediump_u16vec2;
+ typedef vec<3, u16, mediump> mediump_u16vec3;
+ typedef vec<4, u16, mediump> mediump_u16vec4;
+
+ typedef vec<1, u16, highp> highp_u16vec1;
+ typedef vec<2, u16, highp> highp_u16vec2;
+ typedef vec<3, u16, highp> highp_u16vec3;
+ typedef vec<4, u16, highp> highp_u16vec4;
+
+ typedef vec<1, u16, defaultp> u16vec1;
+ typedef vec<2, u16, defaultp> u16vec2;
+ typedef vec<3, u16, defaultp> u16vec3;
+ typedef vec<4, u16, defaultp> u16vec4;
+
+ typedef vec<1, u32, lowp> lowp_u32vec1;
+ typedef vec<2, u32, lowp> lowp_u32vec2;
+ typedef vec<3, u32, lowp> lowp_u32vec3;
+ typedef vec<4, u32, lowp> lowp_u32vec4;
+
+ typedef vec<1, u32, mediump> mediump_u32vec1;
+ typedef vec<2, u32, mediump> mediump_u32vec2;
+ typedef vec<3, u32, mediump> mediump_u32vec3;
+ typedef vec<4, u32, mediump> mediump_u32vec4;
+
+ typedef vec<1, u32, highp> highp_u32vec1;
+ typedef vec<2, u32, highp> highp_u32vec2;
+ typedef vec<3, u32, highp> highp_u32vec3;
+ typedef vec<4, u32, highp> highp_u32vec4;
+
+ typedef vec<1, u32, defaultp> u32vec1;
+ typedef vec<2, u32, defaultp> u32vec2;
+ typedef vec<3, u32, defaultp> u32vec3;
+ typedef vec<4, u32, defaultp> u32vec4;
+
+ typedef vec<1, u64, lowp> lowp_u64vec1;
+ typedef vec<2, u64, lowp> lowp_u64vec2;
+ typedef vec<3, u64, lowp> lowp_u64vec3;
+ typedef vec<4, u64, lowp> lowp_u64vec4;
+
+ typedef vec<1, u64, mediump> mediump_u64vec1;
+ typedef vec<2, u64, mediump> mediump_u64vec2;
+ typedef vec<3, u64, mediump> mediump_u64vec3;
+ typedef vec<4, u64, mediump> mediump_u64vec4;
+
+ typedef vec<1, u64, highp> highp_u64vec1;
+ typedef vec<2, u64, highp> highp_u64vec2;
+ typedef vec<3, u64, highp> highp_u64vec3;
+ typedef vec<4, u64, highp> highp_u64vec4;
+
+ typedef vec<1, u64, defaultp> u64vec1;
+ typedef vec<2, u64, defaultp> u64vec2;
+ typedef vec<3, u64, defaultp> u64vec3;
+ typedef vec<4, u64, defaultp> u64vec4;
+
+
+
+ typedef vec<1, float, lowp> lowp_vec1;
+ typedef vec<2, float, lowp> lowp_vec2;
+ typedef vec<3, float, lowp> lowp_vec3;
+ typedef vec<4, float, lowp> lowp_vec4;
+
+ typedef vec<1, float, mediump> mediump_vec1;
+ typedef vec<2, float, mediump> mediump_vec2;
+ typedef vec<3, float, mediump> mediump_vec3;
+ typedef vec<4, float, mediump> mediump_vec4;
+
+ typedef vec<1, float, highp> highp_vec1;
+ typedef vec<2, float, highp> highp_vec2;
+ typedef vec<3, float, highp> highp_vec3;
+ typedef vec<4, float, highp> highp_vec4;
+
+ typedef vec<1, float, defaultp> vec1;
+ typedef vec<2, float, defaultp> vec2;
+ typedef vec<3, float, defaultp> vec3;
+ typedef vec<4, float, defaultp> vec4;
+
+ typedef vec<1, float, lowp> lowp_fvec1;
+ typedef vec<2, float, lowp> lowp_fvec2;
+ typedef vec<3, float, lowp> lowp_fvec3;
+ typedef vec<4, float, lowp> lowp_fvec4;
+
+ typedef vec<1, float, mediump> mediump_fvec1;
+ typedef vec<2, float, mediump> mediump_fvec2;
+ typedef vec<3, float, mediump> mediump_fvec3;
+ typedef vec<4, float, mediump> mediump_fvec4;
+
+ typedef vec<1, float, highp> highp_fvec1;
+ typedef vec<2, float, highp> highp_fvec2;
+ typedef vec<3, float, highp> highp_fvec3;
+ typedef vec<4, float, highp> highp_fvec4;
+
+ typedef vec<1, f32, defaultp> fvec1;
+ typedef vec<2, f32, defaultp> fvec2;
+ typedef vec<3, f32, defaultp> fvec3;
+ typedef vec<4, f32, defaultp> fvec4;
+
+ typedef vec<1, f32, lowp> lowp_f32vec1;
+ typedef vec<2, f32, lowp> lowp_f32vec2;
+ typedef vec<3, f32, lowp> lowp_f32vec3;
+ typedef vec<4, f32, lowp> lowp_f32vec4;
+
+ typedef vec<1, f32, mediump> mediump_f32vec1;
+ typedef vec<2, f32, mediump> mediump_f32vec2;
+ typedef vec<3, f32, mediump> mediump_f32vec3;
+ typedef vec<4, f32, mediump> mediump_f32vec4;
+
+ typedef vec<1, f32, highp> highp_f32vec1;
+ typedef vec<2, f32, highp> highp_f32vec2;
+ typedef vec<3, f32, highp> highp_f32vec3;
+ typedef vec<4, f32, highp> highp_f32vec4;
+
+ typedef vec<1, f32, defaultp> f32vec1;
+ typedef vec<2, f32, defaultp> f32vec2;
+ typedef vec<3, f32, defaultp> f32vec3;
+ typedef vec<4, f32, defaultp> f32vec4;
+
+ typedef vec<1, f64, lowp> lowp_dvec1;
+ typedef vec<2, f64, lowp> lowp_dvec2;
+ typedef vec<3, f64, lowp> lowp_dvec3;
+ typedef vec<4, f64, lowp> lowp_dvec4;
+
+ typedef vec<1, f64, mediump> mediump_dvec1;
+ typedef vec<2, f64, mediump> mediump_dvec2;
+ typedef vec<3, f64, mediump> mediump_dvec3;
+ typedef vec<4, f64, mediump> mediump_dvec4;
+
+ typedef vec<1, f64, highp> highp_dvec1;
+ typedef vec<2, f64, highp> highp_dvec2;
+ typedef vec<3, f64, highp> highp_dvec3;
+ typedef vec<4, f64, highp> highp_dvec4;
+
+ typedef vec<1, f64, defaultp> dvec1;
+ typedef vec<2, f64, defaultp> dvec2;
+ typedef vec<3, f64, defaultp> dvec3;
+ typedef vec<4, f64, defaultp> dvec4;
+
+ typedef vec<1, f64, lowp> lowp_f64vec1;
+ typedef vec<2, f64, lowp> lowp_f64vec2;
+ typedef vec<3, f64, lowp> lowp_f64vec3;
+ typedef vec<4, f64, lowp> lowp_f64vec4;
+
+ typedef vec<1, f64, mediump> mediump_f64vec1;
+ typedef vec<2, f64, mediump> mediump_f64vec2;
+ typedef vec<3, f64, mediump> mediump_f64vec3;
+ typedef vec<4, f64, mediump> mediump_f64vec4;
+
+ typedef vec<1, f64, highp> highp_f64vec1;
+ typedef vec<2, f64, highp> highp_f64vec2;
+ typedef vec<3, f64, highp> highp_f64vec3;
+ typedef vec<4, f64, highp> highp_f64vec4;
+
+ typedef vec<1, f64, defaultp> f64vec1;
+ typedef vec<2, f64, defaultp> f64vec2;
+ typedef vec<3, f64, defaultp> f64vec3;
+ typedef vec<4, f64, defaultp> f64vec4;
+
+
+
+ typedef mat<2, 2, f32, lowp> lowp_mat2;
+ typedef mat<3, 3, f32, lowp> lowp_mat3;
+ typedef mat<4, 4, f32, lowp> lowp_mat4;
+
+ typedef mat<2, 2, f32, mediump> mediump_mat2;
+ typedef mat<3, 3, f32, mediump> mediump_mat3;
+ typedef mat<4, 4, f32, mediump> mediump_mat4;
+
+ typedef mat<2, 2, f32, highp> highp_mat2;
+ typedef mat<3, 3, f32, highp> highp_mat3;
+ typedef mat<4, 4, f32, highp> highp_mat4;
+
+ typedef mat<2, 2, f32, defaultp> mat2;
+ typedef mat<3, 3, f32, defaultp> mat3;
+ typedef mat<4, 4, f32, defaultp> mat4;
+
+ typedef mat<2, 2, f32, lowp> lowp_fmat2;
+ typedef mat<3, 3, f32, lowp> lowp_fmat3;
+ typedef mat<4, 4, f32, lowp> lowp_fmat4;
+
+ typedef mat<2, 2, f32, mediump> mediump_fmat2;
+ typedef mat<3, 3, f32, mediump> mediump_fmat3;
+ typedef mat<4, 4, f32, mediump> mediump_fmat4;
+
+ typedef mat<2, 2, f32, highp> highp_fmat2;
+ typedef mat<3, 3, f32, highp> highp_fmat3;
+ typedef mat<4, 4, f32, highp> highp_fmat4;
+
+ typedef mat<2, 2, f32, defaultp> fmat2;
+ typedef mat<3, 3, f32, defaultp> fmat3;
+ typedef mat<4, 4, f32, defaultp> fmat4;
+
+ typedef mat<2, 2, f32, lowp> lowp_f32mat2;
+ typedef mat<3, 3, f32, lowp> lowp_f32mat3;
+ typedef mat<4, 4, f32, lowp> lowp_f32mat4;
+
+ typedef mat<2, 2, f32, mediump> mediump_f32mat2;
+ typedef mat<3, 3, f32, mediump> mediump_f32mat3;
+ typedef mat<4, 4, f32, mediump> mediump_f32mat4;
+
+ typedef mat<2, 2, f32, highp> highp_f32mat2;
+ typedef mat<3, 3, f32, highp> highp_f32mat3;
+ typedef mat<4, 4, f32, highp> highp_f32mat4;
+
+ typedef mat<2, 2, f32, defaultp> f32mat2;
+ typedef mat<3, 3, f32, defaultp> f32mat3;
+ typedef mat<4, 4, f32, defaultp> f32mat4;
+
+ typedef mat<2, 2, f64, lowp> lowp_dmat2;
+ typedef mat<3, 3, f64, lowp> lowp_dmat3;
+ typedef mat<4, 4, f64, lowp> lowp_dmat4;
+
+ typedef mat<2, 2, f64, mediump> mediump_dmat2;
+ typedef mat<3, 3, f64, mediump> mediump_dmat3;
+ typedef mat<4, 4, f64, mediump> mediump_dmat4;
+
+ typedef mat<2, 2, f64, highp> highp_dmat2;
+ typedef mat<3, 3, f64, highp> highp_dmat3;
+ typedef mat<4, 4, f64, highp> highp_dmat4;
+
+ typedef mat<2, 2, f64, defaultp> dmat2;
+ typedef mat<3, 3, f64, defaultp> dmat3;
+ typedef mat<4, 4, f64, defaultp> dmat4;
+
+ typedef mat<2, 2, f64, lowp> lowp_f64mat2;
+ typedef mat<3, 3, f64, lowp> lowp_f64mat3;
+ typedef mat<4, 4, f64, lowp> lowp_f64mat4;
+
+ typedef mat<2, 2, f64, mediump> mediump_f64mat2;
+ typedef mat<3, 3, f64, mediump> mediump_f64mat3;
+ typedef mat<4, 4, f64, mediump> mediump_f64mat4;
+
+ typedef mat<2, 2, f64, highp> highp_f64mat2;
+ typedef mat<3, 3, f64, highp> highp_f64mat3;
+ typedef mat<4, 4, f64, highp> highp_f64mat4;
+
+ typedef mat<2, 2, f64, defaultp> f64mat2;
+ typedef mat<3, 3, f64, defaultp> f64mat3;
+ typedef mat<4, 4, f64, defaultp> f64mat4;
+
+
+
+ typedef mat<2, 2, f32, lowp> lowp_mat2x2;
+ typedef mat<2, 3, f32, lowp> lowp_mat2x3;
+ typedef mat<2, 4, f32, lowp> lowp_mat2x4;
+ typedef mat<3, 2, f32, lowp> lowp_mat3x2;
+ typedef mat<3, 3, f32, lowp> lowp_mat3x3;
+ typedef mat<3, 4, f32, lowp> lowp_mat3x4;
+ typedef mat<4, 2, f32, lowp> lowp_mat4x2;
+ typedef mat<4, 3, f32, lowp> lowp_mat4x3;
+ typedef mat<4, 4, f32, lowp> lowp_mat4x4;
+
+ typedef mat<2, 2, f32, mediump> mediump_mat2x2;
+ typedef mat<2, 3, f32, mediump> mediump_mat2x3;
+ typedef mat<2, 4, f32, mediump> mediump_mat2x4;
+ typedef mat<3, 2, f32, mediump> mediump_mat3x2;
+ typedef mat<3, 3, f32, mediump> mediump_mat3x3;
+ typedef mat<3, 4, f32, mediump> mediump_mat3x4;
+ typedef mat<4, 2, f32, mediump> mediump_mat4x2;
+ typedef mat<4, 3, f32, mediump> mediump_mat4x3;
+ typedef mat<4, 4, f32, mediump> mediump_mat4x4;
+
+ typedef mat<2, 2, f32, highp> highp_mat2x2;
+ typedef mat<2, 3, f32, highp> highp_mat2x3;
+ typedef mat<2, 4, f32, highp> highp_mat2x4;
+ typedef mat<3, 2, f32, highp> highp_mat3x2;
+ typedef mat<3, 3, f32, highp> highp_mat3x3;
+ typedef mat<3, 4, f32, highp> highp_mat3x4;
+ typedef mat<4, 2, f32, highp> highp_mat4x2;
+ typedef mat<4, 3, f32, highp> highp_mat4x3;
+ typedef mat<4, 4, f32, highp> highp_mat4x4;
+
+ typedef mat<2, 2, f32, defaultp> mat2x2;
+ typedef mat<2, 3, f32, defaultp> mat2x3;
+ typedef mat<2, 4, f32, defaultp> mat2x4;
+ typedef mat<3, 2, f32, defaultp> mat3x2;
+ typedef mat<3, 3, f32, defaultp> mat3x3;
+ typedef mat<3, 4, f32, defaultp> mat3x4;
+ typedef mat<4, 2, f32, defaultp> mat4x2;
+ typedef mat<4, 3, f32, defaultp> mat4x3;
+ typedef mat<4, 4, f32, defaultp> mat4x4;
+
+ typedef mat<2, 2, f32, lowp> lowp_fmat2x2;
+ typedef mat<2, 3, f32, lowp> lowp_fmat2x3;
+ typedef mat<2, 4, f32, lowp> lowp_fmat2x4;
+ typedef mat<3, 2, f32, lowp> lowp_fmat3x2;
+ typedef mat<3, 3, f32, lowp> lowp_fmat3x3;
+ typedef mat<3, 4, f32, lowp> lowp_fmat3x4;
+ typedef mat<4, 2, f32, lowp> lowp_fmat4x2;
+ typedef mat<4, 3, f32, lowp> lowp_fmat4x3;
+ typedef mat<4, 4, f32, lowp> lowp_fmat4x4;
+
+ typedef mat<2, 2, f32, mediump> mediump_fmat2x2;
+ typedef mat<2, 3, f32, mediump> mediump_fmat2x3;
+ typedef mat<2, 4, f32, mediump> mediump_fmat2x4;
+ typedef mat<3, 2, f32, mediump> mediump_fmat3x2;
+ typedef mat<3, 3, f32, mediump> mediump_fmat3x3;
+ typedef mat<3, 4, f32, mediump> mediump_fmat3x4;
+ typedef mat<4, 2, f32, mediump> mediump_fmat4x2;
+ typedef mat<4, 3, f32, mediump> mediump_fmat4x3;
+ typedef mat<4, 4, f32, mediump> mediump_fmat4x4;
+
+ typedef mat<2, 2, f32, highp> highp_fmat2x2;
+ typedef mat<2, 3, f32, highp> highp_fmat2x3;
+ typedef mat<2, 4, f32, highp> highp_fmat2x4;
+ typedef mat<3, 2, f32, highp> highp_fmat3x2;
+ typedef mat<3, 3, f32, highp> highp_fmat3x3;
+ typedef mat<3, 4, f32, highp> highp_fmat3x4;
+ typedef mat<4, 2, f32, highp> highp_fmat4x2;
+ typedef mat<4, 3, f32, highp> highp_fmat4x3;
+ typedef mat<4, 4, f32, highp> highp_fmat4x4;
+
+ typedef mat<2, 2, f32, defaultp> fmat2x2;
+ typedef mat<2, 3, f32, defaultp> fmat2x3;
+ typedef mat<2, 4, f32, defaultp> fmat2x4;
+ typedef mat<3, 2, f32, defaultp> fmat3x2;
+ typedef mat<3, 3, f32, defaultp> fmat3x3;
+ typedef mat<3, 4, f32, defaultp> fmat3x4;
+ typedef mat<4, 2, f32, defaultp> fmat4x2;
+ typedef mat<4, 3, f32, defaultp> fmat4x3;
+ typedef mat<4, 4, f32, defaultp> fmat4x4;
+
+ typedef mat<2, 2, f32, lowp> lowp_f32mat2x2;
+ typedef mat<2, 3, f32, lowp> lowp_f32mat2x3;
+ typedef mat<2, 4, f32, lowp> lowp_f32mat2x4;
+ typedef mat<3, 2, f32, lowp> lowp_f32mat3x2;
+ typedef mat<3, 3, f32, lowp> lowp_f32mat3x3;
+ typedef mat<3, 4, f32, lowp> lowp_f32mat3x4;
+ typedef mat<4, 2, f32, lowp> lowp_f32mat4x2;
+ typedef mat<4, 3, f32, lowp> lowp_f32mat4x3;
+ typedef mat<4, 4, f32, lowp> lowp_f32mat4x4;
+
+ typedef mat<2, 2, f32, mediump> mediump_f32mat2x2;
+ typedef mat<2, 3, f32, mediump> mediump_f32mat2x3;
+ typedef mat<2, 4, f32, mediump> mediump_f32mat2x4;
+ typedef mat<3, 2, f32, mediump> mediump_f32mat3x2;
+ typedef mat<3, 3, f32, mediump> mediump_f32mat3x3;
+ typedef mat<3, 4, f32, mediump> mediump_f32mat3x4;
+ typedef mat<4, 2, f32, mediump> mediump_f32mat4x2;
+ typedef mat<4, 3, f32, mediump> mediump_f32mat4x3;
+ typedef mat<4, 4, f32, mediump> mediump_f32mat4x4;
+
+ typedef mat<2, 2, f32, highp> highp_f32mat2x2;
+ typedef mat<2, 3, f32, highp> highp_f32mat2x3;
+ typedef mat<2, 4, f32, highp> highp_f32mat2x4;
+ typedef mat<3, 2, f32, highp> highp_f32mat3x2;
+ typedef mat<3, 3, f32, highp> highp_f32mat3x3;
+ typedef mat<3, 4, f32, highp> highp_f32mat3x4;
+ typedef mat<4, 2, f32, highp> highp_f32mat4x2;
+ typedef mat<4, 3, f32, highp> highp_f32mat4x3;
+ typedef mat<4, 4, f32, highp> highp_f32mat4x4;
+
+ typedef mat<2, 2, f32, defaultp> f32mat2x2;
+ typedef mat<2, 3, f32, defaultp> f32mat2x3;
+ typedef mat<2, 4, f32, defaultp> f32mat2x4;
+ typedef mat<3, 2, f32, defaultp> f32mat3x2;
+ typedef mat<3, 3, f32, defaultp> f32mat3x3;
+ typedef mat<3, 4, f32, defaultp> f32mat3x4;
+ typedef mat<4, 2, f32, defaultp> f32mat4x2;
+ typedef mat<4, 3, f32, defaultp> f32mat4x3;
+ typedef mat<4, 4, f32, defaultp> f32mat4x4;
+
+ typedef mat<2, 2, double, lowp> lowp_dmat2x2;
+ typedef mat<2, 3, double, lowp> lowp_dmat2x3;
+ typedef mat<2, 4, double, lowp> lowp_dmat2x4;
+ typedef mat<3, 2, double, lowp> lowp_dmat3x2;
+ typedef mat<3, 3, double, lowp> lowp_dmat3x3;
+ typedef mat<3, 4, double, lowp> lowp_dmat3x4;
+ typedef mat<4, 2, double, lowp> lowp_dmat4x2;
+ typedef mat<4, 3, double, lowp> lowp_dmat4x3;
+ typedef mat<4, 4, double, lowp> lowp_dmat4x4;
+
+ typedef mat<2, 2, double, mediump> mediump_dmat2x2;
+ typedef mat<2, 3, double, mediump> mediump_dmat2x3;
+ typedef mat<2, 4, double, mediump> mediump_dmat2x4;
+ typedef mat<3, 2, double, mediump> mediump_dmat3x2;
+ typedef mat<3, 3, double, mediump> mediump_dmat3x3;
+ typedef mat<3, 4, double, mediump> mediump_dmat3x4;
+ typedef mat<4, 2, double, mediump> mediump_dmat4x2;
+ typedef mat<4, 3, double, mediump> mediump_dmat4x3;
+ typedef mat<4, 4, double, mediump> mediump_dmat4x4;
+
+ typedef mat<2, 2, double, highp> highp_dmat2x2;
+ typedef mat<2, 3, double, highp> highp_dmat2x3;
+ typedef mat<2, 4, double, highp> highp_dmat2x4;
+ typedef mat<3, 2, double, highp> highp_dmat3x2;
+ typedef mat<3, 3, double, highp> highp_dmat3x3;
+ typedef mat<3, 4, double, highp> highp_dmat3x4;
+ typedef mat<4, 2, double, highp> highp_dmat4x2;
+ typedef mat<4, 3, double, highp> highp_dmat4x3;
+ typedef mat<4, 4, double, highp> highp_dmat4x4;
+
+ typedef mat<2, 2, double, defaultp> dmat2x2;
+ typedef mat<2, 3, double, defaultp> dmat2x3;
+ typedef mat<2, 4, double, defaultp> dmat2x4;
+ typedef mat<3, 2, double, defaultp> dmat3x2;
+ typedef mat<3, 3, double, defaultp> dmat3x3;
+ typedef mat<3, 4, double, defaultp> dmat3x4;
+ typedef mat<4, 2, double, defaultp> dmat4x2;
+ typedef mat<4, 3, double, defaultp> dmat4x3;
+ typedef mat<4, 4, double, defaultp> dmat4x4;
+
+ typedef mat<2, 2, f64, lowp> lowp_f64mat2x2;
+ typedef mat<2, 3, f64, lowp> lowp_f64mat2x3;
+ typedef mat<2, 4, f64, lowp> lowp_f64mat2x4;
+ typedef mat<3, 2, f64, lowp> lowp_f64mat3x2;
+ typedef mat<3, 3, f64, lowp> lowp_f64mat3x3;
+ typedef mat<3, 4, f64, lowp> lowp_f64mat3x4;
+ typedef mat<4, 2, f64, lowp> lowp_f64mat4x2;
+ typedef mat<4, 3, f64, lowp> lowp_f64mat4x3;
+ typedef mat<4, 4, f64, lowp> lowp_f64mat4x4;
+
+ typedef mat<2, 2, f64, mediump> mediump_f64mat2x2;
+ typedef mat<2, 3, f64, mediump> mediump_f64mat2x3;
+ typedef mat<2, 4, f64, mediump> mediump_f64mat2x4;
+ typedef mat<3, 2, f64, mediump> mediump_f64mat3x2;
+ typedef mat<3, 3, f64, mediump> mediump_f64mat3x3;
+ typedef mat<3, 4, f64, mediump> mediump_f64mat3x4;
+ typedef mat<4, 2, f64, mediump> mediump_f64mat4x2;
+ typedef mat<4, 3, f64, mediump> mediump_f64mat4x3;
+ typedef mat<4, 4, f64, mediump> mediump_f64mat4x4;
+
+ typedef mat<2, 2, f64, highp> highp_f64mat2x2;
+ typedef mat<2, 3, f64, highp> highp_f64mat2x3;
+ typedef mat<2, 4, f64, highp> highp_f64mat2x4;
+ typedef mat<3, 2, f64, highp> highp_f64mat3x2;
+ typedef mat<3, 3, f64, highp> highp_f64mat3x3;
+ typedef mat<3, 4, f64, highp> highp_f64mat3x4;
+ typedef mat<4, 2, f64, highp> highp_f64mat4x2;
+ typedef mat<4, 3, f64, highp> highp_f64mat4x3;
+ typedef mat<4, 4, f64, highp> highp_f64mat4x4;
+
+ typedef mat<2, 2, f64, defaultp> f64mat2x2;
+ typedef mat<2, 3, f64, defaultp> f64mat2x3;
+ typedef mat<2, 4, f64, defaultp> f64mat2x4;
+ typedef mat<3, 2, f64, defaultp> f64mat3x2;
+ typedef mat<3, 3, f64, defaultp> f64mat3x3;
+ typedef mat<3, 4, f64, defaultp> f64mat3x4;
+ typedef mat<4, 2, f64, defaultp> f64mat4x2;
+ typedef mat<4, 3, f64, defaultp> f64mat4x3;
+ typedef mat<4, 4, f64, defaultp> f64mat4x4;
+
+
+
+ typedef mat<2, 2, int, lowp> lowp_imat2x2;
+ typedef mat<2, 3, int, lowp> lowp_imat2x3;
+ typedef mat<2, 4, int, lowp> lowp_imat2x4;
+ typedef mat<3, 2, int, lowp> lowp_imat3x2;
+ typedef mat<3, 3, int, lowp> lowp_imat3x3;
+ typedef mat<3, 4, int, lowp> lowp_imat3x4;
+ typedef mat<4, 2, int, lowp> lowp_imat4x2;
+ typedef mat<4, 3, int, lowp> lowp_imat4x3;
+ typedef mat<4, 4, int, lowp> lowp_imat4x4;
+
+ typedef mat<2, 2, int, mediump> mediump_imat2x2;
+ typedef mat<2, 3, int, mediump> mediump_imat2x3;
+ typedef mat<2, 4, int, mediump> mediump_imat2x4;
+ typedef mat<3, 2, int, mediump> mediump_imat3x2;
+ typedef mat<3, 3, int, mediump> mediump_imat3x3;
+ typedef mat<3, 4, int, mediump> mediump_imat3x4;
+ typedef mat<4, 2, int, mediump> mediump_imat4x2;
+ typedef mat<4, 3, int, mediump> mediump_imat4x3;
+ typedef mat<4, 4, int, mediump> mediump_imat4x4;
+
+ typedef mat<2, 2, int, highp> highp_imat2x2;
+ typedef mat<2, 3, int, highp> highp_imat2x3;
+ typedef mat<2, 4, int, highp> highp_imat2x4;
+ typedef mat<3, 2, int, highp> highp_imat3x2;
+ typedef mat<3, 3, int, highp> highp_imat3x3;
+ typedef mat<3, 4, int, highp> highp_imat3x4;
+ typedef mat<4, 2, int, highp> highp_imat4x2;
+ typedef mat<4, 3, int, highp> highp_imat4x3;
+ typedef mat<4, 4, int, highp> highp_imat4x4;
+
+ typedef mat<2, 2, int, defaultp> imat2x2;
+ typedef mat<2, 3, int, defaultp> imat2x3;
+ typedef mat<2, 4, int, defaultp> imat2x4;
+ typedef mat<3, 2, int, defaultp> imat3x2;
+ typedef mat<3, 3, int, defaultp> imat3x3;
+ typedef mat<3, 4, int, defaultp> imat3x4;
+ typedef mat<4, 2, int, defaultp> imat4x2;
+ typedef mat<4, 3, int, defaultp> imat4x3;
+ typedef mat<4, 4, int, defaultp> imat4x4;
+
+
+ typedef mat<2, 2, int8, lowp> lowp_i8mat2x2;
+ typedef mat<2, 3, int8, lowp> lowp_i8mat2x3;
+ typedef mat<2, 4, int8, lowp> lowp_i8mat2x4;
+ typedef mat<3, 2, int8, lowp> lowp_i8mat3x2;
+ typedef mat<3, 3, int8, lowp> lowp_i8mat3x3;
+ typedef mat<3, 4, int8, lowp> lowp_i8mat3x4;
+ typedef mat<4, 2, int8, lowp> lowp_i8mat4x2;
+ typedef mat<4, 3, int8, lowp> lowp_i8mat4x3;
+ typedef mat<4, 4, int8, lowp> lowp_i8mat4x4;
+
+ typedef mat<2, 2, int8, mediump> mediump_i8mat2x2;
+ typedef mat<2, 3, int8, mediump> mediump_i8mat2x3;
+ typedef mat<2, 4, int8, mediump> mediump_i8mat2x4;
+ typedef mat<3, 2, int8, mediump> mediump_i8mat3x2;
+ typedef mat<3, 3, int8, mediump> mediump_i8mat3x3;
+ typedef mat<3, 4, int8, mediump> mediump_i8mat3x4;
+ typedef mat<4, 2, int8, mediump> mediump_i8mat4x2;
+ typedef mat<4, 3, int8, mediump> mediump_i8mat4x3;
+ typedef mat<4, 4, int8, mediump> mediump_i8mat4x4;
+
+ typedef mat<2, 2, int8, highp> highp_i8mat2x2;
+ typedef mat<2, 3, int8, highp> highp_i8mat2x3;
+ typedef mat<2, 4, int8, highp> highp_i8mat2x4;
+ typedef mat<3, 2, int8, highp> highp_i8mat3x2;
+ typedef mat<3, 3, int8, highp> highp_i8mat3x3;
+ typedef mat<3, 4, int8, highp> highp_i8mat3x4;
+ typedef mat<4, 2, int8, highp> highp_i8mat4x2;
+ typedef mat<4, 3, int8, highp> highp_i8mat4x3;
+ typedef mat<4, 4, int8, highp> highp_i8mat4x4;
+
+ typedef mat<2, 2, int8, defaultp> i8mat2x2;
+ typedef mat<2, 3, int8, defaultp> i8mat2x3;
+ typedef mat<2, 4, int8, defaultp> i8mat2x4;
+ typedef mat<3, 2, int8, defaultp> i8mat3x2;
+ typedef mat<3, 3, int8, defaultp> i8mat3x3;
+ typedef mat<3, 4, int8, defaultp> i8mat3x4;
+ typedef mat<4, 2, int8, defaultp> i8mat4x2;
+ typedef mat<4, 3, int8, defaultp> i8mat4x3;
+ typedef mat<4, 4, int8, defaultp> i8mat4x4;
+
+
+ typedef mat<2, 2, int16, lowp> lowp_i16mat2x2;
+ typedef mat<2, 3, int16, lowp> lowp_i16mat2x3;
+ typedef mat<2, 4, int16, lowp> lowp_i16mat2x4;
+ typedef mat<3, 2, int16, lowp> lowp_i16mat3x2;
+ typedef mat<3, 3, int16, lowp> lowp_i16mat3x3;
+ typedef mat<3, 4, int16, lowp> lowp_i16mat3x4;
+ typedef mat<4, 2, int16, lowp> lowp_i16mat4x2;
+ typedef mat<4, 3, int16, lowp> lowp_i16mat4x3;
+ typedef mat<4, 4, int16, lowp> lowp_i16mat4x4;
+
+ typedef mat<2, 2, int16, mediump> mediump_i16mat2x2;
+ typedef mat<2, 3, int16, mediump> mediump_i16mat2x3;
+ typedef mat<2, 4, int16, mediump> mediump_i16mat2x4;
+ typedef mat<3, 2, int16, mediump> mediump_i16mat3x2;
+ typedef mat<3, 3, int16, mediump> mediump_i16mat3x3;
+ typedef mat<3, 4, int16, mediump> mediump_i16mat3x4;
+ typedef mat<4, 2, int16, mediump> mediump_i16mat4x2;
+ typedef mat<4, 3, int16, mediump> mediump_i16mat4x3;
+ typedef mat<4, 4, int16, mediump> mediump_i16mat4x4;
+
+ typedef mat<2, 2, int16, highp> highp_i16mat2x2;
+ typedef mat<2, 3, int16, highp> highp_i16mat2x3;
+ typedef mat<2, 4, int16, highp> highp_i16mat2x4;
+ typedef mat<3, 2, int16, highp> highp_i16mat3x2;
+ typedef mat<3, 3, int16, highp> highp_i16mat3x3;
+ typedef mat<3, 4, int16, highp> highp_i16mat3x4;
+ typedef mat<4, 2, int16, highp> highp_i16mat4x2;
+ typedef mat<4, 3, int16, highp> highp_i16mat4x3;
+ typedef mat<4, 4, int16, highp> highp_i16mat4x4;
+
+ typedef mat<2, 2, int16, defaultp> i16mat2x2;
+ typedef mat<2, 3, int16, defaultp> i16mat2x3;
+ typedef mat<2, 4, int16, defaultp> i16mat2x4;
+ typedef mat<3, 2, int16, defaultp> i16mat3x2;
+ typedef mat<3, 3, int16, defaultp> i16mat3x3;
+ typedef mat<3, 4, int16, defaultp> i16mat3x4;
+ typedef mat<4, 2, int16, defaultp> i16mat4x2;
+ typedef mat<4, 3, int16, defaultp> i16mat4x3;
+ typedef mat<4, 4, int16, defaultp> i16mat4x4;
+
+
+ typedef mat<2, 2, int32, lowp> lowp_i32mat2x2;
+ typedef mat<2, 3, int32, lowp> lowp_i32mat2x3;
+ typedef mat<2, 4, int32, lowp> lowp_i32mat2x4;
+ typedef mat<3, 2, int32, lowp> lowp_i32mat3x2;
+ typedef mat<3, 3, int32, lowp> lowp_i32mat3x3;
+ typedef mat<3, 4, int32, lowp> lowp_i32mat3x4;
+ typedef mat<4, 2, int32, lowp> lowp_i32mat4x2;
+ typedef mat<4, 3, int32, lowp> lowp_i32mat4x3;
+ typedef mat<4, 4, int32, lowp> lowp_i32mat4x4;
+
+ typedef mat<2, 2, int32, mediump> mediump_i32mat2x2;
+ typedef mat<2, 3, int32, mediump> mediump_i32mat2x3;
+ typedef mat<2, 4, int32, mediump> mediump_i32mat2x4;
+ typedef mat<3, 2, int32, mediump> mediump_i32mat3x2;
+ typedef mat<3, 3, int32, mediump> mediump_i32mat3x3;
+ typedef mat<3, 4, int32, mediump> mediump_i32mat3x4;
+ typedef mat<4, 2, int32, mediump> mediump_i32mat4x2;
+ typedef mat<4, 3, int32, mediump> mediump_i32mat4x3;
+ typedef mat<4, 4, int32, mediump> mediump_i32mat4x4;
+
+ typedef mat<2, 2, int32, highp> highp_i32mat2x2;
+ typedef mat<2, 3, int32, highp> highp_i32mat2x3;
+ typedef mat<2, 4, int32, highp> highp_i32mat2x4;
+ typedef mat<3, 2, int32, highp> highp_i32mat3x2;
+ typedef mat<3, 3, int32, highp> highp_i32mat3x3;
+ typedef mat<3, 4, int32, highp> highp_i32mat3x4;
+ typedef mat<4, 2, int32, highp> highp_i32mat4x2;
+ typedef mat<4, 3, int32, highp> highp_i32mat4x3;
+ typedef mat<4, 4, int32, highp> highp_i32mat4x4;
+
+ typedef mat<2, 2, int32, defaultp> i32mat2x2;
+ typedef mat<2, 3, int32, defaultp> i32mat2x3;
+ typedef mat<2, 4, int32, defaultp> i32mat2x4;
+ typedef mat<3, 2, int32, defaultp> i32mat3x2;
+ typedef mat<3, 3, int32, defaultp> i32mat3x3;
+ typedef mat<3, 4, int32, defaultp> i32mat3x4;
+ typedef mat<4, 2, int32, defaultp> i32mat4x2;
+ typedef mat<4, 3, int32, defaultp> i32mat4x3;
+ typedef mat<4, 4, int32, defaultp> i32mat4x4;
+
+
+ typedef mat<2, 2, int64, lowp> lowp_i64mat2x2;
+ typedef mat<2, 3, int64, lowp> lowp_i64mat2x3;
+ typedef mat<2, 4, int64, lowp> lowp_i64mat2x4;
+ typedef mat<3, 2, int64, lowp> lowp_i64mat3x2;
+ typedef mat<3, 3, int64, lowp> lowp_i64mat3x3;
+ typedef mat<3, 4, int64, lowp> lowp_i64mat3x4;
+ typedef mat<4, 2, int64, lowp> lowp_i64mat4x2;
+ typedef mat<4, 3, int64, lowp> lowp_i64mat4x3;
+ typedef mat<4, 4, int64, lowp> lowp_i64mat4x4;
+
+ typedef mat<2, 2, int64, mediump> mediump_i64mat2x2;
+ typedef mat<2, 3, int64, mediump> mediump_i64mat2x3;
+ typedef mat<2, 4, int64, mediump> mediump_i64mat2x4;
+ typedef mat<3, 2, int64, mediump> mediump_i64mat3x2;
+ typedef mat<3, 3, int64, mediump> mediump_i64mat3x3;
+ typedef mat<3, 4, int64, mediump> mediump_i64mat3x4;
+ typedef mat<4, 2, int64, mediump> mediump_i64mat4x2;
+ typedef mat<4, 3, int64, mediump> mediump_i64mat4x3;
+ typedef mat<4, 4, int64, mediump> mediump_i64mat4x4;
+
+ typedef mat<2, 2, int64, highp> highp_i64mat2x2;
+ typedef mat<2, 3, int64, highp> highp_i64mat2x3;
+ typedef mat<2, 4, int64, highp> highp_i64mat2x4;
+ typedef mat<3, 2, int64, highp> highp_i64mat3x2;
+ typedef mat<3, 3, int64, highp> highp_i64mat3x3;
+ typedef mat<3, 4, int64, highp> highp_i64mat3x4;
+ typedef mat<4, 2, int64, highp> highp_i64mat4x2;
+ typedef mat<4, 3, int64, highp> highp_i64mat4x3;
+ typedef mat<4, 4, int64, highp> highp_i64mat4x4;
+
+ typedef mat<2, 2, int64, defaultp> i64mat2x2;
+ typedef mat<2, 3, int64, defaultp> i64mat2x3;
+ typedef mat<2, 4, int64, defaultp> i64mat2x4;
+ typedef mat<3, 2, int64, defaultp> i64mat3x2;
+ typedef mat<3, 3, int64, defaultp> i64mat3x3;
+ typedef mat<3, 4, int64, defaultp> i64mat3x4;
+ typedef mat<4, 2, int64, defaultp> i64mat4x2;
+ typedef mat<4, 3, int64, defaultp> i64mat4x3;
+ typedef mat<4, 4, int64, defaultp> i64mat4x4;
+
+
+
+
+ typedef mat<2, 2, uint, lowp> lowp_umat2x2;
+ typedef mat<2, 3, uint, lowp> lowp_umat2x3;
+ typedef mat<2, 4, uint, lowp> lowp_umat2x4;
+ typedef mat<3, 2, uint, lowp> lowp_umat3x2;
+ typedef mat<3, 3, uint, lowp> lowp_umat3x3;
+ typedef mat<3, 4, uint, lowp> lowp_umat3x4;
+ typedef mat<4, 2, uint, lowp> lowp_umat4x2;
+ typedef mat<4, 3, uint, lowp> lowp_umat4x3;
+ typedef mat<4, 4, uint, lowp> lowp_umat4x4;
+
+ typedef mat<2, 2, uint, mediump> mediump_umat2x2;
+ typedef mat<2, 3, uint, mediump> mediump_umat2x3;
+ typedef mat<2, 4, uint, mediump> mediump_umat2x4;
+ typedef mat<3, 2, uint, mediump> mediump_umat3x2;
+ typedef mat<3, 3, uint, mediump> mediump_umat3x3;
+ typedef mat<3, 4, uint, mediump> mediump_umat3x4;
+ typedef mat<4, 2, uint, mediump> mediump_umat4x2;
+ typedef mat<4, 3, uint, mediump> mediump_umat4x3;
+ typedef mat<4, 4, uint, mediump> mediump_umat4x4;
+
+ typedef mat<2, 2, uint, highp> highp_umat2x2;
+ typedef mat<2, 3, uint, highp> highp_umat2x3;
+ typedef mat<2, 4, uint, highp> highp_umat2x4;
+ typedef mat<3, 2, uint, highp> highp_umat3x2;
+ typedef mat<3, 3, uint, highp> highp_umat3x3;
+ typedef mat<3, 4, uint, highp> highp_umat3x4;
+ typedef mat<4, 2, uint, highp> highp_umat4x2;
+ typedef mat<4, 3, uint, highp> highp_umat4x3;
+ typedef mat<4, 4, uint, highp> highp_umat4x4;
+
+ typedef mat<2, 2, uint, defaultp> umat2x2;
+ typedef mat<2, 3, uint, defaultp> umat2x3;
+ typedef mat<2, 4, uint, defaultp> umat2x4;
+ typedef mat<3, 2, uint, defaultp> umat3x2;
+ typedef mat<3, 3, uint, defaultp> umat3x3;
+ typedef mat<3, 4, uint, defaultp> umat3x4;
+ typedef mat<4, 2, uint, defaultp> umat4x2;
+ typedef mat<4, 3, uint, defaultp> umat4x3;
+ typedef mat<4, 4, uint, defaultp> umat4x4;
+
+
+ typedef mat<2, 2, uint8, lowp> lowp_u8mat2x2;
+ typedef mat<2, 3, uint8, lowp> lowp_u8mat2x3;
+ typedef mat<2, 4, uint8, lowp> lowp_u8mat2x4;
+ typedef mat<3, 2, uint8, lowp> lowp_u8mat3x2;
+ typedef mat<3, 3, uint8, lowp> lowp_u8mat3x3;
+ typedef mat<3, 4, uint8, lowp> lowp_u8mat3x4;
+ typedef mat<4, 2, uint8, lowp> lowp_u8mat4x2;
+ typedef mat<4, 3, uint8, lowp> lowp_u8mat4x3;
+ typedef mat<4, 4, uint8, lowp> lowp_u8mat4x4;
+
+ typedef mat<2, 2, uint8, mediump> mediump_u8mat2x2;
+ typedef mat<2, 3, uint8, mediump> mediump_u8mat2x3;
+ typedef mat<2, 4, uint8, mediump> mediump_u8mat2x4;
+ typedef mat<3, 2, uint8, mediump> mediump_u8mat3x2;
+ typedef mat<3, 3, uint8, mediump> mediump_u8mat3x3;
+ typedef mat<3, 4, uint8, mediump> mediump_u8mat3x4;
+ typedef mat<4, 2, uint8, mediump> mediump_u8mat4x2;
+ typedef mat<4, 3, uint8, mediump> mediump_u8mat4x3;
+ typedef mat<4, 4, uint8, mediump> mediump_u8mat4x4;
+
+ typedef mat<2, 2, uint8, highp> highp_u8mat2x2;
+ typedef mat<2, 3, uint8, highp> highp_u8mat2x3;
+ typedef mat<2, 4, uint8, highp> highp_u8mat2x4;
+ typedef mat<3, 2, uint8, highp> highp_u8mat3x2;
+ typedef mat<3, 3, uint8, highp> highp_u8mat3x3;
+ typedef mat<3, 4, uint8, highp> highp_u8mat3x4;
+ typedef mat<4, 2, uint8, highp> highp_u8mat4x2;
+ typedef mat<4, 3, uint8, highp> highp_u8mat4x3;
+ typedef mat<4, 4, uint8, highp> highp_u8mat4x4;
+
+ typedef mat<2, 2, uint8, defaultp> u8mat2x2;
+ typedef mat<2, 3, uint8, defaultp> u8mat2x3;
+ typedef mat<2, 4, uint8, defaultp> u8mat2x4;
+ typedef mat<3, 2, uint8, defaultp> u8mat3x2;
+ typedef mat<3, 3, uint8, defaultp> u8mat3x3;
+ typedef mat<3, 4, uint8, defaultp> u8mat3x4;
+ typedef mat<4, 2, uint8, defaultp> u8mat4x2;
+ typedef mat<4, 3, uint8, defaultp> u8mat4x3;
+ typedef mat<4, 4, uint8, defaultp> u8mat4x4;
+
+
+ typedef mat<2, 2, uint16, lowp> lowp_u16mat2x2;
+ typedef mat<2, 3, uint16, lowp> lowp_u16mat2x3;
+ typedef mat<2, 4, uint16, lowp> lowp_u16mat2x4;
+ typedef mat<3, 2, uint16, lowp> lowp_u16mat3x2;
+ typedef mat<3, 3, uint16, lowp> lowp_u16mat3x3;
+ typedef mat<3, 4, uint16, lowp> lowp_u16mat3x4;
+ typedef mat<4, 2, uint16, lowp> lowp_u16mat4x2;
+ typedef mat<4, 3, uint16, lowp> lowp_u16mat4x3;
+ typedef mat<4, 4, uint16, lowp> lowp_u16mat4x4;
+
+ typedef mat<2, 2, uint16, mediump> mediump_u16mat2x2;
+ typedef mat<2, 3, uint16, mediump> mediump_u16mat2x3;
+ typedef mat<2, 4, uint16, mediump> mediump_u16mat2x4;
+ typedef mat<3, 2, uint16, mediump> mediump_u16mat3x2;
+ typedef mat<3, 3, uint16, mediump> mediump_u16mat3x3;
+ typedef mat<3, 4, uint16, mediump> mediump_u16mat3x4;
+ typedef mat<4, 2, uint16, mediump> mediump_u16mat4x2;
+ typedef mat<4, 3, uint16, mediump> mediump_u16mat4x3;
+ typedef mat<4, 4, uint16, mediump> mediump_u16mat4x4;
+
+ typedef mat<2, 2, uint16, highp> highp_u16mat2x2;
+ typedef mat<2, 3, uint16, highp> highp_u16mat2x3;
+ typedef mat<2, 4, uint16, highp> highp_u16mat2x4;
+ typedef mat<3, 2, uint16, highp> highp_u16mat3x2;
+ typedef mat<3, 3, uint16, highp> highp_u16mat3x3;
+ typedef mat<3, 4, uint16, highp> highp_u16mat3x4;
+ typedef mat<4, 2, uint16, highp> highp_u16mat4x2;
+ typedef mat<4, 3, uint16, highp> highp_u16mat4x3;
+ typedef mat<4, 4, uint16, highp> highp_u16mat4x4;
+
+ typedef mat<2, 2, uint16, defaultp> u16mat2x2;
+ typedef mat<2, 3, uint16, defaultp> u16mat2x3;
+ typedef mat<2, 4, uint16, defaultp> u16mat2x4;
+ typedef mat<3, 2, uint16, defaultp> u16mat3x2;
+ typedef mat<3, 3, uint16, defaultp> u16mat3x3;
+ typedef mat<3, 4, uint16, defaultp> u16mat3x4;
+ typedef mat<4, 2, uint16, defaultp> u16mat4x2;
+ typedef mat<4, 3, uint16, defaultp> u16mat4x3;
+ typedef mat<4, 4, uint16, defaultp> u16mat4x4;
+
+
+ typedef mat<2, 2, uint32, lowp> lowp_u32mat2x2;
+ typedef mat<2, 3, uint32, lowp> lowp_u32mat2x3;
+ typedef mat<2, 4, uint32, lowp> lowp_u32mat2x4;
+ typedef mat<3, 2, uint32, lowp> lowp_u32mat3x2;
+ typedef mat<3, 3, uint32, lowp> lowp_u32mat3x3;
+ typedef mat<3, 4, uint32, lowp> lowp_u32mat3x4;
+ typedef mat<4, 2, uint32, lowp> lowp_u32mat4x2;
+ typedef mat<4, 3, uint32, lowp> lowp_u32mat4x3;
+ typedef mat<4, 4, uint32, lowp> lowp_u32mat4x4;
+
+ typedef mat<2, 2, uint32, mediump> mediump_u32mat2x2;
+ typedef mat<2, 3, uint32, mediump> mediump_u32mat2x3;
+ typedef mat<2, 4, uint32, mediump> mediump_u32mat2x4;
+ typedef mat<3, 2, uint32, mediump> mediump_u32mat3x2;
+ typedef mat<3, 3, uint32, mediump> mediump_u32mat3x3;
+ typedef mat<3, 4, uint32, mediump> mediump_u32mat3x4;
+ typedef mat<4, 2, uint32, mediump> mediump_u32mat4x2;
+ typedef mat<4, 3, uint32, mediump> mediump_u32mat4x3;
+ typedef mat<4, 4, uint32, mediump> mediump_u32mat4x4;
+
+ typedef mat<2, 2, uint32, highp> highp_u32mat2x2;
+ typedef mat<2, 3, uint32, highp> highp_u32mat2x3;
+ typedef mat<2, 4, uint32, highp> highp_u32mat2x4;
+ typedef mat<3, 2, uint32, highp> highp_u32mat3x2;
+ typedef mat<3, 3, uint32, highp> highp_u32mat3x3;
+ typedef mat<3, 4, uint32, highp> highp_u32mat3x4;
+ typedef mat<4, 2, uint32, highp> highp_u32mat4x2;
+ typedef mat<4, 3, uint32, highp> highp_u32mat4x3;
+ typedef mat<4, 4, uint32, highp> highp_u32mat4x4;
+
+ typedef mat<2, 2, uint32, defaultp> u32mat2x2;
+ typedef mat<2, 3, uint32, defaultp> u32mat2x3;
+ typedef mat<2, 4, uint32, defaultp> u32mat2x4;
+ typedef mat<3, 2, uint32, defaultp> u32mat3x2;
+ typedef mat<3, 3, uint32, defaultp> u32mat3x3;
+ typedef mat<3, 4, uint32, defaultp> u32mat3x4;
+ typedef mat<4, 2, uint32, defaultp> u32mat4x2;
+ typedef mat<4, 3, uint32, defaultp> u32mat4x3;
+ typedef mat<4, 4, uint32, defaultp> u32mat4x4;
+
+
+ typedef mat<2, 2, uint64, lowp> lowp_u64mat2x2;
+ typedef mat<2, 3, uint64, lowp> lowp_u64mat2x3;
+ typedef mat<2, 4, uint64, lowp> lowp_u64mat2x4;
+ typedef mat<3, 2, uint64, lowp> lowp_u64mat3x2;
+ typedef mat<3, 3, uint64, lowp> lowp_u64mat3x3;
+ typedef mat<3, 4, uint64, lowp> lowp_u64mat3x4;
+ typedef mat<4, 2, uint64, lowp> lowp_u64mat4x2;
+ typedef mat<4, 3, uint64, lowp> lowp_u64mat4x3;
+ typedef mat<4, 4, uint64, lowp> lowp_u64mat4x4;
+
+ typedef mat<2, 2, uint64, mediump> mediump_u64mat2x2;
+ typedef mat<2, 3, uint64, mediump> mediump_u64mat2x3;
+ typedef mat<2, 4, uint64, mediump> mediump_u64mat2x4;
+ typedef mat<3, 2, uint64, mediump> mediump_u64mat3x2;
+ typedef mat<3, 3, uint64, mediump> mediump_u64mat3x3;
+ typedef mat<3, 4, uint64, mediump> mediump_u64mat3x4;
+ typedef mat<4, 2, uint64, mediump> mediump_u64mat4x2;
+ typedef mat<4, 3, uint64, mediump> mediump_u64mat4x3;
+ typedef mat<4, 4, uint64, mediump> mediump_u64mat4x4;
+
+ typedef mat<2, 2, uint64, highp> highp_u64mat2x2;
+ typedef mat<2, 3, uint64, highp> highp_u64mat2x3;
+ typedef mat<2, 4, uint64, highp> highp_u64mat2x4;
+ typedef mat<3, 2, uint64, highp> highp_u64mat3x2;
+ typedef mat<3, 3, uint64, highp> highp_u64mat3x3;
+ typedef mat<3, 4, uint64, highp> highp_u64mat3x4;
+ typedef mat<4, 2, uint64, highp> highp_u64mat4x2;
+ typedef mat<4, 3, uint64, highp> highp_u64mat4x3;
+ typedef mat<4, 4, uint64, highp> highp_u64mat4x4;
+
+ typedef mat<2, 2, uint64, defaultp> u64mat2x2;
+ typedef mat<2, 3, uint64, defaultp> u64mat2x3;
+ typedef mat<2, 4, uint64, defaultp> u64mat2x4;
+ typedef mat<3, 2, uint64, defaultp> u64mat3x2;
+ typedef mat<3, 3, uint64, defaultp> u64mat3x3;
+ typedef mat<3, 4, uint64, defaultp> u64mat3x4;
+ typedef mat<4, 2, uint64, defaultp> u64mat4x2;
+ typedef mat<4, 3, uint64, defaultp> u64mat4x3;
+ typedef mat<4, 4, uint64, defaultp> u64mat4x4;
+
+
+
+ typedef qua<float, lowp> lowp_quat;
+ typedef qua<float, mediump> mediump_quat;
+ typedef qua<float, highp> highp_quat;
+ typedef qua<float, defaultp> quat;
+
+ typedef qua<float, lowp> lowp_fquat;
+ typedef qua<float, mediump> mediump_fquat;
+ typedef qua<float, highp> highp_fquat;
+ typedef qua<float, defaultp> fquat;
+
+ typedef qua<f32, lowp> lowp_f32quat;
+ typedef qua<f32, mediump> mediump_f32quat;
+ typedef qua<f32, highp> highp_f32quat;
+ typedef qua<f32, defaultp> f32quat;
+
+ typedef qua<double, lowp> lowp_dquat;
+ typedef qua<double, mediump> mediump_dquat;
+ typedef qua<double, highp> highp_dquat;
+ typedef qua<double, defaultp> dquat;
+
+ typedef qua<f64, lowp> lowp_f64quat;
+ typedef qua<f64, mediump> mediump_f64quat;
+ typedef qua<f64, highp> highp_f64quat;
+ typedef qua<f64, defaultp> f64quat;
+}
+# 116 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp" 1
+
+
+
+       
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct vec<2, T, Q>
+ {
+
+
+  typedef T value_type;
+  typedef vec<2, T, Q> type;
+  typedef vec<2, bool, Q> bool_type;
+  enum is_aligned
+  {
+   value = false
+  };
+
+
+
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+# 72 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
+   union {T x, r, s;};
+   union {T y, g, t;};
+# 84 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
+#pragma GCC diagnostic pop
+# 93 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length(){return 2;}
+
+  [[nodiscard]] constexpr T& operator[](length_type i);
+  [[nodiscard]] constexpr T const& operator[](length_type i) const;
+
+
+
+  constexpr vec() = default;
+  constexpr vec(vec const& v) = default;
+  template<qualifier P>
+  constexpr vec(vec<2, T, P> const& v);
+
+
+
+  constexpr explicit vec(T scalar);
+  constexpr vec(T x, T y);
+
+
+
+  template<typename U, qualifier P>
+  constexpr explicit vec(vec<1, U, P> const& v);
+
+
+  template<typename A, typename B>
+  constexpr vec(A x, B y);
+  template<typename A, typename B>
+  constexpr vec(vec<1, A, Q> const& x, B y);
+  template<typename A, typename B>
+  constexpr vec(A x, vec<1, B, Q> const& y);
+  template<typename A, typename B>
+  constexpr vec(vec<1, A, Q> const& x, vec<1, B, Q> const& y);
+
+
+
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<3, U, P> const& v);
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<4, U, P> const& v);
+
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<2, U, P> const& v);
+# 150 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp"
+  constexpr vec<2, T, Q> & operator=(vec const& v) = default;
+
+  template<typename U>
+  constexpr vec<2, T, Q> & operator=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator+=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator+=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator+=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator-=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator-=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator-=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator*=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator*=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator*=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator/=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator/=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator/=(vec<2, U, Q> const& v);
+
+
+
+  constexpr vec<2, T, Q> & operator++();
+  constexpr vec<2, T, Q> & operator--();
+  [[nodiscard]] constexpr vec<2, T, Q> operator++(int);
+  [[nodiscard]] constexpr vec<2, T, Q> operator--(int);
+
+
+
+  template<typename U>
+  constexpr vec<2, T, Q> & operator%=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator%=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator%=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator&=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator&=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator&=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator|=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator|=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator|=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator^=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator^=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator^=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator<<=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator<<=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator<<=(vec<2, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator>>=(U scalar);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator>>=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<2, T, Q> & operator>>=(vec<2, U, Q> const& v);
+ };
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator+(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator-(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator*(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator*(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator/(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator/(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator%(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator%(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator&(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator&(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator|(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator|(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator^(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator^(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator<<(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator<<(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator>>(T scalar, vec<2, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator>>(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<2, T, Q> operator~(vec<2, T, Q> const& v);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2);
+
+ template<qualifier Q>
+ [[nodiscard]] constexpr vec<2, bool, Q> operator&&(vec<2, bool, Q> const& v1, vec<2, bool, Q> const& v2);
+
+ template<qualifier Q>
+ [[nodiscard]] constexpr vec<2, bool, Q> operator||(vec<2, bool, Q> const& v1, vec<2, bool, Q> const& v2);
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl" 1
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp" 1
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp" 2
+
+
+namespace glm{
+namespace detail
+{
+ template <typename T, bool isFloat>
+ struct compute_equal
+ {
+  inline constexpr static bool call(T a, T b)
+  {
+   return a == b;
+  }
+ };
+# 29 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp"
+}
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl" 2
+
+namespace glm
+{
+# 25 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr vec<2, T, Q>::vec(vec<2, T, P> const& v)
+  : x(v.x), y(v.y)
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q>::vec(T scalar)
+  : x(scalar), y(scalar)
+ {}
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q>::vec(T _x, T _y)
+  : x(_x), y(_y)
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<2, T, Q>::vec(vec<1, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B>
+ inline constexpr vec<2, T, Q>::vec(A _x, B _y)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B>
+ inline constexpr vec<2, T, Q>::vec(vec<1, A, Q> const& _x, B _y)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B>
+ inline constexpr vec<2, T, Q>::vec(A _x, vec<1, B, Q> const& _y)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B>
+ inline constexpr vec<2, T, Q>::vec(vec<1, A, Q> const& _x, vec<1, B, Q> const& _y)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y.x))
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<2, T, Q>::vec(vec<2, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<2, T, Q>::vec(vec<3, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<2, T, Q>::vec(vec<4, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.y))
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr T & vec<2, T, Q>::operator[](typename vec<2, T, Q>::length_type i)
+ {
+  (
+# 108 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl" 3
+ ((void)0)
+# 108 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl"
+ );
+  switch(i)
+  {
+  default:
+  case 0:
+   return x;
+  case 1:
+   return y;
+  }
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr T const& vec<2, T, Q>::operator[](typename vec<2, T, Q>::length_type i) const
+ {
+  (
+# 122 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl" 3
+ ((void)0)
+# 122 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl"
+ );
+  switch(i)
+  {
+  default:
+  case 0:
+   return x;
+  case 1:
+   return y;
+  }
+ }
+# 145 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl"
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator=(vec<2, U, Q> const& v)
+ {
+  this->x = static_cast<T>(v.x);
+  this->y = static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator+=(U scalar)
+ {
+  this->x += static_cast<T>(scalar);
+  this->y += static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator+=(vec<1, U, Q> const& v)
+ {
+  this->x += static_cast<T>(v.x);
+  this->y += static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator+=(vec<2, U, Q> const& v)
+ {
+  this->x += static_cast<T>(v.x);
+  this->y += static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator-=(U scalar)
+ {
+  this->x -= static_cast<T>(scalar);
+  this->y -= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator-=(vec<1, U, Q> const& v)
+ {
+  this->x -= static_cast<T>(v.x);
+  this->y -= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator-=(vec<2, U, Q> const& v)
+ {
+  this->x -= static_cast<T>(v.x);
+  this->y -= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator*=(U scalar)
+ {
+  this->x *= static_cast<T>(scalar);
+  this->y *= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator*=(vec<1, U, Q> const& v)
+ {
+  this->x *= static_cast<T>(v.x);
+  this->y *= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator*=(vec<2, U, Q> const& v)
+ {
+  this->x *= static_cast<T>(v.x);
+  this->y *= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator/=(U scalar)
+ {
+  this->x /= static_cast<T>(scalar);
+  this->y /= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator/=(vec<1, U, Q> const& v)
+ {
+  this->x /= static_cast<T>(v.x);
+  this->y /= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator/=(vec<2, U, Q> const& v)
+ {
+  this->x /= static_cast<T>(v.x);
+  this->y /= static_cast<T>(v.y);
+  return *this;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator++()
+ {
+  ++this->x;
+  ++this->y;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator--()
+ {
+  --this->x;
+  --this->y;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> vec<2, T, Q>::operator++(int)
+ {
+  vec<2, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> vec<2, T, Q>::operator--(int)
+ {
+  vec<2, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator%=(U scalar)
+ {
+  this->x %= static_cast<T>(scalar);
+  this->y %= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator%=(vec<1, U, Q> const& v)
+ {
+  this->x %= static_cast<T>(v.x);
+  this->y %= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator%=(vec<2, U, Q> const& v)
+ {
+  this->x %= static_cast<T>(v.x);
+  this->y %= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator&=(U scalar)
+ {
+  this->x &= static_cast<T>(scalar);
+  this->y &= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator&=(vec<1, U, Q> const& v)
+ {
+  this->x &= static_cast<T>(v.x);
+  this->y &= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator&=(vec<2, U, Q> const& v)
+ {
+  this->x &= static_cast<T>(v.x);
+  this->y &= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator|=(U scalar)
+ {
+  this->x |= static_cast<T>(scalar);
+  this->y |= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator|=(vec<1, U, Q> const& v)
+ {
+  this->x |= static_cast<T>(v.x);
+  this->y |= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator|=(vec<2, U, Q> const& v)
+ {
+  this->x |= static_cast<T>(v.x);
+  this->y |= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator^=(U scalar)
+ {
+  this->x ^= static_cast<T>(scalar);
+  this->y ^= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator^=(vec<1, U, Q> const& v)
+ {
+  this->x ^= static_cast<T>(v.x);
+  this->y ^= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator^=(vec<2, U, Q> const& v)
+ {
+  this->x ^= static_cast<T>(v.x);
+  this->y ^= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator<<=(U scalar)
+ {
+  this->x <<= static_cast<T>(scalar);
+  this->y <<= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator<<=(vec<1, U, Q> const& v)
+ {
+  this->x <<= static_cast<T>(v.x);
+  this->y <<= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator<<=(vec<2, U, Q> const& v)
+ {
+  this->x <<= static_cast<T>(v.x);
+  this->y <<= static_cast<T>(v.y);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator>>=(U scalar)
+ {
+  this->x >>= static_cast<T>(scalar);
+  this->y >>= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator>>=(vec<1, U, Q> const& v)
+ {
+  this->x >>= static_cast<T>(v.x);
+  this->y >>= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<2, T, Q> & vec<2, T, Q>::operator>>=(vec<2, U, Q> const& v)
+ {
+  this->x >>= static_cast<T>(v.x);
+  this->y >>= static_cast<T>(v.y);
+  return *this;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v)
+ {
+  return v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   -v.x,
+   -v.y);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x + scalar,
+   v.y + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x + v2.x,
+   v1.y + v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator+(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar + v.x,
+   scalar + v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator+(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x + v2.x,
+   v1.x + v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator+(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x + v2.x,
+   v1.y + v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x - scalar,
+   v.y - scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x - v2.x,
+   v1.y - v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator-(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar - v.x,
+   scalar - v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator-(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x - v2.x,
+   v1.x - v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator-(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x - v2.x,
+   v1.y - v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x * scalar,
+   v.y * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x * v2.x,
+   v1.y * v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator*(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar * v.x,
+   scalar * v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator*(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x * v2.x,
+   v1.x * v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator*(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x * v2.x,
+   v1.y * v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x / scalar,
+   v.y / scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x / v2.x,
+   v1.y / v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator/(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar / v.x,
+   scalar / v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator/(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x / v2.x,
+   v1.x / v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator/(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x / v2.x,
+   v1.y / v2.y);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x % scalar,
+   v.y % scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x % v2.x,
+   v1.y % v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator%(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar % v.x,
+   scalar % v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator%(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x % v2.x,
+   v1.x % v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator%(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x % v2.x,
+   v1.y % v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x & scalar,
+   v.y & scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x & v2.x,
+   v1.y & v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator&(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar & v.x,
+   scalar & v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator&(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x & v2.x,
+   v1.x & v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator&(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x & v2.x,
+   v1.y & v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x | scalar,
+   v.y | scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x | v2.x,
+   v1.y | v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator|(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar | v.x,
+   scalar | v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator|(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x | v2.x,
+   v1.x | v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator|(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x | v2.x,
+   v1.y | v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x ^ scalar,
+   v.y ^ scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x ^ v2.x,
+   v1.y ^ v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator^(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar ^ v.x,
+   scalar ^ v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator^(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x ^ v2.x,
+   v1.x ^ v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator^(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x ^ v2.x,
+   v1.y ^ v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x << scalar,
+   v.y << scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x << v2.x,
+   v1.y << v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator<<(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar << v.x,
+   scalar << v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator<<(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x << v2.x,
+   v1.x << v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator<<(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x << v2.x,
+   v1.y << v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v, T scalar)
+ {
+  return vec<2, T, Q>(
+   v.x >> scalar,
+   v.y >> scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x >> v2.x,
+   v1.y >> v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator>>(T scalar, vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   scalar >> v.x,
+   scalar >> v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator>>(vec<1, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x >> v2.x,
+   v1.x >> v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator>>(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return vec<2, T, Q>(
+   v1.x >> v2.x,
+   v1.y >> v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<2, T, Q> operator~(vec<2, T, Q> const& v)
+ {
+  return vec<2, T, Q>(
+   ~v.x,
+   ~v.y);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return
+   detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.x, v2.x) &&
+   detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.y, v2.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(vec<2, T, Q> const& v1, vec<2, T, Q> const& v2)
+ {
+  return !(v1 == v2);
+ }
+
+ template<qualifier Q>
+ inline constexpr vec<2, bool, Q> operator&&(vec<2, bool, Q> const& v1, vec<2, bool, Q> const& v2)
+ {
+  return vec<2, bool, Q>(v1.x && v2.x, v1.y && v2.y);
+ }
+
+ template<qualifier Q>
+ inline constexpr vec<2, bool, Q> operator||(vec<2, bool, Q> const& v1, vec<2, bool, Q> const& v2)
+ {
+  return vec<2, bool, Q>(v1.x || v2.x, v1.y || v2.y);
+ }
+}
+# 406 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, bool, defaultp> bvec2;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef vec<2, bool, highp> highp_bvec2;
+
+
+
+
+
+ typedef vec<2, bool, mediump> mediump_bvec2;
+
+
+
+
+
+ typedef vec<2, bool, lowp> lowp_bvec2;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float2.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, float, defaultp> vec2;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float2_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef vec<2, float, highp> highp_vec2;
+
+
+
+
+
+ typedef vec<2, float, mediump> mediump_vec2;
+
+
+
+
+
+ typedef vec<2, float, lowp> lowp_vec2;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double2.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, double, defaultp> dvec2;
+
+
+}
+# 10 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double2_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef vec<2, double, highp> highp_dvec2;
+
+
+
+
+
+ typedef vec<2, double, mediump> mediump_dvec2;
+
+
+
+
+
+ typedef vec<2, double, lowp> lowp_dvec2;
+
+
+}
+# 11 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, int, defaultp> ivec2;
+
+
+}
+# 12 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2_sized.hpp" 1
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2_sized.hpp"
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_int_sized.hpp" 1
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_int_sized.hpp"
+       
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_int_sized.hpp" 2
+
+
+
+
+
+namespace glm{
+namespace detail
+{
+
+  typedef std::int8_t int8;
+  typedef std::int16_t int16;
+  typedef std::int32_t int32;
+
+
+
+
+
+
+ template<>
+ struct is_int<int8>
+ {
+  enum test {value = ~0};
+ };
+
+ template<>
+ struct is_int<int16>
+ {
+  enum test {value = ~0};
+ };
+
+ template<>
+ struct is_int<int64>
+ {
+  enum test {value = ~0};
+ };
+}
+
+
+
+
+
+
+ typedef detail::int8 int8;
+
+
+ typedef detail::int16 int16;
+
+
+ typedef detail::int32 int32;
+
+
+ typedef detail::int64 int64;
+
+
+}
+# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2_sized.hpp" 2
+
+
+
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, int8, defaultp> i8vec2;
+
+
+
+
+ typedef vec<2, int16, defaultp> i16vec2;
+
+
+
+
+ typedef vec<2, int32, defaultp> i32vec2;
+
+
+
+
+ typedef vec<2, int64, defaultp> i64vec2;
+
+
+}
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, unsigned int, defaultp> uvec2;
+
+
+}
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2_sized.hpp" 1
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2_sized.hpp"
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_uint_sized.hpp" 1
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_uint_sized.hpp"
+       
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_uint_sized.hpp" 2
+
+
+
+
+
+namespace glm{
+namespace detail
+{
+
+  typedef std::uint8_t uint8;
+  typedef std::uint16_t uint16;
+  typedef std::uint32_t uint32;
+
+
+
+
+
+
+ template<>
+ struct is_int<uint8>
+ {
+  enum test {value = ~0};
+ };
+
+ template<>
+ struct is_int<uint16>
+ {
+  enum test {value = ~0};
+ };
+
+ template<>
+ struct is_int<uint64>
+ {
+  enum test {value = ~0};
+ };
+}
+
+
+
+
+
+
+ typedef detail::uint8 uint8;
+
+
+ typedef detail::uint16 uint16;
+
+
+ typedef detail::uint32 uint32;
+
+
+ typedef detail::uint64 uint64;
+
+
+}
+# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2_sized.hpp" 2
+
+
+
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<2, uint8, defaultp> u8vec2;
+
+
+
+
+ typedef vec<2, uint16, defaultp> u16vec2;
+
+
+
+
+ typedef vec<2, uint32, defaultp> u32vec2;
+
+
+
+
+ typedef vec<2, uint64, defaultp> u64vec2;
+
+
+}
+# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp" 2
+# 118 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool3.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.hpp" 1
+
+
+
+       
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.hpp"
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct vec<3, T, Q>
+ {
+
+
+  typedef T value_type;
+  typedef vec<3, T, Q> type;
+  typedef vec<3, bool, Q> bool_type;
+
+  enum is_aligned
+  {
+   value = detail::is_aligned<Q>::value
+  };
+
+
+
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+# 77 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.hpp"
+   union { T x, r, s; };
+   union { T y, g, t; };
+   union { T z, b, p; };
+# 90 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.hpp"
+#pragma GCC diagnostic pop
+# 99 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.hpp"
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length(){return 3;}
+
+  [[nodiscard]] constexpr T & operator[](length_type i);
+  [[nodiscard]] constexpr T const& operator[](length_type i) const;
+
+
+
+  constexpr vec() = default;
+  constexpr vec(vec const& v) = default;
+  template<qualifier P>
+  constexpr vec(vec<3, T, P> const& v);
+
+
+
+  constexpr explicit vec(T scalar);
+  constexpr vec(T a, T b, T c);
+
+
+
+  template<typename U, qualifier P>
+  constexpr explicit vec(vec<1, U, P> const& v);
+
+
+  template<typename X, typename Y, typename Z>
+  constexpr vec(X x, Y y, Z z);
+  template<typename X, typename Y, typename Z>
+  constexpr vec(vec<1, X, Q> const& _x, Y _y, Z _z);
+  template<typename X, typename Y, typename Z>
+  constexpr vec(X _x, vec<1, Y, Q> const& _y, Z _z);
+  template<typename X, typename Y, typename Z>
+  constexpr vec(vec<1, X, Q> const& _x, vec<1, Y, Q> const& _y, Z _z);
+  template<typename X, typename Y, typename Z>
+  constexpr vec(X _x, Y _y, vec<1, Z, Q> const& _z);
+  template<typename X, typename Y, typename Z>
+  constexpr vec(vec<1, X, Q> const& _x, Y _y, vec<1, Z, Q> const& _z);
+  template<typename X, typename Y, typename Z>
+  constexpr vec(X _x, vec<1, Y, Q> const& _y, vec<1, Z, Q> const& _z);
+  template<typename X, typename Y, typename Z>
+  constexpr vec(vec<1, X, Q> const& _x, vec<1, Y, Q> const& _y, vec<1, Z, Q> const& _z);
+
+
+
+
+  template<typename A, typename B, qualifier P>
+  constexpr vec(vec<2, A, P> const& _xy, B _z);
+
+  template<typename A, typename B, qualifier P>
+  constexpr vec(vec<2, A, P> const& _xy, vec<1, B, P> const& _z);
+
+  template<typename A, typename B, qualifier P>
+  constexpr vec(A _x, vec<2, B, P> const& _yz);
+
+  template<typename A, typename B, qualifier P>
+  constexpr vec(vec<1, A, P> const& _x, vec<2, B, P> const& _yz);
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<4, U, P> const& v);
+
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<3, U, P> const& v);
+# 185 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.hpp"
+  constexpr vec<3, T, Q>& operator=(vec<3, T, Q> const& v) = default;
+
+  template<typename U>
+  constexpr vec<3, T, Q> & operator=(vec<3, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator+=(U scalar);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator+=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator+=(vec<3, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator-=(U scalar);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator-=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator-=(vec<3, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator*=(U scalar);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator*=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator*=(vec<3, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator/=(U scalar);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator/=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator/=(vec<3, U, Q> const& v);
+
+
+
+  constexpr vec<3, T, Q> & operator++();
+  constexpr vec<3, T, Q> & operator--();
+  [[nodiscard]] constexpr vec<3, T, Q> operator++(int);
+  [[nodiscard]] constexpr vec<3, T, Q> operator--(int);
+
+
+
+  template<typename U>
+  constexpr vec<3, T, Q> & operator%=(U scalar);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator%=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator%=(vec<3, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator&=(U scalar);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator&=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator&=(vec<3, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator|=(U scalar);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator|=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator|=(vec<3, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator^=(U scalar);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator^=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator^=(vec<3, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator<<=(U scalar);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator<<=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator<<=(vec<3, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator>>=(U scalar);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator>>=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<3, T, Q> & operator>>=(vec<3, U, Q> const& v);
+ };
+
+
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator+(vec<3, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator-(vec<3, T, Q> const& v);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator+(vec<3, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator+(vec<3, T, Q> const& v, vec<1, T, Q> const& scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator+(T scalar, vec<3, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator+(vec<1, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator+(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator-(vec<3, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator-(vec<3, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator-(T scalar, vec<3, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator-(vec<1, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator-(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator*(vec<3, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator*(vec<3, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator*(T scalar, vec<3, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator*(vec<1, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator*(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator/(vec<3, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator/(vec<3, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator/(T scalar, vec<3, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator/(vec<1, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator/(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator%(vec<3, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator%(vec<3, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator%(T scalar, vec<3, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator%(vec<1, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator%(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator&(vec<3, T, Q> const& v1, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator&(vec<3, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator&(T scalar, vec<3, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator&(vec<1, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator&(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator|(vec<3, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator|(vec<3, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator|(T scalar, vec<3, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator|(vec<1, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator|(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator^(vec<3, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator^(vec<3, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator^(T scalar, vec<3, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator^(vec<1, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator^(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator<<(vec<3, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator<<(vec<3, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator<<(T scalar, vec<3, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator<<(vec<1, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator<<(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator>>(vec<3, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator>>(vec<3, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator>>(T scalar, vec<3, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator>>(vec<1, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator>>(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> operator~(vec<3, T, Q> const& v);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2);
+
+ template<qualifier Q>
+ [[nodiscard]] constexpr vec<3, bool, Q> operator&&(vec<3, bool, Q> const& v1, vec<3, bool, Q> const& v2);
+
+ template<qualifier Q>
+ [[nodiscard]] constexpr vec<3, bool, Q> operator||(vec<3, bool, Q> const& v1, vec<3, bool, Q> const& v2);
+
+
+
+
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.inl" 1
+
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_decl.hpp" 1
+
+       
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/functional" 1 3
+# 61 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 1 3
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+namespace std
+{
+
+
+
+
+
+
+
+  class bad_function_call : public std::exception
+  {
+  public:
+    virtual ~bad_function_call() noexcept;
+
+    const char* what() const noexcept;
+  };
+
+
+
+
+
+
+
+  template<typename _Tp>
+    struct __is_location_invariant
+    : is_trivially_copyable<_Tp>::type
+    { };
+
+  class _Undefined_class;
+
+  union _Nocopy_types
+  {
+    void* _M_object;
+    const void* _M_const_object;
+    void (*_M_function_pointer)();
+    void (_Undefined_class::*_M_member_pointer)();
+  };
+
+  union [[gnu::may_alias]] _Any_data
+  {
+    void* _M_access() noexcept { return &_M_pod_data[0]; }
+    const void* _M_access() const noexcept { return &_M_pod_data[0]; }
+
+    template<typename _Tp>
+      _Tp&
+      _M_access() noexcept
+      { return *static_cast<_Tp*>(_M_access()); }
+
+    template<typename _Tp>
+      const _Tp&
+      _M_access() const noexcept
+      { return *static_cast<const _Tp*>(_M_access()); }
+
+    _Nocopy_types _M_unused;
+    char _M_pod_data[sizeof(_Nocopy_types)];
+  };
+
+  enum _Manager_operation
+  {
+    __get_type_info,
+    __get_functor_ptr,
+    __clone_functor,
+    __destroy_functor
+  };
+
+  template<typename _Signature>
+    class function;
+
+
+  class _Function_base
+  {
+  public:
+    static const size_t _M_max_size = sizeof(_Nocopy_types);
+    static const size_t _M_max_align = __alignof__(_Nocopy_types);
+
+    template<typename _Functor>
+      class _Base_manager
+      {
+      protected:
+ static const bool __stored_locally =
+ (__is_location_invariant<_Functor>::value
+  && sizeof(_Functor) <= _M_max_size
+  && __alignof__(_Functor) <= _M_max_align
+  && (_M_max_align % __alignof__(_Functor) == 0));
+
+ using _Local_storage = integral_constant<bool, __stored_locally>;
+
+
+ static _Functor*
+ _M_get_pointer(const _Any_data& __source) noexcept
+ {
+   if constexpr (__stored_locally)
+     {
+       const _Functor& __f = __source._M_access<_Functor>();
+       return const_cast<_Functor*>(std::__addressof(__f));
+     }
+   else
+     return __source._M_access<_Functor*>();
+ }
+
+      private:
+
+
+ template<typename _Fn>
+   static void
+   _M_create(_Any_data& __dest, _Fn&& __f, true_type)
+   {
+     ::new (__dest._M_access()) _Functor(std::forward<_Fn>(__f));
+   }
+
+
+ template<typename _Fn>
+   static void
+   _M_create(_Any_data& __dest, _Fn&& __f, false_type)
+   {
+     __dest._M_access<_Functor*>()
+       = new _Functor(std::forward<_Fn>(__f));
+   }
+
+
+ static void
+ _M_destroy(_Any_data& __victim, true_type)
+ {
+   __victim._M_access<_Functor>().~_Functor();
+ }
+
+
+ static void
+ _M_destroy(_Any_data& __victim, false_type)
+ {
+   delete __victim._M_access<_Functor*>();
+ }
+
+      public:
+ static bool
+ _M_manager(_Any_data& __dest, const _Any_data& __source,
+     _Manager_operation __op)
+ {
+   switch (__op)
+     {
+     case __get_type_info:
+
+       __dest._M_access<const type_info*>() = &typeid(_Functor);
+
+
+
+       break;
+
+     case __get_functor_ptr:
+       __dest._M_access<_Functor*>() = _M_get_pointer(__source);
+       break;
+
+     case __clone_functor:
+       _M_init_functor(__dest,
+    *const_cast<const _Functor*>(_M_get_pointer(__source)));
+       break;
+
+     case __destroy_functor:
+       _M_destroy(__dest, _Local_storage());
+       break;
+     }
+   return false;
+ }
+
+ template<typename _Fn>
+   static void
+   _M_init_functor(_Any_data& __functor, _Fn&& __f)
+   noexcept(__and_<_Local_storage,
+     is_nothrow_constructible<_Functor, _Fn>>::value)
+   {
+     _M_create(__functor, std::forward<_Fn>(__f), _Local_storage());
+   }
+
+ template<typename _Signature>
+   static bool
+   _M_not_empty_function(const function<_Signature>& __f) noexcept
+   { return static_cast<bool>(__f); }
+
+ template<typename _Tp>
+   static bool
+   _M_not_empty_function(_Tp* __fp) noexcept
+   { return __fp != nullptr; }
+
+ template<typename _Class, typename _Tp>
+   static bool
+   _M_not_empty_function(_Tp _Class::* __mp) noexcept
+   { return __mp != nullptr; }
+
+ template<typename _Tp>
+   static bool
+   _M_not_empty_function(const _Tp&) noexcept
+   { return true; }
+      };
+
+    _Function_base() = default;
+
+    ~_Function_base()
+    {
+      if (_M_manager)
+ _M_manager(_M_functor, _M_functor, __destroy_functor);
+    }
+
+    bool _M_empty() const { return !_M_manager; }
+
+    using _Manager_type
+      = bool (*)(_Any_data&, const _Any_data&, _Manager_operation);
+
+    _Any_data _M_functor{};
+    _Manager_type _M_manager{};
+  };
+
+  template<typename _Signature, typename _Functor>
+    class _Function_handler;
+
+  template<typename _Res, typename _Functor, typename... _ArgTypes>
+    class _Function_handler<_Res(_ArgTypes...), _Functor>
+    : public _Function_base::_Base_manager<_Functor>
+    {
+      using _Base = _Function_base::_Base_manager<_Functor>;
+
+    public:
+      static bool
+      _M_manager(_Any_data& __dest, const _Any_data& __source,
+   _Manager_operation __op)
+      {
+ switch (__op)
+   {
+
+   case __get_type_info:
+     __dest._M_access<const type_info*>() = &typeid(_Functor);
+     break;
+
+   case __get_functor_ptr:
+     __dest._M_access<_Functor*>() = _Base::_M_get_pointer(__source);
+     break;
+
+   default:
+     _Base::_M_manager(__dest, __source, __op);
+   }
+ return false;
+      }
+
+      static _Res
+      _M_invoke(const _Any_data& __functor, _ArgTypes&&... __args)
+      {
+ return std::__invoke_r<_Res>(*_Base::_M_get_pointer(__functor),
+         std::forward<_ArgTypes>(__args)...);
+      }
+
+      template<typename _Fn>
+ static constexpr bool
+ _S_nothrow_init() noexcept
+ {
+   return __and_<typename _Base::_Local_storage,
+   is_nothrow_constructible<_Functor, _Fn>>::value;
+ }
+    };
+
+
+  template<>
+    class _Function_handler<void, void>
+    {
+    public:
+      static bool
+      _M_manager(_Any_data&, const _Any_data&, _Manager_operation)
+      { return false; }
+    };
+
+
+
+
+
+  template<typename _Signature, typename _Functor,
+    bool __valid = is_object<_Functor>::value>
+    struct _Target_handler
+    : _Function_handler<_Signature, typename remove_cv<_Functor>::type>
+    { };
+
+  template<typename _Signature, typename _Functor>
+    struct _Target_handler<_Signature, _Functor, false>
+    : _Function_handler<void, void>
+    { };
+
+
+
+
+
+
+  template<typename _Res, typename... _ArgTypes>
+    class function<_Res(_ArgTypes...)>
+    : public _Maybe_unary_or_binary_function<_Res, _ArgTypes...>,
+      private _Function_base
+    {
+
+
+      template<typename _Func,
+        bool _Self = is_same<__remove_cvref_t<_Func>, function>::value>
+ using _Decay_t
+   = typename __enable_if_t<!_Self, decay<_Func>>::type;
+
+      template<typename _Func,
+        typename _DFunc = _Decay_t<_Func>,
+        typename _Res2 = __invoke_result<_DFunc&, _ArgTypes...>>
+ struct _Callable
+ : __is_invocable_impl<_Res2, _Res>::type
+ { };
+
+      template<typename _Cond, typename _Tp = void>
+ using _Requires = __enable_if_t<_Cond::value, _Tp>;
+
+      template<typename _Functor>
+ using _Handler
+   = _Function_handler<_Res(_ArgTypes...), __decay_t<_Functor>>;
+
+    public:
+      typedef _Res result_type;
+
+
+
+
+
+
+
+      function() noexcept
+      : _Function_base() { }
+
+
+
+
+
+      function(nullptr_t) noexcept
+      : _Function_base() { }
+# 388 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+      function(const function& __x)
+      : _Function_base()
+      {
+ if (static_cast<bool>(__x))
+   {
+     __x._M_manager(_M_functor, __x._M_functor, __clone_functor);
+     _M_invoker = __x._M_invoker;
+     _M_manager = __x._M_manager;
+   }
+      }
+# 406 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+      function(function&& __x) noexcept
+      : _Function_base(), _M_invoker(__x._M_invoker)
+      {
+ if (static_cast<bool>(__x))
+   {
+     _M_functor = __x._M_functor;
+     _M_manager = __x._M_manager;
+     __x._M_manager = nullptr;
+     __x._M_invoker = nullptr;
+   }
+      }
+# 435 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+      template<typename _Functor,
+        typename _Constraints = _Requires<_Callable<_Functor>>>
+ function(_Functor&& __f)
+ noexcept(_Handler<_Functor>::template _S_nothrow_init<_Functor>())
+ : _Function_base()
+ {
+   static_assert(is_copy_constructible<__decay_t<_Functor>>::value,
+       "std::function target must be copy-constructible");
+   static_assert(is_constructible<__decay_t<_Functor>, _Functor>::value,
+       "std::function target must be constructible from the "
+       "constructor argument");
+
+   using _My_handler = _Handler<_Functor>;
+
+   if (_My_handler::_M_not_empty_function(__f))
+     {
+       _My_handler::_M_init_functor(_M_functor,
+        std::forward<_Functor>(__f));
+       _M_invoker = &_My_handler::_M_invoke;
+       _M_manager = &_My_handler::_M_manager;
+     }
+ }
+# 470 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+      function&
+      operator=(const function& __x)
+      {
+ function(__x).swap(*this);
+ return *this;
+      }
+# 488 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+      function&
+      operator=(function&& __x) noexcept
+      {
+ function(std::move(__x)).swap(*this);
+ return *this;
+      }
+# 502 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+      function&
+      operator=(nullptr_t) noexcept
+      {
+ if (_M_manager)
+   {
+     _M_manager(_M_functor, _M_functor, __destroy_functor);
+     _M_manager = nullptr;
+     _M_invoker = nullptr;
+   }
+ return *this;
+      }
+# 531 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+      template<typename _Functor>
+ _Requires<_Callable<_Functor>, function&>
+ operator=(_Functor&& __f)
+ noexcept(_Handler<_Functor>::template _S_nothrow_init<_Functor>())
+ {
+   function(std::forward<_Functor>(__f)).swap(*this);
+   return *this;
+ }
+
+
+      template<typename _Functor>
+ function&
+ operator=(reference_wrapper<_Functor> __f) noexcept
+ {
+   function(__f).swap(*this);
+   return *this;
+ }
+# 558 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+      void swap(function& __x) noexcept
+      {
+ std::swap(_M_functor, __x._M_functor);
+ std::swap(_M_manager, __x._M_manager);
+ std::swap(_M_invoker, __x._M_invoker);
+      }
+# 575 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+      explicit operator bool() const noexcept
+      { return !_M_empty(); }
+# 588 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+      _Res
+      operator()(_ArgTypes... __args) const
+      {
+ if (_M_empty())
+   __throw_bad_function_call();
+ return _M_invoker(_M_functor, std::forward<_ArgTypes>(__args)...);
+      }
+# 607 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+      const type_info&
+      target_type() const noexcept
+      {
+ if (_M_manager)
+   {
+     _Any_data __typeinfo_result;
+     _M_manager(__typeinfo_result, _M_functor, __get_type_info);
+     if (auto __ti = __typeinfo_result._M_access<const type_info*>())
+       return *__ti;
+   }
+ return typeid(void);
+      }
+# 632 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+      template<typename _Functor>
+ _Functor*
+ target() noexcept
+ {
+   const function* __const_this = this;
+   const _Functor* __func = __const_this->template target<_Functor>();
+
+
+   return *const_cast<_Functor**>(&__func);
+ }
+
+      template<typename _Functor>
+ const _Functor*
+ target() const noexcept
+ {
+   if constexpr (is_object<_Functor>::value)
+     {
+
+
+       using _Handler = _Target_handler<_Res(_ArgTypes...), _Functor>;
+
+       if (_M_manager == &_Handler::_M_manager
+
+    || (_M_manager && typeid(_Functor) == target_type())
+
+   )
+  {
+    _Any_data __ptr;
+    _M_manager(__ptr, _M_functor, __get_functor_ptr);
+    return __ptr._M_access<const _Functor*>();
+  }
+     }
+   return nullptr;
+ }
+
+
+    private:
+      using _Invoker_type = _Res (*)(const _Any_data&, _ArgTypes&&...);
+      _Invoker_type _M_invoker = nullptr;
+    };
+
+
+  template<typename>
+    struct __function_guide_helper
+    { };
+
+  template<typename _Res, typename _Tp, bool _Nx, typename... _Args>
+    struct __function_guide_helper<
+      _Res (_Tp::*) (_Args...) noexcept(_Nx)
+    >
+    { using type = _Res(_Args...); };
+
+  template<typename _Res, typename _Tp, bool _Nx, typename... _Args>
+    struct __function_guide_helper<
+      _Res (_Tp::*) (_Args...) & noexcept(_Nx)
+    >
+    { using type = _Res(_Args...); };
+
+  template<typename _Res, typename _Tp, bool _Nx, typename... _Args>
+    struct __function_guide_helper<
+      _Res (_Tp::*) (_Args...) const noexcept(_Nx)
+    >
+    { using type = _Res(_Args...); };
+
+  template<typename _Res, typename _Tp, bool _Nx, typename... _Args>
+    struct __function_guide_helper<
+      _Res (_Tp::*) (_Args...) const & noexcept(_Nx)
+    >
+    { using type = _Res(_Args...); };
+
+
+
+
+  template<typename _Res, typename _Tp, bool _Nx, typename... _Args>
+    struct __function_guide_helper<_Res (*) (_Tp, _Args...) noexcept(_Nx)>
+    { using type = _Res(_Args...); };
+
+
+
+  template<typename _StaticCallOp>
+    struct __function_guide_static_helper
+    { };
+
+  template<typename _Res, bool _Nx, typename... _Args>
+    struct __function_guide_static_helper<_Res (*) (_Args...) noexcept(_Nx)>
+    { using type = _Res(_Args...); };
+
+  template<typename _Fn, typename _Op>
+    using __function_guide_t = typename __conditional_t<
+      requires (_Fn& __f) { (void) __f.operator(); },
+      __function_guide_static_helper<_Op>,
+      __function_guide_helper<_Op>>::type;
+
+
+
+
+
+  template<typename _Res, typename... _ArgTypes>
+    function(_Res(*)(_ArgTypes...)) -> function<_Res(_ArgTypes...)>;
+
+  template<typename _Fn, typename _Signature
+      = __function_guide_t<_Fn, decltype(&_Fn::operator())>>
+    function(_Fn) -> function<_Signature>;
+# 745 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+  template<typename _Res, typename... _Args>
+    inline bool
+    operator==(const function<_Res(_Args...)>& __f, nullptr_t) noexcept
+    { return !static_cast<bool>(__f); }
+# 784 "C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h" 3
+  template<typename _Res, typename... _Args>
+    inline void
+    swap(function<_Res(_Args...)>& __x, function<_Res(_Args...)>& __y) noexcept
+    { __x.swap(__y); }
+
+
+  namespace __detail::__variant
+  {
+    template<typename> struct _Never_valueless_alt;
+
+
+
+    template<typename _Signature>
+      struct _Never_valueless_alt<std::function<_Signature>>
+      : std::true_type
+      { };
+  }
+
+
+
+}
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/functional" 2 3
+# 76 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/move_only_function.h" 1 3
+# 37 "C:/msys64/mingw64/include/c++/15.2.0/bits/move_only_function.h" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 38 "C:/msys64/mingw64/include/c++/15.2.0/bits/move_only_function.h" 2 3
+
+
+
+
+
+
+namespace std
+{
+
+
+  template<typename... _Signature>
+    class move_only_function;
+
+
+  class _Mofunc_base
+  {
+  protected:
+    _Mofunc_base() noexcept
+    : _M_manage(_S_empty)
+    { }
+
+    _Mofunc_base(_Mofunc_base&& __x) noexcept
+    {
+      _M_manage = std::__exchange(__x._M_manage, _S_empty);
+      _M_manage(_M_storage, &__x._M_storage);
+    }
+
+    template<typename _Tp, typename... _Args>
+      static constexpr bool
+      _S_nothrow_init() noexcept
+      {
+ if constexpr (__stored_locally<_Tp>)
+   return is_nothrow_constructible_v<_Tp, _Args...>;
+ return false;
+      }
+
+    template<typename _Tp, typename... _Args>
+      void
+      _M_init(_Args&&... __args) noexcept(_S_nothrow_init<_Tp, _Args...>())
+      {
+ if constexpr (__stored_locally<_Tp>)
+   ::new (_M_storage._M_addr()) _Tp(std::forward<_Args>(__args)...);
+ else
+   _M_storage._M_p = new _Tp(std::forward<_Args>(__args)...);
+
+ _M_manage = &_S_manage<_Tp>;
+      }
+
+    _Mofunc_base&
+    operator=(_Mofunc_base&& __x) noexcept
+    {
+      _M_manage(_M_storage, nullptr);
+      _M_manage = std::__exchange(__x._M_manage, _S_empty);
+      _M_manage(_M_storage, &__x._M_storage);
+      return *this;
+    }
+
+    _Mofunc_base&
+    operator=(nullptr_t) noexcept
+    {
+      _M_manage(_M_storage, nullptr);
+      _M_manage = _S_empty;
+      return *this;
+    }
+
+    ~_Mofunc_base() { _M_manage(_M_storage, nullptr); }
+
+    void
+    swap(_Mofunc_base& __x) noexcept
+    {
+
+      _Storage __s;
+      __x._M_manage(__s, &__x._M_storage);
+      _M_manage(__x._M_storage, &_M_storage);
+      __x._M_manage(_M_storage, &__s);
+      std::swap(_M_manage, __x._M_manage);
+    }
+
+    template<typename _Tp, typename _Self>
+      static _Tp*
+      _S_access(_Self* __self) noexcept
+      {
+ if constexpr (__stored_locally<remove_const_t<_Tp>>)
+   return static_cast<_Tp*>(__self->_M_storage._M_addr());
+ else
+   return static_cast<_Tp*>(__self->_M_storage._M_p);
+      }
+
+  private:
+    struct _Storage
+    {
+      void* _M_addr() noexcept { return &_M_bytes[0]; }
+      const void* _M_addr() const noexcept { return &_M_bytes[0]; }
+
+
+      struct _Delegate { void (_Storage::*__pfm)(); _Storage* __obj; };
+      union {
+ void* _M_p;
+ alignas(_Delegate) alignas(void(*)())
+   unsigned char _M_bytes[sizeof(_Delegate)];
+      };
+    };
+
+    template<typename _Tp>
+      static constexpr bool __stored_locally
+ = sizeof(_Tp) <= sizeof(_Storage) && alignof(_Tp) <= alignof(_Storage)
+     && is_nothrow_move_constructible_v<_Tp>;
+
+
+
+    using _Manager = void (*)(_Storage& __target, _Storage* __src) noexcept;
+
+
+    static void _S_empty(_Storage&, _Storage*) noexcept { }
+
+
+    template<typename _Tp>
+      static void
+      _S_manage(_Storage& __target, _Storage* __src) noexcept
+      {
+ if constexpr (__stored_locally<_Tp>)
+   {
+     if (__src)
+       {
+  _Tp* __rval = static_cast<_Tp*>(__src->_M_addr());
+  ::new (__target._M_addr()) _Tp(std::move(*__rval));
+  __rval->~_Tp();
+       }
+     else
+       static_cast<_Tp*>(__target._M_addr())->~_Tp();
+   }
+ else
+   {
+     if (__src)
+       __target._M_p = __src->_M_p;
+     else
+       delete static_cast<_Tp*>(__target._M_p);
+   }
+      }
+
+    _Storage _M_storage;
+    _Manager _M_manage;
+  };
+
+  template<typename _Tp>
+    inline constexpr bool __is_move_only_function_v = false;
+  template<typename _Tp>
+    constexpr bool __is_move_only_function_v<move_only_function<_Tp>> = true;
+
+
+  namespace __detail::__variant
+  {
+    template<typename> struct _Never_valueless_alt;
+
+
+
+    template<typename... _Signature>
+      struct _Never_valueless_alt<std::move_only_function<_Signature...>>
+      : true_type
+      { };
+  }
+
+
+}
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 1 3
+# 43 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+namespace std
+{
+
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+  template<typename _Res, typename... _ArgTypes, bool _Noex>
+    class move_only_function<_Res(_ArgTypes...)
+          noexcept(_Noex)>
+    : _Mofunc_base
+    {
+      template<typename _Tp>
+ using __callable
+   = __conditional_t<_Noex,
+       is_nothrow_invocable_r<_Res, _Tp, _ArgTypes...>,
+       is_invocable_r<_Res, _Tp, _ArgTypes...>>;
+
+
+      template<typename _Vt>
+ static constexpr bool __is_callable_from
+   = __and_v<__callable<_Vt >,
+      __callable<_Vt &>>;
+
+    public:
+      using result_type = _Res;
+
+
+      move_only_function() noexcept { }
+
+
+      move_only_function(nullptr_t) noexcept { }
+
+
+      move_only_function(move_only_function&& __x) noexcept
+      : _Mofunc_base(static_cast<_Mofunc_base&&>(__x)),
+ _M_invoke(std::__exchange(__x._M_invoke, nullptr))
+      { }
+
+
+      template<typename _Fn, typename _Vt = decay_t<_Fn>>
+ requires (!is_same_v<_Vt, move_only_function>)
+   && (!__is_in_place_type_v<_Vt>) && __is_callable_from<_Vt>
+ move_only_function(_Fn&& __f) noexcept(_S_nothrow_init<_Vt, _Fn>())
+ {
+   if constexpr (is_function_v<remove_pointer_t<_Vt>>
+   || is_member_pointer_v<_Vt>
+   || __is_move_only_function_v<_Vt>)
+     {
+       if (__f == nullptr)
+  return;
+     }
+   _M_init<_Vt>(std::forward<_Fn>(__f));
+   _M_invoke = &_S_invoke<_Vt>;
+ }
+
+
+      template<typename _Tp, typename... _Args>
+ requires is_constructible_v<_Tp, _Args...>
+   && __is_callable_from<_Tp>
+ explicit
+ move_only_function(in_place_type_t<_Tp>, _Args&&... __args)
+ noexcept(_S_nothrow_init<_Tp, _Args...>())
+ : _M_invoke(&_S_invoke<_Tp>)
+ {
+   static_assert(is_same_v<decay_t<_Tp>, _Tp>);
+   _M_init<_Tp>(std::forward<_Args>(__args)...);
+ }
+
+
+      template<typename _Tp, typename _Up, typename... _Args>
+ requires is_constructible_v<_Tp, initializer_list<_Up>&, _Args...>
+   && __is_callable_from<_Tp>
+ explicit
+ move_only_function(in_place_type_t<_Tp>, initializer_list<_Up> __il,
+      _Args&&... __args)
+ noexcept(_S_nothrow_init<_Tp, initializer_list<_Up>&, _Args...>())
+ : _M_invoke(&_S_invoke<_Tp>)
+ {
+   static_assert(is_same_v<decay_t<_Tp>, _Tp>);
+   _M_init<_Tp>(__il, std::forward<_Args>(__args)...);
+ }
+
+
+      move_only_function&
+      operator=(move_only_function&& __x) noexcept
+      {
+ _Mofunc_base::operator=(static_cast<_Mofunc_base&&>(__x));
+ _M_invoke = std::__exchange(__x._M_invoke, nullptr);
+ return *this;
+      }
+
+
+      move_only_function&
+      operator=(nullptr_t) noexcept
+      {
+ _Mofunc_base::operator=(nullptr);
+ _M_invoke = nullptr;
+ return *this;
+      }
+
+
+      template<typename _Fn>
+ requires is_constructible_v<move_only_function, _Fn>
+ move_only_function&
+ operator=(_Fn&& __f)
+ noexcept(is_nothrow_constructible_v<move_only_function, _Fn>)
+ {
+   move_only_function(std::forward<_Fn>(__f)).swap(*this);
+   return *this;
+ }
+
+      ~move_only_function() = default;
+
+
+      explicit operator bool() const noexcept { return _M_invoke != nullptr; }
+# 180 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+      _Res
+      operator()(_ArgTypes... __args) noexcept(_Noex)
+      {
+ do { if (std::__is_constant_evaluated() && !bool(*this != nullptr)) std::__glibcxx_assert_fail(); } while (false);
+ return _M_invoke(this, std::forward<_ArgTypes>(__args)...);
+      }
+
+
+      void
+      swap(move_only_function& __x) noexcept
+      {
+ _Mofunc_base::swap(__x);
+ std::swap(_M_invoke, __x._M_invoke);
+      }
+
+
+      friend void
+      swap(move_only_function& __x, move_only_function& __y) noexcept
+      { __x.swap(__y); }
+
+
+      friend bool
+      operator==(const move_only_function& __x, nullptr_t) noexcept
+      { return __x._M_invoke == nullptr; }
+
+    private:
+      template<typename _Tp>
+ using __param_t = __conditional_t<is_scalar_v<_Tp>, _Tp, _Tp&&>;
+
+      using _Invoker = _Res (*)(_Mofunc_base *,
+    __param_t<_ArgTypes>...) noexcept(_Noex);
+
+      template<typename _Tp>
+ static _Res
+ _S_invoke(_Mofunc_base * __self,
+    __param_t<_ArgTypes>... __args) noexcept(_Noex)
+ {
+   using _TpCv = _Tp ;
+   using _TpInv = _Tp &;
+   return std::__invoke_r<_Res>(
+       std::forward<_TpInv>(*_S_access<_TpCv>(__self)),
+       std::forward<__param_t<_ArgTypes>>(__args)...);
+ }
+
+      _Invoker _M_invoke = nullptr;
+    };
+
+
+
+
+
+
+
+}
+# 204 "C:/msys64/mingw64/include/c++/15.2.0/bits/move_only_function.h" 2 3
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 1 3
+# 43 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+namespace std
+{
+
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+  template<typename _Res, typename... _ArgTypes, bool _Noex>
+    class move_only_function<_Res(_ArgTypes...) const
+          noexcept(_Noex)>
+    : _Mofunc_base
+    {
+      template<typename _Tp>
+ using __callable
+   = __conditional_t<_Noex,
+       is_nothrow_invocable_r<_Res, _Tp, _ArgTypes...>,
+       is_invocable_r<_Res, _Tp, _ArgTypes...>>;
+
+
+      template<typename _Vt>
+ static constexpr bool __is_callable_from
+   = __and_v<__callable<_Vt const >,
+      __callable<_Vt const &>>;
+
+    public:
+      using result_type = _Res;
+
+
+      move_only_function() noexcept { }
+
+
+      move_only_function(nullptr_t) noexcept { }
+
+
+      move_only_function(move_only_function&& __x) noexcept
+      : _Mofunc_base(static_cast<_Mofunc_base&&>(__x)),
+ _M_invoke(std::__exchange(__x._M_invoke, nullptr))
+      { }
+
+
+      template<typename _Fn, typename _Vt = decay_t<_Fn>>
+ requires (!is_same_v<_Vt, move_only_function>)
+   && (!__is_in_place_type_v<_Vt>) && __is_callable_from<_Vt>
+ move_only_function(_Fn&& __f) noexcept(_S_nothrow_init<_Vt, _Fn>())
+ {
+   if constexpr (is_function_v<remove_pointer_t<_Vt>>
+   || is_member_pointer_v<_Vt>
+   || __is_move_only_function_v<_Vt>)
+     {
+       if (__f == nullptr)
+  return;
+     }
+   _M_init<_Vt>(std::forward<_Fn>(__f));
+   _M_invoke = &_S_invoke<_Vt>;
+ }
+
+
+      template<typename _Tp, typename... _Args>
+ requires is_constructible_v<_Tp, _Args...>
+   && __is_callable_from<_Tp>
+ explicit
+ move_only_function(in_place_type_t<_Tp>, _Args&&... __args)
+ noexcept(_S_nothrow_init<_Tp, _Args...>())
+ : _M_invoke(&_S_invoke<_Tp>)
+ {
+   static_assert(is_same_v<decay_t<_Tp>, _Tp>);
+   _M_init<_Tp>(std::forward<_Args>(__args)...);
+ }
+
+
+      template<typename _Tp, typename _Up, typename... _Args>
+ requires is_constructible_v<_Tp, initializer_list<_Up>&, _Args...>
+   && __is_callable_from<_Tp>
+ explicit
+ move_only_function(in_place_type_t<_Tp>, initializer_list<_Up> __il,
+      _Args&&... __args)
+ noexcept(_S_nothrow_init<_Tp, initializer_list<_Up>&, _Args...>())
+ : _M_invoke(&_S_invoke<_Tp>)
+ {
+   static_assert(is_same_v<decay_t<_Tp>, _Tp>);
+   _M_init<_Tp>(__il, std::forward<_Args>(__args)...);
+ }
+
+
+      move_only_function&
+      operator=(move_only_function&& __x) noexcept
+      {
+ _Mofunc_base::operator=(static_cast<_Mofunc_base&&>(__x));
+ _M_invoke = std::__exchange(__x._M_invoke, nullptr);
+ return *this;
+      }
+
+
+      move_only_function&
+      operator=(nullptr_t) noexcept
+      {
+ _Mofunc_base::operator=(nullptr);
+ _M_invoke = nullptr;
+ return *this;
+      }
+
+
+      template<typename _Fn>
+ requires is_constructible_v<move_only_function, _Fn>
+ move_only_function&
+ operator=(_Fn&& __f)
+ noexcept(is_nothrow_constructible_v<move_only_function, _Fn>)
+ {
+   move_only_function(std::forward<_Fn>(__f)).swap(*this);
+   return *this;
+ }
+
+      ~move_only_function() = default;
+
+
+      explicit operator bool() const noexcept { return _M_invoke != nullptr; }
+# 180 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+      _Res
+      operator()(_ArgTypes... __args) const noexcept(_Noex)
+      {
+ do { if (std::__is_constant_evaluated() && !bool(*this != nullptr)) std::__glibcxx_assert_fail(); } while (false);
+ return _M_invoke(this, std::forward<_ArgTypes>(__args)...);
+      }
+
+
+      void
+      swap(move_only_function& __x) noexcept
+      {
+ _Mofunc_base::swap(__x);
+ std::swap(_M_invoke, __x._M_invoke);
+      }
+
+
+      friend void
+      swap(move_only_function& __x, move_only_function& __y) noexcept
+      { __x.swap(__y); }
+
+
+      friend bool
+      operator==(const move_only_function& __x, nullptr_t) noexcept
+      { return __x._M_invoke == nullptr; }
+
+    private:
+      template<typename _Tp>
+ using __param_t = __conditional_t<is_scalar_v<_Tp>, _Tp, _Tp&&>;
+
+      using _Invoker = _Res (*)(_Mofunc_base const*,
+    __param_t<_ArgTypes>...) noexcept(_Noex);
+
+      template<typename _Tp>
+ static _Res
+ _S_invoke(_Mofunc_base const* __self,
+    __param_t<_ArgTypes>... __args) noexcept(_Noex)
+ {
+   using _TpCv = _Tp const;
+   using _TpInv = _Tp const &;
+   return std::__invoke_r<_Res>(
+       std::forward<_TpInv>(*_S_access<_TpCv>(__self)),
+       std::forward<__param_t<_ArgTypes>>(__args)...);
+ }
+
+      _Invoker _M_invoke = nullptr;
+    };
+
+
+
+
+
+
+
+}
+# 206 "C:/msys64/mingw64/include/c++/15.2.0/bits/move_only_function.h" 2 3
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 1 3
+# 43 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+namespace std
+{
+
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+  template<typename _Res, typename... _ArgTypes, bool _Noex>
+    class move_only_function<_Res(_ArgTypes...)
+          & noexcept(_Noex)>
+    : _Mofunc_base
+    {
+      template<typename _Tp>
+ using __callable
+   = __conditional_t<_Noex,
+       is_nothrow_invocable_r<_Res, _Tp, _ArgTypes...>,
+       is_invocable_r<_Res, _Tp, _ArgTypes...>>;
+
+
+      template<typename _Vt>
+ static constexpr bool __is_callable_from
+   = __and_v<__callable<_Vt &>,
+      __callable<_Vt &>>;
+
+    public:
+      using result_type = _Res;
+
+
+      move_only_function() noexcept { }
+
+
+      move_only_function(nullptr_t) noexcept { }
+
+
+      move_only_function(move_only_function&& __x) noexcept
+      : _Mofunc_base(static_cast<_Mofunc_base&&>(__x)),
+ _M_invoke(std::__exchange(__x._M_invoke, nullptr))
+      { }
+
+
+      template<typename _Fn, typename _Vt = decay_t<_Fn>>
+ requires (!is_same_v<_Vt, move_only_function>)
+   && (!__is_in_place_type_v<_Vt>) && __is_callable_from<_Vt>
+ move_only_function(_Fn&& __f) noexcept(_S_nothrow_init<_Vt, _Fn>())
+ {
+   if constexpr (is_function_v<remove_pointer_t<_Vt>>
+   || is_member_pointer_v<_Vt>
+   || __is_move_only_function_v<_Vt>)
+     {
+       if (__f == nullptr)
+  return;
+     }
+   _M_init<_Vt>(std::forward<_Fn>(__f));
+   _M_invoke = &_S_invoke<_Vt>;
+ }
+
+
+      template<typename _Tp, typename... _Args>
+ requires is_constructible_v<_Tp, _Args...>
+   && __is_callable_from<_Tp>
+ explicit
+ move_only_function(in_place_type_t<_Tp>, _Args&&... __args)
+ noexcept(_S_nothrow_init<_Tp, _Args...>())
+ : _M_invoke(&_S_invoke<_Tp>)
+ {
+   static_assert(is_same_v<decay_t<_Tp>, _Tp>);
+   _M_init<_Tp>(std::forward<_Args>(__args)...);
+ }
+
+
+      template<typename _Tp, typename _Up, typename... _Args>
+ requires is_constructible_v<_Tp, initializer_list<_Up>&, _Args...>
+   && __is_callable_from<_Tp>
+ explicit
+ move_only_function(in_place_type_t<_Tp>, initializer_list<_Up> __il,
+      _Args&&... __args)
+ noexcept(_S_nothrow_init<_Tp, initializer_list<_Up>&, _Args...>())
+ : _M_invoke(&_S_invoke<_Tp>)
+ {
+   static_assert(is_same_v<decay_t<_Tp>, _Tp>);
+   _M_init<_Tp>(__il, std::forward<_Args>(__args)...);
+ }
+
+
+      move_only_function&
+      operator=(move_only_function&& __x) noexcept
+      {
+ _Mofunc_base::operator=(static_cast<_Mofunc_base&&>(__x));
+ _M_invoke = std::__exchange(__x._M_invoke, nullptr);
+ return *this;
+      }
+
+
+      move_only_function&
+      operator=(nullptr_t) noexcept
+      {
+ _Mofunc_base::operator=(nullptr);
+ _M_invoke = nullptr;
+ return *this;
+      }
+
+
+      template<typename _Fn>
+ requires is_constructible_v<move_only_function, _Fn>
+ move_only_function&
+ operator=(_Fn&& __f)
+ noexcept(is_nothrow_constructible_v<move_only_function, _Fn>)
+ {
+   move_only_function(std::forward<_Fn>(__f)).swap(*this);
+   return *this;
+ }
+
+      ~move_only_function() = default;
+
+
+      explicit operator bool() const noexcept { return _M_invoke != nullptr; }
+# 180 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+      _Res
+      operator()(_ArgTypes... __args) & noexcept(_Noex)
+      {
+ do { if (std::__is_constant_evaluated() && !bool(*this != nullptr)) std::__glibcxx_assert_fail(); } while (false);
+ return _M_invoke(this, std::forward<_ArgTypes>(__args)...);
+      }
+
+
+      void
+      swap(move_only_function& __x) noexcept
+      {
+ _Mofunc_base::swap(__x);
+ std::swap(_M_invoke, __x._M_invoke);
+      }
+
+
+      friend void
+      swap(move_only_function& __x, move_only_function& __y) noexcept
+      { __x.swap(__y); }
+
+
+      friend bool
+      operator==(const move_only_function& __x, nullptr_t) noexcept
+      { return __x._M_invoke == nullptr; }
+
+    private:
+      template<typename _Tp>
+ using __param_t = __conditional_t<is_scalar_v<_Tp>, _Tp, _Tp&&>;
+
+      using _Invoker = _Res (*)(_Mofunc_base *,
+    __param_t<_ArgTypes>...) noexcept(_Noex);
+
+      template<typename _Tp>
+ static _Res
+ _S_invoke(_Mofunc_base * __self,
+    __param_t<_ArgTypes>... __args) noexcept(_Noex)
+ {
+   using _TpCv = _Tp ;
+   using _TpInv = _Tp &;
+   return std::__invoke_r<_Res>(
+       std::forward<_TpInv>(*_S_access<_TpCv>(__self)),
+       std::forward<__param_t<_ArgTypes>>(__args)...);
+ }
+
+      _Invoker _M_invoke = nullptr;
+    };
+
+
+
+
+
+
+
+}
+# 208 "C:/msys64/mingw64/include/c++/15.2.0/bits/move_only_function.h" 2 3
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 1 3
+# 43 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+namespace std
+{
+
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+  template<typename _Res, typename... _ArgTypes, bool _Noex>
+    class move_only_function<_Res(_ArgTypes...)
+          && noexcept(_Noex)>
+    : _Mofunc_base
+    {
+      template<typename _Tp>
+ using __callable
+   = __conditional_t<_Noex,
+       is_nothrow_invocable_r<_Res, _Tp, _ArgTypes...>,
+       is_invocable_r<_Res, _Tp, _ArgTypes...>>;
+
+
+      template<typename _Vt>
+ static constexpr bool __is_callable_from
+   = __and_v<__callable<_Vt &&>,
+      __callable<_Vt &&>>;
+
+    public:
+      using result_type = _Res;
+
+
+      move_only_function() noexcept { }
+
+
+      move_only_function(nullptr_t) noexcept { }
+
+
+      move_only_function(move_only_function&& __x) noexcept
+      : _Mofunc_base(static_cast<_Mofunc_base&&>(__x)),
+ _M_invoke(std::__exchange(__x._M_invoke, nullptr))
+      { }
+
+
+      template<typename _Fn, typename _Vt = decay_t<_Fn>>
+ requires (!is_same_v<_Vt, move_only_function>)
+   && (!__is_in_place_type_v<_Vt>) && __is_callable_from<_Vt>
+ move_only_function(_Fn&& __f) noexcept(_S_nothrow_init<_Vt, _Fn>())
+ {
+   if constexpr (is_function_v<remove_pointer_t<_Vt>>
+   || is_member_pointer_v<_Vt>
+   || __is_move_only_function_v<_Vt>)
+     {
+       if (__f == nullptr)
+  return;
+     }
+   _M_init<_Vt>(std::forward<_Fn>(__f));
+   _M_invoke = &_S_invoke<_Vt>;
+ }
+
+
+      template<typename _Tp, typename... _Args>
+ requires is_constructible_v<_Tp, _Args...>
+   && __is_callable_from<_Tp>
+ explicit
+ move_only_function(in_place_type_t<_Tp>, _Args&&... __args)
+ noexcept(_S_nothrow_init<_Tp, _Args...>())
+ : _M_invoke(&_S_invoke<_Tp>)
+ {
+   static_assert(is_same_v<decay_t<_Tp>, _Tp>);
+   _M_init<_Tp>(std::forward<_Args>(__args)...);
+ }
+
+
+      template<typename _Tp, typename _Up, typename... _Args>
+ requires is_constructible_v<_Tp, initializer_list<_Up>&, _Args...>
+   && __is_callable_from<_Tp>
+ explicit
+ move_only_function(in_place_type_t<_Tp>, initializer_list<_Up> __il,
+      _Args&&... __args)
+ noexcept(_S_nothrow_init<_Tp, initializer_list<_Up>&, _Args...>())
+ : _M_invoke(&_S_invoke<_Tp>)
+ {
+   static_assert(is_same_v<decay_t<_Tp>, _Tp>);
+   _M_init<_Tp>(__il, std::forward<_Args>(__args)...);
+ }
+
+
+      move_only_function&
+      operator=(move_only_function&& __x) noexcept
+      {
+ _Mofunc_base::operator=(static_cast<_Mofunc_base&&>(__x));
+ _M_invoke = std::__exchange(__x._M_invoke, nullptr);
+ return *this;
+      }
+
+
+      move_only_function&
+      operator=(nullptr_t) noexcept
+      {
+ _Mofunc_base::operator=(nullptr);
+ _M_invoke = nullptr;
+ return *this;
+      }
+
+
+      template<typename _Fn>
+ requires is_constructible_v<move_only_function, _Fn>
+ move_only_function&
+ operator=(_Fn&& __f)
+ noexcept(is_nothrow_constructible_v<move_only_function, _Fn>)
+ {
+   move_only_function(std::forward<_Fn>(__f)).swap(*this);
+   return *this;
+ }
+
+      ~move_only_function() = default;
+
+
+      explicit operator bool() const noexcept { return _M_invoke != nullptr; }
+# 180 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+      _Res
+      operator()(_ArgTypes... __args) && noexcept(_Noex)
+      {
+ do { if (std::__is_constant_evaluated() && !bool(*this != nullptr)) std::__glibcxx_assert_fail(); } while (false);
+ return _M_invoke(this, std::forward<_ArgTypes>(__args)...);
+      }
+
+
+      void
+      swap(move_only_function& __x) noexcept
+      {
+ _Mofunc_base::swap(__x);
+ std::swap(_M_invoke, __x._M_invoke);
+      }
+
+
+      friend void
+      swap(move_only_function& __x, move_only_function& __y) noexcept
+      { __x.swap(__y); }
+
+
+      friend bool
+      operator==(const move_only_function& __x, nullptr_t) noexcept
+      { return __x._M_invoke == nullptr; }
+
+    private:
+      template<typename _Tp>
+ using __param_t = __conditional_t<is_scalar_v<_Tp>, _Tp, _Tp&&>;
+
+      using _Invoker = _Res (*)(_Mofunc_base *,
+    __param_t<_ArgTypes>...) noexcept(_Noex);
+
+      template<typename _Tp>
+ static _Res
+ _S_invoke(_Mofunc_base * __self,
+    __param_t<_ArgTypes>... __args) noexcept(_Noex)
+ {
+   using _TpCv = _Tp ;
+   using _TpInv = _Tp &&;
+   return std::__invoke_r<_Res>(
+       std::forward<_TpInv>(*_S_access<_TpCv>(__self)),
+       std::forward<__param_t<_ArgTypes>>(__args)...);
+ }
+
+      _Invoker _M_invoke = nullptr;
+    };
+
+
+
+
+
+
+
+}
+# 210 "C:/msys64/mingw64/include/c++/15.2.0/bits/move_only_function.h" 2 3
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 1 3
+# 43 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+namespace std
+{
+
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+  template<typename _Res, typename... _ArgTypes, bool _Noex>
+    class move_only_function<_Res(_ArgTypes...) const
+          & noexcept(_Noex)>
+    : _Mofunc_base
+    {
+      template<typename _Tp>
+ using __callable
+   = __conditional_t<_Noex,
+       is_nothrow_invocable_r<_Res, _Tp, _ArgTypes...>,
+       is_invocable_r<_Res, _Tp, _ArgTypes...>>;
+
+
+      template<typename _Vt>
+ static constexpr bool __is_callable_from
+   = __and_v<__callable<_Vt const &>,
+      __callable<_Vt const &>>;
+
+    public:
+      using result_type = _Res;
+
+
+      move_only_function() noexcept { }
+
+
+      move_only_function(nullptr_t) noexcept { }
+
+
+      move_only_function(move_only_function&& __x) noexcept
+      : _Mofunc_base(static_cast<_Mofunc_base&&>(__x)),
+ _M_invoke(std::__exchange(__x._M_invoke, nullptr))
+      { }
+
+
+      template<typename _Fn, typename _Vt = decay_t<_Fn>>
+ requires (!is_same_v<_Vt, move_only_function>)
+   && (!__is_in_place_type_v<_Vt>) && __is_callable_from<_Vt>
+ move_only_function(_Fn&& __f) noexcept(_S_nothrow_init<_Vt, _Fn>())
+ {
+   if constexpr (is_function_v<remove_pointer_t<_Vt>>
+   || is_member_pointer_v<_Vt>
+   || __is_move_only_function_v<_Vt>)
+     {
+       if (__f == nullptr)
+  return;
+     }
+   _M_init<_Vt>(std::forward<_Fn>(__f));
+   _M_invoke = &_S_invoke<_Vt>;
+ }
+
+
+      template<typename _Tp, typename... _Args>
+ requires is_constructible_v<_Tp, _Args...>
+   && __is_callable_from<_Tp>
+ explicit
+ move_only_function(in_place_type_t<_Tp>, _Args&&... __args)
+ noexcept(_S_nothrow_init<_Tp, _Args...>())
+ : _M_invoke(&_S_invoke<_Tp>)
+ {
+   static_assert(is_same_v<decay_t<_Tp>, _Tp>);
+   _M_init<_Tp>(std::forward<_Args>(__args)...);
+ }
+
+
+      template<typename _Tp, typename _Up, typename... _Args>
+ requires is_constructible_v<_Tp, initializer_list<_Up>&, _Args...>
+   && __is_callable_from<_Tp>
+ explicit
+ move_only_function(in_place_type_t<_Tp>, initializer_list<_Up> __il,
+      _Args&&... __args)
+ noexcept(_S_nothrow_init<_Tp, initializer_list<_Up>&, _Args...>())
+ : _M_invoke(&_S_invoke<_Tp>)
+ {
+   static_assert(is_same_v<decay_t<_Tp>, _Tp>);
+   _M_init<_Tp>(__il, std::forward<_Args>(__args)...);
+ }
+
+
+      move_only_function&
+      operator=(move_only_function&& __x) noexcept
+      {
+ _Mofunc_base::operator=(static_cast<_Mofunc_base&&>(__x));
+ _M_invoke = std::__exchange(__x._M_invoke, nullptr);
+ return *this;
+      }
+
+
+      move_only_function&
+      operator=(nullptr_t) noexcept
+      {
+ _Mofunc_base::operator=(nullptr);
+ _M_invoke = nullptr;
+ return *this;
+      }
+
+
+      template<typename _Fn>
+ requires is_constructible_v<move_only_function, _Fn>
+ move_only_function&
+ operator=(_Fn&& __f)
+ noexcept(is_nothrow_constructible_v<move_only_function, _Fn>)
+ {
+   move_only_function(std::forward<_Fn>(__f)).swap(*this);
+   return *this;
+ }
+
+      ~move_only_function() = default;
+
+
+      explicit operator bool() const noexcept { return _M_invoke != nullptr; }
+# 180 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+      _Res
+      operator()(_ArgTypes... __args) const & noexcept(_Noex)
+      {
+ do { if (std::__is_constant_evaluated() && !bool(*this != nullptr)) std::__glibcxx_assert_fail(); } while (false);
+ return _M_invoke(this, std::forward<_ArgTypes>(__args)...);
+      }
+
+
+      void
+      swap(move_only_function& __x) noexcept
+      {
+ _Mofunc_base::swap(__x);
+ std::swap(_M_invoke, __x._M_invoke);
+      }
+
+
+      friend void
+      swap(move_only_function& __x, move_only_function& __y) noexcept
+      { __x.swap(__y); }
+
+
+      friend bool
+      operator==(const move_only_function& __x, nullptr_t) noexcept
+      { return __x._M_invoke == nullptr; }
+
+    private:
+      template<typename _Tp>
+ using __param_t = __conditional_t<is_scalar_v<_Tp>, _Tp, _Tp&&>;
+
+      using _Invoker = _Res (*)(_Mofunc_base const*,
+    __param_t<_ArgTypes>...) noexcept(_Noex);
+
+      template<typename _Tp>
+ static _Res
+ _S_invoke(_Mofunc_base const* __self,
+    __param_t<_ArgTypes>... __args) noexcept(_Noex)
+ {
+   using _TpCv = _Tp const;
+   using _TpInv = _Tp const &;
+   return std::__invoke_r<_Res>(
+       std::forward<_TpInv>(*_S_access<_TpCv>(__self)),
+       std::forward<__param_t<_ArgTypes>>(__args)...);
+ }
+
+      _Invoker _M_invoke = nullptr;
+    };
+
+
+
+
+
+
+
+}
+# 213 "C:/msys64/mingw64/include/c++/15.2.0/bits/move_only_function.h" 2 3
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 1 3
+# 43 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+namespace std
+{
+
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+  template<typename _Res, typename... _ArgTypes, bool _Noex>
+    class move_only_function<_Res(_ArgTypes...) const
+          && noexcept(_Noex)>
+    : _Mofunc_base
+    {
+      template<typename _Tp>
+ using __callable
+   = __conditional_t<_Noex,
+       is_nothrow_invocable_r<_Res, _Tp, _ArgTypes...>,
+       is_invocable_r<_Res, _Tp, _ArgTypes...>>;
+
+
+      template<typename _Vt>
+ static constexpr bool __is_callable_from
+   = __and_v<__callable<_Vt const &&>,
+      __callable<_Vt const &&>>;
+
+    public:
+      using result_type = _Res;
+
+
+      move_only_function() noexcept { }
+
+
+      move_only_function(nullptr_t) noexcept { }
+
+
+      move_only_function(move_only_function&& __x) noexcept
+      : _Mofunc_base(static_cast<_Mofunc_base&&>(__x)),
+ _M_invoke(std::__exchange(__x._M_invoke, nullptr))
+      { }
+
+
+      template<typename _Fn, typename _Vt = decay_t<_Fn>>
+ requires (!is_same_v<_Vt, move_only_function>)
+   && (!__is_in_place_type_v<_Vt>) && __is_callable_from<_Vt>
+ move_only_function(_Fn&& __f) noexcept(_S_nothrow_init<_Vt, _Fn>())
+ {
+   if constexpr (is_function_v<remove_pointer_t<_Vt>>
+   || is_member_pointer_v<_Vt>
+   || __is_move_only_function_v<_Vt>)
+     {
+       if (__f == nullptr)
+  return;
+     }
+   _M_init<_Vt>(std::forward<_Fn>(__f));
+   _M_invoke = &_S_invoke<_Vt>;
+ }
+
+
+      template<typename _Tp, typename... _Args>
+ requires is_constructible_v<_Tp, _Args...>
+   && __is_callable_from<_Tp>
+ explicit
+ move_only_function(in_place_type_t<_Tp>, _Args&&... __args)
+ noexcept(_S_nothrow_init<_Tp, _Args...>())
+ : _M_invoke(&_S_invoke<_Tp>)
+ {
+   static_assert(is_same_v<decay_t<_Tp>, _Tp>);
+   _M_init<_Tp>(std::forward<_Args>(__args)...);
+ }
+
+
+      template<typename _Tp, typename _Up, typename... _Args>
+ requires is_constructible_v<_Tp, initializer_list<_Up>&, _Args...>
+   && __is_callable_from<_Tp>
+ explicit
+ move_only_function(in_place_type_t<_Tp>, initializer_list<_Up> __il,
+      _Args&&... __args)
+ noexcept(_S_nothrow_init<_Tp, initializer_list<_Up>&, _Args...>())
+ : _M_invoke(&_S_invoke<_Tp>)
+ {
+   static_assert(is_same_v<decay_t<_Tp>, _Tp>);
+   _M_init<_Tp>(__il, std::forward<_Args>(__args)...);
+ }
+
+
+      move_only_function&
+      operator=(move_only_function&& __x) noexcept
+      {
+ _Mofunc_base::operator=(static_cast<_Mofunc_base&&>(__x));
+ _M_invoke = std::__exchange(__x._M_invoke, nullptr);
+ return *this;
+      }
+
+
+      move_only_function&
+      operator=(nullptr_t) noexcept
+      {
+ _Mofunc_base::operator=(nullptr);
+ _M_invoke = nullptr;
+ return *this;
+      }
+
+
+      template<typename _Fn>
+ requires is_constructible_v<move_only_function, _Fn>
+ move_only_function&
+ operator=(_Fn&& __f)
+ noexcept(is_nothrow_constructible_v<move_only_function, _Fn>)
+ {
+   move_only_function(std::forward<_Fn>(__f)).swap(*this);
+   return *this;
+ }
+
+      ~move_only_function() = default;
+
+
+      explicit operator bool() const noexcept { return _M_invoke != nullptr; }
+# 180 "C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h" 3
+      _Res
+      operator()(_ArgTypes... __args) const && noexcept(_Noex)
+      {
+ do { if (std::__is_constant_evaluated() && !bool(*this != nullptr)) std::__glibcxx_assert_fail(); } while (false);
+ return _M_invoke(this, std::forward<_ArgTypes>(__args)...);
+      }
+
+
+      void
+      swap(move_only_function& __x) noexcept
+      {
+ _Mofunc_base::swap(__x);
+ std::swap(_M_invoke, __x._M_invoke);
+      }
+
+
+      friend void
+      swap(move_only_function& __x, move_only_function& __y) noexcept
+      { __x.swap(__y); }
+
+
+      friend bool
+      operator==(const move_only_function& __x, nullptr_t) noexcept
+      { return __x._M_invoke == nullptr; }
+
+    private:
+      template<typename _Tp>
+ using __param_t = __conditional_t<is_scalar_v<_Tp>, _Tp, _Tp&&>;
+
+      using _Invoker = _Res (*)(_Mofunc_base const*,
+    __param_t<_ArgTypes>...) noexcept(_Noex);
+
+      template<typename _Tp>
+ static _Res
+ _S_invoke(_Mofunc_base const* __self,
+    __param_t<_ArgTypes>... __args) noexcept(_Noex)
+ {
+   using _TpCv = _Tp const;
+   using _TpInv = _Tp const &&;
+   return std::__invoke_r<_Res>(
+       std::forward<_TpInv>(*_S_access<_TpCv>(__self)),
+       std::forward<__param_t<_ArgTypes>>(__args)...);
+ }
+
+      _Invoker _M_invoke = nullptr;
+    };
+
+
+
+
+
+
+
+}
+# 216 "C:/msys64/mingw64/include/c++/15.2.0/bits/move_only_function.h" 2 3
+# 77 "C:/msys64/mingw64/include/c++/15.2.0/functional" 2 3
+# 90 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 91 "C:/msys64/mingw64/include/c++/15.2.0/functional" 2 3
+
+
+
+namespace std
+{
+
+
+
+
+
+
+  template<int _Num> struct _Placeholder { };
+# 117 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+  template<typename _Callable, typename... _Args>
+    inline constexpr invoke_result_t<_Callable, _Args...>
+    invoke(_Callable&& __fn, _Args&&... __args)
+    noexcept(is_nothrow_invocable_v<_Callable, _Args...>)
+    {
+      return std::__invoke(std::forward<_Callable>(__fn),
+      std::forward<_Args>(__args)...);
+    }
+# 136 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+  template<typename _Res, typename _Callable, typename... _Args>
+    requires is_invocable_r_v<_Res, _Callable, _Args...>
+    constexpr _Res
+    invoke_r(_Callable&& __fn, _Args&&... __args)
+    noexcept(is_nothrow_invocable_r_v<_Res, _Callable, _Args...>)
+    {
+      return std::__invoke_r<_Res>(std::forward<_Callable>(__fn),
+       std::forward<_Args>(__args)...);
+    }
+
+
+
+
+
+  template<typename _MemFunPtr,
+    bool __is_mem_fn = is_member_function_pointer<_MemFunPtr>::value>
+    class _Mem_fn_base
+    : public _Mem_fn_traits<_MemFunPtr>::__maybe_type
+    {
+      using _Traits = _Mem_fn_traits<_MemFunPtr>;
+
+      using _Arity = typename _Traits::__arity;
+      using _Varargs = typename _Traits::__vararg;
+
+      template<typename _Func, typename... _BoundArgs>
+ friend struct _Bind_check_arity;
+
+      _MemFunPtr _M_pmf;
+
+    public:
+
+      using result_type = typename _Traits::__result_type;
+
+      explicit constexpr
+      _Mem_fn_base(_MemFunPtr __pmf) noexcept : _M_pmf(__pmf) { }
+
+      template<typename... _Args>
+ constexpr
+ auto
+ operator()(_Args&&... __args) const
+ noexcept(noexcept(
+       std::__invoke(_M_pmf, std::forward<_Args>(__args)...)))
+ -> decltype(std::__invoke(_M_pmf, std::forward<_Args>(__args)...))
+ { return std::__invoke(_M_pmf, std::forward<_Args>(__args)...); }
+    };
+
+
+  template<typename _MemObjPtr>
+    class _Mem_fn_base<_MemObjPtr, false>
+    {
+      using _Arity = integral_constant<size_t, 0>;
+      using _Varargs = false_type;
+
+      template<typename _Func, typename... _BoundArgs>
+ friend struct _Bind_check_arity;
+
+      _MemObjPtr _M_pm;
+
+    public:
+      explicit constexpr
+      _Mem_fn_base(_MemObjPtr __pm) noexcept : _M_pm(__pm) { }
+
+      template<typename _Tp>
+ constexpr
+ auto
+ operator()(_Tp&& __obj) const
+ noexcept(noexcept(std::__invoke(_M_pm, std::forward<_Tp>(__obj))))
+ -> decltype(std::__invoke(_M_pm, std::forward<_Tp>(__obj)))
+ { return std::__invoke(_M_pm, std::forward<_Tp>(__obj)); }
+    };
+
+  template<typename _MemberPointer>
+    struct _Mem_fn;
+
+  template<typename _Res, typename _Class>
+    struct _Mem_fn<_Res _Class::*>
+    : _Mem_fn_base<_Res _Class::*>
+    {
+      using _Mem_fn_base<_Res _Class::*>::_Mem_fn_base;
+    };
+# 243 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+  template<typename _Tp, typename _Class>
+    constexpr
+    inline _Mem_fn<_Tp _Class::*>
+    mem_fn(_Tp _Class::* __pm) noexcept
+    {
+      return _Mem_fn<_Tp _Class::*>(__pm);
+    }
+# 262 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+  template<typename _Tp>
+    struct is_bind_expression
+    : public false_type { };
+# 274 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+  template<typename _Tp>
+    struct is_placeholder
+    : public integral_constant<int, 0>
+    { };
+
+
+  template <typename _Tp> inline constexpr bool is_bind_expression_v
+    = is_bind_expression<_Tp>::value;
+  template <typename _Tp> inline constexpr int is_placeholder_v
+    = is_placeholder<_Tp>::value;
+
+
+
+
+
+
+
+  namespace placeholders
+  {
+# 303 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+    inline const _Placeholder<1> _1;
+    inline const _Placeholder<2> _2;
+    inline const _Placeholder<3> _3;
+    inline const _Placeholder<4> _4;
+    inline const _Placeholder<5> _5;
+    inline const _Placeholder<6> _6;
+    inline const _Placeholder<7> _7;
+    inline const _Placeholder<8> _8;
+    inline const _Placeholder<9> _9;
+    inline const _Placeholder<10> _10;
+    inline const _Placeholder<11> _11;
+    inline const _Placeholder<12> _12;
+    inline const _Placeholder<13> _13;
+    inline const _Placeholder<14> _14;
+    inline const _Placeholder<15> _15;
+    inline const _Placeholder<16> _16;
+    inline const _Placeholder<17> _17;
+    inline const _Placeholder<18> _18;
+    inline const _Placeholder<19> _19;
+    inline const _Placeholder<20> _20;
+    inline const _Placeholder<21> _21;
+    inline const _Placeholder<22> _22;
+    inline const _Placeholder<23> _23;
+    inline const _Placeholder<24> _24;
+    inline const _Placeholder<25> _25;
+    inline const _Placeholder<26> _26;
+    inline const _Placeholder<27> _27;
+    inline const _Placeholder<28> _28;
+    inline const _Placeholder<29> _29;
+
+
+  }
+
+
+
+
+
+
+
+  template<int _Num>
+    struct is_placeholder<_Placeholder<_Num> >
+    : public integral_constant<int, _Num>
+    { };
+
+  template<int _Num>
+    struct is_placeholder<const _Placeholder<_Num> >
+    : public integral_constant<int, _Num>
+    { };
+
+
+
+
+  template<std::size_t __i, typename _Tuple>
+    using _Safe_tuple_element_t
+      = typename enable_if<(__i < tuple_size<_Tuple>::value),
+      tuple_element<__i, _Tuple>>::type::type;
+# 371 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+  template<typename _Arg,
+    bool _IsBindExp = is_bind_expression<_Arg>::value,
+    bool _IsPlaceholder = (is_placeholder<_Arg>::value > 0)>
+    class _Mu;
+
+
+
+
+
+
+  template<typename _Tp>
+    class _Mu<reference_wrapper<_Tp>, false, false>
+    {
+    public:
+
+
+
+
+      template<typename _CVRef, typename _Tuple>
+ constexpr
+ _Tp&
+ operator()(_CVRef& __arg, _Tuple&) const volatile
+ { return __arg.get(); }
+    };
+
+
+
+
+
+
+
+  template<typename _Arg>
+    class _Mu<_Arg, true, false>
+    {
+    public:
+      template<typename _CVArg, typename... _Args>
+ constexpr
+ auto
+ operator()(_CVArg& __arg,
+     tuple<_Args...>& __tuple) const volatile
+ -> decltype(__arg(declval<_Args>()...))
+ {
+
+   typedef typename _Build_index_tuple<sizeof...(_Args)>::__type
+     _Indexes;
+   return this->__call(__arg, __tuple, _Indexes());
+ }
+
+    private:
+
+
+      template<typename _CVArg, typename... _Args, std::size_t... _Indexes>
+ constexpr
+ auto
+ __call(_CVArg& __arg, tuple<_Args...>& __tuple,
+        const _Index_tuple<_Indexes...>&) const volatile
+ -> decltype(__arg(declval<_Args>()...))
+ {
+   return __arg(std::get<_Indexes>(std::move(__tuple))...);
+ }
+    };
+
+
+
+
+
+
+  template<typename _Arg>
+    class _Mu<_Arg, false, true>
+    {
+    public:
+      template<typename _Tuple>
+ constexpr
+ _Safe_tuple_element_t<(is_placeholder<_Arg>::value - 1), _Tuple>&&
+ operator()(const volatile _Arg&, _Tuple& __tuple) const volatile
+ {
+   return
+     ::std::get<(is_placeholder<_Arg>::value - 1)>(std::move(__tuple));
+ }
+    };
+
+
+
+
+
+
+  template<typename _Arg>
+    class _Mu<_Arg, false, false>
+    {
+    public:
+      template<typename _CVArg, typename _Tuple>
+ constexpr
+ _CVArg&&
+ operator()(_CVArg&& __arg, _Tuple&) const volatile
+ { return std::forward<_CVArg>(__arg); }
+    };
+
+
+  template<std::size_t _Ind, typename... _Tp>
+    inline auto
+    __volget(volatile tuple<_Tp...>& __tuple)
+    -> __tuple_element_t<_Ind, tuple<_Tp...>> volatile&
+    { return std::get<_Ind>(const_cast<tuple<_Tp...>&>(__tuple)); }
+
+
+  template<std::size_t _Ind, typename... _Tp>
+    inline auto
+    __volget(const volatile tuple<_Tp...>& __tuple)
+    -> __tuple_element_t<_Ind, tuple<_Tp...>> const volatile&
+    { return std::get<_Ind>(const_cast<const tuple<_Tp...>&>(__tuple)); }
+# 496 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+  template<typename _Signature>
+    class _Bind;
+
+   template<typename _Functor, typename... _Bound_args>
+    class _Bind<_Functor(_Bound_args...)>
+    : public _Weak_result_type<_Functor>
+    {
+      typedef typename _Build_index_tuple<sizeof...(_Bound_args)>::__type
+ _Bound_indexes;
+
+      _Functor _M_f;
+      tuple<_Bound_args...> _M_bound_args;
+
+
+      template<typename _Result, typename... _Args, std::size_t... _Indexes>
+ constexpr
+ _Result
+ __call(tuple<_Args...>&& __args, _Index_tuple<_Indexes...>)
+ {
+   return std::__invoke(_M_f,
+       _Mu<_Bound_args>()(std::get<_Indexes>(_M_bound_args), __args)...
+       );
+ }
+
+
+      template<typename _Result, typename... _Args, std::size_t... _Indexes>
+ constexpr
+ _Result
+ __call_c(tuple<_Args...>&& __args, _Index_tuple<_Indexes...>) const
+ {
+   return std::__invoke(_M_f,
+       _Mu<_Bound_args>()(std::get<_Indexes>(_M_bound_args), __args)...
+       );
+ }
+# 555 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+      template<typename _BoundArg, typename _CallArgs>
+ using _Mu_type = decltype(
+     _Mu<typename remove_cv<_BoundArg>::type>()(
+       std::declval<_BoundArg&>(), std::declval<_CallArgs&>()) );
+
+      template<typename _Fn, typename _CallArgs, typename... _BArgs>
+ using _Res_type_impl
+   = __invoke_result_t<_Fn&, _Mu_type<_BArgs, _CallArgs>&&...>;
+
+      template<typename _CallArgs>
+ using _Res_type = _Res_type_impl<_Functor, _CallArgs, _Bound_args...>;
+
+      template<typename _CallArgs>
+ using __dependent = typename
+   enable_if<bool(tuple_size<_CallArgs>::value+1), _Functor>::type;
+
+      template<typename _CallArgs, template<class> class __cv_quals>
+ using _Res_type_cv = _Res_type_impl<
+   typename __cv_quals<__dependent<_CallArgs>>::type,
+   _CallArgs,
+   typename __cv_quals<_Bound_args>::type...>;
+
+     public:
+      template<typename... _Args>
+ explicit constexpr
+ _Bind(const _Functor& __f, _Args&&... __args)
+ : _M_f(__f), _M_bound_args(std::forward<_Args>(__args)...)
+ { }
+
+      template<typename... _Args>
+ explicit constexpr
+ _Bind(_Functor&& __f, _Args&&... __args)
+ : _M_f(std::move(__f)), _M_bound_args(std::forward<_Args>(__args)...)
+ { }
+
+      _Bind(const _Bind&) = default;
+      _Bind(_Bind&&) = default;
+
+
+      template<typename... _Args,
+        typename _Result = _Res_type<tuple<_Args...>>>
+ constexpr
+ _Result
+ operator()(_Args&&... __args)
+ {
+   return this->__call<_Result>(
+       std::forward_as_tuple(std::forward<_Args>(__args)...),
+       _Bound_indexes());
+ }
+
+
+      template<typename... _Args,
+        typename _Result = _Res_type_cv<tuple<_Args...>, add_const>>
+ constexpr
+ _Result
+ operator()(_Args&&... __args) const
+ {
+   return this->__call_c<_Result>(
+       std::forward_as_tuple(std::forward<_Args>(__args)...),
+       _Bound_indexes());
+ }
+# 642 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+    };
+
+
+  template<typename _Result, typename _Signature>
+    class _Bind_result;
+
+  template<typename _Result, typename _Functor, typename... _Bound_args>
+    class _Bind_result<_Result, _Functor(_Bound_args...)>
+    {
+      typedef typename _Build_index_tuple<sizeof...(_Bound_args)>::__type
+ _Bound_indexes;
+
+      _Functor _M_f;
+      tuple<_Bound_args...> _M_bound_args;
+
+
+      template<typename _Res, typename... _Args, std::size_t... _Indexes>
+ constexpr
+ _Res
+ __call(tuple<_Args...>&& __args, _Index_tuple<_Indexes...>)
+ {
+   return std::__invoke_r<_Res>(_M_f, _Mu<_Bound_args>()
+        (std::get<_Indexes>(_M_bound_args), __args)...);
+ }
+
+
+      template<typename _Res, typename... _Args, std::size_t... _Indexes>
+ constexpr
+ _Res
+ __call(tuple<_Args...>&& __args, _Index_tuple<_Indexes...>) const
+ {
+   return std::__invoke_r<_Res>(_M_f, _Mu<_Bound_args>()
+        (std::get<_Indexes>(_M_bound_args), __args)...);
+ }
+# 698 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+    public:
+      typedef _Result result_type;
+
+      template<typename... _Args>
+ explicit constexpr
+ _Bind_result(const _Functor& __f, _Args&&... __args)
+ : _M_f(__f), _M_bound_args(std::forward<_Args>(__args)...)
+ { }
+
+      template<typename... _Args>
+ explicit constexpr
+ _Bind_result(_Functor&& __f, _Args&&... __args)
+ : _M_f(std::move(__f)), _M_bound_args(std::forward<_Args>(__args)...)
+ { }
+
+      _Bind_result(const _Bind_result&) = default;
+      _Bind_result(_Bind_result&&) = default;
+
+
+      template<typename... _Args>
+ constexpr
+ result_type
+ operator()(_Args&&... __args)
+ {
+   return this->__call<_Result>(
+       std::forward_as_tuple(std::forward<_Args>(__args)...),
+       _Bound_indexes());
+ }
+
+
+      template<typename... _Args>
+ constexpr
+ result_type
+ operator()(_Args&&... __args) const
+ {
+   return this->__call<_Result>(
+       std::forward_as_tuple(std::forward<_Args>(__args)...),
+       _Bound_indexes());
+ }
+# 761 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+      template<typename... _Args>
+ void operator()(_Args&&...) const volatile = delete;
+
+    };
+# 773 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+  template<typename _Signature>
+    struct is_bind_expression<_Bind<_Signature> >
+    : public true_type { };
+
+
+
+
+
+  template<typename _Signature>
+    struct is_bind_expression<const _Bind<_Signature> >
+    : public true_type { };
+
+
+
+
+
+  template<typename _Signature>
+    struct is_bind_expression<volatile _Bind<_Signature> >
+    : public true_type { };
+
+
+
+
+
+  template<typename _Signature>
+    struct is_bind_expression<const volatile _Bind<_Signature>>
+    : public true_type { };
+
+
+
+
+
+  template<typename _Result, typename _Signature>
+    struct is_bind_expression<_Bind_result<_Result, _Signature>>
+    : public true_type { };
+
+
+
+
+
+  template<typename _Result, typename _Signature>
+    struct is_bind_expression<const _Bind_result<_Result, _Signature>>
+    : public true_type { };
+
+
+
+
+
+  template<typename _Result, typename _Signature>
+    struct is_bind_expression<volatile _Bind_result<_Result, _Signature>>
+    : public true_type { };
+
+
+
+
+
+  template<typename _Result, typename _Signature>
+    struct is_bind_expression<const volatile _Bind_result<_Result, _Signature>>
+    : public true_type { };
+
+  template<typename _Func, typename... _BoundArgs>
+    struct _Bind_check_arity { };
+
+  template<typename _Ret, typename... _Args, typename... _BoundArgs>
+    struct _Bind_check_arity<_Ret (*)(_Args...), _BoundArgs...>
+    {
+      static_assert(sizeof...(_BoundArgs) == sizeof...(_Args),
+                   "Wrong number of arguments for function");
+    };
+
+  template<typename _Ret, typename... _Args, typename... _BoundArgs>
+    struct _Bind_check_arity<_Ret (*)(_Args..., ...), _BoundArgs...>
+    {
+      static_assert(sizeof...(_BoundArgs) >= sizeof...(_Args),
+                   "Wrong number of arguments for function");
+    };
+
+  template<typename _Tp, typename _Class, typename... _BoundArgs>
+    struct _Bind_check_arity<_Tp _Class::*, _BoundArgs...>
+    {
+      using _Arity = typename _Mem_fn<_Tp _Class::*>::_Arity;
+      using _Varargs = typename _Mem_fn<_Tp _Class::*>::_Varargs;
+      static_assert(_Varargs::value
+      ? sizeof...(_BoundArgs) >= _Arity::value + 1
+      : sizeof...(_BoundArgs) == _Arity::value + 1,
+      "Wrong number of arguments for pointer-to-member");
+    };
+
+
+
+
+  template<typename _Tp, typename _Tp2 = typename decay<_Tp>::type>
+    using __is_socketlike = __or_<is_integral<_Tp2>, is_enum<_Tp2>>;
+
+  template<bool _SocketLike, typename _Func, typename... _BoundArgs>
+    struct _Bind_helper
+    : _Bind_check_arity<typename decay<_Func>::type, _BoundArgs...>
+    {
+      typedef typename decay<_Func>::type __func_type;
+      typedef _Bind<__func_type(typename decay<_BoundArgs>::type...)> type;
+    };
+
+
+
+
+  template<typename _Func, typename... _BoundArgs>
+    struct _Bind_helper<true, _Func, _BoundArgs...>
+    { };
+
+
+
+
+
+
+  template<typename _Func, typename... _BoundArgs>
+    inline constexpr typename
+    _Bind_helper<__is_socketlike<_Func>::value, _Func, _BoundArgs...>::type
+    bind(_Func&& __f, _BoundArgs&&... __args)
+    {
+      typedef _Bind_helper<false, _Func, _BoundArgs...> __helper_type;
+      return typename __helper_type::type(std::forward<_Func>(__f),
+       std::forward<_BoundArgs>(__args)...);
+    }
+
+  template<typename _Result, typename _Func, typename... _BoundArgs>
+    struct _Bindres_helper
+    : _Bind_check_arity<typename decay<_Func>::type, _BoundArgs...>
+    {
+      typedef typename decay<_Func>::type __functor_type;
+      typedef _Bind_result<_Result,
+      __functor_type(typename decay<_BoundArgs>::type...)>
+ type;
+    };
+
+
+
+
+
+
+  template<typename _Result, typename _Func, typename... _BoundArgs>
+    inline constexpr
+    typename _Bindres_helper<_Result, _Func, _BoundArgs...>::type
+    bind(_Func&& __f, _BoundArgs&&... __args)
+    {
+      typedef _Bindres_helper<_Result, _Func, _BoundArgs...> __helper_type;
+      return typename __helper_type::type(std::forward<_Func>(__f),
+       std::forward<_BoundArgs>(__args)...);
+    }
+
+
+
+  template<typename _Fd, typename... _BoundArgs>
+    struct _Bind_front
+    {
+      static_assert(is_move_constructible_v<_Fd>);
+      static_assert((is_move_constructible_v<_BoundArgs> && ...));
+
+
+
+      template<typename _Fn, typename... _Args>
+ explicit constexpr
+ _Bind_front(int, _Fn&& __fn, _Args&&... __args)
+ noexcept(__and_<is_nothrow_constructible<_Fd, _Fn>,
+   is_nothrow_constructible<_BoundArgs, _Args>...>::value)
+ : _M_fd(std::forward<_Fn>(__fn)),
+   _M_bound_args(std::forward<_Args>(__args)...)
+ { static_assert(sizeof...(_Args) == sizeof...(_BoundArgs)); }
+
+
+      template<typename _Self, typename... _CallArgs>
+ constexpr
+ invoke_result_t<__like_t<_Self, _Fd>, __like_t<_Self, _BoundArgs>..., _CallArgs...>
+ operator()(this _Self&& __self, _CallArgs&&... __call_args)
+ noexcept(is_nothrow_invocable_v<__like_t<_Self, _Fd>,
+     __like_t<_Self, _BoundArgs>..., _CallArgs...>)
+ {
+   return _S_call(__like_t<_Self, _Bind_front>(__self), _BoundIndices(),
+    std::forward<_CallArgs>(__call_args)...);
+ }
+# 1012 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+    private:
+      using _BoundIndices = index_sequence_for<_BoundArgs...>;
+
+      template<typename _Tp, size_t... _Ind, typename... _CallArgs>
+ static constexpr
+ decltype(auto)
+ _S_call(_Tp&& __g, index_sequence<_Ind...>, _CallArgs&&... __call_args)
+ {
+   return std::invoke(std::forward<_Tp>(__g)._M_fd,
+       std::get<_Ind>(std::forward<_Tp>(__g)._M_bound_args)...,
+       std::forward<_CallArgs>(__call_args)...);
+ }
+
+      [[no_unique_address]] _Fd _M_fd;
+      [[no_unique_address]] std::tuple<_BoundArgs...> _M_bound_args;
+    };
+
+  template<typename _Fn, typename... _Args>
+    using _Bind_front_t = _Bind_front<decay_t<_Fn>, decay_t<_Args>...>;
+# 1041 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+  template<typename _Fn, typename... _Args>
+    constexpr _Bind_front_t<_Fn, _Args...>
+    bind_front(_Fn&& __fn, _Args&&... __args)
+    noexcept(is_nothrow_constructible_v<_Bind_front_t<_Fn, _Args...>,
+     int, _Fn, _Args...>)
+    {
+      return _Bind_front_t<_Fn, _Args...>(0, std::forward<_Fn>(__fn),
+       std::forward<_Args>(__args)...);
+    }
+
+
+
+  template<typename _Fd, typename... _BoundArgs>
+    struct _Bind_back
+    {
+      static_assert(is_move_constructible_v<_Fd>);
+      static_assert((is_move_constructible_v<_BoundArgs> && ...));
+
+
+
+      template<typename _Fn, typename... _Args>
+ explicit constexpr
+ _Bind_back(int, _Fn&& __fn, _Args&&... __args)
+ noexcept(__and_<is_nothrow_constructible<_Fd, _Fn>,
+   is_nothrow_constructible<_BoundArgs, _Args>...>::value)
+ : _M_fd(std::forward<_Fn>(__fn)),
+   _M_bound_args(std::forward<_Args>(__args)...)
+ { static_assert(sizeof...(_Args) == sizeof...(_BoundArgs)); }
+
+      template<typename _Self, typename... _CallArgs>
+ constexpr
+ invoke_result_t<__like_t<_Self, _Fd>, _CallArgs..., __like_t<_Self, _BoundArgs>...>
+ operator()(this _Self&& __self, _CallArgs&&... __call_args)
+ noexcept(is_nothrow_invocable_v<__like_t<_Self, _Fd>,
+     _CallArgs..., __like_t<_Self, _BoundArgs>...>)
+ {
+   return _S_call(__like_t<_Self, _Bind_back>(__self), _BoundIndices(),
+    std::forward<_CallArgs>(__call_args)...);
+ }
+
+    private:
+      using _BoundIndices = index_sequence_for<_BoundArgs...>;
+
+      template<typename _Tp, size_t... _Ind, typename... _CallArgs>
+ static constexpr
+ decltype(auto)
+ _S_call(_Tp&& __g, index_sequence<_Ind...>, _CallArgs&&... __call_args)
+ {
+   return std::invoke(std::forward<_Tp>(__g)._M_fd,
+       std::forward<_CallArgs>(__call_args)...,
+       std::get<_Ind>(std::forward<_Tp>(__g)._M_bound_args)...);
+ }
+
+      [[no_unique_address]] _Fd _M_fd;
+      [[no_unique_address]] std::tuple<_BoundArgs...> _M_bound_args;
+    };
+
+  template<typename _Fn, typename... _Args>
+    using _Bind_back_t = _Bind_back<decay_t<_Fn>, decay_t<_Args>...>;
+# 1110 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+  template<typename _Fn, typename... _Args>
+    constexpr _Bind_back_t<_Fn, _Args...>
+    bind_back(_Fn&& __fn, _Args&&... __args)
+    noexcept(is_nothrow_constructible_v<_Bind_back_t<_Fn, _Args...>,
+     int, _Fn, _Args...>)
+    {
+      return _Bind_back_t<_Fn, _Args...>(0, std::forward<_Fn>(__fn),
+      std::forward<_Args>(__args)...);
+    }
+
+
+
+
+  template<typename _Fn>
+    class _Not_fn
+    {
+      template<typename _Fn2, typename... _Args>
+ using __inv_res_t = typename __invoke_result<_Fn2, _Args...>::type;
+
+      template<typename _Tp>
+ static decltype(!std::declval<_Tp>())
+ _S_not() noexcept(noexcept(!std::declval<_Tp>()));
+
+    public:
+      template<typename _Fn2>
+ constexpr
+ _Not_fn(_Fn2&& __fn, int)
+ : _M_fn(std::forward<_Fn2>(__fn)) { }
+
+      _Not_fn(const _Not_fn& __fn) = default;
+      _Not_fn(_Not_fn&& __fn) = default;
+      ~_Not_fn() = default;
+# 1163 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+      template<typename... _Args, typename = enable_if_t<__is_invocable<_Fn &, _Args...>::value>> constexpr decltype(_S_not<__inv_res_t<_Fn &, _Args...>>()) operator()(_Args&&... __args) & noexcept(__is_nothrow_invocable<_Fn &, _Args...>::value && noexcept(_S_not<__inv_res_t<_Fn &, _Args...>>())) { return !std::__invoke(std::forward< _Fn & >(_M_fn), std::forward<_Args>(__args)...); } template<typename... _Args, typename = enable_if_t<!__is_invocable<_Fn &, _Args...>::value>> void operator()(_Args&&... __args) & = delete;
+      template<typename... _Args, typename = enable_if_t<__is_invocable<_Fn const &, _Args...>::value>> constexpr decltype(_S_not<__inv_res_t<_Fn const &, _Args...>>()) operator()(_Args&&... __args) const & noexcept(__is_nothrow_invocable<_Fn const &, _Args...>::value && noexcept(_S_not<__inv_res_t<_Fn const &, _Args...>>())) { return !std::__invoke(std::forward< _Fn const & >(_M_fn), std::forward<_Args>(__args)...); } template<typename... _Args, typename = enable_if_t<!__is_invocable<_Fn const &, _Args...>::value>> void operator()(_Args&&... __args) const & = delete;
+      template<typename... _Args, typename = enable_if_t<__is_invocable<_Fn &&, _Args...>::value>> constexpr decltype(_S_not<__inv_res_t<_Fn &&, _Args...>>()) operator()(_Args&&... __args) && noexcept(__is_nothrow_invocable<_Fn &&, _Args...>::value && noexcept(_S_not<__inv_res_t<_Fn &&, _Args...>>())) { return !std::__invoke(std::forward< _Fn && >(_M_fn), std::forward<_Args>(__args)...); } template<typename... _Args, typename = enable_if_t<!__is_invocable<_Fn &&, _Args...>::value>> void operator()(_Args&&... __args) && = delete;
+      template<typename... _Args, typename = enable_if_t<__is_invocable<_Fn const &&, _Args...>::value>> constexpr decltype(_S_not<__inv_res_t<_Fn const &&, _Args...>>()) operator()(_Args&&... __args) const && noexcept(__is_nothrow_invocable<_Fn const &&, _Args...>::value && noexcept(_S_not<__inv_res_t<_Fn const &&, _Args...>>())) { return !std::__invoke(std::forward< _Fn const && >(_M_fn), std::forward<_Args>(__args)...); } template<typename... _Args, typename = enable_if_t<!__is_invocable<_Fn const &&, _Args...>::value>> void operator()(_Args&&... __args) const && = delete;
+
+
+    private:
+      _Fn _M_fn;
+    };
+
+  template<typename _Tp, typename _Pred>
+    struct __is_byte_like : false_type { };
+
+  template<typename _Tp>
+    struct __is_byte_like<_Tp, equal_to<_Tp>>
+    : __bool_constant<sizeof(_Tp) == 1 && is_integral<_Tp>::value> { };
+
+  template<typename _Tp>
+    struct __is_byte_like<_Tp, equal_to<void>>
+    : __bool_constant<sizeof(_Tp) == 1 && is_integral<_Tp>::value> { };
+
+
+
+  enum class byte : unsigned char;
+
+  template<>
+    struct __is_byte_like<byte, equal_to<byte>>
+    : true_type { };
+
+  template<>
+    struct __is_byte_like<byte, equal_to<void>>
+    : true_type { };
+# 1211 "C:/msys64/mingw64/include/c++/15.2.0/functional" 3
+  template<typename _Fn>
+    constexpr
+    inline auto
+    not_fn(_Fn&& __fn)
+    noexcept(std::is_nothrow_constructible<std::decay_t<_Fn>, _Fn&&>::value)
+    {
+      return _Not_fn<std::decay_t<_Fn>>{std::forward<_Fn>(__fn), 0};
+    }
+
+
+
+
+
+  template<typename _ForwardIterator1, typename _BinaryPredicate = equal_to<>>
+    class default_searcher
+    {
+    public:
+      constexpr
+      default_searcher(_ForwardIterator1 __pat_first,
+         _ForwardIterator1 __pat_last,
+         _BinaryPredicate __pred = _BinaryPredicate())
+      : _M_m(__pat_first, __pat_last, std::move(__pred))
+      { }
+
+      template<typename _ForwardIterator2>
+ constexpr
+ pair<_ForwardIterator2, _ForwardIterator2>
+ operator()(_ForwardIterator2 __first, _ForwardIterator2 __last) const
+ {
+   _ForwardIterator2 __first_ret =
+     std::search(__first, __last, std::get<0>(_M_m), std::get<1>(_M_m),
+   std::get<2>(_M_m));
+   auto __ret = std::make_pair(__first_ret, __first_ret);
+   if (__ret.first != __last)
+     std::advance(__ret.second, std::distance(std::get<0>(_M_m),
+           std::get<1>(_M_m)));
+   return __ret;
+ }
+
+    private:
+      tuple<_ForwardIterator1, _ForwardIterator1, _BinaryPredicate> _M_m;
+    };
+
+
+
+  template<typename _Key, typename _Tp, typename _Hash, typename _Pred>
+    struct __boyer_moore_map_base
+    {
+      template<typename _RAIter>
+ __boyer_moore_map_base(_RAIter __pat, size_t __patlen,
+          _Hash&& __hf, _Pred&& __pred)
+ : _M_bad_char{ __patlen, std::move(__hf), std::move(__pred) }
+ {
+   if (__patlen > 0)
+     for (__diff_type __i = 0; __i < __patlen - 1; ++__i)
+       _M_bad_char[__pat[__i]] = __patlen - 1 - __i;
+ }
+
+      using __diff_type = _Tp;
+
+      __diff_type
+      _M_lookup(_Key __key, __diff_type __not_found) const
+      {
+ auto __iter = _M_bad_char.find(__key);
+ if (__iter == _M_bad_char.end())
+   return __not_found;
+ return __iter->second;
+      }
+
+      _Pred
+      _M_pred() const { return _M_bad_char.key_eq(); }
+
+      std::unordered_map<_Key, _Tp, _Hash, _Pred> _M_bad_char;
+    };
+
+  template<typename _Tp, size_t _Len, typename _Pred>
+    struct __boyer_moore_array_base
+    {
+      template<typename _RAIter, typename _Unused>
+ __boyer_moore_array_base(_RAIter __pat, size_t __patlen,
+     _Unused&&, _Pred&& __pred)
+ : _M_bad_char{ array<_Tp, _Len>{}, std::move(__pred) }
+ {
+   std::get<0>(_M_bad_char).fill(__patlen);
+   if (__patlen > 0)
+     for (__diff_type __i = 0; __i < __patlen - 1; ++__i)
+       {
+  auto __ch = __pat[__i];
+  using _UCh = make_unsigned_t<decltype(__ch)>;
+  auto __uch = static_cast<_UCh>(__ch);
+  std::get<0>(_M_bad_char)[__uch] = __patlen - 1 - __i;
+       }
+ }
+
+      using __diff_type = _Tp;
+
+      template<typename _Key>
+ __diff_type
+ _M_lookup(_Key __key, __diff_type __not_found) const
+ {
+   auto __ukey = static_cast<make_unsigned_t<_Key>>(__key);
+   if (__ukey >= _Len)
+     return __not_found;
+   return std::get<0>(_M_bad_char)[__ukey];
+ }
+
+      const _Pred&
+      _M_pred() const { return std::get<1>(_M_bad_char); }
+
+      tuple<array<_Tp, _Len>, _Pred> _M_bad_char;
+    };
+
+
+
+  template<typename _RAIter, typename _Hash, typename _Pred,
+           typename _Val = typename iterator_traits<_RAIter>::value_type,
+    typename _Diff = typename iterator_traits<_RAIter>::difference_type>
+    using __boyer_moore_base_t
+      = __conditional_t<__is_byte_like<_Val, _Pred>::value,
+   __boyer_moore_array_base<_Diff, 256, _Pred>,
+   __boyer_moore_map_base<_Val, _Diff, _Hash, _Pred>>;
+
+  template<typename _RAIter, typename _Hash
+      = hash<typename iterator_traits<_RAIter>::value_type>,
+    typename _BinaryPredicate = equal_to<>>
+    class boyer_moore_searcher
+    : __boyer_moore_base_t<_RAIter, _Hash, _BinaryPredicate>
+    {
+      using _Base = __boyer_moore_base_t<_RAIter, _Hash, _BinaryPredicate>;
+      using typename _Base::__diff_type;
+
+    public:
+      boyer_moore_searcher(_RAIter __pat_first, _RAIter __pat_last,
+      _Hash __hf = _Hash(),
+      _BinaryPredicate __pred = _BinaryPredicate());
+
+      template<typename _RandomAccessIterator2>
+        pair<_RandomAccessIterator2, _RandomAccessIterator2>
+ operator()(_RandomAccessIterator2 __first,
+     _RandomAccessIterator2 __last) const;
+
+    private:
+      bool
+      _M_is_prefix(_RAIter __word, __diff_type __len,
+     __diff_type __pos)
+      {
+ const auto& __pred = this->_M_pred();
+ __diff_type __suffixlen = __len - __pos;
+ for (__diff_type __i = 0; __i < __suffixlen; ++__i)
+   if (!__pred(__word[__i], __word[__pos + __i]))
+     return false;
+ return true;
+      }
+
+      __diff_type
+      _M_suffix_length(_RAIter __word, __diff_type __len,
+         __diff_type __pos)
+      {
+ const auto& __pred = this->_M_pred();
+ __diff_type __i = 0;
+ while (__pred(__word[__pos - __i], __word[__len - 1 - __i])
+        && __i < __pos)
+   {
+     ++__i;
+   }
+ return __i;
+      }
+
+      template<typename _Tp>
+ __diff_type
+ _M_bad_char_shift(_Tp __c) const
+ { return this->_M_lookup(__c, _M_pat_end - _M_pat); }
+
+      _RAIter _M_pat;
+      _RAIter _M_pat_end;
+      std::vector<__diff_type> _M_good_suffix;
+    };
+
+  template<typename _RAIter, typename _Hash
+      = hash<typename iterator_traits<_RAIter>::value_type>,
+    typename _BinaryPredicate = equal_to<>>
+    class boyer_moore_horspool_searcher
+    : __boyer_moore_base_t<_RAIter, _Hash, _BinaryPredicate>
+    {
+      using _Base = __boyer_moore_base_t<_RAIter, _Hash, _BinaryPredicate>;
+      using typename _Base::__diff_type;
+
+    public:
+      boyer_moore_horspool_searcher(_RAIter __pat,
+        _RAIter __pat_end,
+        _Hash __hf = _Hash(),
+        _BinaryPredicate __pred
+        = _BinaryPredicate())
+      : _Base(__pat, __pat_end - __pat, std::move(__hf), std::move(__pred)),
+ _M_pat(__pat), _M_pat_end(__pat_end)
+      { }
+
+      template<typename _RandomAccessIterator2>
+        pair<_RandomAccessIterator2, _RandomAccessIterator2>
+ operator()(_RandomAccessIterator2 __first,
+     _RandomAccessIterator2 __last) const
+ {
+   const auto& __pred = this->_M_pred();
+   auto __patlen = _M_pat_end - _M_pat;
+   if (__patlen == 0)
+     return std::make_pair(__first, __first);
+   auto __len = __last - __first;
+   while (__len >= __patlen)
+     {
+       for (auto __scan = __patlen - 1;
+     __pred(__first[__scan], _M_pat[__scan]); --__scan)
+  if (__scan == 0)
+    return std::make_pair(__first, __first + __patlen);
+       auto __shift = _M_bad_char_shift(__first[__patlen - 1]);
+       __len -= __shift;
+       __first += __shift;
+     }
+   return std::make_pair(__last, __last);
+ }
+
+    private:
+      template<typename _Tp>
+ __diff_type
+ _M_bad_char_shift(_Tp __c) const
+ { return this->_M_lookup(__c, _M_pat_end - _M_pat); }
+
+      _RAIter _M_pat;
+      _RAIter _M_pat_end;
+    };
+
+  template<typename _RAIter, typename _Hash, typename _BinaryPredicate>
+    boyer_moore_searcher<_RAIter, _Hash, _BinaryPredicate>::
+    boyer_moore_searcher(_RAIter __pat, _RAIter __pat_end,
+    _Hash __hf, _BinaryPredicate __pred)
+    : _Base(__pat, __pat_end - __pat, std::move(__hf), std::move(__pred)),
+      _M_pat(__pat), _M_pat_end(__pat_end), _M_good_suffix(__pat_end - __pat)
+    {
+      auto __patlen = __pat_end - __pat;
+      if (__patlen == 0)
+ return;
+      __diff_type __last_prefix = __patlen - 1;
+      for (__diff_type __p = __patlen - 1; __p >= 0; --__p)
+ {
+   if (_M_is_prefix(__pat, __patlen, __p + 1))
+     __last_prefix = __p + 1;
+   _M_good_suffix[__p] = __last_prefix + (__patlen - 1 - __p);
+ }
+      for (__diff_type __p = 0; __p < __patlen - 1; ++__p)
+ {
+   auto __slen = _M_suffix_length(__pat, __patlen, __p);
+   auto __pos = __patlen - 1 - __slen;
+   if (!__pred(__pat[__p - __slen], __pat[__pos]))
+     _M_good_suffix[__pos] = __patlen - 1 - __p + __slen;
+ }
+    }
+
+  template<typename _RAIter, typename _Hash, typename _BinaryPredicate>
+  template<typename _RandomAccessIterator2>
+    pair<_RandomAccessIterator2, _RandomAccessIterator2>
+    boyer_moore_searcher<_RAIter, _Hash, _BinaryPredicate>::
+    operator()(_RandomAccessIterator2 __first,
+        _RandomAccessIterator2 __last) const
+    {
+      auto __patlen = _M_pat_end - _M_pat;
+      if (__patlen == 0)
+ return std::make_pair(__first, __first);
+      const auto& __pred = this->_M_pred();
+      __diff_type __i = __patlen - 1;
+      auto __stringlen = __last - __first;
+      while (__i < __stringlen)
+ {
+   __diff_type __j = __patlen - 1;
+   while (__j >= 0 && __pred(__first[__i], _M_pat[__j]))
+     {
+       --__i;
+       --__j;
+     }
+   if (__j < 0)
+     {
+       const auto __match = __first + __i + 1;
+       return std::make_pair(__match, __match + __patlen);
+     }
+   __i += std::max(_M_bad_char_shift(__first[__i]),
+     _M_good_suffix[__j]);
+ }
+      return std::make_pair(__last, __last);
+    }
+
+
+
+
+
+
+
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_decl.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/_vectorize.hpp" 1
+       
+
+
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/_vectorize.hpp"
+namespace glm{
+namespace detail
+{
+ template<template<length_t L, typename T, qualifier Q> class vec, length_t L, typename R, typename T, qualifier Q>
+ struct functor1{};
+
+ template<template<length_t L, typename T, qualifier Q> class vec, typename R, typename T, qualifier Q>
+ struct functor1<vec, 1, R, T, Q>
+ {
+  inline constexpr static vec<1, R, Q> call(R (*Func) (T x), vec<1, T, Q> const& v)
+  {
+   return vec<1, R, Q>(Func(v.x));
+  }
+ };
+
+ template<template<length_t L, typename T, qualifier Q> class vec, typename R, typename T, qualifier Q>
+ struct functor1<vec, 2, R, T, Q>
+ {
+  inline constexpr static vec<2, R, Q> call(R (*Func) (T x), vec<2, T, Q> const& v)
+  {
+   return vec<2, R, Q>(Func(v.x), Func(v.y));
+  }
+ };
+
+ template<template<length_t L, typename T, qualifier Q> class vec, typename R, typename T, qualifier Q>
+ struct functor1<vec, 3, R, T, Q>
+ {
+  inline constexpr static vec<3, R, Q> call(R (*Func) (T x), vec<3, T, Q> const& v)
+  {
+   return vec<3, R, Q>(Func(v.x), Func(v.y), Func(v.z));
+  }
+ };
+
+ template<template<length_t L, typename T, qualifier Q> class vec, typename R, typename T, qualifier Q>
+ struct functor1<vec, 4, R, T, Q>
+ {
+  inline constexpr static vec<4, R, Q> call(R (*Func) (T x), vec<4, T, Q> const& v)
+  {
+   return vec<4, R, Q>(Func(v.x), Func(v.y), Func(v.z), Func(v.w));
+  }
+ };
+
+ template<template<length_t L, typename T, qualifier Q> class vec, length_t L, typename T, qualifier Q>
+ struct functor2{};
+
+ template<template<length_t L, typename T, qualifier Q> class vec, typename T, qualifier Q>
+ struct functor2<vec, 1, T, Q>
+ {
+  inline static vec<1, T, Q> call(T (*Func) (T x, T y), vec<1, T, Q> const& a, vec<1, T, Q> const& b)
+  {
+   return vec<1, T, Q>(Func(a.x, b.x));
+  }
+
+  template<typename Fct>
+  inline constexpr static vec<1, T, Q> call(Fct Func, vec<1, T, Q> const& a, vec<1, T, Q> const& b)
+  {
+   return vec<1, T, Q>(Func(a.x, b.x));
+  }
+ };
+
+ template<template<length_t L, typename T, qualifier Q> class vec, typename T, qualifier Q>
+ struct functor2<vec, 2, T, Q>
+ {
+  inline static vec<2, T, Q> call(T (*Func) (T x, T y), vec<2, T, Q> const& a, vec<2, T, Q> const& b)
+  {
+   return vec<2, T, Q>(Func(a.x, b.x), Func(a.y, b.y));
+  }
+
+  template<typename Fct>
+  inline constexpr static vec<2, T, Q> call(Fct Func, vec<2, T, Q> const& a, vec<2, T, Q> const& b)
+  {
+   return vec<2, T, Q>(Func(a.x, b.x), Func(a.y, b.y));
+  }
+ };
+
+ template<template<length_t L, typename T, qualifier Q> class vec, typename T, qualifier Q>
+ struct functor2<vec, 3, T, Q>
+ {
+  inline static vec<3, T, Q> call(T (*Func) (T x, T y), vec<3, T, Q> const& a, vec<3, T, Q> const& b)
+  {
+   return vec<3, T, Q>(Func(a.x, b.x), Func(a.y, b.y), Func(a.z, b.z));
+  }
+
+  template<class Fct>
+  inline constexpr static vec<3, T, Q> call(Fct Func, vec<3, T, Q> const& a, vec<3, T, Q> const& b)
+  {
+   return vec<3, T, Q>(Func(a.x, b.x), Func(a.y, b.y), Func(a.z, b.z));
+  }
+ };
+
+ template<template<length_t L, typename T, qualifier Q> class vec, typename T, qualifier Q>
+ struct functor2<vec, 4, T, Q>
+ {
+  inline static vec<4, T, Q> call(T (*Func) (T x, T y), vec<4, T, Q> const& a, vec<4, T, Q> const& b)
+  {
+   return vec<4, T, Q>(Func(a.x, b.x), Func(a.y, b.y), Func(a.z, b.z), Func(a.w, b.w));
+  }
+
+  template<class Fct>
+  inline constexpr static vec<4, T, Q> call(Fct Func, vec<4, T, Q> const& a, vec<4, T, Q> const& b)
+  {
+   return vec<4, T, Q>(Func(a.x, b.x), Func(a.y, b.y), Func(a.z, b.z), Func(a.w, b.w));
+  }
+ };
+
+ template<template<length_t L, typename T, qualifier Q> class vec, length_t L, typename T, qualifier Q>
+ struct functor2_vec_sca{};
+
+ template<template<length_t L, typename T, qualifier Q> class vec, typename T, qualifier Q>
+ struct functor2_vec_sca<vec, 1, T, Q>
+ {
+  inline static vec<1, T, Q> call(T (*Func) (T x, T y), vec<1, T, Q> const& a, T b)
+  {
+   return vec<1, T, Q>(Func(a.x, b));
+  }
+  template<class Fct>
+  inline constexpr static vec<1, T, Q> call(Fct Func, vec<1, T, Q> const& a, T b)
+  {
+   return vec<1, T, Q>(Func(a.x, b));
+  }
+ };
+
+ template<template<length_t L, typename T, qualifier Q> class vec, typename T, qualifier Q>
+ struct functor2_vec_sca<vec, 2, T, Q>
+ {
+  inline static vec<2, T, Q> call(T (*Func) (T x, T y), vec<2, T, Q> const& a, T b)
+  {
+   return vec<2, T, Q>(Func(a.x, b), Func(a.y, b));
+  }
+
+  template<class Fct>
+  inline constexpr static vec<2, T, Q> call(Fct Func, vec<2, T, Q> const& a, T b)
+  {
+   return vec<2, T, Q>(Func(a.x, b), Func(a.y, b));
+  }
+ };
+
+ template<template<length_t L, typename T, qualifier Q> class vec, typename T, qualifier Q>
+ struct functor2_vec_sca<vec, 3, T, Q>
+ {
+  inline static vec<3, T, Q> call(T (*Func) (T x, T y), vec<3, T, Q> const& a, T b)
+  {
+   return vec<3, T, Q>(Func(a.x, b), Func(a.y, b), Func(a.z, b));
+  }
+
+  template<class Fct>
+  inline constexpr static vec<3, T, Q> call(Fct Func, vec<3, T, Q> const& a, T b)
+  {
+   return vec<3, T, Q>(Func(a.x, b), Func(a.y, b), Func(a.z, b));
+  }
+ };
+
+ template<template<length_t L, typename T, qualifier Q> class vec, typename T, qualifier Q>
+ struct functor2_vec_sca<vec, 4, T, Q>
+ {
+  inline static vec<4, T, Q> call(T (*Func) (T x, T y), vec<4, T, Q> const& a, T b)
+  {
+   return vec<4, T, Q>(Func(a.x, b), Func(a.y, b), Func(a.z, b), Func(a.w, b));
+  }
+  template<class Fct>
+  inline constexpr static vec<4, T, Q> call(Fct Func, vec<4, T, Q> const& a, T b)
+  {
+   return vec<4, T, Q>(Func(a.x, b), Func(a.y, b), Func(a.z, b), Func(a.w, b));
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q>
+ struct functor2_vec_int {};
+
+ template<typename T, qualifier Q>
+ struct functor2_vec_int<1, T, Q>
+ {
+  inline static vec<1, int, Q> call(int (*Func) (T x, int y), vec<1, T, Q> const& a, vec<1, int, Q> const& b)
+  {
+   return vec<1, int, Q>(Func(a.x, b.x));
+  }
+
+  template<class Fct>
+  inline constexpr static vec<1, int, Q> call(Fct Func, vec<1, T, Q> const& a, vec<1, int, Q> const& b)
+  {
+   return vec<1, int, Q>(Func(a.x, b.x));
+  }
+ };
+
+ template<typename T, qualifier Q>
+ struct functor2_vec_int<2, T, Q>
+ {
+  inline static vec<2, int, Q> call(int (*Func) (T x, int y), vec<2, T, Q> const& a, vec<2, int, Q> const& b)
+  {
+   return vec<2, int, Q>(Func(a.x, b.x), Func(a.y, b.y));
+  }
+  template<class Fct>
+  inline constexpr static vec<2, int, Q> call(Fct Func, vec<2, T, Q> const& a, vec<2, int, Q> const& b)
+  {
+   return vec<2, int, Q>(Func(a.x, b.x), Func(a.y, b.y));
+  }
+ };
+
+ template<typename T, qualifier Q>
+ struct functor2_vec_int<3, T, Q>
+ {
+  inline static vec<3, int, Q> call(int (*Func) (T x, int y), vec<3, T, Q> const& a, vec<3, int, Q> const& b)
+  {
+   return vec<3, int, Q>(Func(a.x, b.x), Func(a.y, b.y), Func(a.z, b.z));
+  }
+  template<class Fct>
+  inline constexpr static vec<3, int, Q> call(Fct Func, vec<3, T, Q> const& a, vec<3, int, Q> const& b)
+  {
+   return vec<3, int, Q>(Func(a.x, b.x), Func(a.y, b.y), Func(a.z, b.z));
+  }
+ };
+
+ template<typename T, qualifier Q>
+ struct functor2_vec_int<4, T, Q>
+ {
+  inline static vec<4, int, Q> call(int (*Func) (T x, int y), vec<4, T, Q> const& a, vec<4, int, Q> const& b)
+  {
+   return vec<4, int, Q>(Func(a.x, b.x), Func(a.y, b.y), Func(a.z, b.z), Func(a.w, b.w));
+  }
+
+  template<class Fct>
+  inline constexpr static vec<4, int, Q> call(Fct Func, vec<4, T, Q> const& a, vec<4, int, Q> const& b)
+  {
+   return vec<4, int, Q>(Func(a.x, b.x), Func(a.y, b.y), Func(a.z, b.z), Func(a.w, b.w));
+  }
+ };
+}
+}
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_decl.hpp" 2
+
+namespace glm {
+ namespace detail
+ {
+  template<length_t L, typename T, qualifier Q, bool UseSimd>
+  struct compute_vec_add {};
+
+  template<length_t L, typename T, qualifier Q, bool UseSimd>
+  struct compute_vec_sub {};
+
+  template<length_t L, typename T, qualifier Q, bool UseSimd>
+  struct compute_vec_mul {};
+
+  template<length_t L, typename T, qualifier Q, bool UseSimd>
+  struct compute_vec_div {};
+
+  template<length_t L, typename T, qualifier Q, bool UseSimd>
+  struct compute_vec_mod {};
+
+  template<length_t L, typename T, qualifier Q, bool UseSimd>
+  struct compute_splat {};
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size, bool UseSimd>
+  struct compute_vec_and {};
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size, bool UseSimd>
+  struct compute_vec_or {};
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size, bool UseSimd>
+  struct compute_vec_xor {};
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size, bool UseSimd>
+  struct compute_vec_shift_left {};
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size, bool UseSimd>
+  struct compute_vec_shift_right {};
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size, bool UseSimd>
+  struct compute_vec_equal {};
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size, bool UseSimd>
+  struct compute_vec_nequal {};
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size, bool UseSimd>
+  struct compute_vec_bitwise_not {};
+
+  template<length_t L, typename T, qualifier Q>
+  struct compute_vec_add<L, T, Q, false>
+  {
+   inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+   {
+    return detail::functor2<vec, L, T, Q>::call(std::plus<T>(), a, b);
+   }
+  };
+
+  template<length_t L, typename T, qualifier Q>
+  struct compute_vec_sub<L, T, Q, false>
+  {
+   inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+   {
+    return detail::functor2<vec, L, T, Q>::call(std::minus<T>(), a, b);
+   }
+  };
+
+  template<length_t L, typename T, qualifier Q>
+  struct compute_vec_mul<L, T, Q, false>
+  {
+   inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+   {
+    return detail::functor2<vec, L, T, Q>::call(std::multiplies<T>(), a, b);
+   }
+  };
+
+  template<length_t L, typename T, qualifier Q>
+  struct compute_vec_div<L, T, Q, false>
+  {
+   inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+   {
+    return detail::functor2<vec, L, T, Q>::call(std::divides<T>(), a, b);
+   }
+  };
+
+  template<length_t L, typename T, qualifier Q>
+  struct compute_vec_mod<L, T, Q, false>
+  {
+   inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+   {
+    return detail::functor2<vec, L, T, Q>::call(std::modulus<T>(), a, b);
+   }
+  };
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size>
+  struct compute_vec_and<L, T, Q, IsInt, Size, false>
+  {
+   inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+   {
+    vec<L, T, Q> v(a);
+    for (length_t i = 0; i < L; ++i)
+     v[i] &= static_cast<T>(b[i]);
+    return v;
+   }
+  };
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size>
+  struct compute_vec_or<L, T, Q, IsInt, Size, false>
+  {
+   inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+   {
+    vec<L, T, Q> v(a);
+    for (length_t i = 0; i < L; ++i)
+     v[i] |= static_cast<T>(b[i]);
+    return v;
+   }
+  };
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size>
+  struct compute_vec_xor<L, T, Q, IsInt, Size, false>
+  {
+   inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+   {
+    vec<L, T, Q> v(a);
+    for (length_t i = 0; i < L; ++i)
+     v[i] ^= static_cast<T>(b[i]);
+    return v;
+   }
+  };
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size>
+  struct compute_vec_shift_left<L, T, Q, IsInt, Size, false>
+  {
+   inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+   {
+    vec<L, T, Q> v(a);
+    for (length_t i = 0; i < L; ++i)
+     v[i] <<= static_cast<T>(b[i]);
+    return v;
+   }
+  };
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size>
+  struct compute_vec_shift_right<L, T, Q, IsInt, Size, false>
+  {
+   inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+   {
+    vec<L, T, Q> v(a);
+    for (length_t i = 0; i < L; ++i)
+     v[i] >>= static_cast<T>(b[i]);
+    return v;
+   }
+  };
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size>
+  struct compute_vec_equal<L, T, Q, IsInt, Size, false>
+  {
+   inline constexpr static bool call(vec<L, T, Q> const& v1, vec<L, T, Q> const& v2)
+   {
+    bool b = true;
+    for (length_t i = 0; b && i < L; ++i)
+     b = detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1[i], v2[i]);
+    return b;
+   }
+  };
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size>
+  struct compute_vec_nequal<L, T, Q, IsInt, Size, false>
+  {
+   inline constexpr static bool call(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+   {
+    return !compute_vec_equal<L, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(v1, v2);
+   }
+  };
+
+  template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size>
+  struct compute_vec_bitwise_not<L, T, Q, IsInt, Size, false>
+  {
+   inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& a)
+   {
+    vec<L, T, Q> v(a);
+    for (length_t i = 0; i < L; ++i)
+     v[i] = ~v[i];
+    return v;
+   }
+  };
+
+ }
+}
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.inl" 2
+
+namespace glm
+{
+# 26 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr vec<3, T, Q>::vec(vec<3, T, P> const& v)
+  : x(v.x), y(v.y), z(v.z)
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q>::vec(T scalar)
+  : x(scalar), y(scalar), z(scalar)
+ {}
+
+ template <typename T, qualifier Q>
+ inline constexpr vec<3, T, Q>::vec(T _x, T _y, T _z)
+  : x(_x), y(_y), z(_z)
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<3, T, Q>::vec(vec<1, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.x))
+  , z(static_cast<T>(v.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z>
+ inline constexpr vec<3, T, Q>::vec(X _x, Y _y, Z _z)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_z))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z>
+ inline constexpr vec<3, T, Q>::vec(vec<1, X, Q> const& _x, Y _y, Z _z)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_z))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z>
+ inline constexpr vec<3, T, Q>::vec(X _x, vec<1, Y, Q> const& _y, Z _z)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_z))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z>
+ inline constexpr vec<3, T, Q>::vec(vec<1, X, Q> const& _x, vec<1, Y, Q> const& _y, Z _z)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_z))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z>
+ inline constexpr vec<3, T, Q>::vec(X _x, Y _y, vec<1, Z, Q> const& _z)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_z.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z>
+ inline constexpr vec<3, T, Q>::vec(vec<1, X, Q> const& _x, Y _y, vec<1, Z, Q> const& _z)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_z.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z>
+ inline constexpr vec<3, T, Q>::vec(X _x, vec<1, Y, Q> const& _y, vec<1, Z, Q> const& _z)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_z.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z>
+ inline constexpr vec<3, T, Q>::vec(vec<1, X, Q> const& _x, vec<1, Y, Q> const& _y, vec<1, Z, Q> const& _z)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_z.x))
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, qualifier P>
+ inline constexpr vec<3, T, Q>::vec(vec<2, A, P> const& _xy, B _z)
+  : x(static_cast<T>(_xy.x))
+  , y(static_cast<T>(_xy.y))
+  , z(static_cast<T>(_z))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, qualifier P>
+ inline constexpr vec<3, T, Q>::vec(vec<2, A, P> const& _xy, vec<1, B, P> const& _z)
+  : x(static_cast<T>(_xy.x))
+  , y(static_cast<T>(_xy.y))
+  , z(static_cast<T>(_z.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, qualifier P>
+ inline constexpr vec<3, T, Q>::vec(A _x, vec<2, B, P> const& _yz)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_yz.x))
+  , z(static_cast<T>(_yz.y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, qualifier P>
+ inline constexpr vec<3, T, Q>::vec(vec<1, A, P> const& _x, vec<2, B, P> const& _yz)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_yz.x))
+  , z(static_cast<T>(_yz.y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<3, T, Q>::vec(vec<3, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.y))
+  , z(static_cast<T>(v.z))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<3, T, Q>::vec(vec<4, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.y))
+  , z(static_cast<T>(v.z))
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr T & vec<3, T, Q>::operator[](typename vec<3, T, Q>::length_type i)
+ {
+  (
+# 173 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.inl" 3
+ ((void)0)
+# 173 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.inl"
+ );
+  switch(i)
+  {
+  default:
+   case 0:
+  return x;
+   case 1:
+  return y;
+   case 2:
+  return z;
+  }
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr T const& vec<3, T, Q>::operator[](typename vec<3, T, Q>::length_type i) const
+ {
+  (
+# 189 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.inl" 3
+ ((void)0)
+# 189 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.inl"
+ );
+  switch(i)
+  {
+  default:
+  case 0:
+   return x;
+  case 1:
+   return y;
+  case 2:
+   return z;
+  }
+ }
+# 215 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.inl"
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q>& vec<3, T, Q>::operator=(vec<3, U, Q> const& v)
+ {
+  this->x = static_cast<T>(v.x);
+  this->y = static_cast<T>(v.y);
+  this->z = static_cast<T>(v.z);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator+=(U scalar)
+ {
+  return (*this = detail::compute_vec_add<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator+=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_add<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<1, T, Q>(v.x)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator+=(vec<3, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_add<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator-=(U scalar)
+ {
+  return (*this = detail::compute_vec_sub<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator-=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_sub<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<1, T, Q>(v.x)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator-=(vec<3, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_sub<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator*=(U scalar)
+ {
+  return (*this = detail::compute_vec_mul<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(static_cast<T>(scalar))));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator*=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_mul<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v.x)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator*=(vec<3, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_mul<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator/=(U v)
+ {
+  return (*this = detail::compute_vec_div<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator/=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_div<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v.x)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator/=(vec<3, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_div<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator++()
+ {
+  ++this->x;
+  ++this->y;
+  ++this->z;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator--()
+ {
+  --this->x;
+  --this->y;
+  --this->z;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> vec<3, T, Q>::operator++(int)
+ {
+  vec<3, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> vec<3, T, Q>::operator--(int)
+ {
+  vec<3, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator%=(U scalar)
+ {
+  return (*this = detail::compute_vec_mod<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator%=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_mod<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator%=(vec<3, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_mod<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator&=(U scalar)
+ {
+  return (*this = detail::compute_vec_and<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator&=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_and<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator&=(vec<3, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_and<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator|=(U scalar)
+ {
+  return (*this = detail::compute_vec_or<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator|=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_or<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator|=(vec<3, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_or<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator^=(U scalar)
+ {
+  return (*this = detail::compute_vec_xor<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator^=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_xor<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v.x)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator^=(vec<3, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_xor<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator<<=(U scalar)
+ {
+  return (*this = detail::compute_vec_shift_left<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator<<=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_shift_left<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<1, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator<<=(vec<3, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_shift_left<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator>>=(U scalar)
+ {
+  return (*this = detail::compute_vec_shift_right<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator>>=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_shift_right<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<3, T, Q> & vec<3, T, Q>::operator>>=(vec<3, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_shift_right<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator+(vec<3, T, Q> const& v)
+ {
+  return v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator-(vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(0) -= v;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator+(vec<3, T, Q> const& v, T scalar)
+ {
+  return vec<3, T, Q>(v) += scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator+(vec<3, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<3, T, Q>(v1) += v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator+(T scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(v) += scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator+(vec<1, T, Q> const& scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar) += v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator+(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2)
+ {
+  return vec<3, T, Q>(v1) += v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator-(vec<3, T, Q> const& v, T scalar)
+ {
+  return vec<3, T, Q>(v) -= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator-(vec<3, T, Q> const& v, vec<1, T, Q> const& scalar)
+ {
+  return vec<3, T, Q>(v) -= scalar.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator-(T scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar) -= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator-(vec<1, T, Q> const& scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar) -= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator-(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2)
+ {
+  return vec<3, T, Q>(v1) -= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator*(vec<3, T, Q> const& v, T scalar)
+ {
+  return vec<3, T, Q>(v) *= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator*(vec<3, T, Q> const& v, vec<1, T, Q> const& scalar)
+ {
+  return vec<3, T, Q>(v) *= scalar.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator*(T scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(v) *= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator*(vec<1, T, Q> const& scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(v) *= scalar.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator*(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2)
+ {
+  return vec<3, T, Q>(v1) *= v2;
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator/(vec<3, T, Q> const& v, T scalar)
+ {
+  return vec<3, T, Q>(v) /= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator/(vec<3, T, Q> const& v, vec<1, T, Q> const& scalar)
+ {
+  return vec<3, T, Q>(v) /= scalar.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator/(T scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar) /= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator/(vec<1, T, Q> const& scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar) /= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator/(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2)
+ {
+  return vec<3, T, Q>(v1) /= v2;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator%(vec<3, T, Q> const& v, T scalar)
+ {
+  return vec<3, T, Q>(v) %= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator%(vec<3, T, Q> const& v, vec<1, T, Q> const& scalar)
+ {
+  return vec<3, T, Q>(v) %= scalar.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator%(T scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar) %= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator%(vec<1, T, Q> const& scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar.x) %= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator%(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2)
+ {
+  return vec<3, T, Q>(v1) %= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator&(vec<3, T, Q> const& v, T scalar)
+ {
+  return vec<3, T, Q>(v) &= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator&(vec<3, T, Q> const& v, vec<1, T, Q> const& scalar)
+ {
+  return vec<3, T, Q>(v) &= scalar.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator&(T scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar) &= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator&(vec<1, T, Q> const& scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar.x) &= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator&(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2)
+ {
+  return vec<3, T, Q>(v1) &= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator|(vec<3, T, Q> const& v, T scalar)
+ {
+  return vec<3, T, Q>(v) |= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator|(vec<3, T, Q> const& v, vec<1, T, Q> const& scalar)
+ {
+  return vec<3, T, Q>(v) |= scalar.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator|(T scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar) |= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator|(vec<1, T, Q> const& scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar.x) |= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator|(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2)
+ {
+  return vec<3, T, Q>(v1) |= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator^(vec<3, T, Q> const& v, T scalar)
+ {
+  return vec<3, T, Q>(v) ^= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator^(vec<3, T, Q> const& v, vec<1, T, Q> const& scalar)
+ {
+  return vec<3, T, Q>(v) ^= scalar.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator^(T scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar) ^= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator^(vec<1, T, Q> const& scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar.x) ^= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator^(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2)
+ {
+  return vec<3, T, Q>(v1) ^= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator<<(vec<3, T, Q> const& v, T scalar)
+ {
+  return vec<3, T, Q>(v) <<= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator<<(vec<3, T, Q> const& v, vec<1, T, Q> const& scalar)
+ {
+  return vec<3, T, Q>(v) <<= scalar.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator<<(T scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar) << v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator<<(vec<1, T, Q> const& scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar.x) << v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator<<(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2)
+ {
+  return vec<3, T, Q>(v1) <<= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator>>(vec<3, T, Q> const& v, T scalar)
+ {
+  return vec<3, T, Q>(v) >>= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator>>(vec<3, T, Q> const& v, vec<1, T, Q> const& scalar)
+ {
+  return vec<3, T, Q>(v) >>= scalar.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator>>(T scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar) >>= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator>>(vec<1, T, Q> const& scalar, vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(scalar.x) >>= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator>>(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2)
+ {
+  return vec<3, T, Q>(v1) >>= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> operator~(vec<3, T, Q> const& v)
+ {
+  return vec<3, T, Q>(
+   ~v.x,
+   ~v.y,
+   ~v.z);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2)
+ {
+  return
+   detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.x, v2.x) &&
+   detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.y, v2.y) &&
+   detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.z, v2.z);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(vec<3, T, Q> const& v1, vec<3, T, Q> const& v2)
+ {
+  return !(v1 == v2);
+ }
+
+ template<qualifier Q>
+ inline constexpr vec<3, bool, Q> operator&&(vec<3, bool, Q> const& v1, vec<3, bool, Q> const& v2)
+ {
+  return vec<3, bool, Q>(v1.x && v2.x, v1.y && v2.y, v1.z && v2.z);
+ }
+
+ template<qualifier Q>
+ inline constexpr vec<3, bool, Q> operator||(vec<3, bool, Q> const& v1, vec<3, bool, Q> const& v2)
+ {
+  return vec<3, bool, Q>(v1.x || v2.x, v1.y || v2.y, v1.z || v2.z);
+ }
+}
+# 447 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool3.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<3, bool, defaultp> bvec3;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool3_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef vec<3, bool, highp> highp_bvec3;
+
+
+
+
+
+ typedef vec<3, bool, mediump> mediump_bvec3;
+
+
+
+
+
+ typedef vec<3, bool, lowp> lowp_bvec3;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float3.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<3, float, defaultp> vec3;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float3_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef vec<3, float, highp> highp_vec3;
+
+
+
+
+
+ typedef vec<3, float, mediump> mediump_vec3;
+
+
+
+
+
+ typedef vec<3, float, lowp> lowp_vec3;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double3.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<3, double, defaultp> dvec3;
+
+
+}
+# 10 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double3_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+# 17 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double3_precision.hpp"
+ typedef vec<3, double, highp> highp_dvec3;
+
+
+
+
+
+
+ typedef vec<3, double, mediump> mediump_dvec3;
+
+
+
+
+
+
+ typedef vec<3, double, lowp> lowp_dvec3;
+
+
+}
+# 11 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int3.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<3, int, defaultp> ivec3;
+
+
+}
+# 12 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int3_sized.hpp" 1
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int3_sized.hpp"
+       
+# 23 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int3_sized.hpp"
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<3, int8, defaultp> i8vec3;
+
+
+
+
+ typedef vec<3, int16, defaultp> i16vec3;
+
+
+
+
+ typedef vec<3, int32, defaultp> i32vec3;
+
+
+
+
+ typedef vec<3, int64, defaultp> i64vec3;
+
+
+}
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint3.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<3, unsigned int, defaultp> uvec3;
+
+
+}
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint3_sized.hpp" 1
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint3_sized.hpp"
+       
+# 23 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint3_sized.hpp"
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<3, uint8, defaultp> u8vec3;
+
+
+
+
+ typedef vec<3, uint16, defaultp> u16vec3;
+
+
+
+
+ typedef vec<3, uint32, defaultp> u32vec3;
+
+
+
+
+ typedef vec<3, uint64, defaultp> u64vec3;
+
+
+}
+# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp" 2
+# 119 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec4.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool4.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.hpp" 1
+
+
+
+       
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.hpp"
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct vec<4, T, Q>
+ {
+
+
+  typedef T value_type;
+  typedef vec<4, T, Q> type;
+  typedef vec<4, bool, Q> bool_type;
+
+  enum is_aligned
+  {
+   value = detail::is_aligned<Q>::value
+  };
+
+
+
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+# 73 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.hpp"
+   union { T x, r, s; };
+   union { T y, g, t; };
+   union { T z, b, p; };
+   union { T w, a, q; };
+# 87 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.hpp"
+#pragma GCC diagnostic pop
+
+
+
+
+
+
+
+  typedef length_t length_type;
+
+
+  [[nodiscard]] static constexpr length_type length(){return 4;}
+
+  [[nodiscard]] constexpr T & operator[](length_type i);
+  [[nodiscard]] constexpr T const& operator[](length_type i) const;
+
+
+
+  constexpr vec() = default;
+  constexpr vec(vec<4, T, Q> const& v) = default;
+  template<qualifier P>
+  constexpr vec(vec<4, T, P> const& v);
+
+
+
+  constexpr explicit vec(T scalar);
+  constexpr vec(T x, T y, T z, T w);
+
+
+
+  template<typename U, qualifier P>
+  constexpr explicit vec(vec<1, U, P> const& v);
+
+
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(X _x, Y _y, Z _z, W _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(vec<1, X, Q> const& _x, Y _y, Z _z, W _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(X _x, vec<1, Y, Q> const& _y, Z _z, W _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(vec<1, X, Q> const& _x, vec<1, Y, Q> const& _y, Z _z, W _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(X _x, Y _y, vec<1, Z, Q> const& _z, W _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(vec<1, X, Q> const& _x, Y _y, vec<1, Z, Q> const& _z, W _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(X _x, vec<1, Y, Q> const& _y, vec<1, Z, Q> const& _z, W _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(vec<1, X, Q> const& _x, vec<1, Y, Q> const& _y, vec<1, Z, Q> const& _z, W _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(vec<1, X, Q> const& _x, Y _y, Z _z, vec<1, W, Q> const& _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(X _x, vec<1, Y, Q> const& _y, Z _z, vec<1, W, Q> const& _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(vec<1, X, Q> const& _x, vec<1, Y, Q> const& _y, Z _z, vec<1, W, Q> const& _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(X _x, Y _y, vec<1, Z, Q> const& _z, vec<1, W, Q> const& _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(vec<1, X, Q> const& _x, Y _y, vec<1, Z, Q> const& _z, vec<1, W, Q> const& _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(X _x, vec<1, Y, Q> const& _y, vec<1, Z, Q> const& _z, vec<1, W, Q> const& _w);
+  template<typename X, typename Y, typename Z, typename W>
+  constexpr vec(vec<1, X, Q> const& _x, vec<1, Y, Q> const& _y, vec<1, Z, Q> const& _z, vec<1, W, Q> const& _w);
+
+
+
+
+  template<typename A, typename B, typename C, qualifier P>
+  constexpr vec(vec<2, A, P> const& _xy, B _z, C _w);
+
+  template<typename A, typename B, typename C, qualifier P>
+  constexpr vec(vec<2, A, P> const& _xy, vec<1, B, P> const& _z, C _w);
+
+  template<typename A, typename B, typename C, qualifier P>
+  constexpr vec(vec<2, A, P> const& _xy, B _z, vec<1, C, P> const& _w);
+
+  template<typename A, typename B, typename C, qualifier P>
+  constexpr vec(vec<2, A, P> const& _xy, vec<1, B, P> const& _z, vec<1, C, P> const& _w);
+
+  template<typename A, typename B, typename C, qualifier P>
+  constexpr vec(A _x, vec<2, B, P> const& _yz, C _w);
+
+  template<typename A, typename B, typename C, qualifier P>
+  constexpr vec(vec<1, A, P> const& _x, vec<2, B, P> const& _yz, C _w);
+
+  template<typename A, typename B, typename C, qualifier P>
+  constexpr vec(A _x, vec<2, B, P> const& _yz, vec<1, C, P> const& _w);
+
+  template<typename A, typename B, typename C, qualifier P>
+  constexpr vec(vec<1, A, P> const& _x, vec<2, B, P> const& _yz, vec<1, C, P> const& _w);
+
+  template<typename A, typename B, typename C, qualifier P>
+  constexpr vec(A _x, B _y, vec<2, C, P> const& _zw);
+
+  template<typename A, typename B, typename C, qualifier P>
+  constexpr vec(vec<1, A, P> const& _x, B _y, vec<2, C, P> const& _zw);
+
+  template<typename A, typename B, typename C, qualifier P>
+  constexpr vec(A _x, vec<1, B, P> const& _y, vec<2, C, P> const& _zw);
+
+  template<typename A, typename B, typename C, qualifier P>
+  constexpr vec(vec<1, A, P> const& _x, vec<1, B, P> const& _y, vec<2, C, P> const& _zw);
+
+  template<typename A, typename B, qualifier P>
+  constexpr vec(vec<3, A, P> const& _xyz, B _w);
+
+  template<typename A, typename B, qualifier P>
+  constexpr vec(vec<3, A, P> const& _xyz, vec<1, B, P> const& _w);
+
+  template<typename A, typename B, qualifier P>
+  constexpr vec(A _x, vec<3, B, P> const& _yzw);
+
+  template<typename A, typename B, qualifier P>
+  constexpr vec(vec<1, A, P> const& _x, vec<3, B, P> const& _yzw);
+
+  template<typename A, typename B, qualifier P>
+  constexpr vec(vec<2, A, P> const& _xy, vec<2, B, P> const& _zw);
+
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<4, U, P> const& v);
+# 257 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.hpp"
+  constexpr vec<4, T, Q>& operator=(vec<4, T, Q> const& v) = default;
+
+  template<typename U>
+  constexpr vec<4, T, Q>& operator=(vec<4, U, Q> const& v);
+  template<typename U>
+  constexpr vec<4, T, Q>& operator+=(U scalar);
+  template<typename U>
+  constexpr vec<4, T, Q>& operator+=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<4, T, Q>& operator+=(vec<4, U, Q> const& v);
+  template<typename U>
+  constexpr vec<4, T, Q>& operator-=(U scalar);
+  template<typename U>
+  constexpr vec<4, T, Q>& operator-=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<4, T, Q>& operator-=(vec<4, U, Q> const& v);
+  template<typename U>
+  constexpr vec<4, T, Q>& operator*=(U scalar);
+  template<typename U>
+  constexpr vec<4, T, Q>& operator*=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<4, T, Q>& operator*=(vec<4, U, Q> const& v);
+  template<typename U>
+  constexpr vec<4, T, Q>& operator/=(U scalar);
+  template<typename U>
+  constexpr vec<4, T, Q>& operator/=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<4, T, Q>& operator/=(vec<4, U, Q> const& v);
+
+
+
+  constexpr vec<4, T, Q> & operator++();
+  constexpr vec<4, T, Q> & operator--();
+  [[nodiscard]] constexpr vec<4, T, Q> operator++(int);
+  [[nodiscard]] constexpr vec<4, T, Q> operator--(int);
+
+
+
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator%=(U scalar);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator%=(vec<1, U, Q> const& v);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator%=(vec<4, U, Q> const& v);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator&=(U scalar);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator&=(vec<1, U, Q> const& v);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator&=(vec<4, U, Q> const& v);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator|=(U scalar);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator|=(vec<1, U, Q> const& v);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator|=(vec<4, U, Q> const& v);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator^=(U scalar);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator^=(vec<1, U, Q> const& v);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator^=(vec<4, U, Q> const& v);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator<<=(U scalar);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator<<=(vec<1, U, Q> const& v);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator<<=(vec<4, U, Q> const& v);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator>>=(U scalar);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator>>=(vec<1, U, Q> const& v);
+  template<typename U>
+  [[nodiscard]] constexpr vec<4, T, Q> & operator>>=(vec<4, U, Q> const& v);
+ };
+
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator+(vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator-(vec<4, T, Q> const& v);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator+(vec<4, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator+(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator+(T scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator+(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator+(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator-(vec<4, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator-(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator-(T scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator-(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator-(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator*(vec<4, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator*(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator*(T scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator*(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator*(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator/(vec<4, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator/(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator/(T scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator/(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator/(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator%(vec<4, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator%(vec<4, T, Q> const& v, vec<1, T, Q> const& scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator%(T scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator%(vec<1, T, Q> const& scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator%(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator&(vec<4, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator&(vec<4, T, Q> const& v, vec<1, T, Q> const& scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator&(T scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator&(vec<1, T, Q> const& scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator&(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator|(vec<4, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator|(vec<4, T, Q> const& v, vec<1, T, Q> const& scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator|(T scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator|(vec<1, T, Q> const& scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator|(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator^(vec<4, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator^(vec<4, T, Q> const& v, vec<1, T, Q> const& scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator^(T scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator^(vec<1, T, Q> const& scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator^(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator<<(vec<4, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator<<(vec<4, T, Q> const& v, vec<1, T, Q> const& scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator<<(T scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator<<(vec<1, T, Q> const& scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator<<(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator>>(vec<4, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator>>(vec<4, T, Q> const& v, vec<1, T, Q> const& scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator>>(T scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator>>(vec<1, T, Q> const& scalar, vec<4, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator>>(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<4, T, Q> operator~(vec<4, T, Q> const& v);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2);
+
+ template<qualifier Q>
+ [[nodiscard]] constexpr vec<4, bool, Q> operator&&(vec<4, bool, Q> const& v1, vec<4, bool, Q> const& v2);
+
+ template<qualifier Q>
+ [[nodiscard]] constexpr vec<4, bool, Q> operator||(vec<4, bool, Q> const& v1, vec<4, bool, Q> const& v2);
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.inl" 1
+
+
+
+
+
+namespace glm{
+namespace detail
+{
+
+}
+# 30 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<4, T, P> const& v)
+  : x(v.x), y(v.y), z(v.z), w(v.w)
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q>::vec(T scalar)
+  : x(scalar), y(scalar), z(scalar), w(scalar)
+ {}
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q>::vec(T _x, T _y, T _z, T _w)
+  : x(_x), y(_y), z(_z), w(_w)
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<1, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.x))
+  , z(static_cast<T>(v.x))
+  , w(static_cast<T>(v.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(X _x, Y _y, Z _z, W _w)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_z))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(vec<1, X, Q> const& _x, Y _y, Z _z, W _w)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_z))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(X _x, vec<1, Y, Q> const& _y, Z _z, W _w)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_z))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(vec<1, X, Q> const& _x, vec<1, Y, Q> const& _y, Z _z, W _w)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_z))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(X _x, Y _y, vec<1, Z, Q> const& _z, W _w)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_z.x))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(vec<1, X, Q> const& _x, Y _y, vec<1, Z, Q> const& _z, W _w)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_z.x))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(X _x, vec<1, Y, Q> const& _y, vec<1, Z, Q> const& _z, W _w)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_z.x))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(vec<1, X, Q> const& _x, vec<1, Y, Q> const& _y, vec<1, Z, Q> const& _z, W _w)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_z.x))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(vec<1, X, Q> const& _x, Y _y, Z _z, vec<1, W, Q> const& _w)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_z))
+  , w(static_cast<T>(_w.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(X _x, vec<1, Y, Q> const& _y, Z _z, vec<1, W, Q> const& _w)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_z))
+  , w(static_cast<T>(_w.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(vec<1, X, Q> const& _x, vec<1, Y, Q> const& _y, Z _z, vec<1, W, Q> const& _w)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_z))
+  , w(static_cast<T>(_w.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(X _x, Y _y, vec<1, Z, Q> const& _z, vec<1, W, Q> const& _w)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_z.x))
+  , w(static_cast<T>(_w.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(vec<1, X, Q> const& _x, Y _y, vec<1, Z, Q> const& _z, vec<1, W, Q> const& _w)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_z.x))
+  , w(static_cast<T>(_w.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(X _x, vec<1, Y, Q> const& _y, vec<1, Z, Q> const& _z, vec<1, W, Q> const& _w)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_z.x))
+  , w(static_cast<T>(_w.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename X, typename Y, typename Z, typename W>
+ inline constexpr vec<4, T, Q>::vec(vec<1, X, Q> const& _x, vec<1, Y, Q> const& _y, vec<1, Z, Q> const& _z, vec<1, W, Q> const& _w)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_z.x))
+  , w(static_cast<T>(_w.x))
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, typename C, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<2, A, P> const& _xy, B _z, C _w)
+  : x(static_cast<T>(_xy.x))
+  , y(static_cast<T>(_xy.y))
+  , z(static_cast<T>(_z))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, typename C, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<2, A, P> const& _xy, vec<1, B, P> const& _z, C _w)
+  : x(static_cast<T>(_xy.x))
+  , y(static_cast<T>(_xy.y))
+  , z(static_cast<T>(_z.x))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, typename C, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<2, A, P> const& _xy, B _z, vec<1, C, P> const& _w)
+  : x(static_cast<T>(_xy.x))
+  , y(static_cast<T>(_xy.y))
+  , z(static_cast<T>(_z))
+  , w(static_cast<T>(_w.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, typename C, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<2, A, P> const& _xy, vec<1, B, P> const& _z, vec<1, C, P> const& _w)
+  : x(static_cast<T>(_xy.x))
+  , y(static_cast<T>(_xy.y))
+  , z(static_cast<T>(_z.x))
+  , w(static_cast<T>(_w.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, typename C, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(A _x, vec<2, B, P> const& _yz, C _w)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_yz.x))
+  , z(static_cast<T>(_yz.y))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, typename C, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<1, A, P> const& _x, vec<2, B, P> const& _yz, C _w)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_yz.x))
+  , z(static_cast<T>(_yz.y))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, typename C, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(A _x, vec<2, B, P> const& _yz, vec<1, C, P> const& _w)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_yz.x))
+  , z(static_cast<T>(_yz.y))
+  , w(static_cast<T>(_w.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, typename C, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<1, A, P> const& _x, vec<2, B, P> const& _yz, vec<1, C, P> const& _w)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_yz.x))
+  , z(static_cast<T>(_yz.y))
+  , w(static_cast<T>(_w.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, typename C, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(A _x, B _y, vec<2, C, P> const& _zw)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_zw.x))
+  , w(static_cast<T>(_zw.y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, typename C, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<1, A, P> const& _x, B _y, vec<2, C, P> const& _zw)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y))
+  , z(static_cast<T>(_zw.x))
+  , w(static_cast<T>(_zw.y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, typename C, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(A _x, vec<1, B, P> const& _y, vec<2, C, P> const& _zw)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_zw.x))
+  , w(static_cast<T>(_zw.y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, typename C, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<1, A, P> const& _x, vec<1, B, P> const& _y, vec<2, C, P> const& _zw)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_y.x))
+  , z(static_cast<T>(_zw.x))
+  , w(static_cast<T>(_zw.y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<3, A, P> const& _xyz, B _w)
+  : x(static_cast<T>(_xyz.x))
+  , y(static_cast<T>(_xyz.y))
+  , z(static_cast<T>(_xyz.z))
+  , w(static_cast<T>(_w))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<3, A, P> const& _xyz, vec<1, B, P> const& _w)
+  : x(static_cast<T>(_xyz.x))
+  , y(static_cast<T>(_xyz.y))
+  , z(static_cast<T>(_xyz.z))
+  , w(static_cast<T>(_w.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(A _x, vec<3, B, P> const& _yzw)
+  : x(static_cast<T>(_x))
+  , y(static_cast<T>(_yzw.x))
+  , z(static_cast<T>(_yzw.y))
+  , w(static_cast<T>(_yzw.z))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<1, A, P> const& _x, vec<3, B, P> const& _yzw)
+  : x(static_cast<T>(_x.x))
+  , y(static_cast<T>(_yzw.x))
+  , z(static_cast<T>(_yzw.y))
+  , w(static_cast<T>(_yzw.z))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename A, typename B, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<2, A, P> const& _xy, vec<2, B, P> const& _zw)
+  : x(static_cast<T>(_xy.x))
+  , y(static_cast<T>(_xy.y))
+  , z(static_cast<T>(_zw.x))
+  , w(static_cast<T>(_zw.y))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<4, T, Q>::vec(vec<4, U, P> const& v)
+  : x(static_cast<T>(v.x))
+  , y(static_cast<T>(v.y))
+  , z(static_cast<T>(v.z))
+  , w(static_cast<T>(v.w))
+ {}
+
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr T& vec<4, T, Q>::operator[](typename vec<4, T, Q>::length_type i)
+ {
+  (
+# 364 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.inl" 3
+ ((void)0)
+# 364 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.inl"
+ );
+  switch (i)
+  {
+  default:
+  case 0:
+   return x;
+  case 1:
+   return y;
+  case 2:
+   return z;
+  case 3:
+   return w;
+  }
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr T const& vec<4, T, Q>::operator[](typename vec<4, T, Q>::length_type i) const
+ {
+  (
+# 382 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.inl" 3
+ ((void)0)
+# 382 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.inl"
+ );
+  switch (i)
+  {
+  default:
+  case 0:
+   return x;
+  case 1:
+   return y;
+  case 2:
+   return z;
+  case 3:
+   return w;
+  }
+ }
+# 411 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.inl"
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q>& vec<4, T, Q>::operator=(vec<4, U, Q> const& v)
+ {
+  this->x = static_cast<T>(v.x);
+  this->y = static_cast<T>(v.y);
+  this->z = static_cast<T>(v.z);
+  this->w = static_cast<T>(v.w);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator+=(U scalar)
+ {
+  return (*this = detail::compute_vec_add<4, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator+=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_add<4, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v.x)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator+=(vec<4, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_add<4, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator-=(U scalar)
+ {
+  return (*this = detail::compute_vec_sub<4, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator-=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_sub<4, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v.x)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator-=(vec<4, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_sub<4, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator*=(U scalar)
+ {
+  return (*this = detail::compute_vec_mul<4,T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator*=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_mul<4,T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v.x)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator*=(vec<4, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_mul<4,T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator/=(U scalar)
+ {
+  return (*this = detail::compute_vec_div<4, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator/=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_div<4, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v.x)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator/=(vec<4, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_div<4, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator++()
+ {
+  ++this->x;
+  ++this->y;
+  ++this->z;
+  ++this->w;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator--()
+ {
+  --this->x;
+  --this->y;
+  --this->z;
+  --this->w;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> vec<4, T, Q>::operator++(int)
+ {
+  vec<4, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> vec<4, T, Q>::operator--(int)
+ {
+  vec<4, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator%=(U scalar)
+ {
+  return (*this = detail::compute_vec_mod<4, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator%=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_mod<3, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<3, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator%=(vec<4, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_mod<4, T, Q, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator&=(U scalar)
+ {
+  return (*this = detail::compute_vec_and<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator&=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_and<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator&=(vec<4, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_and<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator|=(U scalar)
+ {
+  return (*this = detail::compute_vec_or<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator|=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_or<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator|=(vec<4, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_or<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator^=(U scalar)
+ {
+  return (*this = detail::compute_vec_xor<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator^=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_xor<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator^=(vec<4, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_xor<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator<<=(U scalar)
+ {
+  return (*this = detail::compute_vec_shift_left<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator<<=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_shift_left<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator<<=(vec<4, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_shift_left<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator>>=(U scalar)
+ {
+  return (*this = detail::compute_vec_shift_right<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(scalar)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator>>=(vec<1, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_shift_right<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<4, T, Q> & vec<4, T, Q>::operator>>=(vec<4, U, Q> const& v)
+ {
+  return (*this = detail::compute_vec_shift_right<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(*this, vec<4, T, Q>(v)));
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator+(vec<4, T, Q> const& v)
+ {
+  return v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator-(vec<4, T, Q> const& v)
+ {
+  return vec<4, T, Q>(0) -= v;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator+(vec<4, T, Q> const& v, T scalar)
+ {
+  return vec<4, T, Q>(v) += scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator+(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) += v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator+(T scalar, vec<4, T, Q> const& v)
+ {
+  return vec<4, T, Q>(v) += scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator+(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v2) += v1;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator+(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) += v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator-(vec<4, T, Q> const& v, T scalar)
+ {
+  return vec<4, T, Q>(v) -= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator-(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) -= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator-(T scalar, vec<4, T, Q> const& v)
+ {
+  return vec<4, T, Q>(scalar) -= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator-(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1.x) -= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator-(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) -= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator*(vec<4, T, Q> const& v, T scalar)
+ {
+  return vec<4, T, Q>(v) *= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator*(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) *= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator*(T scalar, vec<4, T, Q> const& v)
+ {
+  return vec<4, T, Q>(v) *= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator*(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v2) *= v1;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator*(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) *= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator/(vec<4, T, Q> const& v, T scalar)
+ {
+  return vec<4, T, Q>(v) /= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator/(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) /= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator/(T scalar, vec<4, T, Q> const& v)
+ {
+  return vec<4, T, Q>(scalar) /= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator/(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1.x) /= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator/(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) /= v2;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator%(vec<4, T, Q> const& v, T scalar)
+ {
+  return vec<4, T, Q>(v) %= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator%(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) %= v2.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator%(T scalar, vec<4, T, Q> const& v)
+ {
+  return vec<4, T, Q>(scalar) %= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator%(vec<1, T, Q> const& scalar, vec<4, T, Q> const& v)
+ {
+  return vec<4, T, Q>(scalar.x) %= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator%(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) %= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator&(vec<4, T, Q> const& v, T scalar)
+ {
+  return vec<4, T, Q>(v) &= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator&(vec<4, T, Q> const& v, vec<1, T, Q> const& scalar)
+ {
+  return vec<4, T, Q>(v) &= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator&(T scalar, vec<4, T, Q> const& v)
+ {
+  return vec<4, T, Q>(scalar) &= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator&(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1.x) &= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator&(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) &= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator|(vec<4, T, Q> const& v, T scalar)
+ {
+  return vec<4, T, Q>(v) |= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator|(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) |= v2.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator|(T scalar, vec<4, T, Q> const& v)
+ {
+  return vec<4, T, Q>(scalar) |= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator|(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1.x) |= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator|(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) |= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator^(vec<4, T, Q> const& v, T scalar)
+ {
+  return vec<4, T, Q>(v) ^= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator^(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) ^= v2.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator^(T scalar, vec<4, T, Q> const& v)
+ {
+  return vec<4, T, Q>(scalar) ^= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator^(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1.x) ^= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator^(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) ^= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator<<(vec<4, T, Q> const& v, T scalar)
+ {
+  return vec<4, T, Q>(v) <<= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator<<(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) <<= v2.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator<<(T scalar, vec<4, T, Q> const& v)
+ {
+  return vec<4, T, Q>(scalar) <<= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator<<(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1.x) <<= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator<<(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) <<= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator>>(vec<4, T, Q> const& v, T scalar)
+ {
+  return vec<4, T, Q>(v) >>= scalar;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator>>(vec<4, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) >>= v2.x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator>>(T scalar, vec<4, T, Q> const& v)
+ {
+  return vec<4, T, Q>(scalar) >>= v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator>>(vec<1, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1.x) >>= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator>>(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return vec<4, T, Q>(v1) >>= v2;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<4, T, Q> operator~(vec<4, T, Q> const& v)
+ {
+  return detail::compute_vec_bitwise_not<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(v);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return detail::compute_vec_equal<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(v1, v2);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
+ {
+  return detail::compute_vec_nequal<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(v1, v2);
+ }
+
+ template<qualifier Q>
+ inline constexpr vec<4, bool, Q> operator&&(vec<4, bool, Q> const& v1, vec<4, bool, Q> const& v2)
+ {
+  return vec<4, bool, Q>(v1.x && v2.x, v1.y && v2.y, v1.z && v2.z, v1.w && v2.w);
+ }
+
+ template<qualifier Q>
+ inline constexpr vec<4, bool, Q> operator||(vec<4, bool, Q> const& v1, vec<4, bool, Q> const& v2)
+ {
+  return vec<4, bool, Q>(v1.x || v2.x, v1.y || v2.y, v1.z || v2.z, v1.w || v2.w);
+ }
+}
+# 514 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec4.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool4.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<4, bool, defaultp> bvec4;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool4_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef vec<4, bool, highp> highp_bvec4;
+
+
+
+
+
+ typedef vec<4, bool, mediump> mediump_bvec4;
+
+
+
+
+
+ typedef vec<4, bool, lowp> lowp_bvec4;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float4.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<4, float, defaultp> vec4;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float4_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef vec<4, float, highp> highp_vec4;
+
+
+
+
+
+ typedef vec<4, float, mediump> mediump_vec4;
+
+
+
+
+
+ typedef vec<4, float, lowp> lowp_vec4;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double4.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<4, double, defaultp> dvec4;
+
+
+}
+# 10 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double4_precision.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double4_precision.hpp" 2
+
+
+namespace glm
+{
+# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double4_precision.hpp"
+ typedef vec<4, double, highp> highp_dvec4;
+
+
+
+
+
+
+ typedef vec<4, double, mediump> mediump_dvec4;
+
+
+
+
+
+
+ typedef vec<4, double, lowp> lowp_dvec4;
+
+
+}
+# 11 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int4.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<4, int, defaultp> ivec4;
+
+
+}
+# 12 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int4_sized.hpp" 1
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int4_sized.hpp"
+       
+# 23 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int4_sized.hpp"
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<4, int8, defaultp> i8vec4;
+
+
+
+
+ typedef vec<4, int16, defaultp> i16vec4;
+
+
+
+
+ typedef vec<4, int32, defaultp> i32vec4;
+
+
+
+
+ typedef vec<4, int64, defaultp> i64vec4;
+
+
+}
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint4.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<4, unsigned int, defaultp> uvec4;
+
+
+}
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint4_sized.hpp" 1
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint4_sized.hpp"
+       
+# 23 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint4_sized.hpp"
+namespace glm
+{
+
+
+
+
+
+
+ typedef vec<4, uint8, defaultp> u8vec4;
+
+
+
+
+ typedef vec<4, uint16, defaultp> u16vec4;
+
+
+
+
+ typedef vec<4, uint32, defaultp> u32vec4;
+
+
+
+
+ typedef vec<4, uint64, defaultp> u64vec4;
+
+
+}
+# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec4.hpp" 2
+# 120 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x2.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double2x2.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x2.hpp" 1
+
+
+
+       
+
+
+
+
+
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct mat<2, 2, T, Q>
+ {
+  typedef vec<2, T, Q> col_type;
+  typedef vec<2, T, Q> row_type;
+  typedef mat<2, 2, T, Q> type;
+  typedef mat<2, 2, T, Q> transpose_type;
+  typedef T value_type;
+
+ private:
+  col_type value[2];
+
+ public:
+
+
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length() { return 2; }
+
+  [[nodiscard]] constexpr col_type & operator[](length_type i) noexcept;
+  [[nodiscard]] constexpr col_type const& operator[](length_type i) const noexcept;
+
+
+
+  constexpr mat() = default;
+  template<qualifier P>
+  constexpr mat(mat<2, 2, T, P> const& m);
+
+  constexpr mat(T scalar);
+  constexpr mat(
+   T const& x1, T const& y1,
+   T const& x2, T const& y2);
+  constexpr mat(
+   col_type const& v1,
+   col_type const& v2);
+
+
+
+  template<typename U, typename V, typename M, typename N>
+  constexpr mat(
+   U const& x1, V const& y1,
+   M const& x2, N const& y2);
+
+  template<typename U, typename V>
+  constexpr mat(
+   vec<2, U, Q> const& v1,
+   vec<2, V, Q> const& v2);
+
+
+
+  template<typename U, qualifier P>
+  constexpr mat(mat<2, 2, U, P> const& m);
+
+  constexpr mat(mat<3, 3, T, Q> const& x);
+  constexpr mat(mat<4, 4, T, Q> const& x);
+  constexpr mat(mat<2, 3, T, Q> const& x);
+  constexpr mat(mat<3, 2, T, Q> const& x);
+  constexpr mat(mat<2, 4, T, Q> const& x);
+  constexpr mat(mat<4, 2, T, Q> const& x);
+  constexpr mat(mat<3, 4, T, Q> const& x);
+  constexpr mat(mat<4, 3, T, Q> const& x);
+
+
+
+  template<typename U>
+  constexpr mat<2, 2, T, Q> & operator=(mat<2, 2, U, Q> const& m);
+  template<typename U>
+  constexpr mat<2, 2, T, Q> & operator+=(U s);
+  template<typename U>
+  constexpr mat<2, 2, T, Q> & operator+=(mat<2, 2, U, Q> const& m);
+  template<typename U>
+  constexpr mat<2, 2, T, Q> & operator-=(U s);
+  template<typename U>
+  constexpr mat<2, 2, T, Q> & operator-=(mat<2, 2, U, Q> const& m);
+  template<typename U>
+  constexpr mat<2, 2, T, Q> & operator*=(U s);
+  template<typename U>
+  constexpr mat<2, 2, T, Q> & operator*=(mat<2, 2, U, Q> const& m);
+  template<typename U>
+  constexpr mat<2, 2, T, Q> & operator/=(U s);
+  template<typename U>
+  constexpr mat<2, 2, T, Q> & operator/=(mat<2, 2, U, Q> const& m);
+
+
+
+  constexpr mat<2, 2, T, Q> & operator++ ();
+  constexpr mat<2, 2, T, Q> & operator-- ();
+  [[nodiscard]] constexpr mat<2, 2, T, Q> operator++(int);
+  [[nodiscard]] constexpr mat<2, 2, T, Q> operator--(int);
+ };
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator+(mat<2, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator-(mat<2, 2, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator+(mat<2, 2, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator+(T scalar, mat<2, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator+(mat<2, 2, T, Q> const& m1, mat<2, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator-(mat<2, 2, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator-(T scalar, mat<2, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator-(mat<2, 2, T, Q> const& m1, mat<2, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator*(mat<2, 2, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator*(T scalar, mat<2, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<2, 2, T, Q>::col_type operator*(mat<2, 2, T, Q> const& m, typename mat<2, 2, T, Q>::row_type const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<2, 2, T, Q>::row_type operator*(typename mat<2, 2, T, Q>::col_type const& v, mat<2, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator*(mat<2, 2, T, Q> const& m1, mat<2, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator*(mat<2, 2, T, Q> const& m1, mat<3, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator*(mat<2, 2, T, Q> const& m1, mat<4, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator/(mat<2, 2, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator/(T scalar, mat<2, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<2, 2, T, Q>::col_type operator/(mat<2, 2, T, Q> const& m, typename mat<2, 2, T, Q>::row_type const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<2, 2, T, Q>::row_type operator/(typename mat<2, 2, T, Q>::col_type const& v, mat<2, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator/(mat<2, 2, T, Q> const& m1, mat<2, 2, T, Q> const& m2);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(mat<2, 2, T, Q> const& m1, mat<2, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(mat<2, 2, T, Q> const& m1, mat<2, 2, T, Q> const& m2);
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x2.inl" 1
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp" 1
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp"
+       
+
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp" 2
+
+
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x3.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double2x3.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x3.hpp" 1
+
+
+
+       
+
+
+
+
+
+
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct mat<2, 3, T, Q>
+ {
+  typedef vec<3, T, Q> col_type;
+  typedef vec<2, T, Q> row_type;
+  typedef mat<2, 3, T, Q> type;
+  typedef mat<3, 2, T, Q> transpose_type;
+  typedef T value_type;
+
+ private:
+  col_type value[2];
+
+ public:
+
+
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length() { return 2; }
+
+  [[nodiscard]] constexpr col_type & operator[](length_type i) noexcept;
+  [[nodiscard]] constexpr col_type const& operator[](length_type i) const noexcept;
+
+
+
+  constexpr mat() = default;
+  template<qualifier P>
+  constexpr mat(mat<2, 3, T, P> const& m);
+
+  constexpr mat(T scalar);
+  constexpr mat(
+   T x0, T y0, T z0,
+   T x1, T y1, T z1);
+  constexpr mat(
+   col_type const& v0,
+   col_type const& v1);
+
+
+
+  template<typename X1, typename Y1, typename Z1, typename X2, typename Y2, typename Z2>
+  constexpr mat(
+   X1 x1, Y1 y1, Z1 z1,
+   X2 x2, Y2 y2, Z2 z2);
+
+  template<typename U, typename V>
+  constexpr mat(
+   vec<3, U, Q> const& v1,
+   vec<3, V, Q> const& v2);
+
+
+
+  template<typename U, qualifier P>
+  constexpr mat(mat<2, 3, U, P> const& m);
+
+  constexpr mat(mat<2, 2, T, Q> const& x);
+  constexpr mat(mat<3, 3, T, Q> const& x);
+  constexpr mat(mat<4, 4, T, Q> const& x);
+  constexpr mat(mat<2, 4, T, Q> const& x);
+  constexpr mat(mat<3, 2, T, Q> const& x);
+  constexpr mat(mat<3, 4, T, Q> const& x);
+  constexpr mat(mat<4, 2, T, Q> const& x);
+  constexpr mat(mat<4, 3, T, Q> const& x);
+
+
+
+  template<typename U>
+  constexpr mat<2, 3, T, Q> & operator=(mat<2, 3, U, Q> const& m);
+  template<typename U>
+  constexpr mat<2, 3, T, Q> & operator+=(U s);
+  template<typename U>
+  constexpr mat<2, 3, T, Q> & operator+=(mat<2, 3, U, Q> const& m);
+  template<typename U>
+  constexpr mat<2, 3, T, Q> & operator-=(U s);
+  template<typename U>
+  constexpr mat<2, 3, T, Q> & operator-=(mat<2, 3, U, Q> const& m);
+  template<typename U>
+  constexpr mat<2, 3, T, Q> & operator*=(U s);
+  template<typename U>
+  constexpr mat<2, 3, T, Q> & operator/=(U s);
+
+
+
+  constexpr mat<2, 3, T, Q> & operator++ ();
+  constexpr mat<2, 3, T, Q> & operator-- ();
+  [[nodiscard]] constexpr mat<2, 3, T, Q> operator++(int);
+  [[nodiscard]] constexpr mat<2, 3, T, Q> operator--(int);
+ };
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator+(mat<2, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator-(mat<2, 3, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator+(mat<2, 3, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator+(mat<2, 3, T, Q> const& m1, mat<2, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator-(mat<2, 3, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator-(mat<2, 3, T, Q> const& m1, mat<2, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator*(mat<2, 3, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator*(T scalar, mat<2, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<2, 3, T, Q>::col_type operator*(mat<2, 3, T, Q> const& m, typename mat<2, 3, T, Q>::row_type const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<2, 3, T, Q>::row_type operator*(typename mat<2, 3, T, Q>::col_type const& v, mat<2, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator*(mat<2, 3, T, Q> const& m1, mat<2, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator*(mat<2, 3, T, Q> const& m1, mat<3, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator*(mat<2, 3, T, Q> const& m1, mat<4, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator/(mat<2, 3, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator/(T scalar, mat<2, 3, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(mat<2, 3, T, Q> const& m1, mat<2, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(mat<2, 3, T, Q> const& m1, mat<2, 3, T, Q> const& m2);
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x3.inl" 1
+namespace glm
+{
+# 19 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x3.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr mat<2, 3, T, Q>::mat(mat<2, 3, T, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q>::mat(T scalar)
+
+   : value{col_type(scalar, 0, 0), col_type(0, scalar, 0)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q>::mat
+ (
+  T x0, T y0, T z0,
+  T x1, T y1, T z1
+ )
+
+   : value{col_type(x0, y0, z0), col_type(x1, y1, z1)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q>::mat(col_type const& v0, col_type const& v1)
+
+   : value{col_type(v0), col_type(v1)}
+
+ {
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<
+  typename X1, typename Y1, typename Z1,
+  typename X2, typename Y2, typename Z2>
+ inline constexpr mat<2, 3, T, Q>::mat
+ (
+  X1 x1, Y1 y1, Z1 z1,
+  X2 x2, Y2 y2, Z2 z2
+ )
+
+   : value{col_type(x1, y1, z1), col_type(x2, y2, z2)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ template<typename V1, typename V2>
+ inline constexpr mat<2, 3, T, Q>::mat(vec<3, V1, Q> const& v1, vec<3, V2, Q> const& v2)
+
+   : value{col_type(v1), col_type(v2)}
+
+ {
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr mat<2, 3, T, Q>::mat(mat<2, 3, U, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q>::mat(mat<2, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q>::mat(mat<3, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q>::mat(mat<4, 4, T, Q> const& m)
+
+  : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q>::mat(mat<2, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q>::mat(mat<3, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q>::mat(mat<3, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q>::mat(mat<4, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q>::mat(mat<4, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 3, T, Q>::col_type & mat<2, 3, T, Q>::operator[](typename mat<2, 3, T, Q>::length_type i) noexcept
+ {
+  (
+# 222 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x3.inl" 3
+ ((void)0)
+# 222 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x3.inl"
+ );
+  return this->value[i];
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 3, T, Q>::col_type const& mat<2, 3, T, Q>::operator[](typename mat<2, 3, T, Q>::length_type i) const noexcept
+ {
+  (
+# 229 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x3.inl" 3
+ ((void)0)
+# 229 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x3.inl"
+ );
+  return this->value[i];
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 3, T, Q>& mat<2, 3, T, Q>::operator=(mat<2, 3, U, Q> const& m)
+ {
+  this->value[0] = m[0];
+  this->value[1] = m[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 3, T, Q> & mat<2, 3, T, Q>::operator+=(U s)
+ {
+  this->value[0] += s;
+  this->value[1] += s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 3, T, Q>& mat<2, 3, T, Q>::operator+=(mat<2, 3, U, Q> const& m)
+ {
+  this->value[0] += m[0];
+  this->value[1] += m[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 3, T, Q>& mat<2, 3, T, Q>::operator-=(U s)
+ {
+  this->value[0] -= s;
+  this->value[1] -= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 3, T, Q>& mat<2, 3, T, Q>::operator-=(mat<2, 3, U, Q> const& m)
+ {
+  this->value[0] -= m[0];
+  this->value[1] -= m[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 3, T, Q>& mat<2, 3, T, Q>::operator*=(U s)
+ {
+  this->value[0] *= s;
+  this->value[1] *= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 3, T, Q> & mat<2, 3, T, Q>::operator/=(U s)
+ {
+  this->value[0] /= s;
+  this->value[1] /= s;
+  return *this;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> & mat<2, 3, T, Q>::operator++()
+ {
+  ++this->value[0];
+  ++this->value[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> & mat<2, 3, T, Q>::operator--()
+ {
+  --this->value[0];
+  --this->value[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> mat<2, 3, T, Q>::operator++(int)
+ {
+  mat<2, 3, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> mat<2, 3, T, Q>::operator--(int)
+ {
+  mat<2, 3, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator+(mat<2, 3, T, Q> const& m)
+ {
+  return m;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator-(mat<2, 3, T, Q> const& m)
+ {
+  return mat<2, 3, T, Q>(
+   -m[0],
+   -m[1]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator+(mat<2, 3, T, Q> const& m, T scalar)
+ {
+  return mat<2, 3, T, Q>(
+   m[0] + scalar,
+   m[1] + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator+(mat<2, 3, T, Q> const& m1, mat<2, 3, T, Q> const& m2)
+ {
+  return mat<2, 3, T, Q>(
+   m1[0] + m2[0],
+   m1[1] + m2[1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator-(mat<2, 3, T, Q> const& m, T scalar)
+ {
+  return mat<2, 3, T, Q>(
+   m[0] - scalar,
+   m[1] - scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator-(mat<2, 3, T, Q> const& m1, mat<2, 3, T, Q> const& m2)
+ {
+  return mat<2, 3, T, Q>(
+   m1[0] - m2[0],
+   m1[1] - m2[1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator*(mat<2, 3, T, Q> const& m, T scalar)
+ {
+  return mat<2, 3, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator*(T scalar, mat<2, 3, T, Q> const& m)
+ {
+  return mat<2, 3, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 3, T, Q>::col_type operator*
+ (
+  mat<2, 3, T, Q> const& m,
+  typename mat<2, 3, T, Q>::row_type const& v)
+ {
+  return typename mat<2, 3, T, Q>::col_type(
+   m[0][0] * v.x + m[1][0] * v.y,
+   m[0][1] * v.x + m[1][1] * v.y,
+   m[0][2] * v.x + m[1][2] * v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 3, T, Q>::row_type operator*
+ (
+  typename mat<2, 3, T, Q>::col_type const& v,
+  mat<2, 3, T, Q> const& m)
+ {
+  return typename mat<2, 3, T, Q>::row_type(
+   v.x * m[0][0] + v.y * m[0][1] + v.z * m[0][2],
+   v.x * m[1][0] + v.y * m[1][1] + v.z * m[1][2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator*(mat<2, 3, T, Q> const& m1, mat<2, 2, T, Q> const& m2)
+ {
+  return mat<2, 3, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator*(mat<2, 3, T, Q> const& m1, mat<3, 2, T, Q> const& m2)
+ {
+  return mat<3, 3, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1],
+   m1[0][2] * m2[2][0] + m1[1][2] * m2[2][1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator*(mat<2, 3, T, Q> const& m1, mat<4, 2, T, Q> const& m2)
+ {
+  return mat<4, 3, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1],
+   m1[0][2] * m2[2][0] + m1[1][2] * m2[2][1],
+   m1[0][0] * m2[3][0] + m1[1][0] * m2[3][1],
+   m1[0][1] * m2[3][0] + m1[1][1] * m2[3][1],
+   m1[0][2] * m2[3][0] + m1[1][2] * m2[3][1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator/(mat<2, 3, T, Q> const& m, T scalar)
+ {
+  return mat<2, 3, T, Q>(
+   m[0] / scalar,
+   m[1] / scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator/(T scalar, mat<2, 3, T, Q> const& m)
+ {
+  return mat<2, 3, T, Q>(
+   scalar / m[0],
+   scalar / m[1]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(mat<2, 3, T, Q> const& m1, mat<2, 3, T, Q> const& m2)
+ {
+  return (m1[0] == m2[0]) && (m1[1] == m2[1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(mat<2, 3, T, Q> const& m1, mat<2, 3, T, Q> const& m2)
+ {
+  return (m1[0] != m2[0]) || (m1[1] != m2[1]);
+ }
+}
+# 159 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x3.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double2x3.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<2, 3, double, defaultp> dmat2x3;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double2x3_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<2, 3, double, lowp> lowp_dmat2x3;
+
+
+
+
+
+ typedef mat<2, 3, double, mediump> mediump_dmat2x3;
+
+
+
+
+
+ typedef mat<2, 3, double, highp> highp_dmat2x3;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float2x3.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<2, 3, float, defaultp> mat2x3;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float2x3_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<2, 3, float, lowp> lowp_mat2x3;
+
+
+
+
+
+ typedef mat<2, 3, float, mediump> mediump_mat2x3;
+
+
+
+
+
+ typedef mat<2, 3, float, highp> highp_mat2x3;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x3.hpp" 2
+# 23 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x4.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double2x4.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x4.hpp" 1
+
+
+
+       
+
+
+
+
+
+
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct mat<2, 4, T, Q>
+ {
+  typedef vec<4, T, Q> col_type;
+  typedef vec<2, T, Q> row_type;
+  typedef mat<2, 4, T, Q> type;
+  typedef mat<4, 2, T, Q> transpose_type;
+  typedef T value_type;
+
+ private:
+  col_type value[2];
+
+ public:
+
+
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length() { return 2; }
+
+  [[nodiscard]] constexpr col_type & operator[](length_type i) noexcept;
+  [[nodiscard]] constexpr col_type const& operator[](length_type i) const noexcept;
+
+
+
+  constexpr mat() = default;
+  template<qualifier P>
+  constexpr mat(mat<2, 4, T, P> const& m);
+
+  constexpr mat(T scalar);
+  constexpr mat(
+   T x0, T y0, T z0, T w0,
+   T x1, T y1, T z1, T w1);
+  constexpr mat(
+   col_type const& v0,
+   col_type const& v1);
+
+
+
+  template<
+   typename X1, typename Y1, typename Z1, typename W1,
+   typename X2, typename Y2, typename Z2, typename W2>
+  constexpr mat(
+   X1 x1, Y1 y1, Z1 z1, W1 w1,
+   X2 x2, Y2 y2, Z2 z2, W2 w2);
+
+  template<typename U, typename V>
+  constexpr mat(
+   vec<4, U, Q> const& v1,
+   vec<4, V, Q> const& v2);
+
+
+
+  template<typename U, qualifier P>
+  constexpr mat(mat<2, 4, U, P> const& m);
+
+  constexpr mat(mat<2, 2, T, Q> const& x);
+  constexpr mat(mat<3, 3, T, Q> const& x);
+  constexpr mat(mat<4, 4, T, Q> const& x);
+  constexpr mat(mat<2, 3, T, Q> const& x);
+  constexpr mat(mat<3, 2, T, Q> const& x);
+  constexpr mat(mat<3, 4, T, Q> const& x);
+  constexpr mat(mat<4, 2, T, Q> const& x);
+  constexpr mat(mat<4, 3, T, Q> const& x);
+
+
+
+  template<typename U>
+  constexpr mat<2, 4, T, Q> & operator=(mat<2, 4, U, Q> const& m);
+  template<typename U>
+  constexpr mat<2, 4, T, Q> & operator+=(U s);
+  template<typename U>
+  constexpr mat<2, 4, T, Q> & operator+=(mat<2, 4, U, Q> const& m);
+  template<typename U>
+  constexpr mat<2, 4, T, Q> & operator-=(U s);
+  template<typename U>
+  constexpr mat<2, 4, T, Q> & operator-=(mat<2, 4, U, Q> const& m);
+  template<typename U>
+  constexpr mat<2, 4, T, Q> & operator*=(U s);
+  template<typename U>
+  constexpr mat<2, 4, T, Q> & operator/=(U s);
+
+
+
+  constexpr mat<2, 4, T, Q> & operator++ ();
+  constexpr mat<2, 4, T, Q> & operator-- ();
+  [[nodiscard]] constexpr mat<2, 4, T, Q> operator++(int);
+  [[nodiscard]] constexpr mat<2, 4, T, Q> operator--(int);
+ };
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator+(mat<2, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator-(mat<2, 4, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator+(mat<2, 4, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator+(mat<2, 4, T, Q> const& m1, mat<2, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator-(mat<2, 4, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator-(mat<2, 4, T, Q> const& m1, mat<2, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator*(mat<2, 4, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator*(T scalar, mat<2, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<2, 4, T, Q>::col_type operator*(mat<2, 4, T, Q> const& m, typename mat<2, 4, T, Q>::row_type const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<2, 4, T, Q>::row_type operator*(typename mat<2, 4, T, Q>::col_type const& v, mat<2, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator*(mat<2, 4, T, Q> const& m1, mat<4, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator*(mat<2, 4, T, Q> const& m1, mat<2, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator*(mat<2, 4, T, Q> const& m1, mat<3, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator/(mat<2, 4, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator/(T scalar, mat<2, 4, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(mat<2, 4, T, Q> const& m1, mat<2, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(mat<2, 4, T, Q> const& m1, mat<2, 4, T, Q> const& m2);
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x4.inl" 1
+namespace glm
+{
+# 19 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x4.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr mat<2, 4, T, Q>::mat(mat<2, 4, T, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>::mat(T s)
+
+   : value{col_type(s, 0, 0, 0), col_type(0, s, 0, 0)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>::mat
+ (
+  T x0, T y0, T z0, T w0,
+  T x1, T y1, T z1, T w1
+ )
+
+   : value{col_type(x0, y0, z0, w0), col_type(x1, y1, z1, w1)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>::mat(col_type const& v0, col_type const& v1)
+
+   : value{col_type(v0), col_type(v1)}
+
+ {
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<
+  typename X1, typename Y1, typename Z1, typename W1,
+  typename X2, typename Y2, typename Z2, typename W2>
+ inline constexpr mat<2, 4, T, Q>::mat
+ (
+  X1 x1, Y1 y1, Z1 z1, W1 w1,
+  X2 x2, Y2 y2, Z2 z2, W2 w2
+ )
+
+   : value{
+    col_type(x1, y1, z1, w1),
+    col_type(x2, y2, z2, w2)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ template<typename V1, typename V2>
+ inline constexpr mat<2, 4, T, Q>::mat(vec<4, V1, Q> const& v1, vec<4, V2, Q> const& v2)
+
+   : value{col_type(v1), col_type(v2)}
+
+ {
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr mat<2, 4, T, Q>::mat(mat<2, 4, U, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>::mat(mat<2, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0, 0), col_type(m[1], 0, 0)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>::mat(mat<3, 3, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>::mat(mat<4, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>::mat(mat<2, 3, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>::mat(mat<3, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0, 0), col_type(m[1], 0, 0)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>::mat(mat<3, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>::mat(mat<4, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0, 0), col_type(m[1], 0, 0)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>::mat(mat<4, 3, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0)}
+
+ {
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 4, T, Q>::col_type & mat<2, 4, T, Q>::operator[](typename mat<2, 4, T, Q>::length_type i) noexcept
+ {
+  (
+# 224 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x4.inl" 3
+ ((void)0)
+# 224 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x4.inl"
+ );
+  return this->value[i];
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 4, T, Q>::col_type const& mat<2, 4, T, Q>::operator[](typename mat<2, 4, T, Q>::length_type i) const noexcept
+ {
+  (
+# 231 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x4.inl" 3
+ ((void)0)
+# 231 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x4.inl"
+ );
+  return this->value[i];
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 4, T, Q>& mat<2, 4, T, Q>::operator=(mat<2, 4, U, Q> const& m)
+ {
+  this->value[0] = m[0];
+  this->value[1] = m[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 4, T, Q>& mat<2, 4, T, Q>::operator+=(U s)
+ {
+  this->value[0] += s;
+  this->value[1] += s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 4, T, Q>& mat<2, 4, T, Q>::operator+=(mat<2, 4, U, Q> const& m)
+ {
+  this->value[0] += m[0];
+  this->value[1] += m[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 4, T, Q>& mat<2, 4, T, Q>::operator-=(U s)
+ {
+  this->value[0] -= s;
+  this->value[1] -= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 4, T, Q>& mat<2, 4, T, Q>::operator-=(mat<2, 4, U, Q> const& m)
+ {
+  this->value[0] -= m[0];
+  this->value[1] -= m[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 4, T, Q>& mat<2, 4, T, Q>::operator*=(U s)
+ {
+  this->value[0] *= s;
+  this->value[1] *= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 4, T, Q> & mat<2, 4, T, Q>::operator/=(U s)
+ {
+  this->value[0] /= s;
+  this->value[1] /= s;
+  return *this;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>& mat<2, 4, T, Q>::operator++()
+ {
+  ++this->value[0];
+  ++this->value[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q>& mat<2, 4, T, Q>::operator--()
+ {
+  --this->value[0];
+  --this->value[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> mat<2, 4, T, Q>::operator++(int)
+ {
+  mat<2, 4, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> mat<2, 4, T, Q>::operator--(int)
+ {
+  mat<2, 4, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator+(mat<2, 4, T, Q> const& m)
+ {
+  return m;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator-(mat<2, 4, T, Q> const& m)
+ {
+  return mat<2, 4, T, Q>(
+   -m[0],
+   -m[1]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator+(mat<2, 4, T, Q> const& m, T scalar)
+ {
+  return mat<2, 4, T, Q>(
+   m[0] + scalar,
+   m[1] + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator+(mat<2, 4, T, Q> const& m1, mat<2, 4, T, Q> const& m2)
+ {
+  return mat<2, 4, T, Q>(
+   m1[0] + m2[0],
+   m1[1] + m2[1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator-(mat<2, 4, T, Q> const& m, T scalar)
+ {
+  return mat<2, 4, T, Q>(
+   m[0] - scalar,
+   m[1] - scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator-(mat<2, 4, T, Q> const& m1, mat<2, 4, T, Q> const& m2)
+ {
+  return mat<2, 4, T, Q>(
+   m1[0] - m2[0],
+   m1[1] - m2[1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator*(mat<2, 4, T, Q> const& m, T scalar)
+ {
+  return mat<2, 4, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator*(T scalar, mat<2, 4, T, Q> const& m)
+ {
+  return mat<2, 4, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 4, T, Q>::col_type operator*(mat<2, 4, T, Q> const& m, typename mat<2, 4, T, Q>::row_type const& v)
+ {
+  return typename mat<2, 4, T, Q>::col_type(
+   m[0][0] * v.x + m[1][0] * v.y,
+   m[0][1] * v.x + m[1][1] * v.y,
+   m[0][2] * v.x + m[1][2] * v.y,
+   m[0][3] * v.x + m[1][3] * v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 4, T, Q>::row_type operator*(typename mat<2, 4, T, Q>::col_type const& v, mat<2, 4, T, Q> const& m)
+ {
+  return typename mat<2, 4, T, Q>::row_type(
+   v.x * m[0][0] + v.y * m[0][1] + v.z * m[0][2] + v.w * m[0][3],
+   v.x * m[1][0] + v.y * m[1][1] + v.z * m[1][2] + v.w * m[1][3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator*(mat<2, 4, T, Q> const& m1, mat<4, 2, T, Q> const& m2)
+ {
+  return mat<4, 4, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1],
+   m1[0][3] * m2[0][0] + m1[1][3] * m2[0][1],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1],
+   m1[0][3] * m2[1][0] + m1[1][3] * m2[1][1],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1],
+   m1[0][2] * m2[2][0] + m1[1][2] * m2[2][1],
+   m1[0][3] * m2[2][0] + m1[1][3] * m2[2][1],
+   m1[0][0] * m2[3][0] + m1[1][0] * m2[3][1],
+   m1[0][1] * m2[3][0] + m1[1][1] * m2[3][1],
+   m1[0][2] * m2[3][0] + m1[1][2] * m2[3][1],
+   m1[0][3] * m2[3][0] + m1[1][3] * m2[3][1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator*(mat<2, 4, T, Q> const& m1, mat<2, 2, T, Q> const& m2)
+ {
+  return mat<2, 4, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1],
+   m1[0][3] * m2[0][0] + m1[1][3] * m2[0][1],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1],
+   m1[0][3] * m2[1][0] + m1[1][3] * m2[1][1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator*(mat<2, 4, T, Q> const& m1, mat<3, 2, T, Q> const& m2)
+ {
+  return mat<3, 4, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1],
+   m1[0][3] * m2[0][0] + m1[1][3] * m2[0][1],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1],
+   m1[0][3] * m2[1][0] + m1[1][3] * m2[1][1],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1],
+   m1[0][2] * m2[2][0] + m1[1][2] * m2[2][1],
+   m1[0][3] * m2[2][0] + m1[1][3] * m2[2][1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator/(mat<2, 4, T, Q> const& m, T scalar)
+ {
+  return mat<2, 4, T, Q>(
+   m[0] / scalar,
+   m[1] / scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator/(T scalar, mat<2, 4, T, Q> const& m)
+ {
+  return mat<2, 4, T, Q>(
+   scalar / m[0],
+   scalar / m[1]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(mat<2, 4, T, Q> const& m1, mat<2, 4, T, Q> const& m2)
+ {
+  return (m1[0] == m2[0]) && (m1[1] == m2[1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(mat<2, 4, T, Q> const& m1, mat<2, 4, T, Q> const& m2)
+ {
+  return (m1[0] != m2[0]) || (m1[1] != m2[1]);
+ }
+}
+# 161 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x4.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double2x4.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<2, 4, double, defaultp> dmat2x4;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double2x4_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<2, 4, double, lowp> lowp_dmat2x4;
+
+
+
+
+
+ typedef mat<2, 4, double, mediump> mediump_dmat2x4;
+
+
+
+
+
+ typedef mat<2, 4, double, highp> highp_dmat2x4;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float2x4.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<2, 4, float, defaultp> mat2x4;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float2x4_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<2, 4, float, lowp> lowp_mat2x4;
+
+
+
+
+
+ typedef mat<2, 4, float, mediump> mediump_mat2x4;
+
+
+
+
+
+ typedef mat<2, 4, float, highp> highp_mat2x4;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x4.hpp" 2
+# 24 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x2.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double3x2.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x2.hpp" 1
+
+
+
+       
+
+
+
+
+
+
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct mat<3, 2, T, Q>
+ {
+  typedef vec<2, T, Q> col_type;
+  typedef vec<3, T, Q> row_type;
+  typedef mat<3, 2, T, Q> type;
+  typedef mat<2, 3, T, Q> transpose_type;
+  typedef T value_type;
+
+ private:
+  col_type value[3];
+
+ public:
+
+
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length() { return 3; }
+
+  [[nodiscard]] constexpr col_type & operator[](length_type i) noexcept;
+  [[nodiscard]] constexpr col_type const& operator[](length_type i) const noexcept;
+
+
+
+  constexpr mat() = default;
+  template<qualifier P>
+  constexpr mat(mat<3, 2, T, P> const& m);
+
+  constexpr mat(T scalar);
+  constexpr mat(
+   T x0, T y0,
+   T x1, T y1,
+   T x2, T y2);
+  constexpr mat(
+   col_type const& v0,
+   col_type const& v1,
+   col_type const& v2);
+
+
+
+  template<
+   typename X1, typename Y1,
+   typename X2, typename Y2,
+   typename X3, typename Y3>
+   constexpr mat(
+   X1 x1, Y1 y1,
+   X2 x2, Y2 y2,
+   X3 x3, Y3 y3);
+
+  template<typename V1, typename V2, typename V3>
+  constexpr mat(
+   vec<2, V1, Q> const& v1,
+   vec<2, V2, Q> const& v2,
+   vec<2, V3, Q> const& v3);
+
+
+
+  template<typename U, qualifier P>
+  constexpr mat(mat<3, 2, U, P> const& m);
+
+  constexpr mat(mat<2, 2, T, Q> const& x);
+  constexpr mat(mat<3, 3, T, Q> const& x);
+  constexpr mat(mat<4, 4, T, Q> const& x);
+  constexpr mat(mat<2, 3, T, Q> const& x);
+  constexpr mat(mat<2, 4, T, Q> const& x);
+  constexpr mat(mat<3, 4, T, Q> const& x);
+  constexpr mat(mat<4, 2, T, Q> const& x);
+  constexpr mat(mat<4, 3, T, Q> const& x);
+
+
+
+  template<typename U>
+  constexpr mat<3, 2, T, Q> & operator=(mat<3, 2, U, Q> const& m);
+  template<typename U>
+  constexpr mat<3, 2, T, Q> & operator+=(U s);
+  template<typename U>
+  constexpr mat<3, 2, T, Q> & operator+=(mat<3, 2, U, Q> const& m);
+  template<typename U>
+  constexpr mat<3, 2, T, Q> & operator-=(U s);
+  template<typename U>
+  constexpr mat<3, 2, T, Q> & operator-=(mat<3, 2, U, Q> const& m);
+  template<typename U>
+  constexpr mat<3, 2, T, Q> & operator*=(U s);
+  template<typename U>
+  constexpr mat<3, 2, T, Q> & operator/=(U s);
+
+
+
+  constexpr mat<3, 2, T, Q> & operator++ ();
+  constexpr mat<3, 2, T, Q> & operator-- ();
+  [[nodiscard]] constexpr mat<3, 2, T, Q> operator++(int);
+  [[nodiscard]] constexpr mat<3, 2, T, Q> operator--(int);
+ };
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator+(mat<3, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator-(mat<3, 2, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator+(mat<3, 2, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator+(mat<3, 2, T, Q> const& m1, mat<3, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator-(mat<3, 2, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator-(mat<3, 2, T, Q> const& m1, mat<3, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator*(mat<3, 2, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator*(T scalar, mat<3, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<3, 2, T, Q>::col_type operator*(mat<3, 2, T, Q> const& m, typename mat<3, 2, T, Q>::row_type const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<3, 2, T, Q>::row_type operator*(typename mat<3, 2, T, Q>::col_type const& v, mat<3, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator*(mat<3, 2, T, Q> const& m1, mat<2, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator*(mat<3, 2, T, Q> const& m1, mat<3, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator*(mat<3, 2, T, Q> const& m1, mat<4, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator/(mat<3, 2, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator/(T scalar, mat<3, 2, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(mat<3, 2, T, Q> const& m1, mat<3, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(mat<3, 2, T, Q> const& m1, mat<3, 2, T, Q> const& m2);
+
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x2.inl" 1
+namespace glm
+{
+# 20 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x2.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr mat<3, 2, T, Q>::mat(mat<3, 2, T, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>::mat(T s)
+
+   : value{col_type(s, 0), col_type(0, s), col_type(0, 0)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>::mat
+ (
+  T x0, T y0,
+  T x1, T y1,
+  T x2, T y2
+ )
+
+   : value{col_type(x0, y0), col_type(x1, y1), col_type(x2, y2)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>::mat(col_type const& v0, col_type const& v1, col_type const& v2)
+
+   : value{col_type(v0), col_type(v1), col_type(v2)}
+
+ {
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<
+  typename X0, typename Y0,
+  typename X1, typename Y1,
+  typename X2, typename Y2>
+ inline constexpr mat<3, 2, T, Q>::mat
+ (
+  X0 x0, Y0 y0,
+  X1 x1, Y1 y1,
+  X2 x2, Y2 y2
+ )
+
+   : value{col_type(x0, y0), col_type(x1, y1), col_type(x2, y2)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ template<typename V0, typename V1, typename V2>
+ inline constexpr mat<3, 2, T, Q>::mat(vec<2, V0, Q> const& v0, vec<2, V1, Q> const& v1, vec<2, V2, Q> const& v2)
+
+   : value{col_type(v0), col_type(v1), col_type(v2)}
+
+ {
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr mat<3, 2, T, Q>::mat(mat<3, 2, U, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>::mat(mat<2, 2, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(0)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>::mat(mat<3, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>::mat(mat<4, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>::mat(mat<2, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(0)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>::mat(mat<2, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(0)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>::mat(mat<3, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>::mat(mat<4, 2, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>::mat(mat<4, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 2, T, Q>::col_type & mat<3, 2, T, Q>::operator[](typename mat<3, 2, T, Q>::length_type i) noexcept
+ {
+  (
+# 241 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x2.inl" 3
+ ((void)0)
+# 241 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x2.inl"
+ );
+  return this->value[i];
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 2, T, Q>::col_type const& mat<3, 2, T, Q>::operator[](typename mat<3, 2, T, Q>::length_type i) const noexcept
+ {
+  (
+# 248 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x2.inl" 3
+ ((void)0)
+# 248 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x2.inl"
+ );
+  return this->value[i];
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 2, T, Q>& mat<3, 2, T, Q>::operator=(mat<3, 2, U, Q> const& m)
+ {
+  this->value[0] = m[0];
+  this->value[1] = m[1];
+  this->value[2] = m[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 2, T, Q>& mat<3, 2, T, Q>::operator+=(U s)
+ {
+  this->value[0] += s;
+  this->value[1] += s;
+  this->value[2] += s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 2, T, Q>& mat<3, 2, T, Q>::operator+=(mat<3, 2, U, Q> const& m)
+ {
+  this->value[0] += m[0];
+  this->value[1] += m[1];
+  this->value[2] += m[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 2, T, Q>& mat<3, 2, T, Q>::operator-=(U s)
+ {
+  this->value[0] -= s;
+  this->value[1] -= s;
+  this->value[2] -= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 2, T, Q>& mat<3, 2, T, Q>::operator-=(mat<3, 2, U, Q> const& m)
+ {
+  this->value[0] -= m[0];
+  this->value[1] -= m[1];
+  this->value[2] -= m[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 2, T, Q>& mat<3, 2, T, Q>::operator*=(U s)
+ {
+  this->value[0] *= s;
+  this->value[1] *= s;
+  this->value[2] *= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 2, T, Q> & mat<3, 2, T, Q>::operator/=(U s)
+ {
+  this->value[0] /= s;
+  this->value[1] /= s;
+  this->value[2] /= s;
+  return *this;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>& mat<3, 2, T, Q>::operator++()
+ {
+  ++this->value[0];
+  ++this->value[1];
+  ++this->value[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q>& mat<3, 2, T, Q>::operator--()
+ {
+  --this->value[0];
+  --this->value[1];
+  --this->value[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> mat<3, 2, T, Q>::operator++(int)
+ {
+  mat<3, 2, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> mat<3, 2, T, Q>::operator--(int)
+ {
+  mat<3, 2, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator+(mat<3, 2, T, Q> const& m)
+ {
+  return m;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator-(mat<3, 2, T, Q> const& m)
+ {
+  return mat<3, 2, T, Q>(
+   -m[0],
+   -m[1],
+   -m[2]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator+(mat<3, 2, T, Q> const& m, T scalar)
+ {
+  return mat<3, 2, T, Q>(
+   m[0] + scalar,
+   m[1] + scalar,
+   m[2] + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator+(mat<3, 2, T, Q> const& m1, mat<3, 2, T, Q> const& m2)
+ {
+  return mat<3, 2, T, Q>(
+   m1[0] + m2[0],
+   m1[1] + m2[1],
+   m1[2] + m2[2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator-(mat<3, 2, T, Q> const& m, T scalar)
+ {
+  return mat<3, 2, T, Q>(
+   m[0] - scalar,
+   m[1] - scalar,
+   m[2] - scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator-(mat<3, 2, T, Q> const& m1, mat<3, 2, T, Q> const& m2)
+ {
+  return mat<3, 2, T, Q>(
+   m1[0] - m2[0],
+   m1[1] - m2[1],
+   m1[2] - m2[2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator*(mat<3, 2, T, Q> const& m, T scalar)
+ {
+  return mat<3, 2, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar,
+   m[2] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator*(T scalar, mat<3, 2, T, Q> const& m)
+ {
+  return mat<3, 2, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar,
+   m[2] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 2, T, Q>::col_type operator*(mat<3, 2, T, Q> const& m, typename mat<3, 2, T, Q>::row_type const& v)
+ {
+  return typename mat<3, 2, T, Q>::col_type(
+   m[0][0] * v.x + m[1][0] * v.y + m[2][0] * v.z,
+   m[0][1] * v.x + m[1][1] * v.y + m[2][1] * v.z);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 2, T, Q>::row_type operator*(typename mat<3, 2, T, Q>::col_type const& v, mat<3, 2, T, Q> const& m)
+ {
+  return typename mat<3, 2, T, Q>::row_type(
+   v.x * m[0][0] + v.y * m[0][1],
+   v.x * m[1][0] + v.y * m[1][1],
+   v.x * m[2][0] + v.y * m[2][1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator*(mat<3, 2, T, Q> const& m1, mat<2, 3, T, Q> const& m2)
+ {
+  return mat<2, 2, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator*(mat<3, 2, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
+ {
+  return mat<3, 2, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1] + m1[2][0] * m2[2][2],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1] + m1[2][1] * m2[2][2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator*(mat<3, 2, T, Q> const& m1, mat<4, 3, T, Q> const& m2)
+ {
+  return mat<4, 2, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1] + m1[2][0] * m2[2][2],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1] + m1[2][1] * m2[2][2],
+   m1[0][0] * m2[3][0] + m1[1][0] * m2[3][1] + m1[2][0] * m2[3][2],
+   m1[0][1] * m2[3][0] + m1[1][1] * m2[3][1] + m1[2][1] * m2[3][2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator/(mat<3, 2, T, Q> const& m, T scalar)
+ {
+  return mat<3, 2, T, Q>(
+   m[0] / scalar,
+   m[1] / scalar,
+   m[2] / scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator/(T scalar, mat<3, 2, T, Q> const& m)
+ {
+  return mat<3, 2, T, Q>(
+   scalar / m[0],
+   scalar / m[1],
+   scalar / m[2]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(mat<3, 2, T, Q> const& m1, mat<3, 2, T, Q> const& m2)
+ {
+  return (m1[0] == m2[0]) && (m1[1] == m2[1]) && (m1[2] == m2[2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(mat<3, 2, T, Q> const& m1, mat<3, 2, T, Q> const& m2)
+ {
+  return (m1[0] != m2[0]) || (m1[1] != m2[1]) || (m1[2] != m2[2]);
+ }
+}
+# 167 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x2.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double3x2.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<3, 2, double, defaultp> dmat3x2;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double3x2_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<3, 2, double, lowp> lowp_dmat3x2;
+
+
+
+
+
+ typedef mat<3, 2, double, mediump> mediump_dmat3x2;
+
+
+
+
+
+ typedef mat<3, 2, double, highp> highp_dmat3x2;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float3x2.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<3, 2, float, defaultp> mat3x2;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float3x2_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<3, 2, float, lowp> lowp_mat3x2;
+
+
+
+
+
+ typedef mat<3, 2, float, mediump> mediump_mat3x2;
+
+
+
+
+
+ typedef mat<3, 2, float, highp> highp_mat3x2;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x2.hpp" 2
+# 25 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x3.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double3x3.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x3.hpp" 1
+
+
+
+       
+
+
+
+
+
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct mat<3, 3, T, Q>
+ {
+  typedef vec<3, T, Q> col_type;
+  typedef vec<3, T, Q> row_type;
+  typedef mat<3, 3, T, Q> type;
+  typedef mat<3, 3, T, Q> transpose_type;
+  typedef T value_type;
+
+ private:
+  col_type value[3];
+
+ public:
+
+
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length() { return 3; }
+
+  [[nodiscard]] constexpr col_type & operator[](length_type i) noexcept;
+  [[nodiscard]] constexpr col_type const& operator[](length_type i) const noexcept;
+
+
+
+  constexpr mat() = default;
+  template<qualifier P>
+  constexpr mat(mat<3, 3, T, P> const& m);
+
+  constexpr mat(T scalar);
+  constexpr mat(
+   T x0, T y0, T z0,
+   T x1, T y1, T z1,
+   T x2, T y2, T z2);
+  constexpr mat(
+   col_type const& v0,
+   col_type const& v1,
+   col_type const& v2);
+
+
+
+  template<
+   typename X1, typename Y1, typename Z1,
+   typename X2, typename Y2, typename Z2,
+   typename X3, typename Y3, typename Z3>
+  constexpr mat(
+   X1 x1, Y1 y1, Z1 z1,
+   X2 x2, Y2 y2, Z2 z2,
+   X3 x3, Y3 y3, Z3 z3);
+
+  template<typename V1, typename V2, typename V3>
+  constexpr mat(
+   vec<3, V1, Q> const& v1,
+   vec<3, V2, Q> const& v2,
+   vec<3, V3, Q> const& v3);
+
+
+
+  template<typename U, qualifier P>
+  constexpr mat(mat<3, 3, U, P> const& m);
+
+  constexpr mat(mat<2, 2, T, Q> const& x);
+  constexpr mat(mat<4, 4, T, Q> const& x);
+  constexpr mat(mat<2, 3, T, Q> const& x);
+  constexpr mat(mat<3, 2, T, Q> const& x);
+  constexpr mat(mat<2, 4, T, Q> const& x);
+  constexpr mat(mat<4, 2, T, Q> const& x);
+  constexpr mat(mat<3, 4, T, Q> const& x);
+  constexpr mat(mat<4, 3, T, Q> const& x);
+
+
+
+  template<typename U>
+  constexpr mat<3, 3, T, Q> & operator=(mat<3, 3, U, Q> const& m);
+  template<typename U>
+  constexpr mat<3, 3, T, Q> & operator+=(U s);
+  template<typename U>
+  constexpr mat<3, 3, T, Q> & operator+=(mat<3, 3, U, Q> const& m);
+  template<typename U>
+  constexpr mat<3, 3, T, Q> & operator-=(U s);
+  template<typename U>
+  constexpr mat<3, 3, T, Q> & operator-=(mat<3, 3, U, Q> const& m);
+  template<typename U>
+  constexpr mat<3, 3, T, Q> & operator*=(U s);
+  template<typename U>
+  constexpr mat<3, 3, T, Q> & operator*=(mat<3, 3, U, Q> const& m);
+  template<typename U>
+  constexpr mat<3, 3, T, Q> & operator/=(U s);
+  template<typename U>
+  constexpr mat<3, 3, T, Q> & operator/=(mat<3, 3, U, Q> const& m);
+
+
+
+  constexpr mat<3, 3, T, Q> & operator++();
+  constexpr mat<3, 3, T, Q> & operator--();
+  [[nodiscard]] constexpr mat<3, 3, T, Q> operator++(int);
+  [[nodiscard]] constexpr mat<3, 3, T, Q> operator--(int);
+ };
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator+(mat<3, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator-(mat<3, 3, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator+(mat<3, 3, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator+(T scalar, mat<3, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator+(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator-(mat<3, 3, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator-(T scalar, mat<3, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator-(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator*(mat<3, 3, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator*(T scalar, mat<3, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<3, 3, T, Q>::col_type operator*(mat<3, 3, T, Q> const& m, typename mat<3, 3, T, Q>::row_type const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<3, 3, T, Q>::row_type operator*(typename mat<3, 3, T, Q>::col_type const& v, mat<3, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator*(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator*(mat<3, 3, T, Q> const& m1, mat<2, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator*(mat<3, 3, T, Q> const& m1, mat<4, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator/(mat<3, 3, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator/(T scalar, mat<3, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<3, 3, T, Q>::col_type operator/(mat<3, 3, T, Q> const& m, typename mat<3, 3, T, Q>::row_type const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<3, 3, T, Q>::row_type operator/(typename mat<3, 3, T, Q>::col_type const& v, mat<3, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator/(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2);
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x3.inl" 1
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp" 1
+# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/_fixes.hpp" 1
+# 19 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp" 2
+
+namespace glm
+{
+# 31 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<typename genType>
+ [[nodiscard]] constexpr genType abs(genType x);
+# 42 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, T, Q> abs(vec<L, T, Q> const& x);
+# 53 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, T, Q> sign(vec<L, T, Q> const& x);
+# 64 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> floor(vec<L, T, Q> const& x);
+# 76 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> trunc(vec<L, T, Q> const& x);
+# 91 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> round(vec<L, T, Q> const& x);
+# 105 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> roundEven(vec<L, T, Q> const& x);
+# 117 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> ceil(vec<L, T, Q> const& x);
+
+
+
+
+
+
+
+ template<typename genType>
+ [[nodiscard]] genType fract(genType x);
+# 137 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> fract(vec<L, T, Q> const& x);
+
+ template<typename genType>
+ [[nodiscard]] genType mod(genType x, genType y);
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> mod(vec<L, T, Q> const& x, T y);
+# 155 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> mod(vec<L, T, Q> const& x, vec<L, T, Q> const& y);
+# 167 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<typename genType>
+ [[nodiscard]] genType modf(genType x, genType& i);
+
+
+
+
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType min(genType x, genType y);
+# 187 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, T, Q> min(vec<L, T, Q> const& x, T y);
+# 198 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, T, Q> min(vec<L, T, Q> const& x, vec<L, T, Q> const& y);
+
+
+
+
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType max(genType x, genType y);
+# 218 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, T, Q> max(vec<L, T, Q> const& x, T y);
+# 229 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, T, Q> max(vec<L, T, Q> const& x, vec<L, T, Q> const& y);
+# 239 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<typename genType>
+ [[nodiscard]] constexpr genType clamp(genType x, genType minVal, genType maxVal);
+# 251 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, T, Q> clamp(vec<L, T, Q> const& x, T minVal, T maxVal);
+# 263 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, T, Q> clamp(vec<L, T, Q> const& x, vec<L, T, Q> const& minVal, vec<L, T, Q> const& maxVal);
+# 308 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<typename genTypeT, typename genTypeU>
+ [[nodiscard]] constexpr genTypeT mix(genTypeT x, genTypeT y, genTypeU a);
+
+ template<length_t L, typename T, typename U, qualifier Q>
+ [[nodiscard]] constexpr vec<L, T, Q> mix(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, U, Q> const& a);
+
+ template<length_t L, typename T, typename U, qualifier Q>
+ [[nodiscard]] constexpr vec<L, T, Q> mix(vec<L, T, Q> const& x, vec<L, T, Q> const& y, U a);
+
+
+
+
+
+ template<typename genType>
+ [[nodiscard]] genType step(genType edge, genType x);
+# 332 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> step(T edge, vec<L, T, Q> const& x);
+# 343 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> step(vec<L, T, Q> const& edge, vec<L, T, Q> const& x);
+# 360 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<typename genType>
+ [[nodiscard]] genType smoothstep(genType edge0, genType edge1, genType x);
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> smoothstep(T edge0, T edge1, vec<L, T, Q> const& x);
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> smoothstep(vec<L, T, Q> const& edge0, vec<L, T, Q> const& edge1, vec<L, T, Q> const& x);
+# 383 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, bool, Q> isnan(vec<L, T, Q> const& x);
+# 398 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, bool, Q> isinf(vec<L, T, Q> const& x);
+
+
+
+
+
+
+
+ [[nodiscard]] int floatBitsToInt(float v);
+# 418 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, qualifier Q>
+ [[nodiscard]] vec<L, int, Q> floatBitsToInt(vec<L, float, Q> const& v);
+
+
+
+
+
+
+
+ [[nodiscard]] uint floatBitsToUint(float v);
+# 438 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, qualifier Q>
+ [[nodiscard]] vec<L, uint, Q> floatBitsToUint(vec<L, float, Q> const& v);
+# 449 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ [[nodiscard]] float intBitsToFloat(int v);
+# 462 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, qualifier Q>
+ [[nodiscard]] vec<L, float, Q> intBitsToFloat(vec<L, int, Q> const& v);
+# 473 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ [[nodiscard]] float uintBitsToFloat(uint v);
+# 486 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<length_t L, qualifier Q>
+ [[nodiscard]] vec<L, float, Q> uintBitsToFloat(vec<L, uint, Q> const& v);
+
+
+
+
+
+
+
+ template<typename genType>
+ [[nodiscard]] genType fma(genType const& a, genType const& b, genType const& c);
+# 512 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<typename genType>
+ [[nodiscard]] genType frexp(genType x, int& exp);
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> frexp(vec<L, T, Q> const& v, vec<L, int, Q>& exp);
+# 529 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp"
+ template<typename genType>
+ [[nodiscard]] genType ldexp(genType const& x, int const& exp);
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> ldexp(vec<L, T, Q> const& v, vec<L, int, Q> const& exp);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_common.inl" 1
+
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vector_relational.hpp" 1
+# 20 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vector_relational.hpp"
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 24 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vector_relational.hpp" 2
+
+namespace glm
+{
+# 37 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vector_relational.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> lessThan(vec<L, T, Q> const& x, vec<L, T, Q> const& y);
+# 47 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vector_relational.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> lessThanEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y);
+# 57 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vector_relational.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> greaterThan(vec<L, T, Q> const& x, vec<L, T, Q> const& y);
+# 67 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vector_relational.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> greaterThanEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y);
+# 77 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vector_relational.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> equal(vec<L, T, Q> const& x, vec<L, T, Q> const& y);
+# 87 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vector_relational.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> notEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y);
+
+
+
+
+
+
+
+ template<length_t L, qualifier Q>
+ [[nodiscard]] constexpr bool any(vec<L, bool, Q> const& v);
+
+
+
+
+
+
+
+ template<length_t L, qualifier Q>
+ [[nodiscard]] constexpr bool all(vec<L, bool, Q> const& v);
+# 115 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vector_relational.hpp"
+ template<length_t L, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> not_(vec<L, bool, Q> const& v);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_vector_relational.inl" 1
+namespace glm
+{
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> lessThan(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
+ {
+  vec<L, bool, Q> Result(true);
+  for(length_t i = 0; i < L; ++i)
+   Result[i] = x[i] < y[i];
+  return Result;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> lessThanEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
+ {
+  vec<L, bool, Q> Result(true);
+  for(length_t i = 0; i < L; ++i)
+   Result[i] = x[i] <= y[i];
+  return Result;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> greaterThan(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
+ {
+  vec<L, bool, Q> Result(true);
+  for(length_t i = 0; i < L; ++i)
+   Result[i] = x[i] > y[i];
+  return Result;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> greaterThanEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
+ {
+  vec<L, bool, Q> Result(true);
+  for(length_t i = 0; i < L; ++i)
+   Result[i] = x[i] >= y[i];
+  return Result;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> equal(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
+ {
+  vec<L, bool, Q> Result(true);
+  for(length_t i = 0; i < L; ++i)
+   Result[i] = x[i] == y[i];
+  return Result;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> notEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
+ {
+  vec<L, bool, Q> Result(true);
+  for(length_t i = 0; i < L; ++i)
+   Result[i] = x[i] != y[i];
+  return Result;
+ }
+
+ template<length_t L, qualifier Q>
+ inline constexpr bool any(vec<L, bool, Q> const& v)
+ {
+  bool Result = false;
+  for(length_t i = 0; i < L; ++i)
+   Result = Result || v[i];
+  return Result;
+ }
+
+ template<length_t L, qualifier Q>
+ inline constexpr bool all(vec<L, bool, Q> const& v)
+ {
+  bool Result = true;
+  for(length_t i = 0; i < L; ++i)
+   Result = Result && v[i];
+  return Result;
+ }
+
+ template<length_t L, qualifier Q>
+ inline constexpr vec<L, bool, Q> not_(vec<L, bool, Q> const& v)
+ {
+  vec<L, bool, Q> Result(true);
+  for(length_t i = 0; i < L; ++i)
+   Result[i] = !v[i];
+  return Result;
+ }
+}
+# 122 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vector_relational.hpp" 2
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_common.inl" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_common.hpp" 1
+       
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_common.hpp" 2
+
+
+namespace glm{
+namespace detail
+{
+ template<typename genFIType, bool >
+ struct compute_abs
+ {};
+
+ template<typename genFIType>
+ struct compute_abs<genFIType, true>
+ {
+  inline constexpr static genFIType call(genFIType x)
+  {
+   static_assert(std::numeric_limits<genFIType>::is_iec559 || 0 || std::numeric_limits<genFIType>::is_signed, "'abs' only accept floating-point and integer scalar or vector inputs")
+
+                                                                           ;
+
+   return x >= genFIType(0) ? x : -x;
+
+  }
+ };
+# 38 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_common.hpp"
+ template<typename genFIType>
+ struct compute_abs<genFIType, false>
+ {
+  inline constexpr static genFIType call(genFIType x)
+  {
+   static_assert((!std::numeric_limits<genFIType>::is_signed && std::numeric_limits<genFIType>::is_integer), "'abs' only accept floating-point and integer scalar or vector inputs")
+
+                                                                           ;
+   return x;
+  }
+ };
+}
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_common.inl" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec1.hpp" 1
+
+
+
+       
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec1.hpp"
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct vec<1, T, Q>
+ {
+
+
+  typedef T value_type;
+  typedef vec<1, T, Q> type;
+  typedef vec<1, bool, Q> bool_type;
+
+
+
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+# 66 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec1.hpp"
+   union {T x, r, s;};
+# 78 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec1.hpp"
+#pragma GCC diagnostic pop
+# 87 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec1.hpp"
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length(){return 1;}
+
+  [[nodiscard]] constexpr T & operator[](length_type i);
+  [[nodiscard]] constexpr T const& operator[](length_type i) const;
+
+
+
+  constexpr vec() = default;
+  constexpr vec(vec const& v) = default;
+  template<qualifier P>
+  constexpr vec(vec<1, T, P> const& v);
+
+
+
+  constexpr explicit vec(T scalar);
+
+
+
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<2, U, P> const& v);
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<3, U, P> const& v);
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<4, U, P> const& v);
+
+
+  template<typename U, qualifier P>
+  constexpr vec(vec<1, U, P> const& v);
+# 132 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec1.hpp"
+  constexpr vec<1, T, Q> & operator=(vec const& v) = default;
+
+  template<typename U>
+  constexpr vec<1, T, Q> & operator=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator+=(U scalar);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator+=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator-=(U scalar);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator-=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator*=(U scalar);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator*=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator/=(U scalar);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator/=(vec<1, U, Q> const& v);
+
+
+
+  constexpr vec<1, T, Q> & operator++();
+  constexpr vec<1, T, Q> & operator--();
+  [[nodiscard]] constexpr vec<1, T, Q> operator++(int);
+  [[nodiscard]] constexpr vec<1, T, Q> operator--(int);
+
+
+
+  template<typename U>
+  constexpr vec<1, T, Q> & operator%=(U scalar);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator%=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator&=(U scalar);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator&=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator|=(U scalar);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator|=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator^=(U scalar);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator^=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator<<=(U scalar);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator<<=(vec<1, U, Q> const& v);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator>>=(U scalar);
+  template<typename U>
+  constexpr vec<1, T, Q> & operator>>=(vec<1, U, Q> const& v);
+ };
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator+(vec<1, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator-(vec<1, T, Q> const& v);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator+(vec<1, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator+(T scalar, vec<1, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator+(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator-(vec<1, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator-(T scalar, vec<1, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator-(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator*(vec<1, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator*(T scalar, vec<1, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator*(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator/(vec<1, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator/(T scalar, vec<1, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator/(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator%(vec<1, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator%(T scalar, vec<1, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator%(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator&(vec<1, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator&(T scalar, vec<1, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator&(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator|(vec<1, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator|(T scalar, vec<1, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator|(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator^(vec<1, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator^(T scalar, vec<1, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator^(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator<<(vec<1, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator<<(T scalar, vec<1, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator<<(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator>>(vec<1, T, Q> const& v, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator>>(T scalar, vec<1, T, Q> const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator>>(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<1, T, Q> operator~(vec<1, T, Q> const& v);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2);
+
+ template<qualifier Q>
+ [[nodiscard]] constexpr vec<1, bool, Q> operator&&(vec<1, bool, Q> const& v1, vec<1, bool, Q> const& v2);
+
+ template<qualifier Q>
+ [[nodiscard]] constexpr vec<1, bool, Q> operator||(vec<1, bool, Q> const& v1, vec<1, bool, Q> const& v2);
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec1.inl" 1
+
+
+
+
+namespace glm
+{
+# 25 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec1.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr vec<1, T, Q>::vec(vec<1, T, P> const& v)
+  : x(v.x)
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q>::vec(T scalar)
+  : x(scalar)
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<1, T, Q>::vec(vec<1, U, P> const& v)
+  : x(static_cast<T>(v.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<1, T, Q>::vec(vec<2, U, P> const& v)
+  : x(static_cast<T>(v.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<1, T, Q>::vec(vec<3, U, P> const& v)
+  : x(static_cast<T>(v.x))
+ {}
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr vec<1, T, Q>::vec(vec<4, U, P> const& v)
+  : x(static_cast<T>(v.x))
+ {}
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr T & vec<1, T, Q>::operator[](typename vec<1, T, Q>::length_type)
+ {
+  return x;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr T const& vec<1, T, Q>::operator[](typename vec<1, T, Q>::length_type) const
+ {
+  return x;
+ }
+# 89 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec1.inl"
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator=(vec<1, U, Q> const& v)
+ {
+  this->x = static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator+=(U scalar)
+ {
+  this->x += static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator+=(vec<1, U, Q> const& v)
+ {
+  this->x += static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator-=(U scalar)
+ {
+  this->x -= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator-=(vec<1, U, Q> const& v)
+ {
+  this->x -= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator*=(U scalar)
+ {
+  this->x *= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator*=(vec<1, U, Q> const& v)
+ {
+  this->x *= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator/=(U scalar)
+ {
+  this->x /= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator/=(vec<1, U, Q> const& v)
+ {
+  this->x /= static_cast<T>(v.x);
+  return *this;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator++()
+ {
+  ++this->x;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator--()
+ {
+  --this->x;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> vec<1, T, Q>::operator++(int)
+ {
+  vec<1, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> vec<1, T, Q>::operator--(int)
+ {
+  vec<1, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator%=(U scalar)
+ {
+  this->x %= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator%=(vec<1, U, Q> const& v)
+ {
+  this->x %= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator&=(U scalar)
+ {
+  this->x &= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator&=(vec<1, U, Q> const& v)
+ {
+  this->x &= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator|=(U scalar)
+ {
+  this->x |= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator|=(vec<1, U, Q> const& v)
+ {
+  this->x |= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator^=(U scalar)
+ {
+  this->x ^= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator^=(vec<1, U, Q> const& v)
+ {
+  this->x ^= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator<<=(U scalar)
+ {
+  this->x <<= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator<<=(vec<1, U, Q> const& v)
+ {
+  this->x <<= static_cast<T>(v.x);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator>>=(U scalar)
+ {
+  this->x >>= static_cast<T>(scalar);
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr vec<1, T, Q> & vec<1, T, Q>::operator>>=(vec<1, U, Q> const& v)
+ {
+  this->x >>= static_cast<T>(v.x);
+  return *this;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator+(vec<1, T, Q> const& v)
+ {
+  return v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator-(vec<1, T, Q> const& v)
+ {
+  return vec<1, T, Q>(
+   -v.x);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator+(vec<1, T, Q> const& v, T scalar)
+ {
+  return vec<1, T, Q>(
+   v.x + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator+(T scalar, vec<1, T, Q> const& v)
+ {
+  return vec<1, T, Q>(
+   scalar + v.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator+(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<1, T, Q>(
+   v1.x + v2.x);
+ }
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator-(vec<1, T, Q> const& v, T scalar)
+ {
+  return vec<1, T, Q>(
+   v.x - scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator-(T scalar, vec<1, T, Q> const& v)
+ {
+  return vec<1, T, Q>(
+   scalar - v.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator-(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<1, T, Q>(
+   v1.x - v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator*(vec<1, T, Q> const& v, T scalar)
+ {
+  return vec<1, T, Q>(
+   v.x * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator*(T scalar, vec<1, T, Q> const& v)
+ {
+  return vec<1, T, Q>(
+   scalar * v.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator*(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<1, T, Q>(
+   v1.x * v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator/(vec<1, T, Q> const& v, T scalar)
+ {
+  return vec<1, T, Q>(
+   v.x / scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator/(T scalar, vec<1, T, Q> const& v)
+ {
+  return vec<1, T, Q>(
+   scalar / v.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator/(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<1, T, Q>(
+   v1.x / v2.x);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator%(vec<1, T, Q> const& v, T scalar)
+ {
+  return vec<1, T, Q>(
+   v.x % scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator%(T scalar, vec<1, T, Q> const& v)
+ {
+  return vec<1, T, Q>(
+   scalar % v.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator%(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<1, T, Q>(
+   v1.x % v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator&(vec<1, T, Q> const& v, T scalar)
+ {
+  return vec<1, T, Q>(
+   v.x & scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator&(T scalar, vec<1, T, Q> const& v)
+ {
+  return vec<1, T, Q>(
+   scalar & v.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator&(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<1, T, Q>(
+   v1.x & v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator|(vec<1, T, Q> const& v, T scalar)
+ {
+  return vec<1, T, Q>(
+   v.x | scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator|(T scalar, vec<1, T, Q> const& v)
+ {
+  return vec<1, T, Q>(
+   scalar | v.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator|(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<1, T, Q>(
+   v1.x | v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator^(vec<1, T, Q> const& v, T scalar)
+ {
+  return vec<1, T, Q>(
+   v.x ^ scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator^(T scalar, vec<1, T, Q> const& v)
+ {
+  return vec<1, T, Q>(
+   scalar ^ v.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator^(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<1, T, Q>(
+   v1.x ^ v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator<<(vec<1, T, Q> const& v, T scalar)
+ {
+  return vec<1, T, Q>(
+   static_cast<T>(v.x << scalar));
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator<<(T scalar, vec<1, T, Q> const& v)
+ {
+  return vec<1, T, Q>(
+   static_cast<T>(scalar << v.x));
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator<<(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<1, T, Q>(
+   static_cast<T>(v1.x << v2.x));
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator>>(vec<1, T, Q> const& v, T scalar)
+ {
+  return vec<1, T, Q>(
+   static_cast<T>(v.x >> scalar));
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator>>(T scalar, vec<1, T, Q> const& v)
+ {
+  return vec<1, T, Q>(
+   static_cast<T>(scalar >> v.x));
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator>>(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return vec<1, T, Q>(
+   static_cast<T>(v1.x >> v2.x));
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<1, T, Q> operator~(vec<1, T, Q> const& v)
+ {
+  return vec<1, T, Q>(
+   ~v.x);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.x, v2.x);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(vec<1, T, Q> const& v1, vec<1, T, Q> const& v2)
+ {
+  return !(v1 == v2);
+ }
+
+ template<qualifier Q>
+ inline constexpr vec<1, bool, Q> operator&&(vec<1, bool, Q> const& v1, vec<1, bool, Q> const& v2)
+ {
+  return vec<1, bool, Q>(v1.x && v2.x);
+ }
+
+ template<qualifier Q>
+ inline constexpr vec<1, bool, Q> operator||(vec<1, bool, Q> const& v1, vec<1, bool, Q> const& v2)
+ {
+  return vec<1, bool, Q>(v1.x || v2.x);
+ }
+}
+# 308 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec1.hpp" 2
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_common.inl" 2
+
+
+
+
+
+
+namespace glm
+{
+
+ template<typename genType>
+ inline constexpr genType min(genType x, genType y)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0 || std::numeric_limits<genType>::is_integer, "'min' only accept floating-point or integer inputs");
+  return (y < x) ? y : x;
+ }
+
+ template<typename T>
+ struct TMin {
+  T operator()(const T& a, const T& b) { return min(a, b); }
+ };
+
+
+ template<typename genType>
+ inline constexpr genType max(genType x, genType y)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0 || std::numeric_limits<genType>::is_integer, "'max' only accept floating-point or integer inputs");
+
+  return (x < y) ? y : x;
+ }
+
+ template<typename T>
+ struct TMax {
+  T operator()(const T& a, const T& b) { return max(a, b); }
+ };
+
+
+ template<>
+ inline constexpr int abs(int x)
+ {
+  int const y = x >> (sizeof(int) * 8 - 1);
+  return (x ^ y) - y;
+ }
+
+ template<typename T>
+ struct TAbs {
+  T operator()(const T& a) { return abs(a); }
+ };
+
+
+
+  using ::std::round;
+# 68 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_common.inl"
+  template<typename T>
+  struct TRound {
+   T operator()(const T& a) { return round(a); }
+  };
+
+
+
+  using ::std::trunc;
+# 86 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_common.inl"
+  template<typename T>
+  struct TTrunc {
+   T operator()(const T& a) { return trunc(a); }
+  };
+
+  template<typename T>
+  struct TFmod {
+   T operator()(const T& a, const T& b) { return std::fmod(a, b); }
+  };
+
+}
+
+namespace glm{
+namespace detail
+{
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_abs_vector
+ {
+  inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& x)
+  {
+   return detail::functor1<vec, L, T, T, Q>::call(abs, x);
+  }
+ };
+
+ template<length_t L, typename T, typename U, qualifier Q, bool Aligned>
+ struct compute_mix_vector
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, U, Q> const& a)
+  {
+   static_assert(std::numeric_limits<U>::is_iec559 || 0 || 0, "'mix' only accept floating-point inputs for the interpolator a");
+
+   return vec<L, T, Q>(vec<L, U, Q>(x) * (static_cast<U>(1) - a) + vec<L, U, Q>(y) * a);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_mix_vector<L, T, bool, Q, Aligned>
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, bool, Q> const& a)
+  {
+   vec<L, T, Q> Result(0);
+   for(length_t i = 0; i < x.length(); ++i)
+    Result[i] = a[i] ? y[i] : x[i];
+   return Result;
+  }
+ };
+
+ template<length_t L, typename T, typename U, qualifier Q, bool Aligned>
+ struct compute_mix_scalar
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y, U const& a)
+  {
+   static_assert(std::numeric_limits<U>::is_iec559 || 0 || 0, "'mix' only accept floating-point inputs for the interpolator a");
+
+   return vec<L, T, Q>(vec<L, U, Q>(x) * (static_cast<U>(1) - a) + vec<L, U, Q>(y) * a);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_mix_scalar<L, T, bool, Q, Aligned>
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y, bool const& a)
+  {
+   return a ? y : x;
+  }
+ };
+
+ template<typename T, typename U>
+ struct compute_mix
+ {
+  inline static T call(T const& x, T const& y, U const& a)
+  {
+   static_assert(std::numeric_limits<U>::is_iec559 || 0 || 0, "'mix' only accept floating-point inputs for the interpolator a");
+
+   return static_cast<T>(static_cast<U>(x) * (static_cast<U>(1) - a) + static_cast<U>(y) * a);
+  }
+ };
+
+ template<typename T>
+ struct compute_mix<T, bool>
+ {
+  inline static T call(T const& x, T const& y, bool const& a)
+  {
+   return a ? y : x;
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool isFloat, bool Aligned>
+ struct compute_sign
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x)
+  {
+   return vec<L, T, Q>(glm::lessThan(vec<L, T, Q>(0), x)) - vec<L, T, Q>(glm::lessThan(x, vec<L, T, Q>(0)));
+  }
+ };
+
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_sign<L, T, Q, false, Aligned>
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x)
+  {
+   T const Shift(static_cast<T>(sizeof(T) * 8 - 1));
+   vec<L, T, Q> const y(vec<L, typename detail::make_unsigned<T>::type, Q>(-x) >> typename detail::make_unsigned<T>::type(Shift));
+
+   return (x >> Shift) | y;
+  }
+ };
+
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_floor
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x)
+  {
+   return detail::functor1<vec, L, T, T, Q>::call(std::floor, x);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_ceil
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x)
+  {
+   return detail::functor1<vec, L, T, T, Q>::call(std::ceil, x);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_fract
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x)
+  {
+   return x - floor(x);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_trunc
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x)
+  {
+   return detail::functor1<vec, L, T, T, Q>::call(trunc, x);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_round
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x)
+  {
+   return detail::functor1<vec, L, T, T, Q>::call(round, x);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_mod
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+  {
+   static_assert(std::numeric_limits<T>::is_iec559 || 0, "'mod' only accept floating-point inputs. Include <glm/gtc/integer.hpp> for integer inputs.");
+   return a - b * floor(a / b);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_fma
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b, vec<L, T, Q> const& c)
+  {
+   return a * b + c;
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_min_vector
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
+  {
+   return detail::functor2<vec, L, T, Q>::call(TMin<T>(), x, y);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_max_vector
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
+  {
+   return detail::functor2<vec, L, T, Q>::call(TMax<T>(), x, y);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_clamp_vector
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& minVal, vec<L, T, Q> const& maxVal)
+  {
+   return min(max(x, minVal), maxVal);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_step_vector
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& edge, vec<L, T, Q> const& x)
+  {
+   return mix(vec<L, T, Q>(1), vec<L, T, Q>(0), glm::lessThan(x, edge));
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_smoothstep_vector
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& edge0, vec<L, T, Q> const& edge1, vec<L, T, Q> const& x)
+  {
+   static_assert(std::numeric_limits<T>::is_iec559 || 0 || 0, "'smoothstep' only accept floating-point inputs");
+   vec<L, T, Q> const tmp(clamp((x - edge0) / (edge1 - edge0), static_cast<T>(0), static_cast<T>(1)));
+   return tmp * tmp * (static_cast<T>(3) - static_cast<T>(2) * tmp);
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct convert_vec3_to_vec4W0
+ {
+  inline static vec<4, T, Q> call(vec<3, T, Q> const& a)
+  {
+   return vec<4, T, Q>(a.x, a.y, a.z, 0.0f);
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct convert_vec3_to_vec4WZ
+ {
+  inline static vec<4, T, Q> call(vec<3, T, Q> const& a)
+  {
+   return vec<4, T, Q>(a.x, a.y, a.z, a.z);
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct convert_vec3_to_vec4W1
+ {
+  inline static vec<4, T, Q> call(vec<3, T, Q> const& a)
+  {
+   return vec<4, T, Q>(a.x, a.y, a.z, 1.0f);
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct convert_vec4_to_vec3
+ {
+  inline static vec<4, T, Q> call(vec<3, T, Q> const& a)
+  {
+   return vec<4, T, Q>(a.x, a.y, a.z, 0.0f);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct convert_splat {
+  template<int c>
+  inline constexpr static vec<L, T, Q> call(vec<L, T, Q> const& a)
+  {
+   vec<L, T, Q> v(0.0f);
+   for (int i = 0; i < L; ++i)
+    v[i] = a[c];
+   return v;
+  }
+ };
+
+
+}
+
+ template<typename genFIType>
+ inline constexpr genFIType abs(genFIType x)
+ {
+  return detail::compute_abs<genFIType, std::numeric_limits<genFIType>::is_signed>::call(x);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, T, Q> abs(vec<L, T, Q> const& x)
+ {
+  return detail::compute_abs_vector<L, T, Q, detail::is_aligned<Q>::value>::call(x);
+ }
+
+
+
+ template<typename genFIType>
+ inline constexpr genFIType sign(genFIType x)
+ {
+  static_assert(std::numeric_limits<genFIType>::is_iec559 || 0 || (std::numeric_limits<genFIType>::is_signed && std::numeric_limits<genFIType>::is_integer), "'sign' only accept signed inputs")
+
+                                      ;
+
+  return detail::compute_sign<1, genFIType, defaultp,
+                                    std::numeric_limits<genFIType>::is_iec559, detail::is_aligned<highp>::value>::call(vec<1, genFIType>(x)).x;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, T, Q> sign(vec<L, T, Q> const& x)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0 || (std::numeric_limits<T>::is_signed && std::numeric_limits<T>::is_integer), "'sign' only accept signed inputs")
+
+                                      ;
+
+  return detail::compute_sign<L, T, Q, std::numeric_limits<T>::is_iec559, detail::is_aligned<Q>::value>::call(x);
+ }
+
+
+ using ::std::floor;
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> floor(vec<L, T, Q> const& x)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'floor' only accept floating-point inputs.");
+  return detail::compute_floor<L, T, Q, detail::is_aligned<Q>::value>::call(x);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> trunc(vec<L, T, Q> const& x)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'trunc' only accept floating-point inputs");
+  return detail::compute_trunc<L, T, Q, detail::is_aligned<Q>::value>::call(x);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> round(vec<L, T, Q> const& x)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'round' only accept floating-point inputs");
+  return detail::compute_round<L, T, Q, detail::is_aligned<Q>::value>::call(x);
+ }
+# 428 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_common.inl"
+ template<typename genType>
+ inline genType roundEven(genType x)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0, "'roundEven' only accept floating-point inputs");
+
+  int Integer = static_cast<int>(x);
+  genType IntegerPart = static_cast<genType>(Integer);
+  genType FractionalPart = fract(x);
+
+  if(FractionalPart > static_cast<genType>(0.5) || FractionalPart < static_cast<genType>(0.5))
+  {
+   return round(x);
+  }
+  else if((Integer % 2) == 0)
+  {
+   return IntegerPart;
+  }
+  else if(x <= static_cast<genType>(0))
+  {
+   return IntegerPart - static_cast<genType>(1);
+  }
+  else
+  {
+   return IntegerPart + static_cast<genType>(1);
+  }
+
+
+
+
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> roundEven(vec<L, T, Q> const& x)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'roundEven' only accept floating-point inputs");
+  return detail::functor1<vec, L, T, T, Q>::call(roundEven, x);
+ }
+
+
+ using ::std::ceil;
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> ceil(vec<L, T, Q> const& x)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'ceil' only accept floating-point inputs");
+  return detail::compute_ceil<L, T, Q, detail::is_aligned<Q>::value>::call(x);
+ }
+
+
+ template<typename genType>
+ inline genType fract(genType x)
+ {
+  return fract(vec<1, genType>(x)).x;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> fract(vec<L, T, Q> const& x)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'fract' only accept floating-point inputs");
+  return detail::compute_fract<L, T, Q, detail::is_aligned<Q>::value>::call(x);
+ }
+
+
+ template<typename genType>
+ inline genType mod(genType x, genType y)
+ {
+
+
+
+
+
+   return mod(vec<1, genType, defaultp>(x), y).x;
+
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> mod(vec<L, T, Q> const& x, T y)
+ {
+  return detail::compute_mod<L, T, Q, detail::is_aligned<Q>::value>::call(x, vec<L, T, Q>(y));
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> mod(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
+ {
+  return detail::compute_mod<L, T, Q, detail::is_aligned<Q>::value>::call(x, y);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> fma(vec<L, T, Q> const& a, vec<L, T, Q> const& b, vec<L, T, Q> const& c)
+ {
+  return detail::compute_fma<L, T, Q, detail::is_aligned<Q>::value>::call(a, b, c);
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<4, T, Q> xyz0(vec<3, T, Q> const& a)
+ {
+  return detail::convert_vec3_to_vec4W0<T, Q, detail::is_aligned<Q>::value>::call(a);
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<4, T, Q> xyz1(vec<3, T, Q> const& a)
+ {
+  return detail::convert_vec3_to_vec4W1<T, Q, detail::is_aligned<Q>::value>::call(a);
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<4, T, Q> xyzz(vec<3, T, Q> const& a)
+ {
+  return detail::convert_vec3_to_vec4WZ<T, Q, detail::is_aligned<Q>::value>::call(a);
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<3, T, Q> xyz(vec<4, T, Q> const& a)
+ {
+  return detail::convert_vec4_to_vec3<T, Q, detail::is_aligned<Q>::value>::call(a);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> splatX(vec<L, T, Q> const& a)
+ {
+  return detail::convert_splat<L, T, Q, detail::is_aligned<Q>::value>::template call<0>(a);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> splatY(vec<L, T, Q> const& a)
+ {
+  return detail::convert_splat<L, T, Q, detail::is_aligned<Q>::value>::template call<1>(a);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> splatZ(vec<L, T, Q> const& a)
+ {
+  return detail::convert_splat<L, T, Q, detail::is_aligned<Q>::value>::template call<2>(a);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> splatW(vec<L, T, Q> const& a)
+ {
+  return detail::convert_splat<L, T, Q, detail::is_aligned<Q>::value>::template call<3>(a);
+ }
+
+
+
+ template<typename genType>
+ inline genType modf(genType x, genType & i)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0, "'modf' only accept floating-point inputs");
+  return std::modf(x, &i);
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<1, T, Q> modf(vec<1, T, Q> const& x, vec<1, T, Q> & i)
+ {
+  return vec<1, T, Q>(
+   modf(x.x, i.x));
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<2, T, Q> modf(vec<2, T, Q> const& x, vec<2, T, Q> & i)
+ {
+  return vec<2, T, Q>(
+   modf(x.x, i.x),
+   modf(x.y, i.y));
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<3, T, Q> modf(vec<3, T, Q> const& x, vec<3, T, Q> & i)
+ {
+  return vec<3, T, Q>(
+   modf(x.x, i.x),
+   modf(x.y, i.y),
+   modf(x.z, i.z));
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<4, T, Q> modf(vec<4, T, Q> const& x, vec<4, T, Q> & i)
+ {
+  return vec<4, T, Q>(
+   modf(x.x, i.x),
+   modf(x.y, i.y),
+   modf(x.z, i.z),
+   modf(x.w, i.w));
+ }
+# 620 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_common.inl"
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, T, Q> min(vec<L, T, Q> const& a, T b)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0 || std::numeric_limits<T>::is_integer, "'min' only accept floating-point or integer inputs");
+  return detail::compute_min_vector<L, T, Q, detail::is_aligned<Q>::value>::call(a, vec<L, T, Q>(b));
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, T, Q> min(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+ {
+  return detail::compute_min_vector<L, T, Q, detail::is_aligned<Q>::value>::call(a, b);
+ }
+
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, T, Q> max(vec<L, T, Q> const& a, T b)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0 || std::numeric_limits<T>::is_integer, "'max' only accept floating-point or integer inputs");
+  return detail::compute_max_vector<L, T, Q, detail::is_aligned<Q>::value>::call(a, vec<L, T, Q>(b));
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, T, Q> max(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
+ {
+  return detail::compute_max_vector<L, T, Q, detail::is_aligned<Q>::value>::call(a, b);
+ }
+
+
+ template<typename genType>
+ inline constexpr genType clamp(genType x, genType minVal, genType maxVal)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0 || std::numeric_limits<genType>::is_integer, "'clamp' only accept floating-point or integer inputs");
+  return min(max(x, minVal), maxVal);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, T, Q> clamp(vec<L, T, Q> const& x, T minVal, T maxVal)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0 || std::numeric_limits<T>::is_integer, "'clamp' only accept floating-point or integer inputs");
+  return detail::compute_clamp_vector<L, T, Q, detail::is_aligned<Q>::value>::call(x, vec<L, T, Q>(minVal), vec<L, T, Q>(maxVal));
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, T, Q> clamp(vec<L, T, Q> const& x, vec<L, T, Q> const& minVal, vec<L, T, Q> const& maxVal)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0 || std::numeric_limits<T>::is_integer, "'clamp' only accept floating-point or integer inputs");
+  return detail::compute_clamp_vector<L, T, Q, detail::is_aligned<Q>::value>::call(x, minVal, maxVal);
+ }
+
+ template<typename genTypeT, typename genTypeU>
+ inline constexpr genTypeT mix(genTypeT x, genTypeT y, genTypeU a)
+ {
+  return detail::compute_mix<genTypeT, genTypeU>::call(x, y, a);
+ }
+
+ template<length_t L, typename T, typename U, qualifier Q>
+ inline constexpr vec<L, T, Q> mix(vec<L, T, Q> const& x, vec<L, T, Q> const& y, U a)
+ {
+  return detail::compute_mix_scalar<L, T, U, Q, detail::is_aligned<Q>::value>::call(x, y, a);
+ }
+
+ template<length_t L, typename T, typename U, qualifier Q>
+ inline constexpr vec<L, T, Q> mix(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, U, Q> const& a)
+ {
+  return detail::compute_mix_vector<L, T, U, Q, detail::is_aligned<Q>::value>::call(x, y, a);
+ }
+
+
+ template<typename genType>
+ inline genType step(genType edge, genType x)
+ {
+  return mix(static_cast<genType>(1), static_cast<genType>(0), x < edge);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> step(T edge, vec<L, T, Q> const& x)
+ {
+  return detail::compute_step_vector<L, T, Q, detail::is_aligned<Q>::value>::call(vec<L, T, Q>(edge), x);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> step(vec<L, T, Q> const& edge, vec<L, T, Q> const& x)
+ {
+  return detail::compute_step_vector<L, T, Q, detail::is_aligned<Q>::value>::call(edge, x);
+ }
+
+
+ template<typename genType>
+ inline genType smoothstep(genType edge0, genType edge1, genType x)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0 || 0, "'smoothstep' only accept floating-point inputs");
+
+  genType const tmp(clamp((x - edge0) / (edge1 - edge0), genType(0), genType(1)));
+  return tmp * tmp * (genType(3) - genType(2) * tmp);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> smoothstep(T edge0, T edge1, vec<L, T, Q> const& x)
+ {
+  return detail::compute_smoothstep_vector<L, T, Q, detail::is_aligned<Q>::value>::call(vec<L, T, Q>(edge0), vec<L, T, Q>(edge1), x);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> smoothstep(vec<L, T, Q> const& edge0, vec<L, T, Q> const& edge1, vec<L, T, Q> const& x)
+ {
+  return detail::compute_smoothstep_vector<L, T, Q, detail::is_aligned<Q>::value>::call(edge0, edge1, x);
+ }
+
+
+  using std::isnan;
+# 756 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_common.inl"
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, bool, Q> isnan(vec<L, T, Q> const& v)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'isnan' only accept floating-point inputs");
+
+  vec<L, bool, Q> Result(0);
+  for (length_t l = 0; l < v.length(); ++l)
+   Result[l] = glm::isnan(v[l]);
+  return Result;
+ }
+
+
+  using std::isinf;
+# 798 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_common.inl"
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, bool, Q> isinf(vec<L, T, Q> const& v)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'isinf' only accept floating-point inputs");
+
+  vec<L, bool, Q> Result(0);
+  for (length_t l = 0; l < v.length(); ++l)
+   Result[l] = glm::isinf(v[l]);
+  return Result;
+ }
+
+ inline int floatBitsToInt(float v)
+ {
+  union
+  {
+   float in;
+   int out;
+  } u;
+
+  u.in = v;
+
+  return u.out;
+ }
+
+ template<length_t L, qualifier Q>
+ inline vec<L, int, Q> floatBitsToInt(vec<L, float, Q> const& v)
+ {
+  return detail::functor1<vec, L, int, float, Q>::call(floatBitsToInt, v);
+ }
+
+ inline uint floatBitsToUint(float v)
+ {
+  union
+  {
+   float in;
+   uint out;
+  } u;
+
+  u.in = v;
+
+  return u.out;
+ }
+
+ template<length_t L, qualifier Q>
+ inline vec<L, uint, Q> floatBitsToUint(vec<L, float, Q> const& v)
+ {
+  return detail::functor1<vec, L, uint, float, Q>::call(floatBitsToUint, v);
+ }
+
+ inline float intBitsToFloat(int v)
+ {
+  union
+  {
+   int in;
+   float out;
+  } u;
+
+  u.in = v;
+
+  return u.out;
+ }
+
+ template<length_t L, qualifier Q>
+ inline vec<L, float, Q> intBitsToFloat(vec<L, int, Q> const& v)
+ {
+  return detail::functor1<vec, L, float, int, Q>::call(intBitsToFloat, v);
+ }
+
+ inline float uintBitsToFloat(uint v)
+ {
+  union
+  {
+   uint in;
+   float out;
+  } u;
+
+  u.in = v;
+
+  return u.out;
+ }
+
+ template<length_t L, qualifier Q>
+ inline vec<L, float, Q> uintBitsToFloat(vec<L, uint, Q> const& v)
+ {
+  return reinterpret_cast<vec<L, float, Q>&>(const_cast<vec<L, uint, Q>&>(v));
+ }
+
+
+  using std::fma;
+# 895 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_common.inl"
+ template<typename genType>
+ inline genType frexp(genType x, int& exp)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0, "'frexp' only accept floating-point inputs");
+
+  return std::frexp(x, &exp);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> frexp(vec<L, T, Q> const& v, vec<L, int, Q>& exp)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'frexp' only accept floating-point inputs");
+
+  vec<L, T, Q> Result(0);
+  for (length_t l = 0; l < v.length(); ++l)
+   Result[l] = std::frexp(v[l], &exp[l]);
+  return Result;
+ }
+
+ template<typename genType>
+ inline genType ldexp(genType const& x, int const& exp)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0, "'ldexp' only accept floating-point inputs");
+
+  return std::ldexp(x, exp);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> ldexp(vec<L, T, Q> const& v, vec<L, int, Q> const& exp)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'ldexp' only accept floating-point inputs");
+
+  vec<L, T, Q> Result(0);
+  for (length_t l = 0; l < v.length(); ++l)
+   Result[l] = std::ldexp(v[l], exp[l]);
+  return Result;
+ }
+}
+# 539 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/common.hpp" 2
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x3.inl" 2
+
+namespace glm
+{
+# 23 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x3.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr mat<3, 3, T, Q>::mat(mat<3, 3, T, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q>::mat(T s)
+
+   : value{col_type(s, 0, 0), col_type(0, s, 0), col_type(0, 0, s)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q>::mat
+ (
+  T x0, T y0, T z0,
+  T x1, T y1, T z1,
+  T x2, T y2, T z2
+ )
+
+   : value{col_type(x0, y0, z0), col_type(x1, y1, z1), col_type(x2, y2, z2)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q>::mat(col_type const& v0, col_type const& v1, col_type const& v2)
+
+   : value{col_type(v0), col_type(v1), col_type(v2)}
+
+ {
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<
+  typename X1, typename Y1, typename Z1,
+  typename X2, typename Y2, typename Z2,
+  typename X3, typename Y3, typename Z3>
+ inline constexpr mat<3, 3, T, Q>::mat
+ (
+  X1 x1, Y1 y1, Z1 z1,
+  X2 x2, Y2 y2, Z2 z2,
+  X3 x3, Y3 y3, Z3 z3
+ )
+
+   : value{col_type(x1, y1, z1), col_type(x2, y2, z2), col_type(x3, y3, z3)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ template<typename V1, typename V2, typename V3>
+ inline constexpr mat<3, 3, T, Q>::mat(vec<3, V1, Q> const& v1, vec<3, V2, Q> const& v2, vec<3, V3, Q> const& v3)
+
+   : value{col_type(v1), col_type(v2), col_type(v3)}
+
+ {
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr mat<3, 3, T, Q>::mat(mat<3, 3, U, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q>::mat(mat<2, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0), col_type(0, 0, 1)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q>::mat(mat<4, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q>::mat(mat<2, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(0, 0, 1)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q>::mat(mat<3, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0), col_type(m[2], 1)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q>::mat(mat<2, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(0, 0, 1)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q>::mat(mat<4, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0), col_type(m[2], 1)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q>::mat(mat<3, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q>::mat(mat<4, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 3, T, Q>::col_type & mat<3, 3, T, Q>::operator[](typename mat<3, 3, T, Q>::length_type i) noexcept
+ {
+  (
+# 244 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x3.inl" 3
+ ((void)0)
+# 244 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x3.inl"
+ );
+  return this->value[i];
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 3, T, Q>::col_type const& mat<3, 3, T, Q>::operator[](typename mat<3, 3, T, Q>::length_type i) const noexcept
+ {
+  (
+# 251 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x3.inl" 3
+ ((void)0)
+# 251 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x3.inl"
+ );
+  return this->value[i];
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 3, T, Q> & mat<3, 3, T, Q>::operator=(mat<3, 3, U, Q> const& m)
+ {
+  this->value[0] = m[0];
+  this->value[1] = m[1];
+  this->value[2] = m[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 3, T, Q> & mat<3, 3, T, Q>::operator+=(U s)
+ {
+  this->value[0] += s;
+  this->value[1] += s;
+  this->value[2] += s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 3, T, Q> & mat<3, 3, T, Q>::operator+=(mat<3, 3, U, Q> const& m)
+ {
+  this->value[0] += m[0];
+  this->value[1] += m[1];
+  this->value[2] += m[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 3, T, Q> & mat<3, 3, T, Q>::operator-=(U s)
+ {
+  this->value[0] -= s;
+  this->value[1] -= s;
+  this->value[2] -= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 3, T, Q> & mat<3, 3, T, Q>::operator-=(mat<3, 3, U, Q> const& m)
+ {
+  this->value[0] -= m[0];
+  this->value[1] -= m[1];
+  this->value[2] -= m[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 3, T, Q> & mat<3, 3, T, Q>::operator*=(U s)
+ {
+  col_type sv(s);
+  this->value[0] *= sv;
+  this->value[1] *= sv;
+  this->value[2] *= sv;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 3, T, Q> & mat<3, 3, T, Q>::operator*=(mat<3, 3, U, Q> const& m)
+ {
+  return (*this = *this * m);
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 3, T, Q> & mat<3, 3, T, Q>::operator/=(U s)
+ {
+  this->value[0] /= s;
+  this->value[1] /= s;
+  this->value[2] /= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 3, T, Q> & mat<3, 3, T, Q>::operator/=(mat<3, 3, U, Q> const& m)
+ {
+  return *this *= inverse(m);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> & mat<3, 3, T, Q>::operator++()
+ {
+  ++this->value[0];
+  ++this->value[1];
+  ++this->value[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> & mat<3, 3, T, Q>::operator--()
+ {
+  --this->value[0];
+  --this->value[1];
+  --this->value[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> mat<3, 3, T, Q>::operator++(int)
+ {
+  mat<3, 3, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> mat<3, 3, T, Q>::operator--(int)
+ {
+  mat<3, 3, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator+(mat<3, 3, T, Q> const& m)
+ {
+  return m;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator-(mat<3, 3, T, Q> const& m)
+ {
+  return mat<3, 3, T, Q>(
+   -m[0],
+   -m[1],
+   -m[2]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator+(mat<3, 3, T, Q> const& m, T scalar)
+ {
+  return mat<3, 3, T, Q>(
+   m[0] + scalar,
+   m[1] + scalar,
+   m[2] + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator+(T scalar, mat<3, 3, T, Q> const& m)
+ {
+  return mat<3, 3, T, Q>(
+   m[0] + scalar,
+   m[1] + scalar,
+   m[2] + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator+(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
+ {
+  return mat<3, 3, T, Q>(
+   m1[0] + m2[0],
+   m1[1] + m2[1],
+   m1[2] + m2[2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator-(mat<3, 3, T, Q> const& m, T scalar)
+ {
+  return mat<3, 3, T, Q>(
+   m[0] - scalar,
+   m[1] - scalar,
+   m[2] - scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator-(T scalar, mat<3, 3, T, Q> const& m)
+ {
+  return mat<3, 3, T, Q>(
+   scalar - m[0],
+   scalar - m[1],
+   scalar - m[2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator-(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
+ {
+  return mat<3, 3, T, Q>(
+   m1[0] - m2[0],
+   m1[1] - m2[1],
+   m1[2] - m2[2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator*(mat<3, 3, T, Q> const& m, T scalar)
+ {
+  return mat<3, 3, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar,
+   m[2] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator*(T scalar, mat<3, 3, T, Q> const& m)
+ {
+  return mat<3, 3, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar,
+   m[2] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 3, T, Q>::col_type operator*(mat<3, 3, T, Q> const& m, typename mat<3, 3, T, Q>::row_type const& v)
+ {
+  return typename mat<3, 3, T, Q>::col_type(
+   m[0] * splatX(v) + m[1] * splatY(v) + m[2] * splatZ(v));
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 3, T, Q>::row_type operator*(typename mat<3, 3, T, Q>::col_type const& v, mat<3, 3, T, Q> const& m)
+ {
+  return typename mat<3, 3, T, Q>::row_type(
+   dot(m[0], v),
+   dot(m[1], v),
+   dot(m[2], v));
+ }
+
+ namespace detail
+ {
+  template<typename T, qualifier Q, bool is_aligned>
+  struct mul3x3 {};
+# 512 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x3.inl"
+  template<typename T, qualifier Q>
+  struct mul3x3<T, Q, false>
+  {
+   inline static mat<3, 3, T, Q> call(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
+   {
+    typename mat<3, 3, T, Q>::col_type const& SrcA0 = m1[0];
+    typename mat<3, 3, T, Q>::col_type const& SrcA1 = m1[1];
+    typename mat<3, 3, T, Q>::col_type const& SrcA2 = m1[2];
+
+    typename mat<3, 3, T, Q>::col_type const& SrcB0 = m2[0];
+    typename mat<3, 3, T, Q>::col_type const& SrcB1 = m2[1];
+    typename mat<3, 3, T, Q>::col_type const& SrcB2 = m2[2];
+
+
+
+
+
+
+    typename mat<3, 3, T, Q>::col_type tmp0 = SrcA0 * SrcB0.x;
+    tmp0 += SrcA1 * SrcB0.y;
+    tmp0 += SrcA2 * SrcB0.z;
+    typename mat<3, 3, T, Q>::col_type tmp1 = SrcA0 * SrcB1.x;
+    tmp1 += SrcA1 * SrcB1.y;
+    tmp1 += SrcA2 * SrcB1.z;
+    typename mat<3, 3, T, Q>::col_type tmp2 = SrcA0 * SrcB2.x;
+    tmp2 += SrcA1 * SrcB2.y;
+    tmp2 += SrcA2 * SrcB2.z;
+
+    return mat<3, 3, T, Q>(tmp0, tmp1, tmp2);
+   }
+  };
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator*(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
+ {
+  return detail::mul3x3<T, Q, detail::is_aligned<Q>::value>::call(m1, m2);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator*(mat<3, 3, T, Q> const& m1, mat<2, 3, T, Q> const& m2)
+ {
+  return mat<2, 3, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1] + m1[2][2] * m2[0][2],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1] + m1[2][2] * m2[1][2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator*(mat<3, 3, T, Q> const& m1, mat<4, 3, T, Q> const& m2)
+ {
+  return mat<4, 3, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1] + m1[2][2] * m2[0][2],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1] + m1[2][2] * m2[1][2],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1] + m1[2][0] * m2[2][2],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1] + m1[2][1] * m2[2][2],
+   m1[0][2] * m2[2][0] + m1[1][2] * m2[2][1] + m1[2][2] * m2[2][2],
+   m1[0][0] * m2[3][0] + m1[1][0] * m2[3][1] + m1[2][0] * m2[3][2],
+   m1[0][1] * m2[3][0] + m1[1][1] * m2[3][1] + m1[2][1] * m2[3][2],
+   m1[0][2] * m2[3][0] + m1[1][2] * m2[3][1] + m1[2][2] * m2[3][2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator/(mat<3, 3, T, Q> const& m, T scalar)
+ {
+  return mat<3, 3, T, Q>(
+   m[0] / scalar,
+   m[1] / scalar,
+   m[2] / scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator/(T scalar, mat<3, 3, T, Q> const& m)
+ {
+  return mat<3, 3, T, Q>(
+   scalar / m[0],
+   scalar / m[1],
+   scalar / m[2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 3, T, Q>::col_type operator/(mat<3, 3, T, Q> const& m, typename mat<3, 3, T, Q>::row_type const& v)
+ {
+  return inverse(m) * v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 3, T, Q>::row_type operator/(typename mat<3, 3, T, Q>::col_type const& v, mat<3, 3, T, Q> const& m)
+ {
+  return v * inverse(m);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator/(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
+ {
+  mat<3, 3, T, Q> m1_copy(m1);
+  return m1_copy /= m2;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
+ {
+  return (m1[0] == m2[0]) && (m1[1] == m2[1]) && (m1[2] == m2[2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
+ {
+  return (m1[0] != m2[0]) || (m1[1] != m2[1]) || (m1[2] != m2[2]);
+ }
+}
+# 184 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x3.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double3x3.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<3, 3, double, defaultp> dmat3x3;
+
+
+
+
+ typedef mat<3, 3, double, defaultp> dmat3;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double3x3_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<3, 3, double, lowp> lowp_dmat3;
+
+
+
+
+
+ typedef mat<3, 3, double, mediump> mediump_dmat3;
+
+
+
+
+
+ typedef mat<3, 3, double, highp> highp_dmat3;
+
+
+
+
+
+ typedef mat<3, 3, double, lowp> lowp_dmat3x3;
+
+
+
+
+
+ typedef mat<3, 3, double, mediump> mediump_dmat3x3;
+
+
+
+
+
+ typedef mat<3, 3, double, highp> highp_dmat3x3;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float3x3.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<3, 3, float, defaultp> mat3x3;
+
+
+
+
+ typedef mat<3, 3, float, defaultp> mat3;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float3x3_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<3, 3, float, lowp> lowp_mat3;
+
+
+
+
+
+ typedef mat<3, 3, float, mediump> mediump_mat3;
+
+
+
+
+
+ typedef mat<3, 3, float, highp> highp_mat3;
+
+
+
+
+
+ typedef mat<3, 3, float, lowp> lowp_mat3x3;
+
+
+
+
+
+ typedef mat<3, 3, float, mediump> mediump_mat3x3;
+
+
+
+
+
+ typedef mat<3, 3, float, highp> highp_mat3x3;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x3.hpp" 2
+# 26 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x4.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double3x4.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x4.hpp" 1
+
+
+
+       
+
+
+
+
+
+
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct mat<3, 4, T, Q>
+ {
+  typedef vec<4, T, Q> col_type;
+  typedef vec<3, T, Q> row_type;
+  typedef mat<3, 4, T, Q> type;
+  typedef mat<4, 3, T, Q> transpose_type;
+  typedef T value_type;
+
+ private:
+  col_type value[3];
+
+ public:
+
+
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length() { return 3; }
+
+  [[nodiscard]] constexpr col_type & operator[](length_type i) noexcept;
+  [[nodiscard]] constexpr col_type const& operator[](length_type i) const noexcept;
+
+
+
+  constexpr mat() = default;
+  template<qualifier P>
+  constexpr mat(mat<3, 4, T, P> const& m);
+
+  constexpr mat(T scalar);
+  constexpr mat(
+   T x0, T y0, T z0, T w0,
+   T x1, T y1, T z1, T w1,
+   T x2, T y2, T z2, T w2);
+  constexpr mat(
+   col_type const& v0,
+   col_type const& v1,
+   col_type const& v2);
+
+
+
+  template<
+   typename X1, typename Y1, typename Z1, typename W1,
+   typename X2, typename Y2, typename Z2, typename W2,
+   typename X3, typename Y3, typename Z3, typename W3>
+  constexpr mat(
+   X1 x1, Y1 y1, Z1 z1, W1 w1,
+   X2 x2, Y2 y2, Z2 z2, W2 w2,
+   X3 x3, Y3 y3, Z3 z3, W3 w3);
+
+  template<typename V1, typename V2, typename V3>
+  constexpr mat(
+   vec<4, V1, Q> const& v1,
+   vec<4, V2, Q> const& v2,
+   vec<4, V3, Q> const& v3);
+
+
+
+  template<typename U, qualifier P>
+  constexpr mat(mat<3, 4, U, P> const& m);
+
+  constexpr mat(mat<2, 2, T, Q> const& x);
+  constexpr mat(mat<3, 3, T, Q> const& x);
+  constexpr mat(mat<4, 4, T, Q> const& x);
+  constexpr mat(mat<2, 3, T, Q> const& x);
+  constexpr mat(mat<3, 2, T, Q> const& x);
+  constexpr mat(mat<2, 4, T, Q> const& x);
+  constexpr mat(mat<4, 2, T, Q> const& x);
+  constexpr mat(mat<4, 3, T, Q> const& x);
+
+
+
+  template<typename U>
+  constexpr mat<3, 4, T, Q> & operator=(mat<3, 4, U, Q> const& m);
+  template<typename U>
+  constexpr mat<3, 4, T, Q> & operator+=(U s);
+  template<typename U>
+  constexpr mat<3, 4, T, Q> & operator+=(mat<3, 4, U, Q> const& m);
+  template<typename U>
+  constexpr mat<3, 4, T, Q> & operator-=(U s);
+  template<typename U>
+  constexpr mat<3, 4, T, Q> & operator-=(mat<3, 4, U, Q> const& m);
+  template<typename U>
+  constexpr mat<3, 4, T, Q> & operator*=(U s);
+  template<typename U>
+  constexpr mat<3, 4, T, Q> & operator/=(U s);
+
+
+
+  constexpr mat<3, 4, T, Q> & operator++();
+  constexpr mat<3, 4, T, Q> & operator--();
+  [[nodiscard]] constexpr mat<3, 4, T, Q> operator++(int);
+  [[nodiscard]] constexpr mat<3, 4, T, Q> operator--(int);
+ };
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator+(mat<3, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator-(mat<3, 4, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator+(mat<3, 4, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator+(mat<3, 4, T, Q> const& m1, mat<3, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator-(mat<3, 4, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator-(mat<3, 4, T, Q> const& m1, mat<3, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator*(mat<3, 4, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator*(T scalar, mat<3, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<3, 4, T, Q>::col_type operator*(mat<3, 4, T, Q> const& m, typename mat<3, 4, T, Q>::row_type const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<3, 4, T, Q>::row_type operator*(typename mat<3, 4, T, Q>::col_type const& v, mat<3, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator*(mat<3, 4, T, Q> const& m1, mat<4, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator*(mat<3, 4, T, Q> const& m1, mat<2, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator*(mat<3, 4, T, Q> const& m1, mat<3, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator/(mat<3, 4, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator/(T scalar, mat<3, 4, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(mat<3, 4, T, Q> const& m1, mat<3, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(mat<3, 4, T, Q> const& m1, mat<3, 4, T, Q> const& m2);
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x4.inl" 1
+namespace glm
+{
+# 20 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x4.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr mat<3, 4, T, Q>::mat(mat<3, 4, T, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>::mat(T s)
+
+   : value{col_type(s, 0, 0, 0), col_type(0, s, 0, 0), col_type(0, 0, s, 0)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>::mat
+ (
+  T x0, T y0, T z0, T w0,
+  T x1, T y1, T z1, T w1,
+  T x2, T y2, T z2, T w2
+ )
+
+   : value{
+    col_type(x0, y0, z0, w0),
+    col_type(x1, y1, z1, w1),
+    col_type(x2, y2, z2, w2)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>::mat(col_type const& v0, col_type const& v1, col_type const& v2)
+
+   : value{col_type(v0), col_type(v1), col_type(v2)}
+
+ {
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<
+  typename X0, typename Y0, typename Z0, typename W0,
+  typename X1, typename Y1, typename Z1, typename W1,
+  typename X2, typename Y2, typename Z2, typename W2>
+ inline constexpr mat<3, 4, T, Q>::mat
+ (
+  X0 x0, Y0 y0, Z0 z0, W0 w0,
+  X1 x1, Y1 y1, Z1 z1, W1 w1,
+  X2 x2, Y2 y2, Z2 z2, W2 w2
+ )
+
+   : value{
+    col_type(x0, y0, z0, w0),
+    col_type(x1, y1, z1, w1),
+    col_type(x2, y2, z2, w2)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ template<typename V1, typename V2, typename V3>
+ inline constexpr mat<3, 4, T, Q>::mat(vec<4, V1, Q> const& v0, vec<4, V2, Q> const& v1, vec<4, V3, Q> const& v2)
+
+   : value{col_type(v0), col_type(v1), col_type(v2)}
+
+ {
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr mat<3, 4, T, Q>::mat(mat<3, 4, U, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>::mat(mat<2, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0, 0), col_type(m[1], 0, 0), col_type(0, 0, 1, 0)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>::mat(mat<3, 3, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0), col_type(m[2], 0)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>::mat(mat<4, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2])}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>::mat(mat<2, 3, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0), col_type(0, 0, 1, 0)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>::mat(mat<3, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0, 0), col_type(m[1], 0, 0), col_type(m[2], 1, 0)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>::mat(mat<2, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(0, 0, 1, 0)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>::mat(mat<4, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0, 0), col_type(m[1], 0, 0), col_type(m[2], 1, 0)}
+
+ {
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>::mat(mat<4, 3, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0), col_type(m[2], 0)}
+
+ {
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 4, T, Q>::col_type & mat<3, 4, T, Q>::operator[](typename mat<3, 4, T, Q>::length_type i) noexcept
+ {
+  (
+# 247 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x4.inl" 3
+ ((void)0)
+# 247 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x4.inl"
+ );
+  return this->value[i];
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 4, T, Q>::col_type const& mat<3, 4, T, Q>::operator[](typename mat<3, 4, T, Q>::length_type i) const noexcept
+ {
+  (
+# 254 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x4.inl" 3
+ ((void)0)
+# 254 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x4.inl"
+ );
+  return this->value[i];
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 4, T, Q>& mat<3, 4, T, Q>::operator=(mat<3, 4, U, Q> const& m)
+ {
+  this->value[0] = m[0];
+  this->value[1] = m[1];
+  this->value[2] = m[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 4, T, Q>& mat<3, 4, T, Q>::operator+=(U s)
+ {
+  this->value[0] += s;
+  this->value[1] += s;
+  this->value[2] += s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 4, T, Q>& mat<3, 4, T, Q>::operator+=(mat<3, 4, U, Q> const& m)
+ {
+  this->value[0] += m[0];
+  this->value[1] += m[1];
+  this->value[2] += m[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 4, T, Q>& mat<3, 4, T, Q>::operator-=(U s)
+ {
+  this->value[0] -= s;
+  this->value[1] -= s;
+  this->value[2] -= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 4, T, Q>& mat<3, 4, T, Q>::operator-=(mat<3, 4, U, Q> const& m)
+ {
+  this->value[0] -= m[0];
+  this->value[1] -= m[1];
+  this->value[2] -= m[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 4, T, Q>& mat<3, 4, T, Q>::operator*=(U s)
+ {
+  this->value[0] *= s;
+  this->value[1] *= s;
+  this->value[2] *= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<3, 4, T, Q> & mat<3, 4, T, Q>::operator/=(U s)
+ {
+  this->value[0] /= s;
+  this->value[1] /= s;
+  this->value[2] /= s;
+  return *this;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>& mat<3, 4, T, Q>::operator++()
+ {
+  ++this->value[0];
+  ++this->value[1];
+  ++this->value[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q>& mat<3, 4, T, Q>::operator--()
+ {
+  --this->value[0];
+  --this->value[1];
+  --this->value[2];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> mat<3, 4, T, Q>::operator++(int)
+ {
+  mat<3, 4, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> mat<3, 4, T, Q>::operator--(int)
+ {
+  mat<3, 4, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator+(mat<3, 4, T, Q> const& m)
+ {
+  return m;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator-(mat<3, 4, T, Q> const& m)
+ {
+  return mat<3, 4, T, Q>(
+   -m[0],
+   -m[1],
+   -m[2]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator+(mat<3, 4, T, Q> const& m, T scalar)
+ {
+  return mat<3, 4, T, Q>(
+   m[0] + scalar,
+   m[1] + scalar,
+   m[2] + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator+(mat<3, 4, T, Q> const& m1, mat<3, 4, T, Q> const& m2)
+ {
+  return mat<3, 4, T, Q>(
+   m1[0] + m2[0],
+   m1[1] + m2[1],
+   m1[2] + m2[2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator-(mat<3, 4, T, Q> const& m, T scalar)
+ {
+  return mat<3, 4, T, Q>(
+   m[0] - scalar,
+   m[1] - scalar,
+   m[2] - scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator-(mat<3, 4, T, Q> const& m1, mat<3, 4, T, Q> const& m2)
+ {
+  return mat<3, 4, T, Q>(
+   m1[0] - m2[0],
+   m1[1] - m2[1],
+   m1[2] - m2[2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator*(mat<3, 4, T, Q> const& m, T scalar)
+ {
+  return mat<3, 4, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar,
+   m[2] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator*(T scalar, mat<3, 4, T, Q> const& m)
+ {
+  return mat<3, 4, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar,
+   m[2] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 4, T, Q>::col_type operator*
+ (
+  mat<3, 4, T, Q> const& m,
+  typename mat<3, 4, T, Q>::row_type const& v
+ )
+ {
+  return typename mat<3, 4, T, Q>::col_type(
+   m[0][0] * v.x + m[1][0] * v.y + m[2][0] * v.z,
+   m[0][1] * v.x + m[1][1] * v.y + m[2][1] * v.z,
+   m[0][2] * v.x + m[1][2] * v.y + m[2][2] * v.z,
+   m[0][3] * v.x + m[1][3] * v.y + m[2][3] * v.z);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<3, 4, T, Q>::row_type operator*
+ (
+  typename mat<3, 4, T, Q>::col_type const& v,
+  mat<3, 4, T, Q> const& m
+ )
+ {
+  return typename mat<3, 4, T, Q>::row_type(
+   v.x * m[0][0] + v.y * m[0][1] + v.z * m[0][2] + v.w * m[0][3],
+   v.x * m[1][0] + v.y * m[1][1] + v.z * m[1][2] + v.w * m[1][3],
+   v.x * m[2][0] + v.y * m[2][1] + v.z * m[2][2] + v.w * m[2][3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator*(mat<3, 4, T, Q> const& m1, mat<4, 3, T, Q> const& m2)
+ {
+  return mat<4, 4, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1] + m1[2][2] * m2[0][2],
+   m1[0][3] * m2[0][0] + m1[1][3] * m2[0][1] + m1[2][3] * m2[0][2],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1] + m1[2][2] * m2[1][2],
+   m1[0][3] * m2[1][0] + m1[1][3] * m2[1][1] + m1[2][3] * m2[1][2],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1] + m1[2][0] * m2[2][2],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1] + m1[2][1] * m2[2][2],
+   m1[0][2] * m2[2][0] + m1[1][2] * m2[2][1] + m1[2][2] * m2[2][2],
+   m1[0][3] * m2[2][0] + m1[1][3] * m2[2][1] + m1[2][3] * m2[2][2],
+   m1[0][0] * m2[3][0] + m1[1][0] * m2[3][1] + m1[2][0] * m2[3][2],
+   m1[0][1] * m2[3][0] + m1[1][1] * m2[3][1] + m1[2][1] * m2[3][2],
+   m1[0][2] * m2[3][0] + m1[1][2] * m2[3][1] + m1[2][2] * m2[3][2],
+   m1[0][3] * m2[3][0] + m1[1][3] * m2[3][1] + m1[2][3] * m2[3][2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator*(mat<3, 4, T, Q> const& m1, mat<2, 3, T, Q> const& m2)
+ {
+  return mat<2, 4, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1] + m1[2][2] * m2[0][2],
+   m1[0][3] * m2[0][0] + m1[1][3] * m2[0][1] + m1[2][3] * m2[0][2],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1] + m1[2][2] * m2[1][2],
+   m1[0][3] * m2[1][0] + m1[1][3] * m2[1][1] + m1[2][3] * m2[1][2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator*(mat<3, 4, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
+ {
+  return mat<3, 4, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1] + m1[2][2] * m2[0][2],
+   m1[0][3] * m2[0][0] + m1[1][3] * m2[0][1] + m1[2][3] * m2[0][2],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1] + m1[2][2] * m2[1][2],
+   m1[0][3] * m2[1][0] + m1[1][3] * m2[1][1] + m1[2][3] * m2[1][2],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1] + m1[2][0] * m2[2][2],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1] + m1[2][1] * m2[2][2],
+   m1[0][2] * m2[2][0] + m1[1][2] * m2[2][1] + m1[2][2] * m2[2][2],
+   m1[0][3] * m2[2][0] + m1[1][3] * m2[2][1] + m1[2][3] * m2[2][2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator/(mat<3, 4, T, Q> const& m, T scalar)
+ {
+  return mat<3, 4, T, Q>(
+   m[0] / scalar,
+   m[1] / scalar,
+   m[2] / scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator/(T scalar, mat<3, 4, T, Q> const& m)
+ {
+  return mat<3, 4, T, Q>(
+   scalar / m[0],
+   scalar / m[1],
+   scalar / m[2]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(mat<3, 4, T, Q> const& m1, mat<3, 4, T, Q> const& m2)
+ {
+  return (m1[0] == m2[0]) && (m1[1] == m2[1]) && (m1[2] == m2[2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(mat<3, 4, T, Q> const& m1, mat<3, 4, T, Q> const& m2)
+ {
+  return (m1[0] != m2[0]) || (m1[1] != m2[1]) || (m1[2] != m2[2]);
+ }
+}
+# 166 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat3x4.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double3x4.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<3, 4, double, defaultp> dmat3x4;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double3x4_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<3, 4, double, lowp> lowp_dmat3x4;
+
+
+
+
+
+ typedef mat<3, 4, double, mediump> mediump_dmat3x4;
+
+
+
+
+
+ typedef mat<3, 4, double, highp> highp_dmat3x4;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float3x4.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<3, 4, float, defaultp> mat3x4;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float3x4_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<3, 4, float, lowp> lowp_mat3x4;
+
+
+
+
+
+ typedef mat<3, 4, float, mediump> mediump_mat3x4;
+
+
+
+
+
+ typedef mat<3, 4, float, highp> highp_mat3x4;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat3x4.hpp" 2
+# 27 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x2.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double4x2.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x2.hpp" 1
+
+
+
+       
+
+
+
+
+
+
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct mat<4, 2, T, Q>
+ {
+  typedef vec<2, T, Q> col_type;
+  typedef vec<4, T, Q> row_type;
+  typedef mat<4, 2, T, Q> type;
+  typedef mat<2, 4, T, Q> transpose_type;
+  typedef T value_type;
+
+ private:
+  col_type value[4];
+
+ public:
+
+
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length() { return 4; }
+
+  [[nodiscard]] constexpr col_type & operator[](length_type i) noexcept;
+  [[nodiscard]] constexpr col_type const& operator[](length_type i) const noexcept;
+
+
+
+  constexpr mat() = default;
+  template<qualifier P>
+  constexpr mat(mat<4, 2, T, P> const& m);
+
+  constexpr mat(T scalar);
+  constexpr mat(
+   T x0, T y0,
+   T x1, T y1,
+   T x2, T y2,
+   T x3, T y3);
+  constexpr mat(
+   col_type const& v0,
+   col_type const& v1,
+   col_type const& v2,
+   col_type const& v3);
+
+
+
+  template<
+   typename X0, typename Y0,
+   typename X1, typename Y1,
+   typename X2, typename Y2,
+   typename X3, typename Y3>
+  constexpr mat(
+   X0 x0, Y0 y0,
+   X1 x1, Y1 y1,
+   X2 x2, Y2 y2,
+   X3 x3, Y3 y3);
+
+  template<typename V1, typename V2, typename V3, typename V4>
+  constexpr mat(
+   vec<2, V1, Q> const& v1,
+   vec<2, V2, Q> const& v2,
+   vec<2, V3, Q> const& v3,
+   vec<2, V4, Q> const& v4);
+
+
+
+  template<typename U, qualifier P>
+  constexpr mat(mat<4, 2, U, P> const& m);
+
+  constexpr mat(mat<2, 2, T, Q> const& x);
+  constexpr mat(mat<3, 3, T, Q> const& x);
+  constexpr mat(mat<4, 4, T, Q> const& x);
+  constexpr mat(mat<2, 3, T, Q> const& x);
+  constexpr mat(mat<3, 2, T, Q> const& x);
+  constexpr mat(mat<2, 4, T, Q> const& x);
+  constexpr mat(mat<4, 3, T, Q> const& x);
+  constexpr mat(mat<3, 4, T, Q> const& x);
+
+
+
+  template<typename U>
+  constexpr mat<4, 2, T, Q> & operator=(mat<4, 2, U, Q> const& m);
+  template<typename U>
+  constexpr mat<4, 2, T, Q> & operator+=(U s);
+  template<typename U>
+  constexpr mat<4, 2, T, Q> & operator+=(mat<4, 2, U, Q> const& m);
+  template<typename U>
+  constexpr mat<4, 2, T, Q> & operator-=(U s);
+  template<typename U>
+  constexpr mat<4, 2, T, Q> & operator-=(mat<4, 2, U, Q> const& m);
+  template<typename U>
+  constexpr mat<4, 2, T, Q> & operator*=(U s);
+  template<typename U>
+  constexpr mat<4, 2, T, Q> & operator/=(U s);
+
+
+
+  constexpr mat<4, 2, T, Q> & operator++ ();
+  constexpr mat<4, 2, T, Q> & operator-- ();
+  [[nodiscard]] constexpr mat<4, 2, T, Q> operator++(int);
+  [[nodiscard]] constexpr mat<4, 2, T, Q> operator--(int);
+ };
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator+(mat<4, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator-(mat<4, 2, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator+(mat<4, 2, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator+(mat<4, 2, T, Q> const& m1, mat<4, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator-(mat<4, 2, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator-(mat<4, 2, T, Q> const& m1, mat<4, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator*(mat<4, 2, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator*(T scalar, mat<4, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<4, 2, T, Q>::col_type operator*(mat<4, 2, T, Q> const& m, typename mat<4, 2, T, Q>::row_type const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<4, 2, T, Q>::row_type operator*(typename mat<4, 2, T, Q>::col_type const& v, mat<4, 2, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 2, T, Q> operator*(mat<4, 2, T, Q> const& m1, mat<2, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 2, T, Q> operator*(mat<4, 2, T, Q> const& m1, mat<3, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator*(mat<4, 2, T, Q> const& m1, mat<4, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator/(mat<4, 2, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 2, T, Q> operator/(T scalar, mat<4, 2, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(mat<4, 2, T, Q> const& m1, mat<4, 2, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(mat<4, 2, T, Q> const& m1, mat<4, 2, T, Q> const& m2);
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x2.inl" 1
+namespace glm
+{
+# 21 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x2.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr mat<4, 2, T, Q>::mat(mat<4, 2, T, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(m[3])}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q>::mat(T s)
+
+   : value{col_type(s, 0), col_type(0, s), col_type(0, 0), col_type(0, 0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q>::mat
+ (
+  T x0, T y0,
+  T x1, T y1,
+  T x2, T y2,
+  T x3, T y3
+ )
+
+   : value{col_type(x0, y0), col_type(x1, y1), col_type(x2, y2), col_type(x3, y3)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q>::mat(col_type const& v0, col_type const& v1, col_type const& v2, col_type const& v3)
+
+   : value{col_type(v0), col_type(v1), col_type(v2), col_type(v3)}
+
+ {
+
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<
+  typename X0, typename Y0,
+  typename X1, typename Y1,
+  typename X2, typename Y2,
+  typename X3, typename Y3>
+ inline constexpr mat<4, 2, T, Q>::mat
+ (
+  X0 x0, Y0 y0,
+  X1 x1, Y1 y1,
+  X2 x2, Y2 y2,
+  X3 x3, Y3 y3
+ )
+
+   : value{col_type(x0, y0), col_type(x1, y1), col_type(x2, y2), col_type(x3, y3)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ template<typename V0, typename V1, typename V2, typename V3>
+ inline constexpr mat<4, 2, T, Q>::mat(vec<2, V0, Q> const& v0, vec<2, V1, Q> const& v1, vec<2, V2, Q> const& v2, vec<2, V3, Q> const& v3)
+
+   : value{col_type(v0), col_type(v1), col_type(v2), col_type(v3)}
+
+ {
+
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr mat<4, 2, T, Q>::mat(mat<4, 2, U, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(m[3])}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q>::mat(mat<2, 2, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(0), col_type(0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q>::mat(mat<3, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q>::mat(mat<4, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(m[3])}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q>::mat(mat<2, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(0), col_type(0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q>::mat(mat<3, 2, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q>::mat(mat<2, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(0), col_type(0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q>::mat(mat<4, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(m[3])}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q>::mat(mat<3, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(0)}
+
+ {
+
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 2, T, Q>::col_type & mat<4, 2, T, Q>::operator[](typename mat<4, 2, T, Q>::length_type i) noexcept
+ {
+  (
+# 260 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x2.inl" 3
+ ((void)0)
+# 260 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x2.inl"
+ );
+  return this->value[i];
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 2, T, Q>::col_type const& mat<4, 2, T, Q>::operator[](typename mat<4, 2, T, Q>::length_type i) const noexcept
+ {
+  (
+# 267 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x2.inl" 3
+ ((void)0)
+# 267 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x2.inl"
+ );
+  return this->value[i];
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 2, T, Q>& mat<4, 2, T, Q>::operator=(mat<4, 2, U, Q> const& m)
+ {
+  this->value[0] = m[0];
+  this->value[1] = m[1];
+  this->value[2] = m[2];
+  this->value[3] = m[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 2, T, Q> & mat<4, 2, T, Q>::operator+=(U s)
+ {
+  this->value[0] += s;
+  this->value[1] += s;
+  this->value[2] += s;
+  this->value[3] += s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 2, T, Q> & mat<4, 2, T, Q>::operator+=(mat<4, 2, U, Q> const& m)
+ {
+  this->value[0] += m[0];
+  this->value[1] += m[1];
+  this->value[2] += m[2];
+  this->value[3] += m[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 2, T, Q> & mat<4, 2, T, Q>::operator-=(U s)
+ {
+  this->value[0] -= s;
+  this->value[1] -= s;
+  this->value[2] -= s;
+  this->value[3] -= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 2, T, Q> & mat<4, 2, T, Q>::operator-=(mat<4, 2, U, Q> const& m)
+ {
+  this->value[0] -= m[0];
+  this->value[1] -= m[1];
+  this->value[2] -= m[2];
+  this->value[3] -= m[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 2, T, Q> & mat<4, 2, T, Q>::operator*=(U s)
+ {
+  this->value[0] *= s;
+  this->value[1] *= s;
+  this->value[2] *= s;
+  this->value[3] *= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 2, T, Q> & mat<4, 2, T, Q>::operator/=(U s)
+ {
+  this->value[0] /= s;
+  this->value[1] /= s;
+  this->value[2] /= s;
+  this->value[3] /= s;
+  return *this;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> & mat<4, 2, T, Q>::operator++()
+ {
+  ++this->value[0];
+  ++this->value[1];
+  ++this->value[2];
+  ++this->value[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> & mat<4, 2, T, Q>::operator--()
+ {
+  --this->value[0];
+  --this->value[1];
+  --this->value[2];
+  --this->value[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> mat<4, 2, T, Q>::operator++(int)
+ {
+  mat<4, 2, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> mat<4, 2, T, Q>::operator--(int)
+ {
+  mat<4, 2, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator+(mat<4, 2, T, Q> const& m)
+ {
+  return m;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator-(mat<4, 2, T, Q> const& m)
+ {
+  return mat<4, 2, T, Q>(
+   -m[0],
+   -m[1],
+   -m[2],
+   -m[3]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator+(mat<4, 2, T, Q> const& m, T scalar)
+ {
+  return mat<4, 2, T, Q>(
+   m[0] + scalar,
+   m[1] + scalar,
+   m[2] + scalar,
+   m[3] + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator+(mat<4, 2, T, Q> const& m1, mat<4, 2, T, Q> const& m2)
+ {
+  return mat<4, 2, T, Q>(
+   m1[0] + m2[0],
+   m1[1] + m2[1],
+   m1[2] + m2[2],
+   m1[3] + m2[3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator-(mat<4, 2, T, Q> const& m, T scalar)
+ {
+  return mat<4, 2, T, Q>(
+   m[0] - scalar,
+   m[1] - scalar,
+   m[2] - scalar,
+   m[3] - scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator-(mat<4, 2, T, Q> const& m1, mat<4, 2, T, Q> const& m2)
+ {
+  return mat<4, 2, T, Q>(
+   m1[0] - m2[0],
+   m1[1] - m2[1],
+   m1[2] - m2[2],
+   m1[3] - m2[3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator*(mat<4, 2, T, Q> const& m, T scalar)
+ {
+  return mat<4, 2, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar,
+   m[2] * scalar,
+   m[3] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator*(T scalar, mat<4, 2, T, Q> const& m)
+ {
+  return mat<4, 2, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar,
+   m[2] * scalar,
+   m[3] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 2, T, Q>::col_type operator*(mat<4, 2, T, Q> const& m, typename mat<4, 2, T, Q>::row_type const& v)
+ {
+  return typename mat<4, 2, T, Q>::col_type(
+   m[0][0] * v.x + m[1][0] * v.y + m[2][0] * v.z + m[3][0] * v.w,
+   m[0][1] * v.x + m[1][1] * v.y + m[2][1] * v.z + m[3][1] * v.w);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 2, T, Q>::row_type operator*(typename mat<4, 2, T, Q>::col_type const& v, mat<4, 2, T, Q> const& m)
+ {
+  return typename mat<4, 2, T, Q>::row_type(
+   v.x * m[0][0] + v.y * m[0][1],
+   v.x * m[1][0] + v.y * m[1][1],
+   v.x * m[2][0] + v.y * m[2][1],
+   v.x * m[3][0] + v.y * m[3][1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator*(mat<4, 2, T, Q> const& m1, mat<2, 4, T, Q> const& m2)
+ {
+  return mat<2, 2, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2] + m1[3][0] * m2[0][3],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2] + m1[3][1] * m2[0][3],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2] + m1[3][0] * m2[1][3],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2] + m1[3][1] * m2[1][3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator*(mat<4, 2, T, Q> const& m1, mat<3, 4, T, Q> const& m2)
+ {
+  return mat<3, 2, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2] + m1[3][0] * m2[0][3],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2] + m1[3][1] * m2[0][3],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2] + m1[3][0] * m2[1][3],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2] + m1[3][1] * m2[1][3],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1] + m1[2][0] * m2[2][2] + m1[3][0] * m2[2][3],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1] + m1[2][1] * m2[2][2] + m1[3][1] * m2[2][3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator*(mat<4, 2, T, Q> const& m1, mat<4, 4, T, Q> const& m2)
+ {
+  return mat<4, 2, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2] + m1[3][0] * m2[0][3],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2] + m1[3][1] * m2[0][3],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2] + m1[3][0] * m2[1][3],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2] + m1[3][1] * m2[1][3],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1] + m1[2][0] * m2[2][2] + m1[3][0] * m2[2][3],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1] + m1[2][1] * m2[2][2] + m1[3][1] * m2[2][3],
+   m1[0][0] * m2[3][0] + m1[1][0] * m2[3][1] + m1[2][0] * m2[3][2] + m1[3][0] * m2[3][3],
+   m1[0][1] * m2[3][0] + m1[1][1] * m2[3][1] + m1[2][1] * m2[3][2] + m1[3][1] * m2[3][3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator/(mat<4, 2, T, Q> const& m, T scalar)
+ {
+  return mat<4, 2, T, Q>(
+   m[0] / scalar,
+   m[1] / scalar,
+   m[2] / scalar,
+   m[3] / scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator/(T scalar, mat<4, 2, T, Q> const& m)
+ {
+  return mat<4, 2, T, Q>(
+   scalar / m[0],
+   scalar / m[1],
+   scalar / m[2],
+   scalar / m[3]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(mat<4, 2, T, Q> const& m1, mat<4, 2, T, Q> const& m2)
+ {
+  return (m1[0] == m2[0]) && (m1[1] == m2[1]) && (m1[2] == m2[2]) && (m1[3] == m2[3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(mat<4, 2, T, Q> const& m1, mat<4, 2, T, Q> const& m2)
+ {
+  return (m1[0] != m2[0]) || (m1[1] != m2[1]) || (m1[2] != m2[2]) || (m1[3] != m2[3]);
+ }
+}
+# 171 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x2.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double4x2.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<4, 2, double, defaultp> dmat4x2;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double4x2_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<4, 2, double, lowp> lowp_dmat4x2;
+
+
+
+
+
+ typedef mat<4, 2, double, mediump> mediump_dmat4x2;
+
+
+
+
+
+ typedef mat<4, 2, double, highp> highp_dmat4x2;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float4x2.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<4, 2, float, defaultp> mat4x2;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float4x2_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<4, 2, float, lowp> lowp_mat4x2;
+
+
+
+
+
+ typedef mat<4, 2, float, mediump> mediump_mat4x2;
+
+
+
+
+
+ typedef mat<4, 2, float, highp> highp_mat4x2;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x2.hpp" 2
+# 28 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x3.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double4x3.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x3.hpp" 1
+
+
+
+       
+
+
+
+
+
+
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct mat<4, 3, T, Q>
+ {
+  typedef vec<3, T, Q> col_type;
+  typedef vec<4, T, Q> row_type;
+  typedef mat<4, 3, T, Q> type;
+  typedef mat<3, 4, T, Q> transpose_type;
+  typedef T value_type;
+
+ private:
+  col_type value[4];
+
+ public:
+
+
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length() { return 4; }
+
+  [[nodiscard]] constexpr col_type & operator[](length_type i) noexcept;
+  [[nodiscard]] constexpr col_type const& operator[](length_type i) const noexcept;
+
+
+
+  constexpr mat() = default;
+  template<qualifier P>
+  constexpr mat(mat<4, 3, T, P> const& m);
+
+  constexpr mat(T s);
+  constexpr mat(
+   T const& x0, T const& y0, T const& z0,
+   T const& x1, T const& y1, T const& z1,
+   T const& x2, T const& y2, T const& z2,
+   T const& x3, T const& y3, T const& z3);
+  constexpr mat(
+   col_type const& v0,
+   col_type const& v1,
+   col_type const& v2,
+   col_type const& v3);
+
+
+
+  template<
+   typename X1, typename Y1, typename Z1,
+   typename X2, typename Y2, typename Z2,
+   typename X3, typename Y3, typename Z3,
+   typename X4, typename Y4, typename Z4>
+  constexpr mat(
+   X1 const& x1, Y1 const& y1, Z1 const& z1,
+   X2 const& x2, Y2 const& y2, Z2 const& z2,
+   X3 const& x3, Y3 const& y3, Z3 const& z3,
+   X4 const& x4, Y4 const& y4, Z4 const& z4);
+
+  template<typename V1, typename V2, typename V3, typename V4>
+  constexpr mat(
+   vec<3, V1, Q> const& v1,
+   vec<3, V2, Q> const& v2,
+   vec<3, V3, Q> const& v3,
+   vec<3, V4, Q> const& v4);
+
+
+
+  template<typename U, qualifier P>
+  constexpr mat(mat<4, 3, U, P> const& m);
+
+  constexpr mat(mat<2, 2, T, Q> const& x);
+  constexpr mat(mat<3, 3, T, Q> const& x);
+  constexpr mat(mat<4, 4, T, Q> const& x);
+  constexpr mat(mat<2, 3, T, Q> const& x);
+  constexpr mat(mat<3, 2, T, Q> const& x);
+  constexpr mat(mat<2, 4, T, Q> const& x);
+  constexpr mat(mat<4, 2, T, Q> const& x);
+  constexpr mat(mat<3, 4, T, Q> const& x);
+
+
+
+  template<typename U>
+  constexpr mat<4, 3, T, Q> & operator=(mat<4, 3, U, Q> const& m);
+  template<typename U>
+  constexpr mat<4, 3, T, Q> & operator+=(U s);
+  template<typename U>
+  constexpr mat<4, 3, T, Q> & operator+=(mat<4, 3, U, Q> const& m);
+  template<typename U>
+  constexpr mat<4, 3, T, Q> & operator-=(U s);
+  template<typename U>
+  constexpr mat<4, 3, T, Q> & operator-=(mat<4, 3, U, Q> const& m);
+  template<typename U>
+  constexpr mat<4, 3, T, Q> & operator*=(U s);
+  template<typename U>
+  constexpr mat<4, 3, T, Q> & operator/=(U s);
+
+
+
+  constexpr mat<4, 3, T, Q>& operator++();
+  constexpr mat<4, 3, T, Q>& operator--();
+  [[nodiscard]] constexpr mat<4, 3, T, Q> operator++(int);
+  [[nodiscard]] constexpr mat<4, 3, T, Q> operator--(int);
+ };
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator+(mat<4, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator-(mat<4, 3, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator+(mat<4, 3, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator+(mat<4, 3, T, Q> const& m1, mat<4, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator-(mat<4, 3, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator-(mat<4, 3, T, Q> const& m1, mat<4, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator*(mat<4, 3, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator*(T scalar, mat<4, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<4, 3, T, Q>::col_type operator*(mat<4, 3, T, Q> const& m, typename mat<4, 3, T, Q>::row_type const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<4, 3, T, Q>::row_type operator*(typename mat<4, 3, T, Q>::col_type const& v, mat<4, 3, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 3, T, Q> operator*(mat<4, 3, T, Q> const& m1, mat<2, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 3, T, Q> operator*(mat<4, 3, T, Q> const& m1, mat<3, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator*(mat<4, 3, T, Q> const& m1, mat<4, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator/(mat<4, 3, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 3, T, Q> operator/(T scalar, mat<4, 3, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(mat<4, 3, T, Q> const& m1, mat<4, 3, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(mat<4, 3, T, Q> const& m1, mat<4, 3, T, Q> const& m2);
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x3.inl" 1
+namespace glm
+{
+# 21 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x3.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr mat<4, 3, T, Q>::mat(mat<4, 3, T, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(m[3])}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q>::mat(T s)
+
+   : value{col_type(s, 0, 0), col_type(0, s, 0), col_type(0, 0, s), col_type(0, 0, 0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q>::mat
+ (
+  T const& x0, T const& y0, T const& z0,
+  T const& x1, T const& y1, T const& z1,
+  T const& x2, T const& y2, T const& z2,
+  T const& x3, T const& y3, T const& z3
+ )
+
+   : value{col_type(x0, y0, z0), col_type(x1, y1, z1), col_type(x2, y2, z2), col_type(x3, y3, z3)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q>::mat(col_type const& v0, col_type const& v1, col_type const& v2, col_type const& v3)
+
+   : value{col_type(v0), col_type(v1), col_type(v2), col_type(v3)}
+
+ {
+
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<
+  typename X0, typename Y0, typename Z0,
+  typename X1, typename Y1, typename Z1,
+  typename X2, typename Y2, typename Z2,
+  typename X3, typename Y3, typename Z3>
+ inline constexpr mat<4, 3, T, Q>::mat
+ (
+  X0 const& x0, Y0 const& y0, Z0 const& z0,
+  X1 const& x1, Y1 const& y1, Z1 const& z1,
+  X2 const& x2, Y2 const& y2, Z2 const& z2,
+  X3 const& x3, Y3 const& y3, Z3 const& z3
+ )
+
+   : value{col_type(x0, y0, z0), col_type(x1, y1, z1), col_type(x2, y2, z2), col_type(x3, y3, z3)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ template<typename V1, typename V2, typename V3, typename V4>
+ inline constexpr mat<4, 3, T, Q>::mat(vec<3, V1, Q> const& v1, vec<3, V2, Q> const& v2, vec<3, V3, Q> const& v3, vec<3, V4, Q> const& v4)
+
+   : value{col_type(v1), col_type(v2), col_type(v3), col_type(v4)}
+
+ {
+
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr mat<4, 3, T, Q>::mat(mat<4, 3, U, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(m[3])}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q>::mat(mat<2, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0), col_type(0, 0, 1), col_type(0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q>::mat(mat<3, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q>::mat(mat<4, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(m[3])}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q>::mat(mat<2, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(0, 0, 1), col_type(0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q>::mat(mat<3, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0), col_type(m[2], 1), col_type(0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q>::mat(mat<2, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(0, 0, 1), col_type(0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q>::mat(mat<4, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0), col_type(m[2], 1), col_type(m[3], 0)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q>::mat(mat<3, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(0)}
+
+ {
+
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 3, T, Q>::col_type & mat<4, 3, T, Q>::operator[](typename mat<4, 3, T, Q>::length_type i) noexcept
+ {
+  (
+# 260 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x3.inl" 3
+ ((void)0)
+# 260 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x3.inl"
+ );
+  return this->value[i];
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 3, T, Q>::col_type const& mat<4, 3, T, Q>::operator[](typename mat<4, 3, T, Q>::length_type i) const noexcept
+ {
+  (
+# 267 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x3.inl" 3
+ ((void)0)
+# 267 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x3.inl"
+ );
+  return this->value[i];
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 3, T, Q>& mat<4, 3, T, Q>::operator=(mat<4, 3, U, Q> const& m)
+ {
+  this->value[0] = m[0];
+  this->value[1] = m[1];
+  this->value[2] = m[2];
+  this->value[3] = m[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 3, T, Q> & mat<4, 3, T, Q>::operator+=(U s)
+ {
+  this->value[0] += s;
+  this->value[1] += s;
+  this->value[2] += s;
+  this->value[3] += s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 3, T, Q> & mat<4, 3, T, Q>::operator+=(mat<4, 3, U, Q> const& m)
+ {
+  this->value[0] += m[0];
+  this->value[1] += m[1];
+  this->value[2] += m[2];
+  this->value[3] += m[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 3, T, Q> & mat<4, 3, T, Q>::operator-=(U s)
+ {
+  this->value[0] -= s;
+  this->value[1] -= s;
+  this->value[2] -= s;
+  this->value[3] -= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 3, T, Q> & mat<4, 3, T, Q>::operator-=(mat<4, 3, U, Q> const& m)
+ {
+  this->value[0] -= m[0];
+  this->value[1] -= m[1];
+  this->value[2] -= m[2];
+  this->value[3] -= m[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 3, T, Q> & mat<4, 3, T, Q>::operator*=(U s)
+ {
+  this->value[0] *= s;
+  this->value[1] *= s;
+  this->value[2] *= s;
+  this->value[3] *= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 3, T, Q> & mat<4, 3, T, Q>::operator/=(U s)
+ {
+  this->value[0] /= s;
+  this->value[1] /= s;
+  this->value[2] /= s;
+  this->value[3] /= s;
+  return *this;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> & mat<4, 3, T, Q>::operator++()
+ {
+  ++this->value[0];
+  ++this->value[1];
+  ++this->value[2];
+  ++this->value[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> & mat<4, 3, T, Q>::operator--()
+ {
+  --this->value[0];
+  --this->value[1];
+  --this->value[2];
+  --this->value[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> mat<4, 3, T, Q>::operator++(int)
+ {
+  mat<4, 3, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> mat<4, 3, T, Q>::operator--(int)
+ {
+  mat<4, 3, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator+(mat<4, 3, T, Q> const& m)
+ {
+  return m;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator-(mat<4, 3, T, Q> const& m)
+ {
+  return mat<4, 3, T, Q>(
+   -m[0],
+   -m[1],
+   -m[2],
+   -m[3]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator+(mat<4, 3, T, Q> const& m, T scalar)
+ {
+  return mat<4, 3, T, Q>(
+   m[0] + scalar,
+   m[1] + scalar,
+   m[2] + scalar,
+   m[3] + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator+(mat<4, 3, T, Q> const& m1, mat<4, 3, T, Q> const& m2)
+ {
+  return mat<4, 3, T, Q>(
+   m1[0] + m2[0],
+   m1[1] + m2[1],
+   m1[2] + m2[2],
+   m1[3] + m2[3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator-(mat<4, 3, T, Q> const& m, T scalar)
+ {
+  return mat<4, 3, T, Q>(
+   m[0] - scalar,
+   m[1] - scalar,
+   m[2] - scalar,
+   m[3] - scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator-(mat<4, 3, T, Q> const& m1, mat<4, 3, T, Q> const& m2)
+ {
+  return mat<4, 3, T, Q>(
+   m1[0] - m2[0],
+   m1[1] - m2[1],
+   m1[2] - m2[2],
+   m1[3] - m2[3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator*(mat<4, 3, T, Q> const& m, T scalar)
+ {
+  return mat<4, 3, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar,
+   m[2] * scalar,
+   m[3] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator*(T scalar, mat<4, 3, T, Q> const& m)
+ {
+  return mat<4, 3, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar,
+   m[2] * scalar,
+   m[3] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 3, T, Q>::col_type operator*
+ (
+  mat<4, 3, T, Q> const& m,
+  typename mat<4, 3, T, Q>::row_type const& v)
+ {
+  return typename mat<4, 3, T, Q>::col_type(
+   m[0][0] * v.x + m[1][0] * v.y + m[2][0] * v.z + m[3][0] * v.w,
+   m[0][1] * v.x + m[1][1] * v.y + m[2][1] * v.z + m[3][1] * v.w,
+   m[0][2] * v.x + m[1][2] * v.y + m[2][2] * v.z + m[3][2] * v.w);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 3, T, Q>::row_type operator*
+ (
+  typename mat<4, 3, T, Q>::col_type const& v,
+  mat<4, 3, T, Q> const& m)
+ {
+  return typename mat<4, 3, T, Q>::row_type(
+   v.x * m[0][0] + v.y * m[0][1] + v.z * m[0][2],
+   v.x * m[1][0] + v.y * m[1][1] + v.z * m[1][2],
+   v.x * m[2][0] + v.y * m[2][1] + v.z * m[2][2],
+   v.x * m[3][0] + v.y * m[3][1] + v.z * m[3][2]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 3, T, Q> operator*(mat<4, 3, T, Q> const& m1, mat<2, 4, T, Q> const& m2)
+ {
+  return mat<2, 3, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2] + m1[3][0] * m2[0][3],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2] + m1[3][1] * m2[0][3],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1] + m1[2][2] * m2[0][2] + m1[3][2] * m2[0][3],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2] + m1[3][0] * m2[1][3],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2] + m1[3][1] * m2[1][3],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1] + m1[2][2] * m2[1][2] + m1[3][2] * m2[1][3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 3, T, Q> operator*(mat<4, 3, T, Q> const& m1, mat<3, 4, T, Q> const& m2)
+ {
+  return mat<3, 3, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2] + m1[3][0] * m2[0][3],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2] + m1[3][1] * m2[0][3],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1] + m1[2][2] * m2[0][2] + m1[3][2] * m2[0][3],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2] + m1[3][0] * m2[1][3],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2] + m1[3][1] * m2[1][3],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1] + m1[2][2] * m2[1][2] + m1[3][2] * m2[1][3],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1] + m1[2][0] * m2[2][2] + m1[3][0] * m2[2][3],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1] + m1[2][1] * m2[2][2] + m1[3][1] * m2[2][3],
+   m1[0][2] * m2[2][0] + m1[1][2] * m2[2][1] + m1[2][2] * m2[2][2] + m1[3][2] * m2[2][3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator*(mat<4, 3, T, Q> const& m1, mat<4, 4, T, Q> const& m2)
+ {
+  return mat<4, 3, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2] + m1[3][0] * m2[0][3],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2] + m1[3][1] * m2[0][3],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1] + m1[2][2] * m2[0][2] + m1[3][2] * m2[0][3],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2] + m1[3][0] * m2[1][3],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2] + m1[3][1] * m2[1][3],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1] + m1[2][2] * m2[1][2] + m1[3][2] * m2[1][3],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1] + m1[2][0] * m2[2][2] + m1[3][0] * m2[2][3],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1] + m1[2][1] * m2[2][2] + m1[3][1] * m2[2][3],
+   m1[0][2] * m2[2][0] + m1[1][2] * m2[2][1] + m1[2][2] * m2[2][2] + m1[3][2] * m2[2][3],
+   m1[0][0] * m2[3][0] + m1[1][0] * m2[3][1] + m1[2][0] * m2[3][2] + m1[3][0] * m2[3][3],
+   m1[0][1] * m2[3][0] + m1[1][1] * m2[3][1] + m1[2][1] * m2[3][2] + m1[3][1] * m2[3][3],
+   m1[0][2] * m2[3][0] + m1[1][2] * m2[3][1] + m1[2][2] * m2[3][2] + m1[3][2] * m2[3][3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator/(mat<4, 3, T, Q> const& m, T scalar)
+ {
+  return mat<4, 3, T, Q>(
+   m[0] / scalar,
+   m[1] / scalar,
+   m[2] / scalar,
+   m[3] / scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 3, T, Q> operator/(T scalar, mat<4, 3, T, Q> const& m)
+ {
+  return mat<4, 3, T, Q>(
+   scalar / m[0],
+   scalar / m[1],
+   scalar / m[2],
+   scalar / m[3]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(mat<4, 3, T, Q> const& m1, mat<4, 3, T, Q> const& m2)
+ {
+  return (m1[0] == m2[0]) && (m1[1] == m2[1]) && (m1[2] == m2[2]) && (m1[3] == m2[3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(mat<4, 3, T, Q> const& m1, mat<4, 3, T, Q> const& m2)
+ {
+  return (m1[0] != m2[0]) || (m1[1] != m2[1]) || (m1[2] != m2[2]) || (m1[3] != m2[3]);
+ }
+}
+# 171 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x3.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double4x3.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<4, 3, double, defaultp> dmat4x3;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double4x3_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<4, 3, double, lowp> lowp_dmat4x3;
+
+
+
+
+
+ typedef mat<4, 3, double, mediump> mediump_dmat4x3;
+
+
+
+
+
+ typedef mat<4, 3, double, highp> highp_dmat4x3;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float4x3.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<4, 3, float, defaultp> mat4x3;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x3.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float4x3_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<4, 3, float, lowp> lowp_mat4x3;
+
+
+
+
+
+ typedef mat<4, 3, float, mediump> mediump_mat4x3;
+
+
+
+
+
+ typedef mat<4, 3, float, highp> highp_mat4x3;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x3.hpp" 2
+# 29 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x4.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double4x4.hpp" 1
+
+
+
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x4.hpp" 1
+
+
+
+       
+
+
+
+
+
+namespace glm
+{
+ template<typename T, qualifier Q>
+ struct mat<4, 4, T, Q>
+ {
+  typedef vec<4, T, Q> col_type;
+  typedef vec<4, T, Q> row_type;
+  typedef mat<4, 4, T, Q> type;
+  typedef mat<4, 4, T, Q> transpose_type;
+  typedef T value_type;
+
+ private:
+  col_type value[4];
+
+ public:
+
+
+  typedef length_t length_type;
+  [[nodiscard]] static constexpr length_type length(){return 4;}
+
+  [[nodiscard]] constexpr col_type & operator[](length_type i) noexcept;
+  [[nodiscard]] constexpr col_type const& operator[](length_type i) const noexcept;
+
+
+
+  constexpr mat() = default;
+  template<qualifier P>
+  constexpr mat(mat<4, 4, T, P> const& m);
+
+  constexpr mat(T s);
+  constexpr mat(
+   T const& x0, T const& y0, T const& z0, T const& w0,
+   T const& x1, T const& y1, T const& z1, T const& w1,
+   T const& x2, T const& y2, T const& z2, T const& w2,
+   T const& x3, T const& y3, T const& z3, T const& w3);
+  constexpr mat(
+   col_type const& v0,
+   col_type const& v1,
+   col_type const& v2,
+   col_type const& v3);
+
+
+
+  template<
+   typename X1, typename Y1, typename Z1, typename W1,
+   typename X2, typename Y2, typename Z2, typename W2,
+   typename X3, typename Y3, typename Z3, typename W3,
+   typename X4, typename Y4, typename Z4, typename W4>
+  constexpr mat(
+   X1 const& x1, Y1 const& y1, Z1 const& z1, W1 const& w1,
+   X2 const& x2, Y2 const& y2, Z2 const& z2, W2 const& w2,
+   X3 const& x3, Y3 const& y3, Z3 const& z3, W3 const& w3,
+   X4 const& x4, Y4 const& y4, Z4 const& z4, W4 const& w4);
+
+  template<typename V1, typename V2, typename V3, typename V4>
+  constexpr mat(
+   vec<4, V1, Q> const& v1,
+   vec<4, V2, Q> const& v2,
+   vec<4, V3, Q> const& v3,
+   vec<4, V4, Q> const& v4);
+
+
+
+  template<typename U, qualifier P>
+  constexpr mat(mat<4, 4, U, P> const& m);
+
+  constexpr mat(mat<2, 2, T, Q> const& x);
+  constexpr mat(mat<3, 3, T, Q> const& x);
+  constexpr mat(mat<2, 3, T, Q> const& x);
+  constexpr mat(mat<3, 2, T, Q> const& x);
+  constexpr mat(mat<2, 4, T, Q> const& x);
+  constexpr mat(mat<4, 2, T, Q> const& x);
+  constexpr mat(mat<3, 4, T, Q> const& x);
+  constexpr mat(mat<4, 3, T, Q> const& x);
+
+
+
+  template<typename U>
+  constexpr mat<4, 4, T, Q> & operator=(mat<4, 4, U, Q> const& m);
+  template<typename U>
+  constexpr mat<4, 4, T, Q> & operator+=(U s);
+  template<typename U>
+  constexpr mat<4, 4, T, Q> & operator+=(mat<4, 4, U, Q> const& m);
+  template<typename U>
+  constexpr mat<4, 4, T, Q> & operator-=(U s);
+  template<typename U>
+  constexpr mat<4, 4, T, Q> & operator-=(mat<4, 4, U, Q> const& m);
+  template<typename U>
+  constexpr mat<4, 4, T, Q> & operator*=(U s);
+  template<typename U>
+  constexpr mat<4, 4, T, Q> & operator*=(mat<4, 4, U, Q> const& m);
+  template<typename U>
+  constexpr mat<4, 4, T, Q> & operator/=(U s);
+  template<typename U>
+  constexpr mat<4, 4, T, Q> & operator/=(mat<4, 4, U, Q> const& m);
+
+
+
+  constexpr mat<4, 4, T, Q> & operator++();
+  constexpr mat<4, 4, T, Q> & operator--();
+  [[nodiscard]] constexpr mat<4, 4, T, Q> operator++(int);
+  [[nodiscard]] constexpr mat<4, 4, T, Q> operator--(int);
+ };
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator+(mat<4, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator-(mat<4, 4, T, Q> const& m);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator+(mat<4, 4, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator+(T scalar, mat<4, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator+(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator-(mat<4, 4, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator-(T scalar, mat<4, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator-(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator*(mat<4, 4, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator*(T scalar, mat<4, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<4, 4, T, Q>::col_type operator*(mat<4, 4, T, Q> const& m, typename mat<4, 4, T, Q>::row_type const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<4, 4, T, Q>::row_type operator*(typename mat<4, 4, T, Q>::col_type const& v, mat<4, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<2, 4, T, Q> operator*(mat<4, 4, T, Q> const& m1, mat<2, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<3, 4, T, Q> operator*(mat<4, 4, T, Q> const& m1, mat<3, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator*(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator/(mat<4, 4, T, Q> const& m, T scalar);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator/(T scalar, mat<4, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<4, 4, T, Q>::col_type operator/(mat<4, 4, T, Q> const& m, typename mat<4, 4, T, Q>::row_type const& v);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr typename mat<4, 4, T, Q>::row_type operator/(typename mat<4, 4, T, Q>::col_type const& v, mat<4, 4, T, Q> const& m);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> operator/(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator==(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2);
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr bool operator!=(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2);
+}
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x4.inl" 1
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/geometric.hpp" 1
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/geometric.hpp"
+       
+
+
+
+namespace glm
+{
+# 29 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/geometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] T length(vec<L, T, Q> const& x);
+# 39 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/geometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] T distance(vec<L, T, Q> const& p0, vec<L, T, Q> const& p1);
+# 49 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/geometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr T dot(vec<L, T, Q> const& x, vec<L, T, Q> const& y);
+
+
+
+
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<3, T, Q> cross(vec<3, T, Q> const& x, vec<3, T, Q> const& y);
+# 69 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/geometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> normalize(vec<L, T, Q> const& x);
+# 79 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/geometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> faceforward(
+  vec<L, T, Q> const& N,
+  vec<L, T, Q> const& I,
+  vec<L, T, Q> const& Nref);
+# 93 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/geometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> reflect(
+  vec<L, T, Q> const& I,
+  vec<L, T, Q> const& N);
+# 107 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/geometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> refract(
+  vec<L, T, Q> const& I,
+  vec<L, T, Q> const& N,
+  T eta);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_geometric.inl" 1
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/exponential.hpp" 1
+# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/exponential.hpp"
+       
+
+
+
+
+
+
+
+namespace glm
+{
+# 35 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/exponential.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> pow(vec<L, T, Q> const& base, vec<L, T, Q> const& exponent);
+# 46 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/exponential.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> exp(vec<L, T, Q> const& v);
+# 59 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/exponential.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> log(vec<L, T, Q> const& v);
+# 70 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/exponential.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> exp2(vec<L, T, Q> const& v);
+# 82 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/exponential.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> log2(vec<L, T, Q> const& v);
+# 93 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/exponential.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> sqrt(vec<L, T, Q> const& v);
+# 104 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/exponential.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> inversesqrt(vec<L, T, Q> const& v);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_exponential.inl" 1
+
+
+
+
+
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 1 3
+# 46 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 3
+# 1 "C:/msys64/mingw64/include/assert.h" 1 3
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/cassert" 2 3
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_exponential.inl" 2
+
+namespace glm{
+namespace detail
+{
+
+  using std::log2;
+# 23 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_exponential.inl"
+ template<length_t L, typename T, qualifier Q, bool isFloat, bool Aligned>
+ struct compute_log2
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& v)
+  {
+   static_assert(std::numeric_limits<T>::is_iec559 || 0, "'log2' only accept floating-point inputs. Include <glm/gtc/integer.hpp> for integer inputs.");
+
+   return detail::functor1<vec, L, T, T, Q>::call(log2, v);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_sqrt
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x)
+  {
+   return detail::functor1<vec, L, T, T, Q>::call(std::sqrt, x);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_inversesqrt
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x)
+  {
+   return static_cast<T>(1) / sqrt(x);
+  }
+ };
+
+ template<length_t L, bool Aligned>
+ struct compute_inversesqrt<L, float, lowp, Aligned>
+ {
+  inline static vec<L, float, lowp> call(vec<L, float, lowp> const& x)
+  {
+   vec<L, float, lowp> tmp(x);
+   vec<L, float, lowp> xhalf(tmp * 0.5f);
+   vec<L, uint, lowp>* p = reinterpret_cast<vec<L, uint, lowp>*>(const_cast<vec<L, float, lowp>*>(&x));
+   vec<L, uint, lowp> i = vec<L, uint, lowp>(0x5f375a86) - (*p >> vec<L, uint, lowp>(1));
+   vec<L, float, lowp>* ptmp = reinterpret_cast<vec<L, float, lowp>*>(&i);
+   tmp = *ptmp;
+   tmp = tmp * (1.5f - xhalf * tmp * tmp);
+   return tmp;
+  }
+ };
+}
+
+
+ using std::pow;
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> pow(vec<L, T, Q> const& base, vec<L, T, Q> const& exponent)
+ {
+  return detail::functor2<vec, L, T, Q>::call(pow, base, exponent);
+ }
+
+
+ using std::exp;
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> exp(vec<L, T, Q> const& x)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(exp, x);
+ }
+
+
+ using std::log;
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> log(vec<L, T, Q> const& x)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(log, x);
+ }
+
+
+    using std::exp2;
+# 106 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_exponential.inl"
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> exp2(vec<L, T, Q> const& x)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(exp2, x);
+ }
+
+
+ template<typename genType>
+ inline genType log2(genType x)
+ {
+  return log2(vec<1, genType>(x)).x;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> log2(vec<L, T, Q> const& x)
+ {
+  return detail::compute_log2<L, T, Q, std::numeric_limits<T>::is_iec559, detail::is_aligned<Q>::value>::call(x);
+ }
+
+
+ using std::sqrt;
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> sqrt(vec<L, T, Q> const& x)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'sqrt' only accept floating-point inputs");
+  return detail::compute_sqrt<L, T, Q, detail::is_aligned<Q>::value>::call(x);
+ }
+
+
+ template<typename genType>
+ inline genType inversesqrt(genType x)
+ {
+  return static_cast<genType>(1) / sqrt(x);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> inversesqrt(vec<L, T, Q> const& x)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'inversesqrt' only accept floating-point inputs");
+  return detail::compute_inversesqrt<L, T, Q, detail::is_aligned<Q>::value>::call(x);
+ }
+}
+# 111 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/exponential.hpp" 2
+# 2 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_geometric.inl" 2
+
+
+namespace glm{
+namespace detail
+{
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_length
+ {
+  inline static T call(vec<L, T, Q> const& v)
+  {
+   return sqrt(dot(v, v));
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_distance
+ {
+  inline static T call(vec<L, T, Q> const& p0, vec<L, T, Q> const& p1)
+  {
+   return length(p1 - p0);
+  }
+ };
+
+ template<typename V, typename T, bool Aligned>
+ struct compute_dot{};
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_dot<vec<1, T, Q>, T, Aligned>
+ {
+  inline constexpr static T call(vec<1, T, Q> const& a, vec<1, T, Q> const& b)
+  {
+   return a.x * b.x;
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_dot<vec<2, T, Q>, T, Aligned>
+ {
+  inline constexpr static T call(vec<2, T, Q> const& a, vec<2, T, Q> const& b)
+  {
+   vec<2, T, Q> tmp(a * b);
+   return tmp.x + tmp.y;
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_dot<vec<3, T, Q>, T, Aligned>
+ {
+  inline constexpr static T call(vec<3, T, Q> const& a, vec<3, T, Q> const& b)
+  {
+   vec<3, T, Q> tmp(a * b);
+   return tmp.x + tmp.y + tmp.z;
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_dot<vec<4, T, Q>, T, Aligned>
+ {
+  inline constexpr static T call(vec<4, T, Q> const& a, vec<4, T, Q> const& b)
+  {
+
+
+
+
+    vec<4, T, Q> tmp(a * b);
+    return (tmp.x + tmp.y) + (tmp.z + tmp.w);
+
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_cross
+ {
+  inline constexpr static vec<3, T, Q> call(vec<3, T, Q> const& x, vec<3, T, Q> const& y)
+  {
+   static_assert(std::numeric_limits<T>::is_iec559, "'cross' accepts only floating-point inputs");
+
+   return vec<3, T, Q>(
+    x.y * y.z - y.y * x.z,
+    x.z * y.x - y.z * x.x,
+    x.x * y.y - y.x * x.y);
+  }
+
+  inline constexpr static vec<4, T, Q> call(vec<4, T, Q> const& x, vec<4, T, Q> const& y)
+  {
+   static_assert(std::numeric_limits<T>::is_iec559, "'cross' accepts only floating-point inputs");
+
+   return vec<4, T, Q>(
+    x.y * y.z - y.y * x.z,
+    x.z * y.x - y.z * x.x,
+    x.x * y.y - y.x * x.y,
+    0.0f);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_normalize
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& v)
+  {
+   static_assert(std::numeric_limits<T>::is_iec559, "'normalize' accepts only floating-point inputs");
+
+   return v * inversesqrt(dot(v, v));
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_faceforward
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& N, vec<L, T, Q> const& I, vec<L, T, Q> const& Nref)
+  {
+   static_assert(std::numeric_limits<T>::is_iec559, "'normalize' accepts only floating-point inputs");
+
+   return dot(Nref, I) < static_cast<T>(0) ? N : -N;
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_reflect
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& I, vec<L, T, Q> const& N)
+  {
+   return I - N * dot(N, I) * static_cast<T>(2);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_refract
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& I, vec<L, T, Q> const& N, T eta)
+  {
+   T const dotValue(dot(N, I));
+   T const k(static_cast<T>(1) - eta * eta * (static_cast<T>(1) - dotValue * dotValue));
+   vec<L, T, Q> const Result =
+                (k >= static_cast<T>(0)) ? (eta * I - (eta * dotValue + std::sqrt(k)) * N) : vec<L, T, Q>(0);
+   return Result;
+  }
+ };
+}
+
+
+ template<typename genType>
+ inline genType length(genType x)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559, "'length' accepts only floating-point inputs");
+
+  return abs(x);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline T length(vec<L, T, Q> const& v)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559, "'length' accepts only floating-point inputs");
+
+  return detail::compute_length<L, T, Q, detail::is_aligned<Q>::value>::call(v);
+ }
+
+
+ template<typename genType>
+ inline genType distance(genType const& p0, genType const& p1)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559, "'distance' accepts only floating-point inputs");
+
+  return length(p1 - p0);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline T distance(vec<L, T, Q> const& p0, vec<L, T, Q> const& p1)
+ {
+  return detail::compute_distance<L, T, Q, detail::is_aligned<Q>::value>::call(p0, p1);
+ }
+
+
+ template<typename T>
+ inline constexpr T dot(T x, T y)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559, "'dot' accepts only floating-point inputs");
+  return x * y;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr T dot(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559, "'dot' accepts only floating-point inputs");
+  return detail::compute_dot<vec<L, T, Q>, T, detail::is_aligned<Q>::value>::call(x, y);
+ }
+
+
+ template<typename T, qualifier Q>
+ inline constexpr vec<3, T, Q> cross(vec<3, T, Q> const& x, vec<3, T, Q> const& y)
+ {
+  return detail::compute_cross<T, Q, detail::is_aligned<Q>::value>::call(x, y);
+ }
+# 205 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_geometric.inl"
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> normalize(vec<L, T, Q> const& x)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559, "'normalize' accepts only floating-point inputs");
+
+  return detail::compute_normalize<L, T, Q, detail::is_aligned<Q>::value>::call(x);
+ }
+
+
+ template<typename genType>
+ inline genType faceforward(genType const& N, genType const& I, genType const& Nref)
+ {
+  return dot(Nref, I) < static_cast<genType>(0) ? N : -N;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> faceforward(vec<L, T, Q> const& N, vec<L, T, Q> const& I, vec<L, T, Q> const& Nref)
+ {
+  return detail::compute_faceforward<L, T, Q, detail::is_aligned<Q>::value>::call(N, I, Nref);
+ }
+
+
+ template<typename genType>
+ inline genType reflect(genType const& I, genType const& N)
+ {
+  return I - N * dot(N, I) * genType(2);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> reflect(vec<L, T, Q> const& I, vec<L, T, Q> const& N)
+ {
+  return detail::compute_reflect<L, T, Q, detail::is_aligned<Q>::value>::call(I, N);
+ }
+
+
+ template<typename genType>
+ inline genType refract(genType const& I, genType const& N, genType eta)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559, "'refract' accepts only floating-point inputs");
+  genType const dotValue(dot(N, I));
+  genType const k(static_cast<genType>(1) - eta * eta * (static_cast<genType>(1) - dotValue * dotValue));
+  return (eta * I - (eta * dotValue + sqrt(k)) * N) * static_cast<genType>(k >= static_cast<genType>(0));
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> refract(vec<L, T, Q> const& I, vec<L, T, Q> const& N, T eta)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559, "'refract' accepts only floating-point inputs");
+  return detail::compute_refract<L, T, Q, detail::is_aligned<Q>::value>::call(I, N, eta);
+ }
+}
+# 117 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/geometric.hpp" 2
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x4.inl" 2
+
+namespace glm
+{
+# 24 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x4.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr mat<4, 4, T, Q>::mat(mat<4, 4, T, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(m[3])}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q>::mat(T s)
+
+   : value{col_type(s, 0, 0, 0), col_type(0, s, 0, 0), col_type(0, 0, s, 0), col_type(0, 0, 0, s)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q>::mat
+ (
+  T const& x0, T const& y0, T const& z0, T const& w0,
+  T const& x1, T const& y1, T const& z1, T const& w1,
+  T const& x2, T const& y2, T const& z2, T const& w2,
+  T const& x3, T const& y3, T const& z3, T const& w3
+ )
+
+   : value{
+    col_type(x0, y0, z0, w0),
+    col_type(x1, y1, z1, w1),
+    col_type(x2, y2, z2, w2),
+    col_type(x3, y3, z3, w3)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q>::mat(col_type const& v0, col_type const& v1, col_type const& v2, col_type const& v3)
+
+   : value{col_type(v0), col_type(v1), col_type(v2), col_type(v3)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr mat<4, 4, T, Q>::mat(mat<4, 4, U, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(m[3])}
+
+ {
+
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<
+  typename X1, typename Y1, typename Z1, typename W1,
+  typename X2, typename Y2, typename Z2, typename W2,
+  typename X3, typename Y3, typename Z3, typename W3,
+  typename X4, typename Y4, typename Z4, typename W4>
+ inline constexpr mat<4, 4, T, Q>::mat
+ (
+  X1 const& x1, Y1 const& y1, Z1 const& z1, W1 const& w1,
+  X2 const& x2, Y2 const& y2, Z2 const& z2, W2 const& w2,
+  X3 const& x3, Y3 const& y3, Z3 const& z3, W3 const& w3,
+  X4 const& x4, Y4 const& y4, Z4 const& z4, W4 const& w4
+ )
+
+   : value{col_type(x1, y1, z1, w1), col_type(x2, y2, z2, w2), col_type(x3, y3, z3, w3), col_type(x4, y4, z4, w4)}
+
+ {
+  static_assert(std::numeric_limits<X1>::is_iec559 || std::numeric_limits<X1>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 1st parameter type invalid.");
+  static_assert(std::numeric_limits<Y1>::is_iec559 || std::numeric_limits<Y1>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 2nd parameter type invalid.");
+  static_assert(std::numeric_limits<Z1>::is_iec559 || std::numeric_limits<Z1>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 3rd parameter type invalid.");
+  static_assert(std::numeric_limits<W1>::is_iec559 || std::numeric_limits<W1>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 4th parameter type invalid.");
+
+  static_assert(std::numeric_limits<X2>::is_iec559 || std::numeric_limits<X2>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 5th parameter type invalid.");
+  static_assert(std::numeric_limits<Y2>::is_iec559 || std::numeric_limits<Y2>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 6th parameter type invalid.");
+  static_assert(std::numeric_limits<Z2>::is_iec559 || std::numeric_limits<Z2>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 7th parameter type invalid.");
+  static_assert(std::numeric_limits<W2>::is_iec559 || std::numeric_limits<W2>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 8th parameter type invalid.");
+
+  static_assert(std::numeric_limits<X3>::is_iec559 || std::numeric_limits<X3>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 9th parameter type invalid.");
+  static_assert(std::numeric_limits<Y3>::is_iec559 || std::numeric_limits<Y3>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 10th parameter type invalid.");
+  static_assert(std::numeric_limits<Z3>::is_iec559 || std::numeric_limits<Z3>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 11th parameter type invalid.");
+  static_assert(std::numeric_limits<W3>::is_iec559 || std::numeric_limits<W3>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 12th parameter type invalid.");
+
+  static_assert(std::numeric_limits<X4>::is_iec559 || std::numeric_limits<X4>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 13th parameter type invalid.");
+  static_assert(std::numeric_limits<Y4>::is_iec559 || std::numeric_limits<Y4>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 14th parameter type invalid.");
+  static_assert(std::numeric_limits<Z4>::is_iec559 || std::numeric_limits<Z4>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 15th parameter type invalid.");
+  static_assert(std::numeric_limits<W4>::is_iec559 || std::numeric_limits<W4>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 16th parameter type invalid.");
+
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ template<typename V1, typename V2, typename V3, typename V4>
+ inline constexpr mat<4, 4, T, Q>::mat(vec<4, V1, Q> const& v1, vec<4, V2, Q> const& v2, vec<4, V3, Q> const& v3, vec<4, V4, Q> const& v4)
+
+   : value{col_type(v1), col_type(v2), col_type(v3), col_type(v4)}
+
+ {
+  static_assert(std::numeric_limits<V1>::is_iec559 || std::numeric_limits<V1>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 1st parameter type invalid.");
+  static_assert(std::numeric_limits<V2>::is_iec559 || std::numeric_limits<V2>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 2nd parameter type invalid.");
+  static_assert(std::numeric_limits<V3>::is_iec559 || std::numeric_limits<V3>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 3rd parameter type invalid.");
+  static_assert(std::numeric_limits<V4>::is_iec559 || std::numeric_limits<V4>::is_integer || 0, "*mat4x4 constructor only takes float and integer types, 4th parameter type invalid.");
+
+
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q>::mat(mat<2, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0, 0), col_type(m[1], 0, 0), col_type(0, 0, 1, 0), col_type(0, 0, 0, 1)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q>::mat(mat<3, 3, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0), col_type(m[2], 0), col_type(0, 0, 0, 1)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q>::mat(mat<2, 3, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0), col_type(0, 0, 1, 0), col_type(0, 0, 0, 1)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q>::mat(mat<3, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0, 0), col_type(m[1], 0, 0), col_type(m[2], 1, 0), col_type(0, 0, 0, 1)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q>::mat(mat<2, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(0, 0, 1, 0), col_type(0, 0, 0, 1)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q>::mat(mat<4, 2, T, Q> const& m)
+
+   : value{col_type(m[0], 0, 0), col_type(m[1], 0, 0), col_type(0, 0, 1, 0), col_type(0, 0, 0, 1)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q>::mat(mat<3, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1]), col_type(m[2]), col_type(0, 0, 0, 1)}
+
+ {
+
+
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q>::mat(mat<4, 3, T, Q> const& m)
+
+   : value{col_type(m[0], 0), col_type(m[1], 0), col_type(m[2], 0), col_type(m[3], 1)}
+
+ {
+
+
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 4, T, Q>::col_type & mat<4, 4, T, Q>::operator[](typename mat<4, 4, T, Q>::length_type i) noexcept
+ {
+  (
+# 292 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x4.inl" 3
+ ((void)0)
+# 292 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x4.inl"
+ );
+  return this->value[i];
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 4, T, Q>::col_type const& mat<4, 4, T, Q>::operator[](typename mat<4, 4, T, Q>::length_type i) const noexcept
+ {
+  (
+# 299 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x4.inl" 3
+ ((void)0)
+# 299 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x4.inl"
+ );
+  return this->value[i];
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 4, T, Q>& mat<4, 4, T, Q>::operator=(mat<4, 4, U, Q> const& m)
+ {
+
+
+  this->value[0] = m[0];
+  this->value[1] = m[1];
+  this->value[2] = m[2];
+  this->value[3] = m[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 4, T, Q>& mat<4, 4, T, Q>::operator+=(U s)
+ {
+  this->value[0] += s;
+  this->value[1] += s;
+  this->value[2] += s;
+  this->value[3] += s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 4, T, Q>& mat<4, 4, T, Q>::operator+=(mat<4, 4, U, Q> const& m)
+ {
+  this->value[0] += m[0];
+  this->value[1] += m[1];
+  this->value[2] += m[2];
+  this->value[3] += m[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 4, T, Q> & mat<4, 4, T, Q>::operator-=(U s)
+ {
+  this->value[0] -= s;
+  this->value[1] -= s;
+  this->value[2] -= s;
+  this->value[3] -= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 4, T, Q> & mat<4, 4, T, Q>::operator-=(mat<4, 4, U, Q> const& m)
+ {
+  this->value[0] -= m[0];
+  this->value[1] -= m[1];
+  this->value[2] -= m[2];
+  this->value[3] -= m[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 4, T, Q> & mat<4, 4, T, Q>::operator*=(U s)
+ {
+  this->value[0] *= s;
+  this->value[1] *= s;
+  this->value[2] *= s;
+  this->value[3] *= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 4, T, Q> & mat<4, 4, T, Q>::operator*=(mat<4, 4, U, Q> const& m)
+ {
+  return (*this = *this * m);
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 4, T, Q> & mat<4, 4, T, Q>::operator/=(U s)
+ {
+  this->value[0] /= s;
+  this->value[1] /= s;
+  this->value[2] /= s;
+  this->value[3] /= s;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<4, 4, T, Q> & mat<4, 4, T, Q>::operator/=(mat<4, 4, U, Q> const& m)
+ {
+  return *this *= inverse(m);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> & mat<4, 4, T, Q>::operator++()
+ {
+  ++this->value[0];
+  ++this->value[1];
+  ++this->value[2];
+  ++this->value[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> & mat<4, 4, T, Q>::operator--()
+ {
+  --this->value[0];
+  --this->value[1];
+  --this->value[2];
+  --this->value[3];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> mat<4, 4, T, Q>::operator++(int)
+ {
+  mat<4, 4, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> mat<4, 4, T, Q>::operator--(int)
+ {
+  mat<4, 4, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator+(mat<4, 4, T, Q> const& m)
+ {
+  return m;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator-(mat<4, 4, T, Q> const& m)
+ {
+  return mat<4, 4, T, Q>(
+   -m[0],
+   -m[1],
+   -m[2],
+   -m[3]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator+(mat<4, 4, T, Q> const& m, T scalar)
+ {
+  return mat<4, 4, T, Q>(
+   m[0] + scalar,
+   m[1] + scalar,
+   m[2] + scalar,
+   m[3] + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator+(T scalar, mat<4, 4, T, Q> const& m)
+ {
+  return mat<4, 4, T, Q>(
+   m[0] + scalar,
+   m[1] + scalar,
+   m[2] + scalar,
+   m[3] + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator+(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2)
+ {
+  return mat<4, 4, T, Q>(
+   m1[0] + m2[0],
+   m1[1] + m2[1],
+   m1[2] + m2[2],
+   m1[3] + m2[3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator-(mat<4, 4, T, Q> const& m, T scalar)
+ {
+  return mat<4, 4, T, Q>(
+   m[0] - scalar,
+   m[1] - scalar,
+   m[2] - scalar,
+   m[3] - scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator-(T scalar, mat<4, 4, T, Q> const& m)
+ {
+  return mat<4, 4, T, Q>(
+   scalar - m[0],
+   scalar - m[1],
+   scalar - m[2],
+   scalar - m[3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator-(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2)
+ {
+  return mat<4, 4, T, Q>(
+   m1[0] - m2[0],
+   m1[1] - m2[1],
+   m1[2] - m2[2],
+   m1[3] - m2[3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator*(mat<4, 4, T, Q> const& m, T scalar)
+ {
+  return mat<4, 4, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar,
+   m[2] * scalar,
+   m[3] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator*(T scalar, mat<4, 4, T, Q> const& m)
+ {
+  return mat<4, 4, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar,
+   m[2] * scalar,
+   m[3] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 4, T, Q>::col_type operator*
+ (
+  mat<4, 4, T, Q> const& m,
+  typename mat<4, 4, T, Q>::row_type const& v
+ )
+ {
+# 562 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x4.inl"
+  typename mat<4, 4, T, Q>::col_type const Mov0(v[0]);
+  typename mat<4, 4, T, Q>::col_type const Mov1(v[1]);
+  typename mat<4, 4, T, Q>::col_type const Mul0 = m[0] * Mov0;
+  typename mat<4, 4, T, Q>::col_type const Mul1 = m[1] * Mov1;
+  typename mat<4, 4, T, Q>::col_type const Add0 = Mul0 + Mul1;
+  typename mat<4, 4, T, Q>::col_type const Mov2(v[2]);
+  typename mat<4, 4, T, Q>::col_type const Mov3(v[3]);
+  typename mat<4, 4, T, Q>::col_type const Mul2 = m[2] * Mov2;
+  typename mat<4, 4, T, Q>::col_type const Mul3 = m[3] * Mov3;
+  typename mat<4, 4, T, Q>::col_type const Add1 = Mul2 + Mul3;
+  typename mat<4, 4, T, Q>::col_type const Add2 = Add0 + Add1;
+  return Add2;
+# 582 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x4.inl"
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 4, T, Q>::row_type operator*
+ (
+  typename mat<4, 4, T, Q>::col_type const& v,
+  mat<4, 4, T, Q> const& m
+ )
+ {
+  return typename mat<4, 4, T, Q>::row_type(
+   glm::dot(m[0], v),
+   glm::dot(m[1], v),
+   glm::dot(m[2], v),
+   glm::dot(m[3], v));
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 4, T, Q> operator*(mat<4, 4, T, Q> const& m1, mat<2, 4, T, Q> const& m2)
+ {
+  return mat<2, 4, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2] + m1[3][0] * m2[0][3],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2] + m1[3][1] * m2[0][3],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1] + m1[2][2] * m2[0][2] + m1[3][2] * m2[0][3],
+   m1[0][3] * m2[0][0] + m1[1][3] * m2[0][1] + m1[2][3] * m2[0][2] + m1[3][3] * m2[0][3],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2] + m1[3][0] * m2[1][3],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2] + m1[3][1] * m2[1][3],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1] + m1[2][2] * m2[1][2] + m1[3][2] * m2[1][3],
+   m1[0][3] * m2[1][0] + m1[1][3] * m2[1][1] + m1[2][3] * m2[1][2] + m1[3][3] * m2[1][3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 4, T, Q> operator*(mat<4, 4, T, Q> const& m1, mat<3, 4, T, Q> const& m2)
+ {
+  return mat<3, 4, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1] + m1[2][0] * m2[0][2] + m1[3][0] * m2[0][3],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1] + m1[2][1] * m2[0][2] + m1[3][1] * m2[0][3],
+   m1[0][2] * m2[0][0] + m1[1][2] * m2[0][1] + m1[2][2] * m2[0][2] + m1[3][2] * m2[0][3],
+   m1[0][3] * m2[0][0] + m1[1][3] * m2[0][1] + m1[2][3] * m2[0][2] + m1[3][3] * m2[0][3],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1] + m1[2][0] * m2[1][2] + m1[3][0] * m2[1][3],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1] + m1[2][1] * m2[1][2] + m1[3][1] * m2[1][3],
+   m1[0][2] * m2[1][0] + m1[1][2] * m2[1][1] + m1[2][2] * m2[1][2] + m1[3][2] * m2[1][3],
+   m1[0][3] * m2[1][0] + m1[1][3] * m2[1][1] + m1[2][3] * m2[1][2] + m1[3][3] * m2[1][3],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1] + m1[2][0] * m2[2][2] + m1[3][0] * m2[2][3],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1] + m1[2][1] * m2[2][2] + m1[3][1] * m2[2][3],
+   m1[0][2] * m2[2][0] + m1[1][2] * m2[2][1] + m1[2][2] * m2[2][2] + m1[3][2] * m2[2][3],
+   m1[0][3] * m2[2][0] + m1[1][3] * m2[2][1] + m1[2][3] * m2[2][2] + m1[3][3] * m2[2][3]);
+ }
+
+ namespace detail
+ {
+  template<typename T, qualifier Q, bool is_aligned>
+  struct mul4x4 {};
+
+  template<typename T, qualifier Q>
+  struct mul4x4<T, Q, true>
+  {
+   inline constexpr static mat<4, 4, T, Q> call(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2)
+   {
+    typename mat<4, 4, T, Q>::col_type const SrcA0 = m1[0];
+    typename mat<4, 4, T, Q>::col_type const SrcA1 = m1[1];
+    typename mat<4, 4, T, Q>::col_type const SrcA2 = m1[2];
+    typename mat<4, 4, T, Q>::col_type const SrcA3 = m1[3];
+
+    typename mat<4, 4, T, Q>::col_type const SrcB0 = m2[0];
+    typename mat<4, 4, T, Q>::col_type const SrcB1 = m2[1];
+    typename mat<4, 4, T, Q>::col_type const SrcB2 = m2[2];
+    typename mat<4, 4, T, Q>::col_type const SrcB3 = m2[3];
+
+    typename mat<4, 4, T, Q>::col_type const tmp0 = glm::fma(SrcA3, splatW(SrcB0), glm::fma(SrcA2, splatZ(SrcB0), glm::fma(SrcA1, splatY(SrcB0), SrcA0 * splatX(SrcB0))));
+    typename mat<4, 4, T, Q>::col_type const tmp1 = glm::fma(SrcA3, splatW(SrcB1), glm::fma(SrcA2, splatZ(SrcB1), glm::fma(SrcA1, splatY(SrcB1), SrcA0 * splatX(SrcB1))));
+    typename mat<4, 4, T, Q>::col_type const tmp2 = glm::fma(SrcA3, splatW(SrcB2), glm::fma(SrcA2, splatZ(SrcB2), glm::fma(SrcA1, splatY(SrcB2), SrcA0 * splatX(SrcB2))));
+    typename mat<4, 4, T, Q>::col_type const tmp3 = glm::fma(SrcA3, splatW(SrcB3), glm::fma(SrcA2, splatZ(SrcB3), glm::fma(SrcA1, splatY(SrcB3), SrcA0 * splatX(SrcB3))));
+
+    return mat < 4, 4, T, Q > (tmp0, tmp1, tmp2, tmp3);
+   }
+  };
+
+  template<typename T, qualifier Q>
+  struct mul4x4<T, Q, false>
+  {
+   inline constexpr static mat<4, 4, T, Q> call(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2)
+   {
+    typename mat<4, 4, T, Q>::col_type const& SrcA0 = m1[0];
+    typename mat<4, 4, T, Q>::col_type const& SrcA1 = m1[1];
+    typename mat<4, 4, T, Q>::col_type const& SrcA2 = m1[2];
+    typename mat<4, 4, T, Q>::col_type const& SrcA3 = m1[3];
+
+    typename mat<4, 4, T, Q>::col_type const& SrcB0 = m2[0];
+    typename mat<4, 4, T, Q>::col_type const& SrcB1 = m2[1];
+    typename mat<4, 4, T, Q>::col_type const& SrcB2 = m2[2];
+    typename mat<4, 4, T, Q>::col_type const& SrcB3 = m2[3];
+
+
+
+
+
+
+
+    typename mat<4, 4, T, Q>::col_type tmp0 = SrcA0 * SrcB0.x;
+    tmp0 += SrcA1 * SrcB0.y;
+    tmp0 += SrcA2 * SrcB0.z;
+    tmp0 += SrcA3 * SrcB0.w;
+    typename mat<4, 4, T, Q>::col_type tmp1 = SrcA0 * SrcB1.x;
+    tmp1 += SrcA1 * SrcB1.y;
+    tmp1 += SrcA2 * SrcB1.z;
+    tmp1 += SrcA3 * SrcB1.w;
+    typename mat<4, 4, T, Q>::col_type tmp2 = SrcA0 * SrcB2.x;
+    tmp2 += SrcA1 * SrcB2.y;
+    tmp2 += SrcA2 * SrcB2.z;
+    tmp2 += SrcA3 * SrcB2.w;
+    typename mat<4, 4, T, Q>::col_type tmp3 = SrcA0 * SrcB3.x;
+    tmp3 += SrcA1 * SrcB3.y;
+    tmp3 += SrcA2 * SrcB3.z;
+    tmp3 += SrcA3 * SrcB3.w;
+
+    return mat<4, 4, T, Q>(tmp0, tmp1, tmp2, tmp3);
+   }
+  };
+ }
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator*(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2)
+ {
+  return detail::mul4x4<T, Q, detail::is_aligned<Q>::value>::call(m1, m2);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator/(mat<4, 4, T, Q> const& m, T scalar)
+ {
+  return mat<4, 4, T, Q>(
+   m[0] / scalar,
+   m[1] / scalar,
+   m[2] / scalar,
+   m[3] / scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator/(T scalar, mat<4, 4, T, Q> const& m)
+ {
+  return mat<4, 4, T, Q>(
+   scalar / m[0],
+   scalar / m[1],
+   scalar / m[2],
+   scalar / m[3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 4, T, Q>::col_type operator/(mat<4, 4, T, Q> const& m, typename mat<4, 4, T, Q>::row_type const& v)
+ {
+  return inverse(m) * v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<4, 4, T, Q>::row_type operator/(typename mat<4, 4, T, Q>::col_type const& v, mat<4, 4, T, Q> const& m)
+ {
+  return v * inverse(m);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> operator/(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2)
+ {
+  mat<4, 4, T, Q> m1_copy(m1);
+  return m1_copy /= m2;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2)
+ {
+  return (m1[0] == m2[0]) && (m1[1] == m2[1]) && (m1[2] == m2[2]) && (m1[3] == m2[3]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2)
+ {
+  return (m1[0] != m2[0]) || (m1[1] != m2[1]) || (m1[2] != m2[2]) || (m1[3] != m2[3]);
+ }
+}
+# 189 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat4x4.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double4x4.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<4, 4, double, defaultp> dmat4x4;
+
+
+
+
+ typedef mat<4, 4, double, defaultp> dmat4;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double4x4_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<4, 4, double, lowp> lowp_dmat4;
+
+
+
+
+
+ typedef mat<4, 4, double, mediump> mediump_dmat4;
+
+
+
+
+
+ typedef mat<4, 4, double, highp> highp_dmat4;
+
+
+
+
+
+ typedef mat<4, 4, double, lowp> lowp_dmat4x4;
+
+
+
+
+
+ typedef mat<4, 4, double, mediump> mediump_dmat4x4;
+
+
+
+
+
+ typedef mat<4, 4, double, highp> highp_dmat4x4;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float4x4.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<4, 4, float, defaultp> mat4x4;
+
+
+
+
+ typedef mat<4, 4, float, defaultp> mat4;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x4.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float4x4_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<4, 4, float, lowp> lowp_mat4;
+
+
+
+
+
+ typedef mat<4, 4, float, mediump> mediump_mat4;
+
+
+
+
+
+ typedef mat<4, 4, float, highp> highp_mat4;
+
+
+
+
+
+ typedef mat<4, 4, float, lowp> lowp_mat4x4;
+
+
+
+
+
+ typedef mat<4, 4, float, mediump> mediump_mat4x4;
+
+
+
+
+
+ typedef mat<4, 4, float, highp> highp_mat4x4;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat4x4.hpp" 2
+# 30 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp" 2
+
+namespace glm {
+namespace detail
+{
+ template<length_t C, length_t R, typename T, qualifier Q>
+ struct outerProduct_trait{};
+
+ template<typename T, qualifier Q>
+ struct outerProduct_trait<2, 2, T, Q>
+ {
+  typedef mat<2, 2, T, Q> type;
+ };
+
+ template<typename T, qualifier Q>
+ struct outerProduct_trait<2, 3, T, Q>
+ {
+  typedef mat<3, 2, T, Q> type;
+ };
+
+ template<typename T, qualifier Q>
+ struct outerProduct_trait<2, 4, T, Q>
+ {
+  typedef mat<4, 2, T, Q> type;
+ };
+
+ template<typename T, qualifier Q>
+ struct outerProduct_trait<3, 2, T, Q>
+ {
+  typedef mat<2, 3, T, Q> type;
+ };
+
+ template<typename T, qualifier Q>
+ struct outerProduct_trait<3, 3, T, Q>
+ {
+  typedef mat<3, 3, T, Q> type;
+ };
+
+ template<typename T, qualifier Q>
+ struct outerProduct_trait<3, 4, T, Q>
+ {
+  typedef mat<4, 3, T, Q> type;
+ };
+
+ template<typename T, qualifier Q>
+ struct outerProduct_trait<4, 2, T, Q>
+ {
+  typedef mat<2, 4, T, Q> type;
+ };
+
+ template<typename T, qualifier Q>
+ struct outerProduct_trait<4, 3, T, Q>
+ {
+  typedef mat<3, 4, T, Q> type;
+ };
+
+ template<typename T, qualifier Q>
+ struct outerProduct_trait<4, 4, T, Q>
+ {
+  typedef mat<4, 4, T, Q> type;
+ };
+}
+# 105 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp"
+ template<length_t C, length_t R, typename T, qualifier Q>
+ [[nodiscard]] mat<C, R, T, Q> matrixCompMult(mat<C, R, T, Q> const& x, mat<C, R, T, Q> const& y);
+# 119 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp"
+ template<length_t C, length_t R, typename T, qualifier Q>
+ [[nodiscard]] typename detail::outerProduct_trait<C, R, T, Q>::type outerProduct(vec<C, T, Q> const& c, vec<R, T, Q> const& r);
+# 131 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp"
+ template<length_t C, length_t R, typename T, qualifier Q>
+ [[nodiscard]] typename mat<C, R, T, Q>::transpose_type transpose(mat<C, R, T, Q> const& x);
+# 143 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp"
+ template<length_t C, length_t R, typename T, qualifier Q>
+ [[nodiscard]] T determinant(mat<C, R, T, Q> const& m);
+# 155 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp"
+ template<length_t C, length_t R, typename T, qualifier Q>
+ [[nodiscard]] mat<C, R, T, Q> inverse(mat<C, R, T, Q> const& m);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_matrix.inl" 1
+
+
+
+namespace glm{
+namespace detail
+{
+ template<length_t C, length_t R, typename T, qualifier Q, bool Aligned>
+ struct compute_matrixCompMult
+ {
+  inline static mat<C, R, T, Q> call(mat<C, R, T, Q> const& x, mat<C, R, T, Q> const& y)
+  {
+   mat<C, R, T, Q> Result(1);
+   for(length_t i = 0; i < Result.length(); ++i)
+    Result[i] = x[i] * y[i];
+   return Result;
+  }
+ };
+
+ template<length_t C, length_t R, typename T, qualifier Q, bool IsFloat, bool Aligned>
+ struct compute_matrixCompMult_type {
+  inline static mat<C, R, T, Q> call(mat<C, R, T, Q> const& x, mat<C, R, T, Q> const& y)
+  {
+   static_assert(std::numeric_limits<T>::is_iec559 || 0, "'matrixCompMult' only accept floating-point inputs, include <glm/ext/matrix_integer.hpp> to discard this restriction.")
+                                                                                                                            ;
+   return detail::compute_matrixCompMult<C, R, T, Q, detail::is_aligned<Q>::value>::call(x, y);
+  }
+ };
+
+ template<length_t DA, length_t DB, typename T, qualifier Q>
+ struct compute_outerProduct {
+  inline static typename detail::outerProduct_trait<DA, DB, T, Q>::type call(vec<DA, T, Q> const& c, vec<DB, T, Q> const& r)
+  {
+   typename detail::outerProduct_trait<DA, DB, T, Q>::type m(0);
+   for(length_t i = 0; i < m.length(); ++i)
+    m[i] = c * r[i];
+   return m;
+  }
+ };
+
+ template<length_t DA, length_t DB, typename T, qualifier Q, bool IsFloat>
+ struct compute_outerProduct_type {
+  inline static typename detail::outerProduct_trait<DA, DB, T, Q>::type call(vec<DA, T, Q> const& c, vec<DB, T, Q> const& r)
+  {
+   static_assert(std::numeric_limits<T>::is_iec559 || 0, "'outerProduct' only accept floating-point inputs, include <glm/ext/matrix_integer.hpp> to discard this restriction.")
+                                                                                                                          ;
+
+   return detail::compute_outerProduct<DA, DB, T, Q>::call(c, r);
+  }
+ };
+
+ template<length_t C, length_t R, typename T, qualifier Q, bool Aligned>
+ struct compute_transpose{};
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_transpose<2, 2, T, Q, Aligned>
+ {
+  inline static mat<2, 2, T, Q> call(mat<2, 2, T, Q> const& m)
+  {
+   mat<2, 2, T, Q> Result(1);
+   Result[0][0] = m[0][0];
+   Result[0][1] = m[1][0];
+   Result[1][0] = m[0][1];
+   Result[1][1] = m[1][1];
+   return Result;
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_transpose<2, 3, T, Q, Aligned>
+ {
+  inline static mat<3, 2, T, Q> call(mat<2, 3, T, Q> const& m)
+  {
+   mat<3,2, T, Q> Result(1);
+   Result[0][0] = m[0][0];
+   Result[0][1] = m[1][0];
+   Result[1][0] = m[0][1];
+   Result[1][1] = m[1][1];
+   Result[2][0] = m[0][2];
+   Result[2][1] = m[1][2];
+   return Result;
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_transpose<2, 4, T, Q, Aligned>
+ {
+  inline static mat<4, 2, T, Q> call(mat<2, 4, T, Q> const& m)
+  {
+   mat<4, 2, T, Q> Result(1);
+   Result[0][0] = m[0][0];
+   Result[0][1] = m[1][0];
+   Result[1][0] = m[0][1];
+   Result[1][1] = m[1][1];
+   Result[2][0] = m[0][2];
+   Result[2][1] = m[1][2];
+   Result[3][0] = m[0][3];
+   Result[3][1] = m[1][3];
+   return Result;
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_transpose<3, 2, T, Q, Aligned>
+ {
+  inline static mat<2, 3, T, Q> call(mat<3, 2, T, Q> const& m)
+  {
+   mat<2, 3, T, Q> Result(1);
+   Result[0][0] = m[0][0];
+   Result[0][1] = m[1][0];
+   Result[0][2] = m[2][0];
+   Result[1][0] = m[0][1];
+   Result[1][1] = m[1][1];
+   Result[1][2] = m[2][1];
+   return Result;
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_transpose<3, 3, T, Q, Aligned>
+ {
+  inline static mat<3, 3, T, Q> call(mat<3, 3, T, Q> const& m)
+  {
+   mat<3, 3, T, Q> Result(1);
+   Result[0][0] = m[0][0];
+   Result[0][1] = m[1][0];
+   Result[0][2] = m[2][0];
+
+   Result[1][0] = m[0][1];
+   Result[1][1] = m[1][1];
+   Result[1][2] = m[2][1];
+
+   Result[2][0] = m[0][2];
+   Result[2][1] = m[1][2];
+   Result[2][2] = m[2][2];
+   return Result;
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_transpose<3, 4, T, Q, Aligned>
+ {
+  inline static mat<4, 3, T, Q> call(mat<3, 4, T, Q> const& m)
+  {
+   mat<4, 3, T, Q> Result(1);
+   Result[0][0] = m[0][0];
+   Result[0][1] = m[1][0];
+   Result[0][2] = m[2][0];
+   Result[1][0] = m[0][1];
+   Result[1][1] = m[1][1];
+   Result[1][2] = m[2][1];
+   Result[2][0] = m[0][2];
+   Result[2][1] = m[1][2];
+   Result[2][2] = m[2][2];
+   Result[3][0] = m[0][3];
+   Result[3][1] = m[1][3];
+   Result[3][2] = m[2][3];
+   return Result;
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_transpose<4, 2, T, Q, Aligned>
+ {
+  inline static mat<2, 4, T, Q> call(mat<4, 2, T, Q> const& m)
+  {
+   mat<2, 4, T, Q> Result(1);
+   Result[0][0] = m[0][0];
+   Result[0][1] = m[1][0];
+   Result[0][2] = m[2][0];
+   Result[0][3] = m[3][0];
+   Result[1][0] = m[0][1];
+   Result[1][1] = m[1][1];
+   Result[1][2] = m[2][1];
+   Result[1][3] = m[3][1];
+   return Result;
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_transpose<4, 3, T, Q, Aligned>
+ {
+  inline static mat<3, 4, T, Q> call(mat<4, 3, T, Q> const& m)
+  {
+   mat<3, 4, T, Q> Result(1);
+   Result[0][0] = m[0][0];
+   Result[0][1] = m[1][0];
+   Result[0][2] = m[2][0];
+   Result[0][3] = m[3][0];
+   Result[1][0] = m[0][1];
+   Result[1][1] = m[1][1];
+   Result[1][2] = m[2][1];
+   Result[1][3] = m[3][1];
+   Result[2][0] = m[0][2];
+   Result[2][1] = m[1][2];
+   Result[2][2] = m[2][2];
+   Result[2][3] = m[3][2];
+   return Result;
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_transpose<4, 4, T, Q, Aligned>
+ {
+  inline static mat<4, 4, T, Q> call(mat<4, 4, T, Q> const& m)
+  {
+   mat<4, 4, T, Q> Result(1);
+   Result[0][0] = m[0][0];
+   Result[0][1] = m[1][0];
+   Result[0][2] = m[2][0];
+   Result[0][3] = m[3][0];
+
+   Result[1][0] = m[0][1];
+   Result[1][1] = m[1][1];
+   Result[1][2] = m[2][1];
+   Result[1][3] = m[3][1];
+
+   Result[2][0] = m[0][2];
+   Result[2][1] = m[1][2];
+   Result[2][2] = m[2][2];
+   Result[2][3] = m[3][2];
+
+   Result[3][0] = m[0][3];
+   Result[3][1] = m[1][3];
+   Result[3][2] = m[2][3];
+   Result[3][3] = m[3][3];
+   return Result;
+  }
+ };
+
+ template<length_t C, length_t R, typename T, qualifier Q, bool IsFloat, bool Aligned>
+ struct compute_transpose_type {
+  inline static mat<R, C, T, Q> call(mat<C, R, T, Q> const& m)
+  {
+   static_assert(std::numeric_limits<T>::is_iec559 || 0, "'transpose' only accept floating-point inputs, include <glm/ext/matrix_integer.hpp> to discard this restriction.")
+                                                                                                                       ;
+   return detail::compute_transpose<C, R, T, Q, detail::is_aligned<Q>::value>::call(m);
+  }
+ };
+
+ template<length_t C, length_t R, typename T, qualifier Q, bool Aligned>
+ struct compute_determinant{};
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_determinant<2, 2, T, Q, Aligned>
+ {
+  inline static T call(mat<2, 2, T, Q> const& m)
+  {
+   return m[0][0] * m[1][1] - m[1][0] * m[0][1];
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_determinant<3, 3, T, Q, Aligned>
+ {
+  inline static T call(mat<3, 3, T, Q> const& m)
+  {
+   return
+    + m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
+    - m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
+    + m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]);
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_determinant<4, 4, T, Q, Aligned>
+ {
+  inline static T call(mat<4, 4, T, Q> const& m)
+  {
+   T SubFactor00 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
+   T SubFactor01 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
+   T SubFactor02 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
+   T SubFactor03 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
+   T SubFactor04 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
+   T SubFactor05 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
+
+   vec<4, T, Q> DetCof(
+    + (m[1][1] * SubFactor00 - m[1][2] * SubFactor01 + m[1][3] * SubFactor02),
+    - (m[1][0] * SubFactor00 - m[1][2] * SubFactor03 + m[1][3] * SubFactor04),
+    + (m[1][0] * SubFactor01 - m[1][1] * SubFactor03 + m[1][3] * SubFactor05),
+    - (m[1][0] * SubFactor02 - m[1][1] * SubFactor04 + m[1][2] * SubFactor05));
+
+   return
+    m[0][0] * DetCof[0] + m[0][1] * DetCof[1] +
+    m[0][2] * DetCof[2] + m[0][3] * DetCof[3];
+  }
+ };
+
+ template<length_t C, length_t R, typename T, qualifier Q, bool IsFloat, bool Aligned>
+ struct compute_determinant_type{
+
+  inline static T call(mat<C, R, T, Q> const& m)
+  {
+   static_assert(std::numeric_limits<T>::is_iec559 || 0, "'determinant' only accept floating-point inputs, include <glm/ext/matrix_integer.hpp> to discard this restriction.")
+                                                                                                                         ;
+   return detail::compute_determinant<C, R, T, Q, detail::is_aligned<Q>::value>::call(m);
+  }
+ };
+
+ template<length_t C, length_t R, typename T, qualifier Q, bool Aligned>
+ struct compute_inverse{};
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_inverse<2, 2, T, Q, Aligned>
+ {
+  inline static mat<2, 2, T, Q> call(mat<2, 2, T, Q> const& m)
+  {
+   T OneOverDeterminant = static_cast<T>(1) / (
+    + m[0][0] * m[1][1]
+    - m[1][0] * m[0][1]);
+
+   mat<2, 2, T, Q> Inverse(
+    + m[1][1] * OneOverDeterminant,
+    - m[0][1] * OneOverDeterminant,
+    - m[1][0] * OneOverDeterminant,
+    + m[0][0] * OneOverDeterminant);
+
+   return Inverse;
+  }
+ };
+
+ template<typename T, qualifier Q, bool is_aligned>
+ struct inv3x3 {};
+
+ template<typename T, qualifier Q>
+ struct inv3x3<T, Q, true>
+ {
+  inline static mat<3, 3, T, Q> call(mat<3, 3, T, Q> const& m)
+  {
+
+
+   vec<4, T, Q> a = xyz0(m[0]);
+   vec<4, T, Q> b = xyz0(m[1]);
+   vec<4, T, Q> c = xyz0(m[2]);
+
+   vec<4, T, Q> i0 = compute_cross<T, Q, true>::call(b, c);
+   vec<4, T, Q> i1 = compute_cross<T, Q, true>::call(c, a);
+   vec<4, T, Q> i2 = compute_cross<T, Q, true>::call(a, b);
+
+   mat<3, 3, T, Q> Inverse;
+   Inverse[0] = xyz(i0);
+   Inverse[1] = xyz(i1);
+   Inverse[2] = xyz(i2);
+   Inverse = transpose(Inverse);
+
+   T Determinant = compute_dot<vec<4, T, Q>, T, true>::call(a, compute_cross<T, Q, true>::call(b, c));
+   vec<3, T, Q> OneOverDeterminant(static_cast<T>(1) / Determinant);
+   Inverse *= OneOverDeterminant;
+   return Inverse;
+  }
+ };
+
+ template<typename T, qualifier Q>
+ struct inv3x3<T, Q, false>
+ {
+  inline static mat<3, 3, T, Q> call(mat<3, 3, T, Q> const& m)
+  {
+   T OneOverDeterminant = static_cast<T>(1) / (
+    +m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
+    - m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
+    + m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]));
+
+   mat<3, 3, T, Q> Inverse;
+   Inverse[0][0] = +(m[1][1] * m[2][2] - m[2][1] * m[1][2]);
+   Inverse[1][0] = -(m[1][0] * m[2][2] - m[2][0] * m[1][2]);
+   Inverse[2][0] = +(m[1][0] * m[2][1] - m[2][0] * m[1][1]);
+   Inverse[0][1] = -(m[0][1] * m[2][2] - m[2][1] * m[0][2]);
+   Inverse[1][1] = +(m[0][0] * m[2][2] - m[2][0] * m[0][2]);
+   Inverse[2][1] = -(m[0][0] * m[2][1] - m[2][0] * m[0][1]);
+   Inverse[0][2] = +(m[0][1] * m[1][2] - m[1][1] * m[0][2]);
+   Inverse[1][2] = -(m[0][0] * m[1][2] - m[1][0] * m[0][2]);
+   Inverse[2][2] = +(m[0][0] * m[1][1] - m[1][0] * m[0][1]);
+
+   Inverse *= OneOverDeterminant;
+   return Inverse;
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_inverse<3, 3, T, Q, Aligned>
+ {
+  inline static mat<3, 3, T, Q> call(mat<3, 3, T, Q> const& m)
+  {
+   return detail::inv3x3<T, Q, detail::is_aligned<Q>::value>::call(m);
+  }
+ };
+
+ template<typename T, qualifier Q, bool Aligned>
+ struct compute_inverse<4, 4, T, Q, Aligned>
+ {
+  inline static mat<4, 4, T, Q> call(mat<4, 4, T, Q> const& m)
+  {
+   T Coef00 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
+   T Coef02 = m[1][2] * m[3][3] - m[3][2] * m[1][3];
+   T Coef03 = m[1][2] * m[2][3] - m[2][2] * m[1][3];
+
+   T Coef04 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
+   T Coef06 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
+   T Coef07 = m[1][1] * m[2][3] - m[2][1] * m[1][3];
+
+   T Coef08 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
+   T Coef10 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
+   T Coef11 = m[1][1] * m[2][2] - m[2][1] * m[1][2];
+
+   T Coef12 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
+   T Coef14 = m[1][0] * m[3][3] - m[3][0] * m[1][3];
+   T Coef15 = m[1][0] * m[2][3] - m[2][0] * m[1][3];
+
+   T Coef16 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
+   T Coef18 = m[1][0] * m[3][2] - m[3][0] * m[1][2];
+   T Coef19 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
+
+   T Coef20 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
+   T Coef22 = m[1][0] * m[3][1] - m[3][0] * m[1][1];
+   T Coef23 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
+
+   vec<4, T, Q> Fac0(Coef00, Coef00, Coef02, Coef03);
+   vec<4, T, Q> Fac1(Coef04, Coef04, Coef06, Coef07);
+   vec<4, T, Q> Fac2(Coef08, Coef08, Coef10, Coef11);
+   vec<4, T, Q> Fac3(Coef12, Coef12, Coef14, Coef15);
+   vec<4, T, Q> Fac4(Coef16, Coef16, Coef18, Coef19);
+   vec<4, T, Q> Fac5(Coef20, Coef20, Coef22, Coef23);
+
+   vec<4, T, Q> Vec0(m[1][0], m[0][0], m[0][0], m[0][0]);
+   vec<4, T, Q> Vec1(m[1][1], m[0][1], m[0][1], m[0][1]);
+   vec<4, T, Q> Vec2(m[1][2], m[0][2], m[0][2], m[0][2]);
+   vec<4, T, Q> Vec3(m[1][3], m[0][3], m[0][3], m[0][3]);
+
+   vec<4, T, Q> Inv0(Vec1 * Fac0 - Vec2 * Fac1 + Vec3 * Fac2);
+   vec<4, T, Q> Inv1(Vec0 * Fac0 - Vec2 * Fac3 + Vec3 * Fac4);
+   vec<4, T, Q> Inv2(Vec0 * Fac1 - Vec1 * Fac3 + Vec3 * Fac5);
+   vec<4, T, Q> Inv3(Vec0 * Fac2 - Vec1 * Fac4 + Vec2 * Fac5);
+
+   vec<4, T, Q> SignA(+1, -1, +1, -1);
+   vec<4, T, Q> SignB(-1, +1, -1, +1);
+   mat<4, 4, T, Q> Inverse(Inv0 * SignA, Inv1 * SignB, Inv2 * SignA, Inv3 * SignB);
+
+   vec<4, T, Q> Row0(Inverse[0][0], Inverse[1][0], Inverse[2][0], Inverse[3][0]);
+
+   vec<4, T, Q> Dot0(m[0] * Row0);
+   T Dot1 = (Dot0.x + Dot0.y) + (Dot0.z + Dot0.w);
+
+   T OneOverDeterminant = static_cast<T>(1) / Dot1;
+
+   return Inverse * OneOverDeterminant;
+  }
+ };
+}
+
+ template<length_t C, length_t R, typename T, qualifier Q>
+ inline mat<C, R, T, Q> matrixCompMult(mat<C, R, T, Q> const& x, mat<C, R, T, Q> const& y)
+ {
+  return detail::compute_matrixCompMult_type<C, R, T, Q, std::numeric_limits<T>::is_iec559, detail::is_aligned<Q>::value>::call(x, y);
+ }
+
+ template<length_t DA, length_t DB, typename T, qualifier Q>
+ inline typename detail::outerProduct_trait<DA, DB, T, Q>::type outerProduct(vec<DA, T, Q> const& c, vec<DB, T, Q> const& r)
+ {
+  return detail::compute_outerProduct_type<DA, DB, T, Q, std::numeric_limits<T>::is_iec559>::call(c, r);
+ }
+
+ template<length_t C, length_t R, typename T, qualifier Q>
+ inline typename mat<C, R, T, Q>::transpose_type transpose(mat<C, R, T, Q> const& m)
+ {
+  return detail::compute_transpose_type<C, R, T, Q, std::numeric_limits<T>::is_iec559, detail::is_aligned<Q>::value>::call(m);
+ }
+
+ template<length_t C, length_t R, typename T, qualifier Q>
+ inline T determinant(mat<C, R, T, Q> const& m)
+ {
+  return detail::compute_determinant_type<C, R, T, Q, std::numeric_limits<T>::is_iec559, detail::is_aligned<Q>::value>::call(m);
+ }
+
+ template<length_t C, length_t R, typename T, qualifier Q>
+ inline mat<C, R, T, Q> inverse(mat<C, R, T, Q> const& m)
+ {
+  static_assert(std::numeric_limits<T>::is_iec559 || 0, "'inverse' only accept floating-point inputs");
+  return detail::compute_inverse<C, R, T, Q, detail::is_aligned<Q>::value>::call(m);
+ }
+}
+# 162 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/matrix.hpp" 2
+# 2 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x2.inl" 2
+
+namespace glm
+{
+# 21 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x2.inl"
+ template<typename T, qualifier Q>
+ template<qualifier P>
+ inline constexpr mat<2, 2, T, Q>::mat(mat<2, 2, T, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>::mat(T scalar)
+
+   : value{col_type(scalar, 0), col_type(0, scalar)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>::mat
+ (
+  T const& x0, T const& y0,
+  T const& x1, T const& y1
+ )
+
+   : value{col_type(x0, y0), col_type(x1, y1)}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>::mat(col_type const& v0, col_type const& v1)
+
+   : value{v0, v1}
+
+ {
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename X1, typename Y1, typename X2, typename Y2>
+ inline constexpr mat<2, 2, T, Q>::mat
+ (
+  X1 const& x1, Y1 const& y1,
+  X2 const& x2, Y2 const& y2
+ )
+
+   : value{col_type(static_cast<T>(x1), value_type(y1)), col_type(static_cast<T>(x2), value_type(y2)) }
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ template<typename V1, typename V2>
+ inline constexpr mat<2, 2, T, Q>::mat(vec<2, V1, Q> const& v1, vec<2, V2, Q> const& v2)
+
+   : value{col_type(v1), col_type(v2)}
+
+ {
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U, qualifier P>
+ inline constexpr mat<2, 2, T, Q>::mat(mat<2, 2, U, P> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>::mat(mat<3, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>::mat(mat<4, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>::mat(mat<2, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>::mat(mat<3, 2, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>::mat(mat<2, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>::mat(mat<4, 2, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>::mat(mat<3, 4, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>::mat(mat<4, 3, T, Q> const& m)
+
+   : value{col_type(m[0]), col_type(m[1])}
+
+ {
+
+
+
+
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 2, T, Q>::col_type& mat<2, 2, T, Q>::operator[](typename mat<2, 2, T, Q>::length_type i) noexcept
+ {
+  (
+# 222 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x2.inl" 3
+ ((void)0)
+# 222 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x2.inl"
+ );
+  return this->value[i];
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 2, T, Q>::col_type const& mat<2, 2, T, Q>::operator[](typename mat<2, 2, T, Q>::length_type i) const noexcept
+ {
+  (
+# 229 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x2.inl" 3
+ ((void)0)
+# 229 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x2.inl"
+ );
+  return this->value[i];
+ }
+
+
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 2, T, Q>& mat<2, 2, T, Q>::operator=(mat<2, 2, U, Q> const& m)
+ {
+  this->value[0] = m[0];
+  this->value[1] = m[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 2, T, Q>& mat<2, 2, T, Q>::operator+=(U scalar)
+ {
+  this->value[0] += scalar;
+  this->value[1] += scalar;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 2, T, Q>& mat<2, 2, T, Q>::operator+=(mat<2, 2, U, Q> const& m)
+ {
+  this->value[0] += m[0];
+  this->value[1] += m[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 2, T, Q>& mat<2, 2, T, Q>::operator-=(U scalar)
+ {
+  this->value[0] -= scalar;
+  this->value[1] -= scalar;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 2, T, Q>& mat<2, 2, T, Q>::operator-=(mat<2, 2, U, Q> const& m)
+ {
+  this->value[0] -= m[0];
+  this->value[1] -= m[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 2, T, Q>& mat<2, 2, T, Q>::operator*=(U scalar)
+ {
+  this->value[0] *= scalar;
+  this->value[1] *= scalar;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 2, T, Q>& mat<2, 2, T, Q>::operator*=(mat<2, 2, U, Q> const& m)
+ {
+  return (*this = *this * m);
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 2, T, Q>& mat<2, 2, T, Q>::operator/=(U scalar)
+ {
+  this->value[0] /= scalar;
+  this->value[1] /= scalar;
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ template<typename U>
+ inline constexpr mat<2, 2, T, Q>& mat<2, 2, T, Q>::operator/=(mat<2, 2, U, Q> const& m)
+ {
+  return *this *= inverse(m);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>& mat<2, 2, T, Q>::operator++()
+ {
+  ++this->value[0];
+  ++this->value[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q>& mat<2, 2, T, Q>::operator--()
+ {
+  --this->value[0];
+  --this->value[1];
+  return *this;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> mat<2, 2, T, Q>::operator++(int)
+ {
+  mat<2, 2, T, Q> Result(*this);
+  ++*this;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> mat<2, 2, T, Q>::operator--(int)
+ {
+  mat<2, 2, T, Q> Result(*this);
+  --*this;
+  return Result;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator+(mat<2, 2, T, Q> const& m)
+ {
+  return m;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator-(mat<2, 2, T, Q> const& m)
+ {
+  return mat<2, 2, T, Q>(
+   -m[0],
+   -m[1]);
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator+(mat<2, 2, T, Q> const& m, T scalar)
+ {
+  return mat<2, 2, T, Q>(
+   m[0] + scalar,
+   m[1] + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator+(T scalar, mat<2, 2, T, Q> const& m)
+ {
+  return mat<2, 2, T, Q>(
+   m[0] + scalar,
+   m[1] + scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator+(mat<2, 2, T, Q> const& m1, mat<2, 2, T, Q> const& m2)
+ {
+  return mat<2, 2, T, Q>(
+   m1[0] + m2[0],
+   m1[1] + m2[1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator-(mat<2, 2, T, Q> const& m, T scalar)
+ {
+  return mat<2, 2, T, Q>(
+   m[0] - scalar,
+   m[1] - scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator-(T scalar, mat<2, 2, T, Q> const& m)
+ {
+  return mat<2, 2, T, Q>(
+   scalar - m[0],
+   scalar - m[1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator-(mat<2, 2, T, Q> const& m1, mat<2, 2, T, Q> const& m2)
+ {
+  return mat<2, 2, T, Q>(
+   m1[0] - m2[0],
+   m1[1] - m2[1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator*(mat<2, 2, T, Q> const& m, T scalar)
+ {
+  return mat<2, 2, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator*(T scalar, mat<2, 2, T, Q> const& m)
+ {
+  return mat<2, 2, T, Q>(
+   m[0] * scalar,
+   m[1] * scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 2, T, Q>::col_type operator*
+ (
+  mat<2, 2, T, Q> const& m,
+  typename mat<2, 2, T, Q>::row_type const& v
+ )
+ {
+  return vec<2, T, Q>(
+   m[0][0] * v.x + m[1][0] * v.y,
+   m[0][1] * v.x + m[1][1] * v.y);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 2, T, Q>::row_type operator*
+ (
+  typename mat<2, 2, T, Q>::col_type const& v,
+  mat<2, 2, T, Q> const& m
+ )
+ {
+  return vec<2, T, Q>(
+   v.x * m[0][0] + v.y * m[0][1],
+   v.x * m[1][0] + v.y * m[1][1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator*(mat<2, 2, T, Q> const& m1, mat<2, 2, T, Q> const& m2)
+ {
+  return mat<2, 2, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<3, 2, T, Q> operator*(mat<2, 2, T, Q> const& m1, mat<3, 2, T, Q> const& m2)
+ {
+  return mat<3, 2, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 2, T, Q> operator*(mat<2, 2, T, Q> const& m1, mat<4, 2, T, Q> const& m2)
+ {
+  return mat<4, 2, T, Q>(
+   m1[0][0] * m2[0][0] + m1[1][0] * m2[0][1],
+   m1[0][1] * m2[0][0] + m1[1][1] * m2[0][1],
+   m1[0][0] * m2[1][0] + m1[1][0] * m2[1][1],
+   m1[0][1] * m2[1][0] + m1[1][1] * m2[1][1],
+   m1[0][0] * m2[2][0] + m1[1][0] * m2[2][1],
+   m1[0][1] * m2[2][0] + m1[1][1] * m2[2][1],
+   m1[0][0] * m2[3][0] + m1[1][0] * m2[3][1],
+   m1[0][1] * m2[3][0] + m1[1][1] * m2[3][1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator/(mat<2, 2, T, Q> const& m, T scalar)
+ {
+  return mat<2, 2, T, Q>(
+   m[0] / scalar,
+   m[1] / scalar);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator/(T scalar, mat<2, 2, T, Q> const& m)
+ {
+  return mat<2, 2, T, Q>(
+   scalar / m[0],
+   scalar / m[1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 2, T, Q>::col_type operator/(mat<2, 2, T, Q> const& m, typename mat<2, 2, T, Q>::row_type const& v)
+ {
+  return inverse(m) * v;
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr typename mat<2, 2, T, Q>::row_type operator/(typename mat<2, 2, T, Q>::col_type const& v, mat<2, 2, T, Q> const& m)
+ {
+  return v * inverse(m);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<2, 2, T, Q> operator/(mat<2, 2, T, Q> const& m1, mat<2, 2, T, Q> const& m2)
+ {
+  mat<2, 2, T, Q> m1_copy(m1);
+  return m1_copy /= m2;
+ }
+
+
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator==(mat<2, 2, T, Q> const& m1, mat<2, 2, T, Q> const& m2)
+ {
+  return (m1[0] == m2[0]) && (m1[1] == m2[1]);
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr bool operator!=(mat<2, 2, T, Q> const& m1, mat<2, 2, T, Q> const& m2)
+ {
+  return (m1[0] != m2[0]) || (m1[1] != m2[1]);
+ }
+}
+# 177 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_mat2x2.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double2x2.hpp" 2
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<2, 2, double, defaultp> dmat2x2;
+
+
+
+
+ typedef mat<2, 2, double, defaultp> dmat2;
+
+
+}
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_double2x2_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<2, 2, double, lowp> lowp_dmat2;
+
+
+
+
+
+ typedef mat<2, 2, double, mediump> mediump_dmat2;
+
+
+
+
+
+ typedef mat<2, 2, double, highp> highp_dmat2;
+
+
+
+
+
+ typedef mat<2, 2, double, lowp> lowp_dmat2x2;
+
+
+
+
+
+ typedef mat<2, 2, double, mediump> mediump_dmat2x2;
+
+
+
+
+
+ typedef mat<2, 2, double, highp> highp_dmat2x2;
+
+
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float2x2.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+ typedef mat<2, 2, float, defaultp> mat2x2;
+
+
+
+
+ typedef mat<2, 2, float, defaultp> mat2;
+
+
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x2.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_float2x2_precision.hpp" 1
+
+
+
+       
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ typedef mat<2, 2, float, lowp> lowp_mat2;
+
+
+
+
+
+ typedef mat<2, 2, float, mediump> mediump_mat2;
+
+
+
+
+
+ typedef mat<2, 2, float, highp> highp_mat2;
+
+
+
+
+
+ typedef mat<2, 2, float, lowp> lowp_mat2x2;
+
+
+
+
+
+ typedef mat<2, 2, float, mediump> mediump_mat2x2;
+
+
+
+
+
+ typedef mat<2, 2, float, highp> highp_mat2x2;
+
+
+}
+# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/mat2x2.hpp" 2
+# 121 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+# 130 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp"
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp" 1
+# 19 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+       
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 22 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp" 2
+
+
+namespace glm
+{
+# 37 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, T, Q> radians(vec<L, T, Q> const& degrees);
+# 48 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, T, Q> degrees(vec<L, T, Q> const& radians);
+# 60 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> sin(vec<L, T, Q> const& angle);
+# 72 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> cos(vec<L, T, Q> const& angle);
+# 83 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> tan(vec<L, T, Q> const& angle);
+# 96 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> asin(vec<L, T, Q> const& x);
+# 109 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> acos(vec<L, T, Q> const& x);
+# 124 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> atan(vec<L, T, Q> const& y, vec<L, T, Q> const& x);
+# 136 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> atan(vec<L, T, Q> const& y_over_x);
+# 147 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> sinh(vec<L, T, Q> const& angle);
+# 158 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> cosh(vec<L, T, Q> const& angle);
+# 169 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> tanh(vec<L, T, Q> const& angle);
+# 180 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> asinh(vec<L, T, Q> const& x);
+# 192 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> acosh(vec<L, T, Q> const& x);
+# 204 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> atanh(vec<L, T, Q> const& x);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_trigonometric.inl" 1
+
+
+
+
+namespace glm
+{
+
+ template<typename genType>
+ inline constexpr genType radians(genType degrees)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0, "'radians' only accept floating-point input");
+
+  return degrees * static_cast<genType>(0.01745329251994329576923690768489);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, T, Q> radians(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(radians, v);
+ }
+
+
+ template<typename genType>
+ inline constexpr genType degrees(genType radians)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0, "'degrees' only accept floating-point input");
+
+  return radians * static_cast<genType>(57.295779513082320876798154814105);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, T, Q> degrees(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(degrees, v);
+ }
+
+
+ using ::std::sin;
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> sin(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(sin, v);
+ }
+
+
+ using std::cos;
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> cos(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(cos, v);
+ }
+
+
+ using std::tan;
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> tan(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(tan, v);
+ }
+
+
+ using std::asin;
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> asin(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(asin, v);
+ }
+
+
+ using std::acos;
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> acos(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(acos, v);
+ }
+
+
+ template<typename genType>
+ inline genType atan(genType y, genType x)
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0, "'atan' only accept floating-point input");
+
+  return ::std::atan2(y, x);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> atan(vec<L, T, Q> const& y, vec<L, T, Q> const& x)
+ {
+  return detail::functor2<vec, L, T, Q>::call(::std::atan2, y, x);
+ }
+
+ using std::atan;
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> atan(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(atan, v);
+ }
+
+
+ using std::sinh;
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> sinh(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(sinh, v);
+ }
+
+
+ using std::cosh;
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> cosh(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(cosh, v);
+ }
+
+
+ using std::tanh;
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> tanh(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(tanh, v);
+ }
+
+
+
+  using std::asinh;
+# 145 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_trigonometric.inl"
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> asinh(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(asinh, v);
+ }
+
+
+
+  using std::acosh;
+# 166 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_trigonometric.inl"
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> acosh(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(acosh, v);
+ }
+
+
+
+  using std::atanh;
+# 187 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_trigonometric.inl"
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> atanh(vec<L, T, Q> const& v)
+ {
+  return detail::functor1<vec, L, T, T, Q>::call(atanh, v);
+ }
+}
+# 211 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/trigonometric.hpp" 2
+# 131 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp" 1
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+       
+
+
+
+
+
+namespace glm
+{
+# 38 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+ [[nodiscard]] uint packUnorm2x16(vec2 const& v);
+# 51 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+ [[nodiscard]] uint packSnorm2x16(vec2 const& v);
+# 64 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+ [[nodiscard]] uint packUnorm4x8(vec4 const& v);
+# 77 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+ [[nodiscard]] uint packSnorm4x8(vec4 const& v);
+# 90 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+ [[nodiscard]] vec2 unpackUnorm2x16(uint p);
+# 103 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+ [[nodiscard]] vec2 unpackSnorm2x16(uint p);
+# 116 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+ [[nodiscard]] vec4 unpackUnorm4x8(uint p);
+# 129 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+ [[nodiscard]] vec4 unpackSnorm4x8(uint p);
+# 139 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+ [[nodiscard]] double packDouble2x32(uvec2 const& v);
+# 148 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+ [[nodiscard]] uvec2 unpackDouble2x32(double v);
+# 158 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+ [[nodiscard]] uint packHalf2x16(vec2 const& v);
+# 168 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp"
+ [[nodiscard]] vec2 unpackHalf2x16(uint v);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_packing.inl" 1
+
+
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_half.hpp" 1
+       
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_half.hpp" 2
+
+namespace glm{
+namespace detail
+{
+ typedef short hdata;
+
+ [[nodiscard]] float toFloat32(hdata value);
+ [[nodiscard]] hdata toFloat16(float const& value);
+
+}
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_half.inl" 1
+namespace glm{
+namespace detail
+{
+ inline float overflow()
+ {
+  volatile float f = 1e10;
+
+  for(int i = 0; i < 10; ++i)
+   f = f * f;
+  return f;
+ }
+
+ union uif32
+ {
+  inline uif32() :
+   i(0)
+  {}
+
+  inline uif32(float f_) :
+   f(f_)
+  {}
+
+  inline uif32(unsigned int i_) :
+   i(i_)
+  {}
+
+  float f;
+  unsigned int i;
+ };
+
+ inline float toFloat32(hdata value)
+ {
+  int s = (value >> 15) & 0x00000001;
+  int e = (value >> 10) & 0x0000001f;
+  int m = value & 0x000003ff;
+
+  if(e == 0)
+  {
+   if(m == 0)
+   {
+
+
+
+
+    detail::uif32 result;
+    result.i = static_cast<unsigned int>(s << 31);
+    return result.f;
+   }
+   else
+   {
+
+
+
+
+    while(!(m & 0x00000400))
+    {
+     m <<= 1;
+     e -= 1;
+    }
+
+    e += 1;
+    m &= ~0x00000400;
+   }
+  }
+  else if(e == 31)
+  {
+   if(m == 0)
+   {
+
+
+
+
+    uif32 result;
+    result.i = static_cast<unsigned int>((s << 31) | 0x7f800000);
+    return result.f;
+   }
+   else
+   {
+
+
+
+
+    uif32 result;
+    result.i = static_cast<unsigned int>((s << 31) | 0x7f800000 | (m << 13));
+    return result.f;
+   }
+  }
+
+
+
+
+
+  e = e + (127 - 15);
+  m = m << 13;
+
+
+
+
+
+  uif32 Result;
+  Result.i = static_cast<unsigned int>((s << 31) | (e << 23) | m);
+  return Result.f;
+ }
+
+ inline hdata toFloat16(float const& f)
+ {
+  uif32 Entry;
+  Entry.f = f;
+  int i = static_cast<int>(Entry.i);
+# 121 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_half.inl"
+  int s = (i >> 16) & 0x00008000;
+  int e = ((i >> 23) & 0x000000ff) - (127 - 15);
+  int m = i & 0x007fffff;
+
+
+
+
+
+  if(e <= 0)
+  {
+   if(e < -10)
+   {
+# 141 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_half.inl"
+    return hdata(s);
+   }
+# 151 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_half.inl"
+   m = (m | 0x00800000) >> (1 - e);
+# 162 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_half.inl"
+   if(m & 0x00001000)
+    m += 0x00002000;
+
+
+
+
+
+   return hdata(s | (m >> 13));
+  }
+  else if(e == 0xff - (127 - 15))
+  {
+   if(m == 0)
+   {
+
+
+
+
+
+    return hdata(s | 0x7c00);
+   }
+   else
+   {
+# 193 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_half.inl"
+    m >>= 13;
+
+    return hdata(s | 0x7c00 | m | (m == 0));
+   }
+  }
+  else
+  {
+# 209 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_half.inl"
+   if(m & 0x00001000)
+   {
+    m += 0x00002000;
+
+    if(m & 0x00800000)
+    {
+     m = 0;
+     e += 1;
+    }
+   }
+
+
+
+
+
+   if (e > 30)
+   {
+    overflow();
+
+    return hdata(s | 0x7c00);
+
+   }
+
+
+
+
+
+   return hdata(s | (e << 10) | (m >> 13));
+  }
+ }
+
+}
+}
+# 17 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_half.hpp" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_packing.inl" 2
+
+namespace glm
+{
+ inline uint packUnorm2x16(vec2 const& v)
+ {
+  union
+  {
+   unsigned short in[2];
+   uint out;
+  } u;
+
+  vec<2, unsigned short, defaultp> result(round(clamp(v, 0.0f, 1.0f) * 65535.0f));
+
+  u.in[0] = result[0];
+  u.in[1] = result[1];
+
+  return u.out;
+ }
+
+ inline vec2 unpackUnorm2x16(uint p)
+ {
+  union
+  {
+   uint in;
+   unsigned short out[2];
+  } u;
+
+  u.in = p;
+
+  return vec2(u.out[0], u.out[1]) * 1.5259021896696421759365224689097e-5f;
+ }
+
+ inline uint packSnorm2x16(vec2 const& v)
+ {
+  union
+  {
+   signed short in[2];
+   uint out;
+  } u;
+
+  vec<2, short, defaultp> result(round(clamp(v, -1.0f, 1.0f) * 32767.0f));
+
+  u.in[0] = result[0];
+  u.in[1] = result[1];
+
+  return u.out;
+ }
+
+ inline vec2 unpackSnorm2x16(uint p)
+ {
+  union
+  {
+   uint in;
+   signed short out[2];
+  } u;
+
+  u.in = p;
+
+  return clamp(vec2(u.out[0], u.out[1]) * 3.0518509475997192297128208258309e-5f, -1.0f, 1.0f);
+ }
+
+ inline uint packUnorm4x8(vec4 const& v)
+ {
+  union
+  {
+   unsigned char in[4];
+   uint out;
+  } u;
+
+  vec<4, unsigned char, defaultp> result(round(clamp(v, 0.0f, 1.0f) * 255.0f));
+
+  u.in[0] = result[0];
+  u.in[1] = result[1];
+  u.in[2] = result[2];
+  u.in[3] = result[3];
+
+  return u.out;
+ }
+
+ inline vec4 unpackUnorm4x8(uint p)
+ {
+  union
+  {
+   uint in;
+   unsigned char out[4];
+  } u;
+
+  u.in = p;
+
+  return vec4(u.out[0], u.out[1], u.out[2], u.out[3]) * 0.0039215686274509803921568627451f;
+ }
+
+ inline uint packSnorm4x8(vec4 const& v)
+ {
+  union
+  {
+   signed char in[4];
+   uint out;
+  } u;
+
+  vec<4, signed char, defaultp> result(round(clamp(v, -1.0f, 1.0f) * 127.0f));
+
+  u.in[0] = result[0];
+  u.in[1] = result[1];
+  u.in[2] = result[2];
+  u.in[3] = result[3];
+
+  return u.out;
+ }
+
+ inline glm::vec4 unpackSnorm4x8(uint p)
+ {
+  union
+  {
+   uint in;
+   signed char out[4];
+  } u;
+
+  u.in = p;
+
+  return clamp(vec4(u.out[0], u.out[1], u.out[2], u.out[3]) * 0.0078740157480315f, -1.0f, 1.0f);
+ }
+
+ inline double packDouble2x32(uvec2 const& v)
+ {
+  union
+  {
+   uint in[2];
+   double out;
+  } u;
+
+  u.in[0] = v[0];
+  u.in[1] = v[1];
+
+  return u.out;
+ }
+
+ inline uvec2 unpackDouble2x32(double v)
+ {
+  union
+  {
+   double in;
+   uint out[2];
+  } u;
+
+  u.in = v;
+
+  return uvec2(u.out[0], u.out[1]);
+ }
+
+ inline uint packHalf2x16(vec2 const& v)
+ {
+  union
+  {
+   signed short in[2];
+   uint out;
+  } u;
+
+  u.in[0] = detail::toFloat16(v.x);
+  u.in[1] = detail::toFloat16(v.y);
+
+  return u.out;
+ }
+
+ inline vec2 unpackHalf2x16(uint v)
+ {
+  union
+  {
+   uint in;
+   signed short out[2];
+  } u;
+
+  u.in = v;
+
+  return vec2(
+   detail::toFloat32(u.out[0]),
+   detail::toFloat32(u.out[1]));
+ }
+}
+# 174 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/packing.hpp" 2
+# 134 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp" 1
+# 17 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+       
+
+
+
+
+
+namespace glm
+{
+# 36 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+ template<length_t L, qualifier Q>
+ [[nodiscard]] vec<L, uint, Q> uaddCarry(
+  vec<L, uint, Q> const& x,
+  vec<L, uint, Q> const& y,
+  vec<L, uint, Q> & carry);
+# 50 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+ template<length_t L, qualifier Q>
+ [[nodiscard]] vec<L, uint, Q> usubBorrow(
+  vec<L, uint, Q> const& x,
+  vec<L, uint, Q> const& y,
+  vec<L, uint, Q> & borrow);
+# 64 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+ template<length_t L, qualifier Q>
+ void umulExtended(
+  vec<L, uint, Q> const& x,
+  vec<L, uint, Q> const& y,
+  vec<L, uint, Q> & msb,
+  vec<L, uint, Q> & lsb);
+# 79 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+ template<length_t L, qualifier Q>
+ void imulExtended(
+  vec<L, int, Q> const& x,
+  vec<L, int, Q> const& y,
+  vec<L, int, Q> & msb,
+  vec<L, int, Q> & lsb);
+# 102 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> bitfieldExtract(
+  vec<L, T, Q> const& Value,
+  int Offset,
+  int Bits);
+# 123 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> bitfieldInsert(
+  vec<L, T, Q> const& Base,
+  vec<L, T, Q> const& Insert,
+  int Offset,
+  int Bits);
+# 139 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, T, Q> bitfieldReverse(vec<L, T, Q> const& v);
+
+
+
+
+
+
+
+ template<typename genType>
+ [[nodiscard]] int bitCount(genType v);
+# 158 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, int, Q> bitCount(vec<L, T, Q> const& v);
+# 169 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+ template<typename genIUType>
+ [[nodiscard]] int findLSB(genIUType x);
+# 181 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, int, Q> findLSB(vec<L, T, Q> const& v);
+# 193 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+ template<typename genIUType>
+ [[nodiscard]] int findMSB(genIUType x);
+# 206 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, int, Q> findMSB(vec<L, T, Q> const& v);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_integer.inl" 1
+# 21 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_integer.inl"
+namespace glm{
+namespace detail
+{
+ template<typename T>
+ inline T mask(T Bits)
+ {
+  return Bits >= static_cast<T>(sizeof(T) * 8) ? ~static_cast<T>(0) : (static_cast<T>(1) << Bits) - static_cast<T>(1);
+ }
+
+ template<length_t L, typename T, qualifier Q, bool Aligned, bool EXEC>
+ struct compute_bitfieldReverseStep
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& v, T, T)
+  {
+   return v;
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_bitfieldReverseStep<L, T, Q, Aligned, true>
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& v, T Mask, T Shift)
+  {
+   return (v & Mask) << Shift | (v & (~Mask)) >> Shift;
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned, bool EXEC>
+ struct compute_bitfieldBitCountStep
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& v, T, T)
+  {
+   return v;
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, bool Aligned>
+ struct compute_bitfieldBitCountStep<L, T, Q, Aligned, true>
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& v, T Mask, T Shift)
+  {
+   return (v & Mask) + ((v >> Shift) & Mask);
+  }
+ };
+
+ template<typename genIUType, size_t Bits>
+ struct compute_findLSB
+ {
+  inline static int call(genIUType Value)
+  {
+   if(Value == 0)
+    return -1;
+
+   return glm::bitCount(~Value & (Value - static_cast<genIUType>(1)));
+  }
+ };
+# 104 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_integer.inl"
+ template<length_t L, typename T, qualifier Q, bool EXEC = true>
+ struct compute_findMSB_step_vec
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x, T Shift)
+  {
+   return x | (x >> Shift);
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q>
+ struct compute_findMSB_step_vec<L, T, Q, false>
+ {
+  inline static vec<L, T, Q> call(vec<L, T, Q> const& x, T)
+  {
+   return x;
+  }
+ };
+
+ template<length_t L, typename T, qualifier Q, int>
+ struct compute_findMSB_vec
+ {
+  inline static vec<L, int, Q> call(vec<L, T, Q> const& v)
+  {
+   vec<L, T, Q> x(v);
+   x = compute_findMSB_step_vec<L, T, Q, sizeof(T) * 8 >= 8>::call(x, static_cast<T>( 1));
+   x = compute_findMSB_step_vec<L, T, Q, sizeof(T) * 8 >= 8>::call(x, static_cast<T>( 2));
+   x = compute_findMSB_step_vec<L, T, Q, sizeof(T) * 8 >= 8>::call(x, static_cast<T>( 4));
+   x = compute_findMSB_step_vec<L, T, Q, sizeof(T) * 8 >= 16>::call(x, static_cast<T>( 8));
+   x = compute_findMSB_step_vec<L, T, Q, sizeof(T) * 8 >= 32>::call(x, static_cast<T>(16));
+   x = compute_findMSB_step_vec<L, T, Q, sizeof(T) * 8 >= 64>::call(x, static_cast<T>(32));
+   return vec<L, int, Q>(sizeof(T) * 8 - 1) - glm::bitCount(~x);
+  }
+ };
+# 175 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_integer.inl"
+}
+
+
+ inline uint uaddCarry(uint const& x, uint const& y, uint & Carry)
+ {
+  detail::uint64 const Value64(static_cast<detail::uint64>(x) + static_cast<detail::uint64>(y));
+  detail::uint64 const Max32((static_cast<detail::uint64>(1) << static_cast<detail::uint64>(32)) - static_cast<detail::uint64>(1));
+  Carry = Value64 > Max32 ? 1u : 0u;
+  return static_cast<uint>(Value64 % (Max32 + static_cast<detail::uint64>(1)));
+ }
+
+ template<length_t L, qualifier Q>
+ inline vec<L, uint, Q> uaddCarry(vec<L, uint, Q> const& x, vec<L, uint, Q> const& y, vec<L, uint, Q>& Carry)
+ {
+  vec<L, detail::uint64, Q> Value64(vec<L, detail::uint64, Q>(x) + vec<L, detail::uint64, Q>(y));
+  vec<L, detail::uint64, Q> Max32((static_cast<detail::uint64>(1) << static_cast<detail::uint64>(32)) - static_cast<detail::uint64>(1));
+  Carry = mix(vec<L, uint, Q>(0), vec<L, uint, Q>(1), greaterThan(Value64, Max32));
+  return vec<L, uint, Q>(Value64 % (Max32 + static_cast<detail::uint64>(1)));
+ }
+
+
+ inline uint usubBorrow(uint const& x, uint const& y, uint & Borrow)
+ {
+  Borrow = x >= y ? static_cast<uint>(0) : static_cast<uint>(1);
+  if(y >= x)
+   return y - x;
+  else
+   return static_cast<uint>((static_cast<detail::int64>(1) << static_cast<detail::int64>(32)) + (static_cast<detail::int64>(y) - static_cast<detail::int64>(x)));
+ }
+
+ template<length_t L, qualifier Q>
+ inline vec<L, uint, Q> usubBorrow(vec<L, uint, Q> const& x, vec<L, uint, Q> const& y, vec<L, uint, Q>& Borrow)
+ {
+  Borrow = mix(vec<L, uint, Q>(1), vec<L, uint, Q>(0), greaterThanEqual(x, y));
+  vec<L, uint, Q> const YgeX(y - x);
+  vec<L, uint, Q> const XgeY(vec<L, uint, Q>((static_cast<detail::int64>(1) << static_cast<detail::int64>(32)) + (vec<L, detail::int64, Q>(y) - vec<L, detail::int64, Q>(x))));
+  return mix(XgeY, YgeX, greaterThanEqual(y, x));
+ }
+
+
+ inline void umulExtended(uint const& x, uint const& y, uint & msb, uint & lsb)
+ {
+  detail::uint64 Value64 = static_cast<detail::uint64>(x) * static_cast<detail::uint64>(y);
+  msb = static_cast<uint>(Value64 >> static_cast<detail::uint64>(32));
+  lsb = static_cast<uint>(Value64);
+ }
+
+ template<length_t L, qualifier Q>
+ inline void umulExtended(vec<L, uint, Q> const& x, vec<L, uint, Q> const& y, vec<L, uint, Q>& msb, vec<L, uint, Q>& lsb)
+ {
+  vec<L, detail::uint64, Q> Value64(vec<L, detail::uint64, Q>(x) * vec<L, detail::uint64, Q>(y));
+  msb = vec<L, uint, Q>(Value64 >> static_cast<detail::uint64>(32));
+  lsb = vec<L, uint, Q>(Value64);
+ }
+
+
+ inline void imulExtended(int x, int y, int& msb, int& lsb)
+ {
+  detail::int64 Value64 = static_cast<detail::int64>(x) * static_cast<detail::int64>(y);
+  msb = static_cast<int>(Value64 >> static_cast<detail::int64>(32));
+  lsb = static_cast<int>(Value64);
+ }
+
+ template<length_t L, qualifier Q>
+ inline void imulExtended(vec<L, int, Q> const& x, vec<L, int, Q> const& y, vec<L, int, Q>& msb, vec<L, int, Q>& lsb)
+ {
+  vec<L, detail::int64, Q> Value64(vec<L, detail::int64, Q>(x) * vec<L, detail::int64, Q>(y));
+  lsb = vec<L, int, Q>(Value64 & static_cast<detail::int64>(0xFFFFFFFF));
+  msb = vec<L, int, Q>((Value64 >> static_cast<detail::int64>(32)) & static_cast<detail::int64>(0xFFFFFFFF));
+ }
+
+
+ template<typename genIUType>
+ inline genIUType bitfieldExtract(genIUType Value, int Offset, int Bits)
+ {
+  return bitfieldExtract(vec<1, genIUType>(Value), Offset, Bits).x;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> bitfieldExtract(vec<L, T, Q> const& Value, int Offset, int Bits)
+ {
+  static_assert(std::numeric_limits<T>::is_integer, "'bitfieldExtract' only accept integer inputs");
+
+  return (Value >> static_cast<T>(Offset)) & static_cast<T>(detail::mask(Bits));
+ }
+
+
+ template<typename genIUType>
+ inline genIUType bitfieldInsert(genIUType const& Base, genIUType const& Insert, int Offset, int Bits)
+ {
+  static_assert(std::numeric_limits<genIUType>::is_integer, "'bitfieldInsert' only accept integer values");
+
+  return bitfieldInsert(vec<1, genIUType>(Base), vec<1, genIUType>(Insert), Offset, Bits).x;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> bitfieldInsert(vec<L, T, Q> const& Base, vec<L, T, Q> const& Insert, int Offset, int Bits)
+ {
+  static_assert(std::numeric_limits<T>::is_integer, "'bitfieldInsert' only accept integer values");
+
+  T const Mask = detail::mask(static_cast<T>(Bits)) << Offset;
+  return (Base & ~Mask) | ((Insert << static_cast<T>(Offset)) & Mask);
+ }
+
+
+
+
+
+
+
+ template<typename genIUType>
+ inline genIUType bitfieldReverse(genIUType x)
+ {
+  static_assert(std::numeric_limits<genIUType>::is_integer, "'bitfieldReverse' only accept integer values");
+
+  return bitfieldReverse(glm::vec<1, genIUType, glm::defaultp>(x)).x;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, T, Q> bitfieldReverse(vec<L, T, Q> const& v)
+ {
+  static_assert(std::numeric_limits<T>::is_integer, "'bitfieldReverse' only accept integer values");
+
+  vec<L, T, Q> x(v);
+  x = detail::compute_bitfieldReverseStep<L, T, Q, detail::is_aligned<Q>::value, sizeof(T) * 8>= 2>::call(x, static_cast<T>(0x5555555555555555ull), static_cast<T>( 1));
+  x = detail::compute_bitfieldReverseStep<L, T, Q, detail::is_aligned<Q>::value, sizeof(T) * 8>= 4>::call(x, static_cast<T>(0x3333333333333333ull), static_cast<T>( 2));
+  x = detail::compute_bitfieldReverseStep<L, T, Q, detail::is_aligned<Q>::value, sizeof(T) * 8>= 8>::call(x, static_cast<T>(0x0F0F0F0F0F0F0F0Full), static_cast<T>( 4));
+  x = detail::compute_bitfieldReverseStep<L, T, Q, detail::is_aligned<Q>::value, sizeof(T) * 8>= 16>::call(x, static_cast<T>(0x00FF00FF00FF00FFull), static_cast<T>( 8));
+  x = detail::compute_bitfieldReverseStep<L, T, Q, detail::is_aligned<Q>::value, sizeof(T) * 8>= 32>::call(x, static_cast<T>(0x0000FFFF0000FFFFull), static_cast<T>(16));
+  x = detail::compute_bitfieldReverseStep<L, T, Q, detail::is_aligned<Q>::value, sizeof(T) * 8>= 64>::call(x, static_cast<T>(0x00000000FFFFFFFFull), static_cast<T>(32));
+  return x;
+ }
+
+
+
+
+
+
+ template<typename genIUType>
+ inline int bitCount(genIUType x)
+ {
+  static_assert(std::numeric_limits<genIUType>::is_integer, "'bitCount' only accept integer values");
+
+  return bitCount(glm::vec<1, genIUType, glm::defaultp>(x)).x;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, int, Q> bitCount(vec<L, T, Q> const& v)
+ {
+  static_assert(std::numeric_limits<T>::is_integer, "'bitCount' only accept integer values");
+
+
+
+
+
+
+  vec<L, typename detail::make_unsigned<T>::type, Q> x(v);
+  x = detail::compute_bitfieldBitCountStep<L, typename detail::make_unsigned<T>::type, Q, detail::is_aligned<Q>::value, sizeof(T) * 8>= 2>::call(x, typename detail::make_unsigned<T>::type(0x5555555555555555ull), typename detail::make_unsigned<T>::type( 1));
+  x = detail::compute_bitfieldBitCountStep<L, typename detail::make_unsigned<T>::type, Q, detail::is_aligned<Q>::value, sizeof(T) * 8>= 4>::call(x, typename detail::make_unsigned<T>::type(0x3333333333333333ull), typename detail::make_unsigned<T>::type( 2));
+  x = detail::compute_bitfieldBitCountStep<L, typename detail::make_unsigned<T>::type, Q, detail::is_aligned<Q>::value, sizeof(T) * 8>= 8>::call(x, typename detail::make_unsigned<T>::type(0x0F0F0F0F0F0F0F0Full), typename detail::make_unsigned<T>::type( 4));
+  x = detail::compute_bitfieldBitCountStep<L, typename detail::make_unsigned<T>::type, Q, detail::is_aligned<Q>::value, sizeof(T) * 8>= 16>::call(x, typename detail::make_unsigned<T>::type(0x00FF00FF00FF00FFull), typename detail::make_unsigned<T>::type( 8));
+  x = detail::compute_bitfieldBitCountStep<L, typename detail::make_unsigned<T>::type, Q, detail::is_aligned<Q>::value, sizeof(T) * 8>= 32>::call(x, typename detail::make_unsigned<T>::type(0x0000FFFF0000FFFFull), typename detail::make_unsigned<T>::type(16));
+  x = detail::compute_bitfieldBitCountStep<L, typename detail::make_unsigned<T>::type, Q, detail::is_aligned<Q>::value, sizeof(T) * 8>= 64>::call(x, typename detail::make_unsigned<T>::type(0x00000000FFFFFFFFull), typename detail::make_unsigned<T>::type(32));
+  return vec<L, int, Q>(x);
+
+
+
+
+ }
+
+
+ template<typename genIUType>
+ inline int findLSB(genIUType Value)
+ {
+  static_assert(std::numeric_limits<genIUType>::is_integer, "'findLSB' only accept integer values");
+
+  return detail::compute_findLSB<genIUType, sizeof(genIUType) * 8>::call(Value);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, int, Q> findLSB(vec<L, T, Q> const& x)
+ {
+  static_assert(std::numeric_limits<T>::is_integer, "'findLSB' only accept integer values");
+
+  return detail::functor1<vec, L, int, T, Q>::call(findLSB, x);
+ }
+
+
+ template<typename genIUType>
+ inline int findMSB(genIUType v)
+ {
+  static_assert(std::numeric_limits<genIUType>::is_integer, "'findMSB' only accept integer values");
+
+  return findMSB(vec<1, genIUType>(v)).x;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, int, Q> findMSB(vec<L, T, Q> const& v)
+ {
+  static_assert(std::numeric_limits<T>::is_integer, "'findMSB' only accept integer values");
+
+  return detail::compute_findMSB_vec<L, T, Q, static_cast<int>(sizeof(T) * 8)>::call(v);
+ }
+}
+# 213 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp" 2
+# 138 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp" 2
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/components/transformComponent.h" 2
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/rotate_vector.hpp" 1
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/rotate_vector.hpp"
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/transform.hpp" 1
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/transform.hpp"
+       
+
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/matrix_transform.hpp" 1
+# 21 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/matrix_transform.hpp"
+       
+
+
+
+
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.hpp" 1
+# 20 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.hpp"
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/constants.hpp" 1
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/constants.hpp"
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_constants.hpp" 1
+# 11 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_constants.hpp"
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_constants.hpp" 2
+
+
+
+
+
+namespace glm
+{
+
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType epsilon();
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType pi();
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType cos_one_over_two();
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_constants.inl" 1
+
+
+namespace glm
+{
+ template<typename genType>
+ inline constexpr genType epsilon()
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0, "'epsilon' only accepts floating-point inputs");
+  return std::numeric_limits<genType>::epsilon();
+ }
+
+ template<typename genType>
+ inline constexpr genType pi()
+ {
+  static_assert(std::numeric_limits<genType>::is_iec559 || 0, "'pi' only accepts floating-point inputs");
+  return static_cast<genType>(3.14159265358979323846264338327950288);
+ }
+
+ template<typename genType>
+ inline constexpr genType cos_one_over_two()
+ {
+  return genType(0.877582561890372716130286068203503191);
+ }
+}
+# 41 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_constants.hpp" 2
+# 17 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/constants.hpp" 2
+
+
+
+
+
+namespace glm
+{
+
+
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType zero();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType one();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType two_pi();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType tau();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType root_pi();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType half_pi();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType three_over_two_pi();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType quarter_pi();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType one_over_pi();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType one_over_two_pi();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType two_over_pi();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType four_over_pi();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType two_over_root_pi();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType one_over_root_two();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType root_half_pi();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType root_two_pi();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType root_ln_four();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType e();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType euler();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType root_two();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType root_three();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType root_five();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType ln_two();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType ln_ten();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType ln_ln_two();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType third();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType two_thirds();
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType golden_ratio();
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/constants.inl" 1
+
+
+namespace glm
+{
+ template<typename genType>
+ inline constexpr genType zero()
+ {
+  return genType(0);
+ }
+
+ template<typename genType>
+ inline constexpr genType one()
+ {
+  return genType(1);
+ }
+
+ template<typename genType>
+ inline constexpr genType two_pi()
+ {
+  return genType(6.28318530717958647692528676655900576);
+ }
+
+ template<typename genType>
+ inline constexpr genType tau()
+ {
+  return two_pi<genType>();
+ }
+
+ template<typename genType>
+ inline constexpr genType root_pi()
+ {
+  return genType(1.772453850905516027);
+ }
+
+ template<typename genType>
+ inline constexpr genType half_pi()
+ {
+  return genType(1.57079632679489661923132169163975144);
+ }
+
+ template<typename genType>
+ inline constexpr genType three_over_two_pi()
+ {
+  return genType(4.71238898038468985769396507491925432);
+ }
+
+ template<typename genType>
+ inline constexpr genType quarter_pi()
+ {
+  return genType(0.785398163397448309615660845819875721);
+ }
+
+ template<typename genType>
+ inline constexpr genType one_over_pi()
+ {
+  return genType(0.318309886183790671537767526745028724);
+ }
+
+ template<typename genType>
+ inline constexpr genType one_over_two_pi()
+ {
+  return genType(0.159154943091895335768883763372514362);
+ }
+
+ template<typename genType>
+ inline constexpr genType two_over_pi()
+ {
+  return genType(0.636619772367581343075535053490057448);
+ }
+
+ template<typename genType>
+ inline constexpr genType four_over_pi()
+ {
+  return genType(1.273239544735162686151070106980114898);
+ }
+
+ template<typename genType>
+ inline constexpr genType two_over_root_pi()
+ {
+  return genType(1.12837916709551257389615890312154517);
+ }
+
+ template<typename genType>
+ inline constexpr genType one_over_root_two()
+ {
+  return genType(0.707106781186547524400844362104849039);
+ }
+
+ template<typename genType>
+ inline constexpr genType root_half_pi()
+ {
+  return genType(1.253314137315500251);
+ }
+
+ template<typename genType>
+ inline constexpr genType root_two_pi()
+ {
+  return genType(2.506628274631000502);
+ }
+
+ template<typename genType>
+ inline constexpr genType root_ln_four()
+ {
+  return genType(1.17741002251547469);
+ }
+
+ template<typename genType>
+ inline constexpr genType e()
+ {
+  return genType(2.71828182845904523536);
+ }
+
+ template<typename genType>
+ inline constexpr genType euler()
+ {
+  return genType(0.577215664901532860606);
+ }
+
+ template<typename genType>
+ inline constexpr genType root_two()
+ {
+  return genType(1.41421356237309504880168872420969808);
+ }
+
+ template<typename genType>
+ inline constexpr genType root_three()
+ {
+  return genType(1.73205080756887729352744634150587236);
+ }
+
+ template<typename genType>
+ inline constexpr genType root_five()
+ {
+  return genType(2.23606797749978969640917366873127623);
+ }
+
+ template<typename genType>
+ inline constexpr genType ln_two()
+ {
+  return genType(0.693147180559945309417232121458176568);
+ }
+
+ template<typename genType>
+ inline constexpr genType ln_ten()
+ {
+  return genType(2.30258509299404568401799145468436421);
+ }
+
+ template<typename genType>
+ inline constexpr genType ln_ln_two()
+ {
+  return genType(-0.3665129205816643);
+ }
+
+ template<typename genType>
+ inline constexpr genType third()
+ {
+  return genType(0.3333333333333333333333333333333333333333);
+ }
+
+ template<typename genType>
+ inline constexpr genType two_thirds()
+ {
+  return genType(0.666666666666666666666666666666666666667);
+ }
+
+ template<typename genType>
+ inline constexpr genType golden_ratio()
+ {
+  return genType(1.61803398874989484820458683436563811);
+ }
+
+}
+# 171 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/constants.hpp" 2
+# 24 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.hpp" 2
+# 32 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.hpp"
+namespace glm
+{
+# 49 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.hpp"
+ template<typename T, typename U, qualifier Q>
+ [[nodiscard]] vec<3, T, Q> projectZO(
+  vec<3, T, Q> const& obj, mat<4, 4, T, Q> const& model, mat<4, 4, T, Q> const& proj, vec<4, U, Q> const& viewport);
+# 65 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.hpp"
+ template<typename T, typename U, qualifier Q>
+ [[nodiscard]] vec<3, T, Q> projectNO(
+  vec<3, T, Q> const& obj, mat<4, 4, T, Q> const& model, mat<4, 4, T, Q> const& proj, vec<4, U, Q> const& viewport);
+# 81 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.hpp"
+ template<typename T, typename U, qualifier Q>
+ [[nodiscard]] vec<3, T, Q> project(
+  vec<3, T, Q> const& obj, mat<4, 4, T, Q> const& model, mat<4, 4, T, Q> const& proj, vec<4, U, Q> const& viewport);
+# 97 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.hpp"
+ template<typename T, typename U, qualifier Q>
+ [[nodiscard]] vec<3, T, Q> unProjectZO(
+  vec<3, T, Q> const& win, mat<4, 4, T, Q> const& model, mat<4, 4, T, Q> const& proj, vec<4, U, Q> const& viewport);
+# 113 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.hpp"
+ template<typename T, typename U, qualifier Q>
+ [[nodiscard]] vec<3, T, Q> unProjectNO(
+  vec<3, T, Q> const& win, mat<4, 4, T, Q> const& model, mat<4, 4, T, Q> const& proj, vec<4, U, Q> const& viewport);
+# 129 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.hpp"
+ template<typename T, typename U, qualifier Q>
+ [[nodiscard]] vec<3, T, Q> unProject(
+  vec<3, T, Q> const& win, mat<4, 4, T, Q> const& model, mat<4, 4, T, Q> const& proj, vec<4, U, Q> const& viewport);
+# 142 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.hpp"
+ template<typename T, qualifier Q, typename U>
+ [[nodiscard]] mat<4, 4, T, Q> pickMatrix(
+  vec<2, T, Q> const& center, vec<2, T, Q> const& delta, vec<4, U, Q> const& viewport);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.inl" 1
+namespace glm
+{
+ template<typename T, typename U, qualifier Q>
+ inline vec<3, T, Q> projectZO(vec<3, T, Q> const& obj, mat<4, 4, T, Q> const& model, mat<4, 4, T, Q> const& proj, vec<4, U, Q> const& viewport)
+ {
+  vec<4, T, Q> tmp = vec<4, T, Q>(obj, static_cast<T>(1));
+  tmp = model * tmp;
+  tmp = proj * tmp;
+
+  tmp /= tmp.w;
+  tmp.x = tmp.x * static_cast<T>(0.5) + static_cast<T>(0.5);
+  tmp.y = tmp.y * static_cast<T>(0.5) + static_cast<T>(0.5);
+
+  tmp[0] = tmp[0] * T(viewport[2]) + T(viewport[0]);
+  tmp[1] = tmp[1] * T(viewport[3]) + T(viewport[1]);
+
+  return vec<3, T, Q>(tmp);
+ }
+
+ template<typename T, typename U, qualifier Q>
+ inline vec<3, T, Q> projectNO(vec<3, T, Q> const& obj, mat<4, 4, T, Q> const& model, mat<4, 4, T, Q> const& proj, vec<4, U, Q> const& viewport)
+ {
+  vec<4, T, Q> tmp = vec<4, T, Q>(obj, static_cast<T>(1));
+  tmp = model * tmp;
+  tmp = proj * tmp;
+
+  tmp /= tmp.w;
+  tmp = tmp * static_cast<T>(0.5) + static_cast<T>(0.5);
+  tmp[0] = tmp[0] * T(viewport[2]) + T(viewport[0]);
+  tmp[1] = tmp[1] * T(viewport[3]) + T(viewport[1]);
+
+  return vec<3, T, Q>(tmp);
+ }
+
+ template<typename T, typename U, qualifier Q>
+ inline vec<3, T, Q> project(vec<3, T, Q> const& obj, mat<4, 4, T, Q> const& model, mat<4, 4, T, Q> const& proj, vec<4, U, Q> const& viewport)
+ {
+
+
+
+   return projectNO(obj, model, proj, viewport);
+
+ }
+
+ template<typename T, typename U, qualifier Q>
+ inline vec<3, T, Q> unProjectZO(vec<3, T, Q> const& win, mat<4, 4, T, Q> const& model, mat<4, 4, T, Q> const& proj, vec<4, U, Q> const& viewport)
+ {
+  mat<4, 4, T, Q> Inverse = inverse(proj * model);
+
+  vec<4, T, Q> tmp = vec<4, T, Q>(win, T(1));
+  tmp.x = (tmp.x - T(viewport[0])) / T(viewport[2]);
+  tmp.y = (tmp.y - T(viewport[1])) / T(viewport[3]);
+  tmp.x = tmp.x * static_cast<T>(2) - static_cast<T>(1);
+  tmp.y = tmp.y * static_cast<T>(2) - static_cast<T>(1);
+
+  vec<4, T, Q> obj = Inverse * tmp;
+  obj /= obj.w;
+
+  return vec<3, T, Q>(obj);
+ }
+
+ template<typename T, typename U, qualifier Q>
+ inline vec<3, T, Q> unProjectNO(vec<3, T, Q> const& win, mat<4, 4, T, Q> const& model, mat<4, 4, T, Q> const& proj, vec<4, U, Q> const& viewport)
+ {
+  mat<4, 4, T, Q> Inverse = inverse(proj * model);
+
+  vec<4, T, Q> tmp = vec<4, T, Q>(win, T(1));
+  tmp.x = (tmp.x - T(viewport[0])) / T(viewport[2]);
+  tmp.y = (tmp.y - T(viewport[1])) / T(viewport[3]);
+  tmp = tmp * static_cast<T>(2) - static_cast<T>(1);
+
+  vec<4, T, Q> obj = Inverse * tmp;
+  obj /= obj.w;
+
+  return vec<3, T, Q>(obj);
+ }
+
+ template<typename T, typename U, qualifier Q>
+ inline vec<3, T, Q> unProject(vec<3, T, Q> const& win, mat<4, 4, T, Q> const& model, mat<4, 4, T, Q> const& proj, vec<4, U, Q> const& viewport)
+ {
+
+
+
+   return unProjectNO(win, model, proj, viewport);
+
+ }
+
+ template<typename T, qualifier Q, typename U>
+ inline mat<4, 4, T, Q> pickMatrix(vec<2, T, Q> const& center, vec<2, T, Q> const& delta, vec<4, U, Q> const& viewport)
+ {
+  
+# 91 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.inl" 3
+ ((void)0)
+# 91 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.inl"
+                                                                   ;
+  mat<4, 4, T, Q> Result(static_cast<T>(1));
+
+  if(!(delta.x > static_cast<T>(0) && delta.y > static_cast<T>(0)))
+   return Result;
+
+  vec<3, T, Q> Temp(
+   (static_cast<T>(viewport[2]) - static_cast<T>(2) * (center.x - static_cast<T>(viewport[0]))) / delta.x,
+   (static_cast<T>(viewport[3]) - static_cast<T>(2) * (center.y - static_cast<T>(viewport[1]))) / delta.y,
+   static_cast<T>(0));
+
+
+  Result = translate(Result, Temp);
+  return scale(Result, vec<3, T, Q>(static_cast<T>(viewport[2]) / delta.x, static_cast<T>(viewport[3]) / delta.y, static_cast<T>(1)));
+ }
+}
+# 150 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_projection.hpp" 2
+# 29 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/matrix_transform.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp" 1
+# 20 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+       
+# 31 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+namespace glm
+{
+# 42 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> ortho(
+  T left, T right, T bottom, T top);
+
+
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> orthoLH_ZO(
+  T left, T right, T bottom, T top, T zNear, T zFar);
+
+
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> orthoLH_NO(
+  T left, T right, T bottom, T top, T zNear, T zFar);
+
+
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> orthoRH_ZO(
+  T left, T right, T bottom, T top, T zNear, T zFar);
+
+
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> orthoRH_NO(
+  T left, T right, T bottom, T top, T zNear, T zFar);
+
+
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> orthoZO(
+  T left, T right, T bottom, T top, T zNear, T zFar);
+
+
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> orthoNO(
+  T left, T right, T bottom, T top, T zNear, T zFar);
+# 113 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> orthoLH(
+  T left, T right, T bottom, T top, T zNear, T zFar);
+# 124 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> orthoRH(
+  T left, T right, T bottom, T top, T zNear, T zFar);
+# 135 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> ortho(
+  T left, T right, T bottom, T top, T zNear, T zFar);
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> frustumLH_ZO(
+  T left, T right, T bottom, T top, T near, T far);
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> frustumLH_NO(
+  T left, T right, T bottom, T top, T near, T far);
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> frustumRH_ZO(
+  T left, T right, T bottom, T top, T near, T far);
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> frustumRH_NO(
+  T left, T right, T bottom, T top, T near, T far);
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> frustumZO(
+  T left, T right, T bottom, T top, T near, T far);
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> frustumNO(
+  T left, T right, T bottom, T top, T near, T far);
+
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> frustumLH(
+  T left, T right, T bottom, T top, T near, T far);
+
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> frustumRH(
+  T left, T right, T bottom, T top, T near, T far);
+
+
+
+
+
+
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> frustum(
+  T left, T right, T bottom, T top, T near, T far);
+# 224 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveRH_ZO(
+  T fovy, T aspect, T near, T far);
+# 237 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveRH_NO(
+  T fovy, T aspect, T near, T far);
+# 250 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveLH_ZO(
+  T fovy, T aspect, T near, T far);
+# 263 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveLH_NO(
+  T fovy, T aspect, T near, T far);
+# 276 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveZO(
+  T fovy, T aspect, T near, T far);
+# 289 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveNO(
+  T fovy, T aspect, T near, T far);
+# 303 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveRH(
+  T fovy, T aspect, T near, T far);
+# 317 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveLH(
+  T fovy, T aspect, T near, T far);
+# 331 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspective(
+  T fovy, T aspect, T near, T far);
+# 345 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveFovRH_ZO(
+  T fov, T width, T height, T near, T far);
+# 359 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveFovRH_NO(
+  T fov, T width, T height, T near, T far);
+# 373 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveFovLH_ZO(
+  T fov, T width, T height, T near, T far);
+# 387 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveFovLH_NO(
+  T fov, T width, T height, T near, T far);
+# 401 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveFovZO(
+  T fov, T width, T height, T near, T far);
+# 415 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveFovNO(
+  T fov, T width, T height, T near, T far);
+# 430 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveFovRH(
+  T fov, T width, T height, T near, T far);
+# 445 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveFovLH(
+  T fov, T width, T height, T near, T far);
+# 459 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> perspectiveFov(
+  T fov, T width, T height, T near, T far);
+# 471 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> infinitePerspectiveLH_ZO(
+  T fovy, T aspect, T near);
+# 483 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> infinitePerspectiveLH_NO(
+  T fovy, T aspect, T near);
+# 495 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> infinitePerspectiveRH_ZO(
+  T fovy, T aspect, T near);
+# 507 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> infinitePerspectiveRH_NO(
+  T fovy, T aspect, T near);
+# 520 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> infinitePerspectiveLH(
+  T fovy, T aspect, T near);
+# 533 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> infinitePerspectiveRH(
+  T fovy, T aspect, T near);
+# 546 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> infinitePerspective(
+  T fovy, T aspect, T near);
+# 557 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> tweakedInfinitePerspective(
+  T fovy, T aspect, T near);
+# 569 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp"
+ template<typename T>
+ [[nodiscard]] mat<4, 4, T, defaultp> tweakedInfinitePerspective(
+  T fovy, T aspect, T near, T ep);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 1
+namespace glm
+{
+ template<typename T>
+ inline mat<4, 4, T, defaultp> ortho(T left, T right, T bottom, T top)
+ {
+  mat<4, 4, T, defaultp> Result(static_cast<T>(1));
+  Result[0][0] = static_cast<T>(2) / (right - left);
+  Result[1][1] = static_cast<T>(2) / (top - bottom);
+  Result[2][2] = - static_cast<T>(1);
+  Result[3][0] = - (right + left) / (right - left);
+  Result[3][1] = - (top + bottom) / (top - bottom);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> orthoLH_ZO(T left, T right, T bottom, T top, T zNear, T zFar)
+ {
+  mat<4, 4, T, defaultp> Result(1);
+  Result[0][0] = static_cast<T>(2) / (right - left);
+  Result[1][1] = static_cast<T>(2) / (top - bottom);
+  Result[2][2] = static_cast<T>(1) / (zFar - zNear);
+  Result[3][0] = - (right + left) / (right - left);
+  Result[3][1] = - (top + bottom) / (top - bottom);
+  Result[3][2] = - zNear / (zFar - zNear);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> orthoLH_NO(T left, T right, T bottom, T top, T zNear, T zFar)
+ {
+  mat<4, 4, T, defaultp> Result(1);
+  Result[0][0] = static_cast<T>(2) / (right - left);
+  Result[1][1] = static_cast<T>(2) / (top - bottom);
+  Result[2][2] = static_cast<T>(2) / (zFar - zNear);
+  Result[3][0] = - (right + left) / (right - left);
+  Result[3][1] = - (top + bottom) / (top - bottom);
+  Result[3][2] = - (zFar + zNear) / (zFar - zNear);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> orthoRH_ZO(T left, T right, T bottom, T top, T zNear, T zFar)
+ {
+  mat<4, 4, T, defaultp> Result(1);
+  Result[0][0] = static_cast<T>(2) / (right - left);
+  Result[1][1] = static_cast<T>(2) / (top - bottom);
+  Result[2][2] = - static_cast<T>(1) / (zFar - zNear);
+  Result[3][0] = - (right + left) / (right - left);
+  Result[3][1] = - (top + bottom) / (top - bottom);
+  Result[3][2] = - zNear / (zFar - zNear);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> orthoRH_NO(T left, T right, T bottom, T top, T zNear, T zFar)
+ {
+  mat<4, 4, T, defaultp> Result(1);
+  Result[0][0] = static_cast<T>(2) / (right - left);
+  Result[1][1] = static_cast<T>(2) / (top - bottom);
+  Result[2][2] = - static_cast<T>(2) / (zFar - zNear);
+  Result[3][0] = - (right + left) / (right - left);
+  Result[3][1] = - (top + bottom) / (top - bottom);
+  Result[3][2] = - (zFar + zNear) / (zFar - zNear);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> orthoZO(T left, T right, T bottom, T top, T zNear, T zFar)
+ {
+
+
+
+   return orthoRH_ZO(left, right, bottom, top, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> orthoNO(T left, T right, T bottom, T top, T zNear, T zFar)
+ {
+
+
+
+   return orthoRH_NO(left, right, bottom, top, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> orthoLH(T left, T right, T bottom, T top, T zNear, T zFar)
+ {
+
+
+
+   return orthoLH_NO(left, right, bottom, top, zNear, zFar);
+
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> orthoRH(T left, T right, T bottom, T top, T zNear, T zFar)
+ {
+
+
+
+   return orthoRH_NO(left, right, bottom, top, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> ortho(T left, T right, T bottom, T top, T zNear, T zFar)
+ {
+
+
+
+
+
+
+
+   return orthoRH_NO(left, right, bottom, top, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> frustumLH_ZO(T left, T right, T bottom, T top, T nearVal, T farVal)
+ {
+  mat<4, 4, T, defaultp> Result(0);
+  Result[0][0] = (static_cast<T>(2) * nearVal) / (right - left);
+  Result[1][1] = (static_cast<T>(2) * nearVal) / (top - bottom);
+  Result[2][0] = -(right + left) / (right - left);
+  Result[2][1] = -(top + bottom) / (top - bottom);
+  Result[2][2] = farVal / (farVal - nearVal);
+  Result[2][3] = static_cast<T>(1);
+  Result[3][2] = -(farVal * nearVal) / (farVal - nearVal);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> frustumLH_NO(T left, T right, T bottom, T top, T nearVal, T farVal)
+ {
+  mat<4, 4, T, defaultp> Result(0);
+  Result[0][0] = (static_cast<T>(2) * nearVal) / (right - left);
+  Result[1][1] = (static_cast<T>(2) * nearVal) / (top - bottom);
+  Result[2][0] = -(right + left) / (right - left);
+  Result[2][1] = -(top + bottom) / (top - bottom);
+  Result[2][2] = (farVal + nearVal) / (farVal - nearVal);
+  Result[2][3] = static_cast<T>(1);
+  Result[3][2] = - (static_cast<T>(2) * farVal * nearVal) / (farVal - nearVal);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> frustumRH_ZO(T left, T right, T bottom, T top, T nearVal, T farVal)
+ {
+  mat<4, 4, T, defaultp> Result(0);
+  Result[0][0] = (static_cast<T>(2) * nearVal) / (right - left);
+  Result[1][1] = (static_cast<T>(2) * nearVal) / (top - bottom);
+  Result[2][0] = (right + left) / (right - left);
+  Result[2][1] = (top + bottom) / (top - bottom);
+  Result[2][2] = farVal / (nearVal - farVal);
+  Result[2][3] = static_cast<T>(-1);
+  Result[3][2] = -(farVal * nearVal) / (farVal - nearVal);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> frustumRH_NO(T left, T right, T bottom, T top, T nearVal, T farVal)
+ {
+  mat<4, 4, T, defaultp> Result(0);
+  Result[0][0] = (static_cast<T>(2) * nearVal) / (right - left);
+  Result[1][1] = (static_cast<T>(2) * nearVal) / (top - bottom);
+  Result[2][0] = (right + left) / (right - left);
+  Result[2][1] = (top + bottom) / (top - bottom);
+  Result[2][2] = - (farVal + nearVal) / (farVal - nearVal);
+  Result[2][3] = static_cast<T>(-1);
+  Result[3][2] = - (static_cast<T>(2) * farVal * nearVal) / (farVal - nearVal);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> frustumZO(T left, T right, T bottom, T top, T nearVal, T farVal)
+ {
+
+
+
+   return frustumRH_ZO(left, right, bottom, top, nearVal, farVal);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> frustumNO(T left, T right, T bottom, T top, T nearVal, T farVal)
+ {
+
+
+
+   return frustumRH_NO(left, right, bottom, top, nearVal, farVal);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> frustumLH(T left, T right, T bottom, T top, T nearVal, T farVal)
+ {
+
+
+
+   return frustumLH_NO(left, right, bottom, top, nearVal, farVal);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> frustumRH(T left, T right, T bottom, T top, T nearVal, T farVal)
+ {
+
+
+
+   return frustumRH_NO(left, right, bottom, top, nearVal, farVal);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> frustum(T left, T right, T bottom, T top, T nearVal, T farVal)
+ {
+
+
+
+
+
+
+
+   return frustumRH_NO(left, right, bottom, top, nearVal, farVal);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveRH_ZO(T fovy, T aspect, T zNear, T zFar)
+ {
+  
+# 235 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 235 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                                                            ;
+
+  T const tanHalfFovy = tan(fovy / static_cast<T>(2));
+
+  mat<4, 4, T, defaultp> Result(static_cast<T>(0));
+  Result[0][0] = static_cast<T>(1) / (aspect * tanHalfFovy);
+  Result[1][1] = static_cast<T>(1) / (tanHalfFovy);
+  Result[2][2] = zFar / (zNear - zFar);
+  Result[2][3] = - static_cast<T>(1);
+  Result[3][2] = -(zFar * zNear) / (zFar - zNear);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveRH_NO(T fovy, T aspect, T zNear, T zFar)
+ {
+  
+# 251 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 251 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                                                            ;
+
+  T const tanHalfFovy = tan(fovy / static_cast<T>(2));
+
+  mat<4, 4, T, defaultp> Result(static_cast<T>(0));
+  Result[0][0] = static_cast<T>(1) / (aspect * tanHalfFovy);
+  Result[1][1] = static_cast<T>(1) / (tanHalfFovy);
+  Result[2][2] = - (zFar + zNear) / (zFar - zNear);
+  Result[2][3] = - static_cast<T>(1);
+  Result[3][2] = - (static_cast<T>(2) * zFar * zNear) / (zFar - zNear);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveLH_ZO(T fovy, T aspect, T zNear, T zFar)
+ {
+  
+# 267 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 267 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                                                            ;
+
+  T const tanHalfFovy = tan(fovy / static_cast<T>(2));
+
+  mat<4, 4, T, defaultp> Result(static_cast<T>(0));
+  Result[0][0] = static_cast<T>(1) / (aspect * tanHalfFovy);
+  Result[1][1] = static_cast<T>(1) / (tanHalfFovy);
+  Result[2][2] = zFar / (zFar - zNear);
+  Result[2][3] = static_cast<T>(1);
+  Result[3][2] = -(zFar * zNear) / (zFar - zNear);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveLH_NO(T fovy, T aspect, T zNear, T zFar)
+ {
+  
+# 283 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 283 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                                                            ;
+
+  T const tanHalfFovy = tan(fovy / static_cast<T>(2));
+
+  mat<4, 4, T, defaultp> Result(static_cast<T>(0));
+  Result[0][0] = static_cast<T>(1) / (aspect * tanHalfFovy);
+  Result[1][1] = static_cast<T>(1) / (tanHalfFovy);
+  Result[2][2] = (zFar + zNear) / (zFar - zNear);
+  Result[2][3] = static_cast<T>(1);
+  Result[3][2] = - (static_cast<T>(2) * zFar * zNear) / (zFar - zNear);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveZO(T fovy, T aspect, T zNear, T zFar)
+ {
+
+
+
+   return perspectiveRH_ZO(fovy, aspect, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveNO(T fovy, T aspect, T zNear, T zFar)
+ {
+
+
+
+   return perspectiveRH_NO(fovy, aspect, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveLH(T fovy, T aspect, T zNear, T zFar)
+ {
+
+
+
+   return perspectiveLH_NO(fovy, aspect, zNear, zFar);
+
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveRH(T fovy, T aspect, T zNear, T zFar)
+ {
+
+
+
+   return perspectiveRH_NO(fovy, aspect, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspective(T fovy, T aspect, T zNear, T zFar)
+ {
+
+
+
+
+
+
+
+   return perspectiveRH_NO(fovy, aspect, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveFovRH_ZO(T fov, T width, T height, T zNear, T zFar)
+ {
+  
+# 354 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 354 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                  ;
+  
+# 355 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 355 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                   ;
+  
+# 356 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 356 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                ;
+
+  T const rad = fov;
+  T const h = glm::cos(static_cast<T>(0.5) * rad) / glm::sin(static_cast<T>(0.5) * rad);
+  T const w = h * height / width;
+
+  mat<4, 4, T, defaultp> Result(static_cast<T>(0));
+  Result[0][0] = w;
+  Result[1][1] = h;
+  Result[2][2] = zFar / (zNear - zFar);
+  Result[2][3] = - static_cast<T>(1);
+  Result[3][2] = -(zFar * zNear) / (zFar - zNear);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveFovRH_NO(T fov, T width, T height, T zNear, T zFar)
+ {
+  
+# 374 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 374 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                  ;
+  
+# 375 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 375 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                   ;
+  
+# 376 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 376 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                ;
+
+  T const rad = fov;
+  T const h = glm::cos(static_cast<T>(0.5) * rad) / glm::sin(static_cast<T>(0.5) * rad);
+  T const w = h * height / width;
+
+  mat<4, 4, T, defaultp> Result(static_cast<T>(0));
+  Result[0][0] = w;
+  Result[1][1] = h;
+  Result[2][2] = - (zFar + zNear) / (zFar - zNear);
+  Result[2][3] = - static_cast<T>(1);
+  Result[3][2] = - (static_cast<T>(2) * zFar * zNear) / (zFar - zNear);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveFovLH_ZO(T fov, T width, T height, T zNear, T zFar)
+ {
+  
+# 394 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 394 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                  ;
+  
+# 395 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 395 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                   ;
+  
+# 396 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 396 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                ;
+
+  T const rad = fov;
+  T const h = glm::cos(static_cast<T>(0.5) * rad) / glm::sin(static_cast<T>(0.5) * rad);
+  T const w = h * height / width;
+
+  mat<4, 4, T, defaultp> Result(static_cast<T>(0));
+  Result[0][0] = w;
+  Result[1][1] = h;
+  Result[2][2] = zFar / (zFar - zNear);
+  Result[2][3] = static_cast<T>(1);
+  Result[3][2] = -(zFar * zNear) / (zFar - zNear);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveFovLH_NO(T fov, T width, T height, T zNear, T zFar)
+ {
+  
+# 414 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 414 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                  ;
+  
+# 415 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 415 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                   ;
+  
+# 416 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl" 3
+ ((void)0)
+# 416 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.inl"
+                                ;
+
+  T const rad = fov;
+  T const h = glm::cos(static_cast<T>(0.5) * rad) / glm::sin(static_cast<T>(0.5) * rad);
+  T const w = h * height / width;
+
+  mat<4, 4, T, defaultp> Result(static_cast<T>(0));
+  Result[0][0] = w;
+  Result[1][1] = h;
+  Result[2][2] = (zFar + zNear) / (zFar - zNear);
+  Result[2][3] = static_cast<T>(1);
+  Result[3][2] = - (static_cast<T>(2) * zFar * zNear) / (zFar - zNear);
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveFovZO(T fov, T width, T height, T zNear, T zFar)
+ {
+
+
+
+   return perspectiveFovRH_ZO(fov, width, height, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveFovNO(T fov, T width, T height, T zNear, T zFar)
+ {
+
+
+
+   return perspectiveFovRH_NO(fov, width, height, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveFovLH(T fov, T width, T height, T zNear, T zFar)
+ {
+
+
+
+   return perspectiveFovLH_NO(fov, width, height, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveFovRH(T fov, T width, T height, T zNear, T zFar)
+ {
+
+
+
+   return perspectiveFovRH_NO(fov, width, height, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> perspectiveFov(T fov, T width, T height, T zNear, T zFar)
+ {
+
+
+
+
+
+
+
+   return perspectiveFovRH_NO(fov, width, height, zNear, zFar);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> infinitePerspectiveRH_NO(T fovy, T aspect, T zNear)
+ {
+  T const range = tan(fovy / static_cast<T>(2)) * zNear;
+  T const left = -range * aspect;
+  T const right = range * aspect;
+  T const bottom = -range;
+  T const top = range;
+
+  mat<4, 4, T, defaultp> Result(static_cast<T>(0));
+  Result[0][0] = (static_cast<T>(2) * zNear) / (right - left);
+  Result[1][1] = (static_cast<T>(2) * zNear) / (top - bottom);
+  Result[2][2] = - static_cast<T>(1);
+  Result[2][3] = - static_cast<T>(1);
+  Result[3][2] = - static_cast<T>(2) * zNear;
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> infinitePerspectiveRH_ZO(T fovy, T aspect, T zNear)
+ {
+  T const range = tan(fovy / static_cast<T>(2)) * zNear;
+  T const left = -range * aspect;
+  T const right = range * aspect;
+  T const bottom = -range;
+  T const top = range;
+
+  mat<4, 4, T, defaultp> Result(static_cast<T>(0));
+  Result[0][0] = (static_cast<T>(2) * zNear) / (right - left);
+  Result[1][1] = (static_cast<T>(2) * zNear) / (top - bottom);
+  Result[2][2] = - static_cast<T>(1);
+  Result[2][3] = - static_cast<T>(1);
+  Result[3][2] = - zNear;
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> infinitePerspectiveLH_NO(T fovy, T aspect, T zNear)
+ {
+  T const range = tan(fovy / static_cast<T>(2)) * zNear;
+  T const left = -range * aspect;
+  T const right = range * aspect;
+  T const bottom = -range;
+  T const top = range;
+
+  mat<4, 4, T, defaultp> Result(T(0));
+  Result[0][0] = (static_cast<T>(2) * zNear) / (right - left);
+  Result[1][1] = (static_cast<T>(2) * zNear) / (top - bottom);
+  Result[2][2] = static_cast<T>(1);
+  Result[2][3] = static_cast<T>(1);
+  Result[3][2] = - static_cast<T>(2) * zNear;
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> infinitePerspectiveLH_ZO(T fovy, T aspect, T zNear)
+ {
+  T const range = tan(fovy / static_cast<T>(2)) * zNear;
+  T const left = -range * aspect;
+  T const right = range * aspect;
+  T const bottom = -range;
+  T const top = range;
+
+  mat<4, 4, T, defaultp> Result(T(0));
+  Result[0][0] = (static_cast<T>(2) * zNear) / (right - left);
+  Result[1][1] = (static_cast<T>(2) * zNear) / (top - bottom);
+  Result[2][2] = static_cast<T>(1);
+  Result[2][3] = static_cast<T>(1);
+  Result[3][2] = - zNear;
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> infinitePerspectiveRH(T fovy, T aspect, T zNear)
+ {
+
+
+
+   return infinitePerspectiveRH_NO(fovy, aspect, zNear);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> infinitePerspectiveLH(T fovy, T aspect, T zNear)
+ {
+
+
+
+   return infinitePerspectiveLH_NO(fovy, aspect, zNear);
+
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> infinitePerspective(T fovy, T aspect, T zNear)
+ {
+
+
+
+
+
+
+
+   return infinitePerspectiveRH_NO(fovy, aspect, zNear);
+
+ }
+
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> tweakedInfinitePerspective(T fovy, T aspect, T zNear, T ep)
+ {
+  T const range = tan(fovy / static_cast<T>(2)) * zNear;
+  T const left = -range * aspect;
+  T const right = range * aspect;
+  T const bottom = -range;
+  T const top = range;
+
+  mat<4, 4, T, defaultp> Result(static_cast<T>(0));
+  Result[0][0] = (static_cast<T>(2) * zNear) / (right - left);
+  Result[1][1] = (static_cast<T>(2) * zNear) / (top - bottom);
+  Result[2][2] = ep - static_cast<T>(1);
+  Result[2][3] = static_cast<T>(-1);
+  Result[3][2] = (ep - static_cast<T>(2)) * zNear;
+  return Result;
+ }
+
+ template<typename T>
+ inline mat<4, 4, T, defaultp> tweakedInfinitePerspective(T fovy, T aspect, T zNear)
+ {
+  return tweakedInfinitePerspective(fovy, aspect, zNear, epsilon<T>());
+ }
+}
+# 577 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_clip_space.hpp" 2
+# 30 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/matrix_transform.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_transform.hpp" 1
+# 20 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_transform.hpp"
+       
+# 32 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_transform.hpp"
+namespace glm
+{
+
+
+
+
+ template<typename genType>
+ [[nodiscard]] constexpr genType identity();
+# 63 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_transform.hpp"
+ template<typename T, qualifier Q>
+ [[nodiscard]] constexpr mat<4, 4, T, Q> translate(
+  mat<4, 4, T, Q> const& m, vec<3, T, Q> const& v);
+# 79 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_transform.hpp"
+ template<typename T, qualifier Q>
+ [[nodiscard]] mat<4, 4, T, Q> rotate(
+  mat<4, 4, T, Q> const& m, T angle, vec<3, T, Q> const& axis);
+# 94 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_transform.hpp"
+ template<typename T, qualifier Q>
+ [[nodiscard]] mat<4, 4, T, Q> scale(
+  mat<4, 4, T, Q> const& m, vec<3, T, Q> const& v);
+# 121 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_transform.hpp"
+    template <typename T, qualifier Q>
+    inline mat<4, 4, T, Q> shear(
+        mat<4, 4, T, Q> const &m, vec<3, T, Q> const& p, vec<2, T, Q> const &l_x, vec<2, T, Q> const &l_y, vec<2, T, Q> const &l_z);
+# 135 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_transform.hpp"
+ template<typename T, qualifier Q>
+ [[nodiscard]] mat<4, 4, T, Q> lookAtRH(
+  vec<3, T, Q> const& eye, vec<3, T, Q> const& center, vec<3, T, Q> const& up);
+# 149 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_transform.hpp"
+ template<typename T, qualifier Q>
+ [[nodiscard]] mat<4, 4, T, Q> lookAtLH(
+  vec<3, T, Q> const& eye, vec<3, T, Q> const& center, vec<3, T, Q> const& up);
+# 164 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_transform.hpp"
+ template<typename T, qualifier Q>
+ [[nodiscard]] mat<4, 4, T, Q> lookAt(
+  vec<3, T, Q> const& eye, vec<3, T, Q> const& center, vec<3, T, Q> const& up);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_transform.inl" 1
+namespace glm
+{
+ template<typename genType>
+ inline constexpr genType identity()
+ {
+  return detail::init_gentype<genType, detail::genTypeTrait<genType>::GENTYPE>::identity();
+ }
+
+ template<typename T, qualifier Q>
+ inline constexpr mat<4, 4, T, Q> translate(mat<4, 4, T, Q> const& m, vec<3, T, Q> const& v)
+ {
+  mat<4, 4, T, Q> Result(m);
+  Result[3] = m[0] * v[0] + m[1] * v[1] + m[2] * v[2] + m[3];
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline mat<4, 4, T, Q> rotate(mat<4, 4, T, Q> const& m, T angle, vec<3, T, Q> const& v)
+ {
+  T const a = angle;
+  T const c = cos(a);
+  T const s = sin(a);
+
+  vec<3, T, Q> axis(normalize(v));
+  vec<3, T, Q> temp((T(1) - c) * axis);
+
+  mat<4, 4, T, Q> Rotate;
+  Rotate[0][0] = c + temp[0] * axis[0];
+  Rotate[0][1] = temp[0] * axis[1] + s * axis[2];
+  Rotate[0][2] = temp[0] * axis[2] - s * axis[1];
+
+  Rotate[1][0] = temp[1] * axis[0] - s * axis[2];
+  Rotate[1][1] = c + temp[1] * axis[1];
+  Rotate[1][2] = temp[1] * axis[2] + s * axis[0];
+
+  Rotate[2][0] = temp[2] * axis[0] + s * axis[1];
+  Rotate[2][1] = temp[2] * axis[1] - s * axis[0];
+  Rotate[2][2] = c + temp[2] * axis[2];
+
+  mat<4, 4, T, Q> Result;
+  Result[0] = m[0] * Rotate[0][0] + m[1] * Rotate[0][1] + m[2] * Rotate[0][2];
+  Result[1] = m[0] * Rotate[1][0] + m[1] * Rotate[1][1] + m[2] * Rotate[1][2];
+  Result[2] = m[0] * Rotate[2][0] + m[1] * Rotate[2][1] + m[2] * Rotate[2][2];
+  Result[3] = m[3];
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline mat<4, 4, T, Q> rotate_slow(mat<4, 4, T, Q> const& m, T angle, vec<3, T, Q> const& v)
+ {
+  T const a = angle;
+  T const c = cos(a);
+  T const s = sin(a);
+  mat<4, 4, T, Q> Result;
+
+  vec<3, T, Q> axis = normalize(v);
+
+  Result[0][0] = c + (static_cast<T>(1) - c) * axis.x * axis.x;
+  Result[0][1] = (static_cast<T>(1) - c) * axis.x * axis.y + s * axis.z;
+  Result[0][2] = (static_cast<T>(1) - c) * axis.x * axis.z - s * axis.y;
+  Result[0][3] = static_cast<T>(0);
+
+  Result[1][0] = (static_cast<T>(1) - c) * axis.y * axis.x - s * axis.z;
+  Result[1][1] = c + (static_cast<T>(1) - c) * axis.y * axis.y;
+  Result[1][2] = (static_cast<T>(1) - c) * axis.y * axis.z + s * axis.x;
+  Result[1][3] = static_cast<T>(0);
+
+  Result[2][0] = (static_cast<T>(1) - c) * axis.z * axis.x + s * axis.y;
+  Result[2][1] = (static_cast<T>(1) - c) * axis.z * axis.y - s * axis.x;
+  Result[2][2] = c + (static_cast<T>(1) - c) * axis.z * axis.z;
+  Result[2][3] = static_cast<T>(0);
+
+  Result[3] = vec<4, T, Q>(0, 0, 0, 1);
+  return m * Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline mat<4, 4, T, Q> scale(mat<4, 4, T, Q> const& m, vec<3, T, Q> const& v)
+ {
+  mat<4, 4, T, Q> Result;
+  Result[0] = m[0] * v[0];
+  Result[1] = m[1] * v[1];
+  Result[2] = m[2] * v[2];
+  Result[3] = m[3];
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline mat<4, 4, T, Q> scale_slow(mat<4, 4, T, Q> const& m, vec<3, T, Q> const& v)
+ {
+  mat<4, 4, T, Q> Result(T(1));
+  Result[0][0] = v.x;
+  Result[1][1] = v.y;
+  Result[2][2] = v.z;
+  return m * Result;
+ }
+
+    template <typename T, qualifier Q>
+    inline mat<4, 4, T, Q> shear(mat<4, 4, T, Q> const &m, vec<3, T, Q> const& p, vec<2, T, Q> const &l_x, vec<2, T, Q> const &l_y, vec<2, T, Q> const &l_z)
+    {
+        T const lambda_xy = l_x[0];
+        T const lambda_xz = l_x[1];
+        T const lambda_yx = l_y[0];
+        T const lambda_yz = l_y[1];
+        T const lambda_zx = l_z[0];
+        T const lambda_zy = l_z[1];
+
+        vec<3, T, Q> point_lambda = vec<3, T, Q>(
+            (lambda_xy + lambda_xz), (lambda_yx + lambda_yz), (lambda_zx + lambda_zy)
+        );
+
+        mat<4, 4, T, Q> Shear = mat<4, 4, T, Q>(
+            1 , lambda_yx , lambda_zx , 0,
+            lambda_xy , 1 , lambda_zy , 0,
+            lambda_xz , lambda_yz , 1 , 0,
+            -point_lambda[0] * p[0], -point_lambda[1] * p[1], -point_lambda[2] * p[2], 1
+        );
+
+        mat<4, 4, T, Q> Result;
+  Result[0] = m[0] * Shear[0][0] + m[1] * Shear[0][1] + m[2] * Shear[0][2] + m[3] * Shear[0][3];
+  Result[1] = m[0] * Shear[1][0] + m[1] * Shear[1][1] + m[2] * Shear[1][2] + m[3] * Shear[1][3];
+  Result[2] = m[0] * Shear[2][0] + m[1] * Shear[2][1] + m[2] * Shear[2][2] + m[3] * Shear[2][3];
+  Result[3] = m[0] * Shear[3][0] + m[1] * Shear[3][1] + m[2] * Shear[3][2] + m[3] * Shear[3][3];
+        return Result;
+    }
+
+    template <typename T, qualifier Q>
+    inline mat<4, 4, T, Q> shear_slow(mat<4, 4, T, Q> const &m, vec<3, T, Q> const& p, vec<2, T, Q> const &l_x, vec<2, T, Q> const &l_y, vec<2, T, Q> const &l_z)
+    {
+        T const lambda_xy = static_cast<T>(l_x[0]);
+        T const lambda_xz = static_cast<T>(l_x[1]);
+        T const lambda_yx = static_cast<T>(l_y[0]);
+        T const lambda_yz = static_cast<T>(l_y[1]);
+        T const lambda_zx = static_cast<T>(l_z[0]);
+        T const lambda_zy = static_cast<T>(l_z[1]);
+
+        vec<3, T, Q> point_lambda = vec<3, T, Q>(
+            static_cast<T>(lambda_xy + lambda_xz),
+            static_cast<T>(lambda_yx + lambda_yz),
+            static_cast<T>(lambda_zx + lambda_zy)
+        );
+
+        mat<4, 4, T, Q> Shear = mat<4, 4, T, Q>(
+            1 , lambda_yx , lambda_zx , 0,
+            lambda_xy , 1 , lambda_zy , 0,
+            lambda_xz , lambda_yz , 1 , 0,
+            -point_lambda[0] * p[0], -point_lambda[1] * p[1], -point_lambda[2] * p[2], 1
+        );
+        return m * Shear;
+    }
+
+ template<typename T, qualifier Q>
+ inline mat<4, 4, T, Q> lookAtRH(vec<3, T, Q> const& eye, vec<3, T, Q> const& center, vec<3, T, Q> const& up)
+ {
+  vec<3, T, Q> const f(normalize(center - eye));
+  vec<3, T, Q> const s(normalize(cross(f, up)));
+  vec<3, T, Q> const u(cross(s, f));
+
+  mat<4, 4, T, Q> Result(1);
+  Result[0][0] = s.x;
+  Result[1][0] = s.y;
+  Result[2][0] = s.z;
+  Result[0][1] = u.x;
+  Result[1][1] = u.y;
+  Result[2][1] = u.z;
+  Result[0][2] =-f.x;
+  Result[1][2] =-f.y;
+  Result[2][2] =-f.z;
+  Result[3][0] =-dot(s, eye);
+  Result[3][1] =-dot(u, eye);
+  Result[3][2] = dot(f, eye);
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline mat<4, 4, T, Q> lookAtLH(vec<3, T, Q> const& eye, vec<3, T, Q> const& center, vec<3, T, Q> const& up)
+ {
+  vec<3, T, Q> const f(normalize(center - eye));
+  vec<3, T, Q> const s(normalize(cross(up, f)));
+  vec<3, T, Q> const u(cross(f, s));
+
+  mat<4, 4, T, Q> Result(1);
+  Result[0][0] = s.x;
+  Result[1][0] = s.y;
+  Result[2][0] = s.z;
+  Result[0][1] = u.x;
+  Result[1][1] = u.y;
+  Result[2][1] = u.z;
+  Result[0][2] = f.x;
+  Result[1][2] = f.y;
+  Result[2][2] = f.z;
+  Result[3][0] = -dot(s, eye);
+  Result[3][1] = -dot(u, eye);
+  Result[3][2] = -dot(f, eye);
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline mat<4, 4, T, Q> lookAt(vec<3, T, Q> const& eye, vec<3, T, Q> const& center, vec<3, T, Q> const& up)
+ {
+
+
+
+            return lookAtRH(eye, center, up);
+
+ }
+}
+# 172 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/matrix_transform.hpp" 2
+# 31 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/matrix_transform.hpp" 2
+
+
+
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/matrix_transform.inl" 1
+# 37 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/matrix_transform.hpp" 2
+# 21 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/transform.hpp" 2
+
+
+
+
+
+
+
+namespace glm
+{
+
+
+
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] mat<4, 4, T, Q> translate(
+  vec<3, T, Q> const& v);
+
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] mat<4, 4, T, Q> rotate(
+  T angle,
+  vec<3, T, Q> const& v);
+
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] mat<4, 4, T, Q> scale(
+  vec<3, T, Q> const& v);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/transform.inl" 1
+
+
+namespace glm
+{
+ template<typename T, qualifier Q>
+ inline mat<4, 4, T, Q> translate(vec<3, T, Q> const& v)
+ {
+  return translate(mat<4, 4, T, Q>(static_cast<T>(1)), v);
+ }
+
+ template<typename T, qualifier Q>
+ inline mat<4, 4, T, Q> rotate(T angle, vec<3, T, Q> const& v)
+ {
+  return rotate(mat<4, 4, T, Q>(static_cast<T>(1)), angle, v);
+ }
+
+ template<typename T, qualifier Q>
+ inline mat<4, 4, T, Q> scale(vec<3, T, Q> const& v)
+ {
+  return scale(mat<4, 4, T, Q>(static_cast<T>(1)), v);
+ }
+
+}
+# 59 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/transform.hpp" 2
+# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/rotate_vector.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/epsilon.hpp" 1
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/epsilon.hpp"
+       
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/epsilon.hpp" 2
+
+
+
+
+
+
+namespace glm
+{
+
+
+
+
+
+
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, bool, Q> epsilonEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, T const& epsilon);
+
+
+
+
+
+ template<typename genType>
+ [[nodiscard]] bool epsilonEqual(genType const& x, genType const& y, genType const& epsilon);
+
+
+
+
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] vec<L, bool, Q> epsilonNotEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, T const& epsilon);
+
+
+
+
+
+ template<typename genType>
+ [[nodiscard]] bool epsilonNotEqual(genType const& x, genType const& y, genType const& epsilon);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/epsilon.inl" 1
+
+
+
+
+
+
+namespace glm
+{
+ template<>
+ inline bool epsilonEqual
+ (
+  float const& x,
+  float const& y,
+  float const& epsilon
+ )
+ {
+  return abs(x - y) < epsilon;
+ }
+
+ template<>
+ inline bool epsilonEqual
+ (
+  double const& x,
+  double const& y,
+  double const& epsilon
+ )
+ {
+  return abs(x - y) < epsilon;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, bool, Q> epsilonEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, T const& epsilon)
+ {
+  return lessThan(abs(x - y), vec<L, T, Q>(epsilon));
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, bool, Q> epsilonEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, T, Q> const& epsilon)
+ {
+  return lessThan(abs(x - y), vec<L, T, Q>(epsilon));
+ }
+
+ template<>
+ inline bool epsilonNotEqual(float const& x, float const& y, float const& epsilon)
+ {
+  return abs(x - y) >= epsilon;
+ }
+
+ template<>
+ inline bool epsilonNotEqual(double const& x, double const& y, double const& epsilon)
+ {
+  return abs(x - y) >= epsilon;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, bool, Q> epsilonNotEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, T const& epsilon)
+ {
+  return greaterThanEqual(abs(x - y), vec<L, T, Q>(epsilon));
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline vec<L, bool, Q> epsilonNotEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, T, Q> const& epsilon)
+ {
+  return greaterThanEqual(abs(x - y), vec<L, T, Q>(epsilon));
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<4, bool, Q> epsilonEqual(qua<T, Q> const& x, qua<T, Q> const& y, T const& epsilon)
+ {
+  vec<4, T, Q> v(x.x - y.x, x.y - y.y, x.z - y.z, x.w - y.w);
+  return lessThan(abs(v), vec<4, T, Q>(epsilon));
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<4, bool, Q> epsilonNotEqual(qua<T, Q> const& x, qua<T, Q> const& y, T const& epsilon)
+ {
+  vec<4, T, Q> v(x.x - y.x, x.y - y.y, x.z - y.z, x.w - y.w);
+  return greaterThanEqual(abs(v), vec<4, T, Q>(epsilon));
+ }
+}
+# 61 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtc/epsilon.hpp" 2
+# 19 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/rotate_vector.hpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_relational.hpp" 1
+# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_relational.hpp"
+       
+# 27 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_relational.hpp"
+namespace glm
+{
+# 38 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_relational.hpp"
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> equal(vec<L, T, Q> const& x, vec<L, T, Q> const& y, T epsilon);
+
+
+
+
+
+
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> equal(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, T, Q> const& epsilon);
+
+
+
+
+
+
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> notEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, T epsilon);
+
+
+
+
+
+
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> notEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, T, Q> const& epsilon);
+
+
+
+
+
+
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> equal(vec<L, T, Q> const& x, vec<L, T, Q> const& y, int ULPs);
+
+
+
+
+
+
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> equal(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, int, Q> const& ULPs);
+
+
+
+
+
+
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> notEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, int ULPs);
+
+
+
+
+
+
+
+ template<length_t L, typename T, qualifier Q>
+ [[nodiscard]] constexpr vec<L, bool, Q> notEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, int, Q> const& ULPs);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_relational.inl" 1
+
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_float.hpp" 1
+       
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp" 1
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_float.hpp" 2
+
+
+
+
+
+
+namespace glm{
+namespace detail
+{
+ template <typename T>
+ union float_t
+ {};
+
+
+ template <>
+ union float_t<float>
+ {
+  typedef int int_type;
+  typedef float float_type;
+
+  constexpr float_t(float_type Num = 0.0f) : f(Num) {}
+
+  constexpr float_t& operator=(float_t const& x)
+  {
+   f = x.f;
+   return *this;
+  }
+
+
+  constexpr bool negative() const { return i < 0; }
+  constexpr int_type mantissa() const { return i & ((1 << 23) - 1); }
+  constexpr int_type exponent() const { return (i >> 23) & ((1 << 8) - 1); }
+
+  int_type i;
+  float_type f;
+ };
+
+ template <>
+ union float_t<double>
+ {
+  typedef detail::int64 int_type;
+  typedef double float_type;
+
+  constexpr float_t(float_type Num = static_cast<float_type>(0)) : f(Num) {}
+
+  constexpr float_t& operator=(float_t const& x)
+  {
+   f = x.f;
+   return *this;
+  }
+
+
+  constexpr bool negative() const { return i < 0; }
+  constexpr int_type mantissa() const { return i & ((int_type(1) << 52) - 1); }
+  constexpr int_type exponent() const { return (i >> 52) & ((int_type(1) << 11) - 1); }
+
+  int_type i;
+  float_type f;
+ };
+}
+}
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_relational.inl" 2
+
+namespace glm
+{
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> equal(vec<L, T, Q> const& x, vec<L, T, Q> const& y, T Epsilon)
+ {
+  return equal(x, y, vec<L, T, Q>(Epsilon));
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> equal(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, T, Q> const& Epsilon)
+ {
+  return lessThanEqual(abs(x - y), Epsilon);
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> notEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, T Epsilon)
+ {
+  return notEqual(x, y, vec<L, T, Q>(Epsilon));
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> notEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, T, Q> const& Epsilon)
+ {
+  return greaterThan(abs(x - y), Epsilon);
+ }
+
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> equal(vec<L, T, Q> const& x, vec<L, T, Q> const& y, int MaxULPs)
+ {
+  return equal(x, y, vec<L, int, Q>(MaxULPs));
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> equal(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, int, Q> const& MaxULPs)
+ {
+  vec<L, bool, Q> Result(false);
+  for(length_t i = 0; i < L; ++i)
+  {
+   detail::float_t<T> const a(x[i]);
+   detail::float_t<T> const b(y[i]);
+
+
+   if(a.negative() != b.negative())
+   {
+
+    Result[i] = a.mantissa() == b.mantissa() && a.exponent() == b.exponent();
+   }
+   else
+   {
+
+    typename detail::float_t<T>::int_type const DiffULPs = abs(a.i - b.i);
+    Result[i] = DiffULPs <= MaxULPs[i];
+   }
+  }
+  return Result;
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> notEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, int MaxULPs)
+ {
+  return notEqual(x, y, vec<L, int, Q>(MaxULPs));
+ }
+
+ template<length_t L, typename T, qualifier Q>
+ inline constexpr vec<L, bool, Q> notEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, int, Q> const& MaxULPs)
+ {
+  return not_(equal(x, y, MaxULPs));
+ }
+}
+# 108 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_relational.hpp" 2
+# 20 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/rotate_vector.hpp" 2
+# 28 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/rotate_vector.hpp"
+namespace glm
+{
+# 40 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/rotate_vector.hpp"
+ template<typename T, qualifier Q>
+ [[nodiscard]] vec<3, T, Q> slerp(
+  vec<3, T, Q> const& x,
+  vec<3, T, Q> const& y,
+  T const& a);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] vec<2, T, Q> rotate(
+  vec<2, T, Q> const& v,
+  T const& angle);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] vec<3, T, Q> rotate(
+  vec<3, T, Q> const& v,
+  T const& angle,
+  vec<3, T, Q> const& normal);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] vec<4, T, Q> rotate(
+  vec<4, T, Q> const& v,
+  T const& angle,
+  vec<3, T, Q> const& normal);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] vec<3, T, Q> rotateX(
+  vec<3, T, Q> const& v,
+  T const& angle);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] vec<3, T, Q> rotateY(
+  vec<3, T, Q> const& v,
+  T const& angle);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] vec<3, T, Q> rotateZ(
+  vec<3, T, Q> const& v,
+  T const& angle);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] vec<4, T, Q> rotateX(
+  vec<4, T, Q> const& v,
+  T const& angle);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] vec<4, T, Q> rotateY(
+  vec<4, T, Q> const& v,
+  T const& angle);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] vec<4, T, Q> rotateZ(
+  vec<4, T, Q> const& v,
+  T const& angle);
+
+
+
+ template<typename T, qualifier Q>
+ [[nodiscard]] mat<4, 4, T, Q> orientation(
+  vec<3, T, Q> const& Normal,
+  vec<3, T, Q> const& Up);
+
+
+}
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/rotate_vector.inl" 1
+
+
+namespace glm
+{
+ template<typename T, qualifier Q>
+ inline vec<3, T, Q> slerp
+ (
+  vec<3, T, Q> const& x,
+  vec<3, T, Q> const& y,
+  T const& a
+ )
+ {
+
+  T CosAlpha = dot(x, y);
+
+  T Alpha = acos(CosAlpha);
+
+  T SinAlpha = sin(Alpha);
+
+  T t1 = sin((static_cast<T>(1) - a) * Alpha) / SinAlpha;
+  T t2 = sin(a * Alpha) / SinAlpha;
+
+
+  return x * t1 + y * t2;
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<2, T, Q> rotate
+ (
+  vec<2, T, Q> const& v,
+  T const& angle
+ )
+ {
+  vec<2, T, Q> Result;
+  T const Cos(cos(angle));
+  T const Sin(sin(angle));
+
+  Result.x = v.x * Cos - v.y * Sin;
+  Result.y = v.x * Sin + v.y * Cos;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<3, T, Q> rotate
+ (
+  vec<3, T, Q> const& v,
+  T const& angle,
+  vec<3, T, Q> const& normal
+ )
+ {
+  return mat<3, 3, T, Q>(glm::rotate(angle, normal)) * v;
+ }
+# 65 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/rotate_vector.inl"
+ template<typename T, qualifier Q>
+ inline vec<4, T, Q> rotate
+ (
+  vec<4, T, Q> const& v,
+  T const& angle,
+  vec<3, T, Q> const& normal
+ )
+ {
+  return rotate(angle, normal) * v;
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<3, T, Q> rotateX
+ (
+  vec<3, T, Q> const& v,
+  T const& angle
+ )
+ {
+  vec<3, T, Q> Result(v);
+  T const Cos(cos(angle));
+  T const Sin(sin(angle));
+
+  Result.y = v.y * Cos - v.z * Sin;
+  Result.z = v.y * Sin + v.z * Cos;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<3, T, Q> rotateY
+ (
+  vec<3, T, Q> const& v,
+  T const& angle
+ )
+ {
+  vec<3, T, Q> Result = v;
+  T const Cos(cos(angle));
+  T const Sin(sin(angle));
+
+  Result.x = v.x * Cos + v.z * Sin;
+  Result.z = -v.x * Sin + v.z * Cos;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<3, T, Q> rotateZ
+ (
+  vec<3, T, Q> const& v,
+  T const& angle
+ )
+ {
+  vec<3, T, Q> Result = v;
+  T const Cos(cos(angle));
+  T const Sin(sin(angle));
+
+  Result.x = v.x * Cos - v.y * Sin;
+  Result.y = v.x * Sin + v.y * Cos;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<4, T, Q> rotateX
+ (
+  vec<4, T, Q> const& v,
+  T const& angle
+ )
+ {
+  vec<4, T, Q> Result = v;
+  T const Cos(cos(angle));
+  T const Sin(sin(angle));
+
+  Result.y = v.y * Cos - v.z * Sin;
+  Result.z = v.y * Sin + v.z * Cos;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<4, T, Q> rotateY
+ (
+  vec<4, T, Q> const& v,
+  T const& angle
+ )
+ {
+  vec<4, T, Q> Result = v;
+  T const Cos(cos(angle));
+  T const Sin(sin(angle));
+
+  Result.x = v.x * Cos + v.z * Sin;
+  Result.z = -v.x * Sin + v.z * Cos;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline vec<4, T, Q> rotateZ
+ (
+  vec<4, T, Q> const& v,
+  T const& angle
+ )
+ {
+  vec<4, T, Q> Result = v;
+  T const Cos(cos(angle));
+  T const Sin(sin(angle));
+
+  Result.x = v.x * Cos - v.y * Sin;
+  Result.y = v.x * Sin + v.y * Cos;
+  return Result;
+ }
+
+ template<typename T, qualifier Q>
+ inline mat<4, 4, T, Q> orientation
+ (
+  vec<3, T, Q> const& Normal,
+  vec<3, T, Q> const& Up
+ )
+ {
+  if(all(equal(Normal, Up, epsilon<T>())))
+   return mat<4, 4, T, Q>(static_cast<T>(1));
+
+  vec<3, T, Q> RotationAxis = cross(Up, Normal);
+  T Angle = acos(dot(Normal, Up));
+
+  return rotate(Angle, RotationAxis);
+ }
+}
+# 122 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/gtx/rotate_vector.hpp" 2
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/components/transformComponent.h" 2
+
+
+
+namespace Neon
+{
+class Transform
+{
+public:
+    const glm::vec3& getPosition() const;
+    void setPosition(const glm::vec3& pos);
+
+    const glm::vec3& getRotation() const;
+    void setRotation(const glm::vec3& rot);
+    void rotate(const glm::vec3& rot);
+
+    const glm::vec3& getScale() const;
+    void setScale(const glm::vec3& scl);
+
+    const glm::mat4& getLocalMatrix() const;
+    void setLocalMatrix(const glm::mat4& transform);
+
+    glm::vec3 forward() const;
+    glm::vec3 backward() const;
+    glm::vec3 up() const;
+    glm::vec3 down() const;
+    glm::vec3 right() const;
+    glm::vec3 left() const;
+
+    void translate(glm::vec3 translation);
+
+    static glm::mat4 getWorldMatrix(ECS::Entity entity, const glm::mat4& parentMatrix = glm::mat4(1.0f));
+private:
+    glm::vec3 position{};
+    glm::vec3 rotation{};
+    glm::vec3 scale{1.0f};
+
+    mutable bool dirty = true;
+    mutable glm::mat4 cachedLocalMatrix{1.0f};
+    mutable glm::mat4 cachedLocalRotationMatrix{1.0f};
+
+    void updateMatrix() const;
+};
+}
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/scene.cpp" 2
+
+namespace Neon
+{
+
+    ECS::Registry& Scene::getRegistry()
+    {
+        return registry;
+    }
+
+    ECS::Entity Scene::createEntity(const std::string& name)
+    {
+        ECS::Entity entity = registry.createEntity();
+
+        entity.emplace<Transform>();
+        entity.emplace<Tag>(name);
+        entity.emplace<Parent>();
+
+        return entity;
+    }
+
+    ECS::Entity Scene::import(Prefab& prefab)
+    {
+        const std::vector<ECS::Entity> newEntities = registry.merge(prefab.scene.getRegistry());
+
+        const ECS::Entity parent = createEntity(prefab.name);
+
+        for(auto entity : newEntities)
+        {
+            if(!entity.has<Parent>())
+                continue;
+
+            auto& p = entity.get<Parent>();
+
+            if(!p.hasParent())
+            {
+                p.setParent(parent);
+            }
+        }
+
+        return parent;
     }
 }

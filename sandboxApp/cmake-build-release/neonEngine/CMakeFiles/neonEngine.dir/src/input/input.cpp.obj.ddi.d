@@ -2,7 +2,7 @@ neonEngine\CMakeFiles\neonEngine.dir\src\input\input.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/input/input.cpp \
  C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/CMakeFiles/neonEngine.dir/cmake_pch.hxx \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/common.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/dependencies/neonCore/src/neonCore/memory.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h \
  C:/msys64/mingw64/include/c++/15.2.0/memory \
  C:/msys64/mingw64/include/c++/15.2.0/bits/memoryfwd.h \
  C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++config.h \
@@ -349,37 +349,78 @@ neonEngine\CMakeFiles\neonEngine.dir\src\input\input.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_integer.inl \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/input/keyCodes.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/engine.h \
+ C:/msys64/mingw64/include/c++/15.2.0/chrono \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h \
+ C:/msys64/mingw64/include/c++/15.2.0/ratio \
+ C:/msys64/mingw64/include/c++/15.2.0/ctime \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/parse_numbers.h \
+ C:/msys64/mingw64/include/c++/15.2.0/sstream \
+ C:/msys64/mingw64/include/c++/15.2.0/istream \
+ C:/msys64/mingw64/include/c++/15.2.0/ostream \
+ C:/msys64/mingw64/include/c++/15.2.0/format \
+ C:/msys64/mingw64/include/c++/15.2.0/charconv \
+ C:/msys64/mingw64/include/c++/15.2.0/locale \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h \
+ C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/time_members.h \
+ C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/messages_members.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/codecvt.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/locale_conv.h \
+ C:/msys64/mingw64/include/c++/15.2.0/optional \
+ C:/msys64/mingw64/include/c++/15.2.0/span \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/monostate.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/unicode.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/algorithmfwd.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/uniform_int_dist.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/unicode-data.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/ostream.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/istream.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/sstream.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h \
+ C:/msys64/mingw64/include/c++/15.2.0/iomanip \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/quoted_string.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/frameBuffer.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/pipeline.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/buffer.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/sampler.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/texture.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelFormat.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/textureView.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/sampler.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureUploadDescription.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelLayout.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelType.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/indexFormat.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/scissorRect.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/shader.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/shaderReflection.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/blendState.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendFactor.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendOp.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/depthState.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/inputLayout.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexAttribute.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexBufferDescription.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/primitiveType.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/fillMode.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/rasterizerState.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/cullMode.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/fillMode.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/primitiveType.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/renderTargetsDescription.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/swapchain.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/computePipelineDescription.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/framebufferDescription.h \
+ C:/msys64/mingw64/include/c++/15.2.0/utility \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/mipmapFilter.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureFilter.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureWrap.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/util/memory.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/swapchainDescription.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureDescription.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureType.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureUsage.h \
@@ -389,19 +430,18 @@ neonEngine\CMakeFiles\neonEngine.dir\src\input\input.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/window.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/windowCreationOptions.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/backendAPI.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexBufferBinding.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/loadOperation.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/storeOperation.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/system.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/event.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/renderSystem.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/graphicsSystem.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/components/meshRenderer.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/components/material.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetRef.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetHandle.h \
  C:/msys64/mingw64/include/c++/15.2.0/random \
  C:/msys64/mingw64/include/c++/15.2.0/bits/random.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/uniform_int_dist.h \
  C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/opt_random.h \
  C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/pmmintrin.h \
  C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/emmintrin.h \
@@ -415,36 +455,7 @@ neonEngine\CMakeFiles\neonEngine.dir\src\input\input.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetManager.h \
  C:/msys64/mingw64/include/c++/15.2.0/filesystem \
  C:/msys64/mingw64/include/c++/15.2.0/bits/fs_fwd.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h \
- C:/msys64/mingw64/include/c++/15.2.0/ratio \
- C:/msys64/mingw64/include/c++/15.2.0/ctime \
- C:/msys64/mingw64/include/c++/15.2.0/bits/parse_numbers.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/fs_path.h \
- C:/msys64/mingw64/include/c++/15.2.0/locale \
- C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h \
- C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/time_members.h \
- C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/messages_members.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/codecvt.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/bits/locale_conv.h \
- C:/msys64/mingw64/include/c++/15.2.0/iomanip \
- C:/msys64/mingw64/include/c++/15.2.0/bits/quoted_string.h \
- C:/msys64/mingw64/include/c++/15.2.0/sstream \
- C:/msys64/mingw64/include/c++/15.2.0/istream \
- C:/msys64/mingw64/include/c++/15.2.0/ostream \
- C:/msys64/mingw64/include/c++/15.2.0/format \
- C:/msys64/mingw64/include/c++/15.2.0/charconv \
- C:/msys64/mingw64/include/c++/15.2.0/optional \
- C:/msys64/mingw64/include/c++/15.2.0/span \
- C:/msys64/mingw64/include/c++/15.2.0/bits/monostate.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/unicode.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/algorithmfwd.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/unicode-data.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/ostream.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/bits/istream.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/bits/sstream.tcc \
  C:/msys64/mingw64/include/c++/15.2.0/codecvt \
  C:/msys64/mingw64/include/c++/15.2.0/bits/fs_dir.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/fs_ops.h \
@@ -458,8 +469,6 @@ neonEngine\CMakeFiles\neonEngine.dir\src\input\input.cpp.obj.ddi: \
  C:/msys64/mingw64/include/c++/15.2.0/algorithm \
  C:/msys64/mingw64/include/c++/15.2.0/bits/ranges_algo.h \
  C:/msys64/mingw64/include/c++/15.2.0/pstl/glue_algorithm_defs.h \
- C:/msys64/mingw64/include/c++/15.2.0/utility \
- C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/entity.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/registry.h \
  C:/msys64/mingw64/include/c++/15.2.0/typeindex \
@@ -469,6 +478,7 @@ neonEngine\CMakeFiles\neonEngine.dir\src\input\input.cpp.obj.ddi: \
  C:/msys64/mingw64/include/c++/15.2.0/variant \
  C:/msys64/mingw64/include/c++/15.2.0/bits/elements_of.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/viewBase.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/scene.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetSerializer.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/debug.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/spdlog.h \
@@ -476,8 +486,6 @@ neonEngine\CMakeFiles\neonEngine.dir\src\input\input.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/null_mutex.h \
  C:/msys64/mingw64/include/c++/15.2.0/atomic \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/tweakme.h \
- C:/msys64/mingw64/include/c++/15.2.0/chrono \
- C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/fmt/fmt.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/fmt/bundled/format.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/fmt/bundled/base.h \

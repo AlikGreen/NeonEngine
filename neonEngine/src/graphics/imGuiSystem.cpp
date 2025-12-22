@@ -6,6 +6,9 @@
 #include "core/sceneManager.h"
 #include "events/rhiWindowEvent.h"
 #include "imgui/imGuiExtensions.h"
+#include "windows/consoleWindow.h"
+#include "windows/statsWindow.h"
+#include "windows/viewportWindow.h"
 
 namespace Neon
 {
@@ -13,7 +16,7 @@ namespace Neon
     void setNeonImGuiStyle()
     {
         ImGuiStyle &style = ImGui::GetStyle();
-        NeonGui::LoadStyle("style.yaml", style);
+        NeonGui::LoadStyle(AssetManager::getFullPath("style.yaml"), style);
     }
 
     void ImGuiSystem::preStartup()
@@ -28,8 +31,26 @@ namespace Neon
 
         io.Fonts->Clear();
 
+        io.FontDefault = io.Fonts->AddFontFromFileTTF(AssetManager::getFullPath(R"(fonts\JetBrainsMono-Regular.ttf)").c_str(), 22.0f);
 
-        io.FontDefault = io.Fonts->AddFontFromFileTTF(R"(C:\Users\alikg\Downloads\JetBrainsMono-Regular.ttf)", 22.0f);
+        ImFontConfig mergeCfg{};
+        mergeCfg.MergeMode = true;
+        mergeCfg.PixelSnapH = true;
+
+        // Include the full BMP (0x0020..0xFFFF) so all symbols from the font get baked.
+        // (Noto Sans Symbols 2 glyphs are in BMP; this captures them.)
+        static constexpr ImWchar rangesAllBMP[] =
+        {
+            0x0020, 0xFFFF,
+            0
+        };
+
+        io.Fonts->AddFontFromFileTTF(
+            AssetManager::getFullPath(R"(fonts\NotoSansSymbols2-Regular.ttf)").c_str(),
+            22.0f,              // same size as base for consistent alignment
+            &mergeCfg,
+            rangesAllBMP
+        );
 
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // optional
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -66,6 +87,10 @@ namespace Neon
         m_frameCountStart = std::chrono::high_resolution_clock::now();
 
         setNeonImGuiStyle();
+
+        m_windows.push_back(makeRc<StatsWindow>());
+        m_windows.push_back(makeRc<ViewportWindow>());
+        m_windows.push_back(makeRc<ConsoleWindow>());
     }
 
     void ImGuiSystem::update()
@@ -85,9 +110,6 @@ namespace Neon
 
     void ImGuiSystem::render()
     {
-        auto& world = Engine::getSceneManager().getCurrentScene().getRegistry();
-        const auto cameras = world.view<Camera>();
-
         ImGuiIO &io = ImGui::GetIO();
         io.DisplaySize = ImVec2(
             static_cast<float>(m_window->getWidth()),
@@ -99,32 +121,17 @@ namespace Neon
 
         drawDockSpace();
 
-        ImGui::ShowDemoWindow();
-
-
-        ImGui::Begin("Statistics");
-        ImGui::Text("FPS: %d", m_fps);
-        ImGui::Text("Frame Time: %.4f ms", m_frameTime);
-        NeonGui::InputText("Text: ", input);
-        NeonGui::InputInt3("Int3: ", inputSize);
-        ImGui::End();
-
-        ImGui::Begin("Viewport");
-
-        const ImVec2 avail = ImGui::GetContentRegionAvail();
-
-        Rc<RHI::TextureView> sceneTexture = nullptr;
-        if(cameras.size() >= 1)
+        for(const auto& window : m_windows)
         {
-            auto [camEntity, camera] = cameras.at(0);
-            camera.setWidth(static_cast<uint32_t>(avail.x));
-            camera.setHeight(static_cast<uint32_t>(avail.y));
-            sceneTexture = camera.getColorTexture();
+            if(!window->open) continue;
+            ImGui::Begin(window->getName().c_str(), &window->open);
+
+            window->render();
+
+            ImGui::End();
         }
 
-        NeonGui::Image(sceneTexture, avail, ImVec2(0, 1), ImVec2(1, 0));
-
-        ImGui::End();
+        ImGui::ShowDemoWindow();
 
         m_imGuiController->endFrame();
 

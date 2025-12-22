@@ -32,4 +32,7 @@ neonEngine\dependencies\neonrhi\CMakeFiles\neonRHI.dir\src\implementations\openg
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelType.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/shaderType.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureType.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendFactor.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendOp.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/indexFormat.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/input/keyCodes.h

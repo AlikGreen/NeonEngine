@@ -29,10 +29,11 @@ namespace Neon
         static void quit();
 
         template <typename T, typename... Args>
-        static void registerSystem(Args&&... args)
+        static T& registerSystem(Args&&... args)
         {
             T* system = new T(std::forward<Args>(args)...);
             registeredSystems.push_back(system);
+            return *system;
         }
 
         template <typename T>

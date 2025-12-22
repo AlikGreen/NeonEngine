@@ -2,7 +2,7 @@ neonEngine\CMakeFiles\neonEngine.dir\src\core\coreSystem.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/coreSystem.cpp \
  C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/neonEngine/CMakeFiles/neonEngine.dir/cmake_pch.hxx \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/common.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/dependencies/neonCore/src/neonCore/memory.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h \
  C:/msys64/mingw64/include/c++/15.2.0/memory \
  C:/msys64/mingw64/include/c++/15.2.0/bits/memoryfwd.h \
  C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++config.h \
@@ -175,56 +175,58 @@ neonEngine\CMakeFiles\neonEngine.dir\src\core\coreSystem.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/system.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/event.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/engine.h \
+ C:/msys64/mingw64/include/c++/15.2.0/chrono \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h \
+ C:/msys64/mingw64/include/c++/15.2.0/ratio \
+ C:/msys64/mingw64/include/c++/15.2.0/limits \
+ C:/msys64/mingw64/include/c++/15.2.0/ctime \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/parse_numbers.h \
+ C:/msys64/mingw64/include/c++/15.2.0/sstream \
+ C:/msys64/mingw64/include/c++/15.2.0/istream \
+ C:/msys64/mingw64/include/c++/15.2.0/ostream \
+ C:/msys64/mingw64/include/c++/15.2.0/format \
+ C:/msys64/mingw64/include/c++/15.2.0/array \
+ C:/msys64/mingw64/include/c++/15.2.0/charconv \
+ C:/msys64/mingw64/include/c++/15.2.0/locale \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h \
+ C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/time_members.h \
+ C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/messages_members.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/codecvt.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/locale_conv.h \
+ C:/msys64/mingw64/include/c++/15.2.0/optional \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/enable_special_members.h \
+ C:/msys64/mingw64/include/c++/15.2.0/span \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/monostate.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/formatfwd.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/unicode.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/algorithmfwd.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/uniform_int_dist.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/unicode-data.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/ostream.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/istream.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/sstream.tcc \
  C:/msys64/mingw64/include/c++/15.2.0/vector \
  C:/msys64/mingw64/include/c++/15.2.0/bits/stl_vector.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/stl_bvector.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/vector.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/bits/formatfwd.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h \
+ C:/msys64/mingw64/include/c++/15.2.0/iomanip \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/quoted_string.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/frameBuffer.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/pipeline.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/buffer.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/sampler.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/texture.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelFormat.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/textureView.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureUploadDescription.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelLayout.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelType.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/_fixes.hpp \
- C:/msys64/mingw64/include/c++/15.2.0/cmath \
- C:/msys64/mingw64/include/math.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h \
- C:/msys64/mingw64/include/c++/15.2.0/limits \
- C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/tr1/special_function_util.h \
- C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/tr1/beta_function.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/tr1/hypergeometric.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/tr1/legendre_function.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/tr1/modified_bessel_func.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_hermite.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_laguerre.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp \
  C:/msys64/mingw64/include/c++/15.2.0/cassert \
  C:/msys64/mingw64/include/assert.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/simd/platform.h \
- C:/msys64/mingw64/include/c++/15.2.0/climits \
- C:/msys64/mingw64/include/c++/15.2.0/cfloat \
- C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/float.h \
- C:/msys64/mingw64/include/float.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/fwd.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2_precision.hpp \
@@ -239,6 +241,38 @@ neonEngine\CMakeFiles\neonEngine.dir\src\core\coreSystem.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2_sized.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_uint_sized.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/pipeline.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/buffer.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/texture.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelFormat.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/textureView.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/sampler.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureUploadDescription.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelLayout.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelType.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/_fixes.hpp \
+ C:/msys64/mingw64/include/c++/15.2.0/cmath \
+ C:/msys64/mingw64/include/math.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h \
+ C:/msys64/mingw64/include/c++/15.2.0/tr1/gamma.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/tr1/special_function_util.h \
+ C:/msys64/mingw64/include/c++/15.2.0/tr1/bessel_function.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/tr1/beta_function.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/tr1/ell_integral.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/tr1/exp_integral.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/tr1/hypergeometric.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/tr1/legendre_function.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/tr1/modified_bessel_func.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_hermite.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_laguerre.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp \
+ C:/msys64/mingw64/include/c++/15.2.0/climits \
+ C:/msys64/mingw64/include/c++/15.2.0/cfloat \
+ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/float.h \
+ C:/msys64/mingw64/include/float.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/fwd.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool3.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.hpp \
@@ -250,10 +284,8 @@ neonEngine\CMakeFiles\neonEngine.dir\src\core\coreSystem.cpp.obj.ddi: \
  C:/msys64/mingw64/include/c++/15.2.0/bits/unordered_map.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/hashtable.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/hashtable_policy.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/enable_special_members.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/node_handle.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/erase_if.h \
- C:/msys64/mingw64/include/c++/15.2.0/array \
  C:/msys64/mingw64/include/c++/15.2.0/bits/move_only_function.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/_vectorize.hpp \
@@ -364,23 +396,32 @@ neonEngine\CMakeFiles\neonEngine.dir\src\core\coreSystem.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_integer.inl \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/indexFormat.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/scissorRect.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/shader.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/shaderReflection.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/blendState.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendFactor.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendOp.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/depthState.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/inputLayout.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexAttribute.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexBufferDescription.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/primitiveType.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/fillMode.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/rasterizerState.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/cullMode.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/fillMode.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/primitiveType.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/renderTargetsDescription.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/swapchain.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/computePipelineDescription.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/framebufferDescription.h \
+ C:/msys64/mingw64/include/c++/15.2.0/utility \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/mipmapFilter.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureFilter.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureWrap.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/util/memory.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/swapchainDescription.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureDescription.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureType.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureUsage.h \
@@ -391,7 +432,6 @@ neonEngine\CMakeFiles\neonEngine.dir\src\core\coreSystem.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/window.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/windowCreationOptions.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/backendAPI.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexBufferBinding.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/loadOperation.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/storeOperation.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/events/QuitEvent.h

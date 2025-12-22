@@ -34,6 +34,7 @@ endif()
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/*.cpp")
 set(OLD_GLOB
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/debug.cpp"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/log.cpp"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/consoleStream.cpp"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/fileStream.cpp"
   )
@@ -186,6 +187,10 @@ set(OLD_GLOB
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/materialShader.cpp"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/mesh.cpp"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/renderSystem.cpp"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/windows/consoleWindow.cpp"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/windows/sceneGraph.cpp"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/windows/statsWindow.cpp"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/windows/viewportWindow.cpp"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/input/input.cpp"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/input/inputSystem.cpp"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/util/file.cpp"
@@ -240,7 +245,11 @@ set(OLD_GLOB
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/materialShader.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/mesh.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/renderSystem.h"
-  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/windows/window.h"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/windows/consoleWindow.h"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/windows/imGuiWindow.h"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/windows/sceneGraph.h"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/windows/statsWindow.h"
+  "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/windows/viewportWindow.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/input/events/keyDownEvent.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/input/events/keyUpEvent.h"
   "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/input/events/mouseButtonDownEvent.h"

@@ -26,6 +26,8 @@ namespace Neon
 
     void Engine::initialize(const EngineConfig &config)
     {
+        Log::init("Neon Engine");
+
         Engine::config = config;
         eventManager = makeBox<EventManager>();
         assetManager = makeBox<AssetManager>();

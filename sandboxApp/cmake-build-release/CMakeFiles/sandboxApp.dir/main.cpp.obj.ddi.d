@@ -2,7 +2,7 @@ CMakeFiles\sandboxApp.dir\main.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/main.cpp \
  C:/Users/alikg/CLionProjects/NeonEngine/sandboxApp/cmake-build-release/CMakeFiles/sandboxApp.dir/cmake_pch.hxx \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/common.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/dependencies/neonCore/src/neonCore/memory.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h \
  C:/msys64/mingw64/include/c++/15.2.0/memory \
  C:/msys64/mingw64/include/c++/15.2.0/bits/memoryfwd.h \
  C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++config.h \
@@ -214,9 +214,45 @@ CMakeFiles\sandboxApp.dir\main.cpp.obj.ddi: \
  C:/msys64/mingw64/include/c++/15.2.0/bits/quoted_string.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/system.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/event.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetManager.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetHandle.h \
- C:/msys64/mingw64/include/c++/15.2.0/random \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/coreSystem.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/engine.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/frameBuffer.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp \
+ C:/msys64/mingw64/include/c++/15.2.0/cassert \
+ C:/msys64/mingw64/include/assert.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/simd/platform.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2_precision.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float2.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float2_precision.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double2.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double2_precision.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2_sized.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_int_sized.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2_sized.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_uint_sized.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/pipeline.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/buffer.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/texture.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelFormat.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/textureView.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/sampler.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureUploadDescription.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelLayout.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelType.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/_fixes.hpp \
  C:/msys64/mingw64/include/c++/15.2.0/cmath \
  C:/msys64/mingw64/include/math.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/specfun.h \
@@ -232,150 +268,27 @@ CMakeFiles\sandboxApp.dir\main.cpp.obj.ddi: \
  C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_hermite.tcc \
  C:/msys64/mingw64/include/c++/15.2.0/tr1/poly_laguerre.tcc \
  C:/msys64/mingw64/include/c++/15.2.0/tr1/riemann_zeta.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/bits/random.h \
- C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/opt_random.h \
- C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/pmmintrin.h \
- C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/emmintrin.h \
- C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/xmmintrin.h \
- C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mmintrin.h \
- C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mwaitintrin.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/random.tcc \
- C:/msys64/mingw64/include/c++/15.2.0/numeric \
- C:/msys64/mingw64/include/c++/15.2.0/bits/stl_numeric.h \
- C:/msys64/mingw64/include/c++/15.2.0/pstl/glue_numeric_defs.h \
- C:/msys64/mingw64/include/c++/15.2.0/filesystem \
- C:/msys64/mingw64/include/c++/15.2.0/bits/fs_fwd.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/fs_path.h \
- C:/msys64/mingw64/include/c++/15.2.0/codecvt \
- C:/msys64/mingw64/include/c++/15.2.0/bits/fs_dir.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/fs_ops.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetDeserializer.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetStream.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetLoader.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/prefab.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/include/neonECS/neonECS.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/view.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/storage.h \
- C:/msys64/mingw64/include/c++/15.2.0/algorithm \
- C:/msys64/mingw64/include/c++/15.2.0/bits/ranges_algo.h \
- C:/msys64/mingw64/include/c++/15.2.0/pstl/glue_algorithm_defs.h \
- C:/msys64/mingw64/include/c++/15.2.0/utility \
- C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/entity.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/registry.h \
- C:/msys64/mingw64/include/c++/15.2.0/typeindex \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp \
+ C:/msys64/mingw64/include/c++/15.2.0/climits \
+ C:/msys64/mingw64/include/c++/15.2.0/cfloat \
+ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/float.h \
+ C:/msys64/mingw64/include/float.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/fwd.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool3.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.hpp \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.inl \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_decl.hpp \
+ C:/msys64/mingw64/include/c++/15.2.0/functional \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h \
  C:/msys64/mingw64/include/c++/15.2.0/unordered_map \
  C:/msys64/mingw64/include/c++/15.2.0/bits/unordered_map.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/hashtable.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/hashtable_policy.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/node_handle.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/erase_if.h \
- C:/msys64/mingw64/include/c++/15.2.0/ranges \
- C:/msys64/mingw64/include/c++/15.2.0/iterator \
- C:/msys64/mingw64/include/c++/15.2.0/bits/stream_iterator.h \
- C:/msys64/mingw64/include/c++/15.2.0/variant \
- C:/msys64/mingw64/include/c++/15.2.0/bits/elements_of.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/viewBase.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetSerializer.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/debug.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/spdlog.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/common.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/null_mutex.h \
- C:/msys64/mingw64/include/c++/15.2.0/atomic \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/tweakme.h \
- C:/msys64/mingw64/include/c++/15.2.0/functional \
- C:/msys64/mingw64/include/c++/15.2.0/bits/std_function.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/move_only_function.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/mofunc_impl.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/fmt/fmt.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/fmt/bundled/format.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/fmt/bundled/base.h \
- C:/msys64/mingw64/include/string.h \
- C:/msys64/mingw64/include/sec_api/string_s.h \
- C:/msys64/mingw64/include/c++/15.2.0/cstring \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/registry.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/periodic_worker.h \
- C:/msys64/mingw64/include/c++/15.2.0/condition_variable \
- C:/msys64/mingw64/include/c++/15.2.0/bits/unique_lock.h \
- C:/msys64/mingw64/include/c++/15.2.0/stop_token \
- C:/msys64/mingw64/include/c++/15.2.0/bits/std_thread.h \
- C:/msys64/mingw64/include/c++/15.2.0/semaphore \
- C:/msys64/mingw64/include/c++/15.2.0/bits/semaphore_base.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/atomic_timed_wait.h \
- C:/msys64/mingw64/include/c++/15.2.0/bits/this_thread_sleep.h \
- C:/msys64/mingw64/include/semaphore.h \
- C:/msys64/mingw64/include/c++/15.2.0/mutex \
- C:/msys64/mingw64/include/c++/15.2.0/thread \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/synchronous_factory.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/logger.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/backtracer.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/circular_q.h \
- C:/msys64/mingw64/include/c++/15.2.0/cassert \
- C:/msys64/mingw64/include/assert.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/log_msg_buffer.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/log_msg.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/version.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/log.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/callbackSink.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/level.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/sinks/base_sink.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/sinks/sink.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/formatter.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/sinks/callback_sink.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/sinks/stdout_color_sinks-inl.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/sinks/stdout_color_sinks.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/sinks/wincolor_sink.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/console_globals.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/consoleStream.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/stream.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/coreSystem.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/engine.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/frameBuffer.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/pipeline.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/buffer.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/sampler.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/texture.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelFormat.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/textureView.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureUploadDescription.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelLayout.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/pixelType.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/glm.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/_fixes.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/simd/platform.h \
- C:/msys64/mingw64/include/c++/15.2.0/climits \
- C:/msys64/mingw64/include/c++/15.2.0/cfloat \
- C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/float.h \
- C:/msys64/mingw64/include/float.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/fwd.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/qualifier.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec2.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec2.inl \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_relational.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool2_precision.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float2.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float2_precision.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double2.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_double2_precision.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_int2_sized.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_int_sized.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/setup.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_uint2_sized.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/scalar_uint_sized.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/vec3.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool3.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.hpp \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/type_vec3.inl \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/compute_vector_decl.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/_vectorize.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_bool3_precision.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/ext/vector_float3.hpp \
@@ -484,23 +397,32 @@ CMakeFiles\sandboxApp.dir\main.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/integer.hpp \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glm/glm/detail/func_integer.inl \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/indexFormat.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/scissorRect.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/shader.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/shaderReflection.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/blendState.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendFactor.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendOp.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/depthState.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/inputLayout.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexAttribute.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexBufferDescription.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/primitiveType.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/fillMode.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/rasterizerState.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/cullMode.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/fillMode.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/primitiveType.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/renderTargetsDescription.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/swapchain.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/computePipelineDescription.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/framebufferDescription.h \
+ C:/msys64/mingw64/include/c++/15.2.0/utility \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/mipmapFilter.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureFilter.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureWrap.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/util/memory.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/swapchainDescription.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureDescription.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureType.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/textureUsage.h \
@@ -511,18 +433,108 @@ CMakeFiles\sandboxApp.dir\main.cpp.obj.ddi: \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/window.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/windowCreationOptions.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/backendAPI.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexBufferBinding.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/loadOperation.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/storeOperation.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/guiSystem.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/bufferOGL.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/commandListOGL.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glad/include/glad/glad.h \
- C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/glad/include/KHR/khrplatform.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/imGuiSystem.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/renderSystem.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/graphicsSystem.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/components/meshRenderer.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/components/material.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetRef.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetHandle.h \
+ C:/msys64/mingw64/include/c++/15.2.0/random \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/random.h \
+ C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/opt_random.h \
+ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/pmmintrin.h \
+ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/emmintrin.h \
+ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/xmmintrin.h \
+ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mmintrin.h \
+ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mwaitintrin.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/random.tcc \
+ C:/msys64/mingw64/include/c++/15.2.0/numeric \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/stl_numeric.h \
+ C:/msys64/mingw64/include/c++/15.2.0/pstl/glue_numeric_defs.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetManager.h \
+ C:/msys64/mingw64/include/c++/15.2.0/filesystem \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/fs_fwd.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/fs_path.h \
+ C:/msys64/mingw64/include/c++/15.2.0/codecvt \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/fs_dir.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/fs_ops.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetDeserializer.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetStream.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetLoader.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/prefab.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/include/neonECS/neonECS.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/view.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/storage.h \
+ C:/msys64/mingw64/include/c++/15.2.0/algorithm \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/ranges_algo.h \
+ C:/msys64/mingw64/include/c++/15.2.0/pstl/glue_algorithm_defs.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/entity.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/registry.h \
+ C:/msys64/mingw64/include/c++/15.2.0/typeindex \
+ C:/msys64/mingw64/include/c++/15.2.0/ranges \
+ C:/msys64/mingw64/include/c++/15.2.0/iterator \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/stream_iterator.h \
+ C:/msys64/mingw64/include/c++/15.2.0/variant \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/elements_of.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/src/viewBase.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/scene.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/asset/assetSerializer.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/debug.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/spdlog.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/common.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/null_mutex.h \
+ C:/msys64/mingw64/include/c++/15.2.0/atomic \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/tweakme.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/fmt/fmt.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/fmt/bundled/format.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/fmt/bundled/base.h \
+ C:/msys64/mingw64/include/string.h \
+ C:/msys64/mingw64/include/sec_api/string_s.h \
+ C:/msys64/mingw64/include/c++/15.2.0/cstring \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/registry.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/periodic_worker.h \
+ C:/msys64/mingw64/include/c++/15.2.0/condition_variable \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/unique_lock.h \
+ C:/msys64/mingw64/include/c++/15.2.0/stop_token \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/std_thread.h \
+ C:/msys64/mingw64/include/c++/15.2.0/semaphore \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/semaphore_base.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/atomic_timed_wait.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/this_thread_sleep.h \
+ C:/msys64/mingw64/include/semaphore.h \
+ C:/msys64/mingw64/include/c++/15.2.0/mutex \
+ C:/msys64/mingw64/include/c++/15.2.0/thread \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/synchronous_factory.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/logger.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/backtracer.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/circular_q.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/log_msg_buffer.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/log_msg.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/version.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/log.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/callbackSink.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/level.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/sinks/base_sink.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/sinks/sink.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/formatter.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/sinks/callback_sink.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/sinks/stdout_color_sinks-inl.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/sinks/stdout_color_sinks.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/sinks/wincolor_sink.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog/include/spdlog/details/console_globals.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/consoleStream.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonLog/src/streams/stream.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/image.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/mesh.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/backends/imgui/imGuiController.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/imgui/imgui.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/imgui/imconfig.h \
+ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdarg.h \
+ C:/msys64/mingw64/include/stdarg.h \
+ C:/msys64/mingw64/include/_mingw_stdarg.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/backends/imgui/imGuiConfig.h \
+ C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/windows/imGuiWindow.h \
  C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/input/inputSystem.h

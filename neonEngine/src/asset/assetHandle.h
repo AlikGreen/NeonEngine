@@ -49,14 +49,11 @@ namespace Neon
     };
 }
 
-namespace std
+template<>
+struct std::hash<Neon::AssetHandle>
 {
-    template<>
-    struct hash<Neon::AssetHandle>
+    std::size_t operator()(const Neon::AssetHandle& handle) const noexcept
     {
-        std::size_t operator()(const Neon::AssetHandle& handle) const noexcept
-        {
-            return static_cast<std::size_t>(handle);
-        }
-    };
-}
+        return static_cast<std::size_t>(handle);
+    }
+};

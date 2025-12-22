@@ -3902,10 +3902,11 @@ extern int gladLoadGL( GLADloadfunc load);
 
 namespace Neon::RHI
 {
-class SamplerOGL : public Sampler
+class SamplerOGL final : public Sampler
 {
 public:
     explicit SamplerOGL(const SamplerDescription &description);
+    ~SamplerOGL();
 
     void bind(uint32_t binding) const;
 private:
@@ -4299,6 +4300,47 @@ enum class TextureType
 }
 # 12 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
 
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendFactor.h" 1
+       
+
+
+namespace Neon::RHI
+{
+    enum class BlendFactor
+    {
+        One,
+        Zero,
+        SrcAlpha,
+        InvSrcAlpha,
+    };
+}
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendOp.h" 1
+       
+
+namespace Neon::RHI
+{
+    enum class BlendOp
+    {
+        Add,
+        Subtract,
+        RevSubtract,
+        Min,
+        Max
+    };
+}
+# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/indexFormat.h" 1
+       
+
+namespace Neon::RHI
+{
+enum class IndexFormat
+{
+    UInt32, UInt16
+};
+}
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/input/keyCodes.h" 1
        
 
@@ -4601,7 +4643,7 @@ enum class MouseButton
     Side1,
     Side2,
 };
-# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
+# 17 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
 
 namespace Neon::RHI
 {
@@ -4620,7 +4662,11 @@ public:
     static GLenum textureFilterCombineToGL(TextureFilter filter, MipmapFilter mipmapFilter);
     static GLenum pixelTypeToGL(PixelType type);
     static GLenum pixelLayoutToGL(PixelLayout layout);
-    static GLenum textureTypeToGLType(TextureType type);
+    static GLenum textureTypeToGL(TextureType type);
+    static GLenum blendFactorToGL(BlendFactor factor);
+    static GLenum blendOpToGL(BlendOp op);
+    static GLenum indexFormatToGL(IndexFormat format);
+    static uint32_t indexFormatToSize(IndexFormat format);
 };
 }
 # 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/samplerOGL.cpp" 2
@@ -4637,6 +4683,11 @@ namespace Neon::RHI
         glad_glSamplerParameteri(handle, 0x2800, static_cast<int>(ConvertOGL::textureFilterCombineToGL(description.magFilter, description.mipmapFilter)));
         glad_glSamplerParameterf(handle, 0x8501, description.lodBias);
         glad_glSamplerParameteri(handle, 0x884C, 0);
+    }
+
+    SamplerOGL::~SamplerOGL()
+    {
+        glad_glDeleteSamplers(1, &handle);
     }
 
     void SamplerOGL::bind(const uint32_t binding) const

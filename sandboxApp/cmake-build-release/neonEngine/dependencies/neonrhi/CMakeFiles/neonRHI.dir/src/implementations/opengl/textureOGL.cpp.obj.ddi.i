@@ -556,13 +556,13 @@ class Texture
 public:
     virtual ~Texture() = default;
 
-    virtual uint32_t getWidth() = 0;
-    virtual uint32_t getHeight() = 0;
-    virtual uint32_t getDepth() = 0;
+    [[nodiscard]] virtual uint32_t getWidth() const = 0;
+    [[nodiscard]] virtual uint32_t getHeight() const = 0;
+    [[nodiscard]] virtual uint32_t getDepth() const = 0;
 
-    virtual uint32_t getMipLevels() = 0;
-    virtual uint32_t getArrayLayers() = 0;
-    virtual PixelFormat getFormat() = 0;
+    [[nodiscard]] virtual uint32_t getMipLevels() const = 0;
+    [[nodiscard]] virtual uint32_t getArrayLayers() const = 0;
+    [[nodiscard]] virtual PixelFormat getFormat() const = 0;
 };
 }
 # 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/textureOGL.h" 2
@@ -589,14 +589,14 @@ enum class TextureType
 
 namespace Neon::RHI
 {
-    enum class TextureUsage : uint32_t {
-        Sampler = 1u << 0,
+    enum class TextureUsage : uint32_t
+    {
+        Sampled = 1u << 0,
         ColorTarget = 1u << 1,
         DepthStencilTarget = 1u << 2,
         GraphicsStorageRead = 1u << 3,
         ComputeStorageRead = 1u << 4,
         ComputeStorageWrite = 1u << 5,
-        ComputeStorageSimultaneousReadWrite = 1u << 6
     };
 
     constexpr TextureUsage operator|(TextureUsage a, TextureUsage b) {
@@ -68638,12 +68638,14 @@ namespace Neon::RHI
 {
 struct TextureDescription
 {
-    glm::uvec3 dimensions{};
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t depth = 0;
 
     uint32_t arrayLayers = 1;
 
     PixelFormat format = PixelFormat::Invalid;
-    TextureUsage usage = TextureUsage::Sampler;
+    TextureUsage usage = TextureUsage::Sampled;
     TextureType type = TextureType::Texture2D;
 
     uint32_t numMipmaps{};
@@ -68651,13 +68653,13 @@ struct TextureDescription
     static TextureDescription Texture1D(
         const uint32_t width,
         const PixelFormat format,
-        const TextureUsage usage = TextureUsage::Sampler,
+        const TextureUsage usage = TextureUsage::Sampled,
         const uint32_t numMipmaps = 1,
         const uint32_t arrayLayers = 1)
     {
         TextureDescription desc;
         desc.type = TextureType::Texture1D;
-        desc.dimensions = glm::uvec3(width, 1, 1);
+        desc.width = width;
         desc.arrayLayers = arrayLayers;
         desc.format = format;
         desc.usage = usage;
@@ -68669,13 +68671,14 @@ struct TextureDescription
         const uint32_t width,
         const uint32_t height,
         const PixelFormat format,
-        const TextureUsage usage = TextureUsage::Sampler,
+        const TextureUsage usage = TextureUsage::Sampled,
         const uint32_t numMipmaps = 1,
         const uint32_t arrayLayers = 1)
     {
         TextureDescription desc;
         desc.type = TextureType::Texture2D;
-        desc.dimensions = glm::uvec3(width, height, 1);
+        desc.width = width;
+        desc.height = height;
         desc.arrayLayers = arrayLayers;
         desc.format = format;
         desc.usage = usage;
@@ -68688,13 +68691,15 @@ struct TextureDescription
         const uint32_t height,
         const uint32_t depth,
         const PixelFormat format,
-        const TextureUsage usage = TextureUsage::Sampler,
+        const TextureUsage usage = TextureUsage::Sampled,
         const uint32_t numMipmaps = 1,
         const uint32_t arrayLayers = 1)
     {
         TextureDescription desc;
         desc.type = TextureType::Texture3D;
-        desc.dimensions = glm::uvec3(width, height, depth);
+        desc.width = width;
+        desc.height = height;
+        desc.depth = depth;
         desc.arrayLayers = arrayLayers;
         desc.format = format;
         desc.usage = usage;
@@ -72141,16 +72146,17 @@ class TextureOGL final : public Texture
 {
 public:
     explicit TextureOGL(const TextureDescription &description);
+    ~TextureOGL() override;
 
     void bind(uint32_t binding) const;
 
-    uint32_t getWidth() override;
-    uint32_t getHeight() override;
-    uint32_t getDepth() override;
+    [[nodiscard]] uint32_t getWidth() const override;
+    [[nodiscard]] uint32_t getHeight() const override;
+    [[nodiscard]] uint32_t getDepth() const override;
 
-    uint32_t getMipLevels() override;
-    uint32_t getArrayLayers() override;
-    PixelFormat getFormat() override;
+    [[nodiscard]] uint32_t getMipLevels() const override;
+    [[nodiscard]] uint32_t getArrayLayers() const override;
+    [[nodiscard]] PixelFormat getFormat() const override;
 
     [[nodiscard]] GLenum getType() const;
     [[nodiscard]] GLuint getHandle() const;
@@ -108579,6 +108585,47 @@ namespace Neon::RHI
     };
 }
 # 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendFactor.h" 1
+       
+
+
+namespace Neon::RHI
+{
+    enum class BlendFactor
+    {
+        One,
+        Zero,
+        SrcAlpha,
+        InvSrcAlpha,
+    };
+}
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendOp.h" 1
+       
+
+namespace Neon::RHI
+{
+    enum class BlendOp
+    {
+        Add,
+        Subtract,
+        RevSubtract,
+        Min,
+        Max
+    };
+}
+# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/indexFormat.h" 1
+       
+
+namespace Neon::RHI
+{
+enum class IndexFormat
+{
+    UInt32, UInt16
+};
+}
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/input/keyCodes.h" 1
        
 
@@ -108881,7 +108928,7 @@ enum class MouseButton
     Side1,
     Side2,
 };
-# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
+# 17 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
 
 namespace Neon::RHI
 {
@@ -108900,7 +108947,11 @@ public:
     static GLenum textureFilterCombineToGL(TextureFilter filter, MipmapFilter mipmapFilter);
     static GLenum pixelTypeToGL(PixelType type);
     static GLenum pixelLayoutToGL(PixelLayout layout);
-    static GLenum textureTypeToGLType(TextureType type);
+    static GLenum textureTypeToGL(TextureType type);
+    static GLenum blendFactorToGL(BlendFactor factor);
+    static GLenum blendOpToGL(BlendOp op);
+    static GLenum indexFormatToGL(IndexFormat format);
+    static uint32_t indexFormatToSize(IndexFormat format);
 };
 }
 # 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/textureOGL.cpp" 2
@@ -108910,9 +108961,9 @@ namespace Neon::RHI
 {
     TextureOGL::TextureOGL(const TextureDescription &description)
     {
-        width = description.dimensions.x;
-        height = description.dimensions.y;
-        depth = description.dimensions.z;
+        width = description.width;
+        height = description.height;
+        depth = description.depth;
 
         format = description.format;
 
@@ -108923,7 +108974,7 @@ namespace Neon::RHI
 
         arrayLayers = description.arrayLayers;
 
-        type = ConvertOGL::textureTypeToGLType(description.type);
+        type = ConvertOGL::textureTypeToGL(description.type);
 
         glad_glCreateTextures(type, 1, &handle);
         glad_glTextureParameteri(handle, 0x813D, static_cast<int>(numMipmaps) - 1);
@@ -108947,38 +108998,43 @@ namespace Neon::RHI
         }
     }
 
+    TextureOGL::~TextureOGL()
+    {
+        glad_glDeleteTextures(1, &handle);
+    }
+
     void TextureOGL::bind(const uint32_t binding) const
     {
         glad_glBindTextureUnit(binding, handle);
     }
 
 
-    uint32_t TextureOGL::getWidth()
+    uint32_t TextureOGL::getWidth() const
     {
         return width;
     }
 
-    uint32_t TextureOGL::getHeight()
+    uint32_t TextureOGL::getHeight() const
     {
         return height;
     }
 
-    uint32_t TextureOGL::getDepth()
+    uint32_t TextureOGL::getDepth() const
     {
         return depth;
     }
 
-    uint32_t TextureOGL::getMipLevels()
+    uint32_t TextureOGL::getMipLevels() const
     {
         return numMipmaps;
     }
 
-    uint32_t TextureOGL::getArrayLayers()
+    uint32_t TextureOGL::getArrayLayers() const
     {
         return arrayLayers;
     }
 
-    PixelFormat TextureOGL::getFormat()
+    PixelFormat TextureOGL::getFormat() const
     {
         return format;
     }

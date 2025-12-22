@@ -134,8 +134,8 @@ namespace Neon
 
     	m_commandList->setUniformBuffer("DebugUniforms", m_debugUniformBuffer);
 
-	    const auto meshRenderers = world.view<MeshRenderer, Transform>();
-	    const auto pointLights = world.view<PointLight, Transform>();
+	    const auto& meshRenderers = world.view<MeshRenderer, Transform>();
+	    const auto& pointLights = world.view<PointLight, Transform>();
 
     	PointLightUniforms pointLightUniforms{};
 

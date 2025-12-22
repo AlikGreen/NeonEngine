@@ -10,7 +10,7 @@
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/common.h" 1 3
 # 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/common.h" 3
        
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/dependencies/neonCore/src/neonCore/memory.h" 1 3
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h" 1 3
        
 
 # 1 "C:/msys64/mingw64/include/c++/15.2.0/memory" 1 3
@@ -52494,7 +52494,7 @@ uninitialized_value_construct_n(_ExecutionPolicy&& __exec, _ForwardIterator __fi
 
 }
 # 175 "C:/msys64/mingw64/include/c++/15.2.0/memory" 2 3
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/dependencies/neonCore/src/neonCore/memory.h" 2 3
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h" 2 3
 
 namespace Neon
 {
@@ -52545,6 +52545,12 @@ namespace Neon
         [[nodiscard]] bool isCanceled() const
         {
             return canceled;
+        }
+
+        template<typename... Types>
+        [[nodiscard]] bool isAny() const
+        {
+            return ( (dynamic_cast<const Types*>(this) != nullptr) || ... );
         }
     private:
         bool canceled = false;
@@ -109048,7 +109054,7 @@ namespace Neon
 
     void InputSystem::postUpdate()
     {
-        for (auto keyState: std::views::values(Input::keyStates))
+        for (auto& keyState: std::views::values(Input::keyStates))
         {
             keyState.pressed = false;
             keyState.released = false;

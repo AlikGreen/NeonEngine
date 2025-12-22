@@ -9,6 +9,7 @@ class GraphicsSystem final : public System
 {
 public:
     explicit GraphicsSystem(const RHI::WindowCreationOptions &windowOptions);
+
     void preStartup() override;
     void preUpdate() override;
     void preRender() override;
@@ -32,5 +33,7 @@ private:
     Rc<RHI::Pipeline> m_pipeline{};
 
     std::vector<Rc<RHI::Framebuffer>> m_framebuffers{};
+
+    void updateSwapchainFramebuffers();
 };
 }

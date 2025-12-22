@@ -10,7 +10,7 @@
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/common.h" 1 3
 # 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/common.h" 3
        
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/dependencies/neonCore/src/neonCore/memory.h" 1 3
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h" 1 3
        
 
 # 1 "C:/msys64/mingw64/include/c++/15.2.0/memory" 1 3
@@ -52494,7 +52494,7 @@ uninitialized_value_construct_n(_ExecutionPolicy&& __exec, _ForwardIterator __fi
 
 }
 # 175 "C:/msys64/mingw64/include/c++/15.2.0/memory" 2 3
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonecs/dependencies/neonCore/src/neonCore/memory.h" 2 3
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/dependencies/neonCore/src/neonCore/neonCore.h" 2 3
 
 namespace Neon
 {
@@ -95967,12 +95967,16 @@ namespace glm
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/frameBuffer.h" 1
        
 
+
 namespace Neon::RHI
 {
 class Framebuffer
 {
 public:
     virtual ~Framebuffer() = default;
+
+    [[nodiscard]] virtual uint32_t getWidth() const = 0;
+    [[nodiscard]] virtual uint32_t getHeight() const = 0;
 };
 }
 # 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
@@ -96001,18 +96005,6 @@ public:
 }
 # 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
 
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/sampler.h" 1
-       
-
-namespace Neon::RHI
-{
-class Sampler
-{
-public:
-    virtual ~Sampler() = default;
-};
-}
-# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/texture.h" 1
        
 
@@ -96119,18 +96111,21 @@ class Texture
 public:
     virtual ~Texture() = default;
 
-    virtual uint32_t getWidth() = 0;
-    virtual uint32_t getHeight() = 0;
-    virtual uint32_t getDepth() = 0;
+    [[nodiscard]] virtual uint32_t getWidth() const = 0;
+    [[nodiscard]] virtual uint32_t getHeight() const = 0;
+    [[nodiscard]] virtual uint32_t getDepth() const = 0;
 
-    virtual uint32_t getMipLevels() = 0;
-    virtual uint32_t getArrayLayers() = 0;
-    virtual PixelFormat getFormat() = 0;
+    [[nodiscard]] virtual uint32_t getMipLevels() const = 0;
+    [[nodiscard]] virtual uint32_t getArrayLayers() const = 0;
+    [[nodiscard]] virtual PixelFormat getFormat() const = 0;
 };
 }
-# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/textureView.h" 1
        
+
+
+
 
 namespace Neon::RHI
 {
@@ -96138,6 +96133,26 @@ class TextureView
 {
 public:
     virtual ~TextureView() = default;
+
+    [[nodiscard]] virtual uint32_t getWidth() const = 0;
+    [[nodiscard]] virtual uint32_t getHeight() const = 0;
+    [[nodiscard]] virtual uint32_t getDepth() const = 0;
+
+    [[nodiscard]] virtual uint32_t getMipLevels() const = 0;
+    [[nodiscard]] virtual uint32_t getArrayLayers() const = 0;
+    [[nodiscard]] virtual PixelFormat getFormat() const = 0;
+};
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/sampler.h" 1
+       
+
+namespace Neon::RHI
+{
+class Sampler
+{
+public:
+    virtual ~Sampler() = default;
 };
 }
 # 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
@@ -96214,6 +96229,19 @@ enum class IndexFormat
 
 
 
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/scissorRect.h" 1
+       
+
+struct ScissorRect
+{
+    int x;
+    int y;
+    int width;
+    int height;
+};
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/commandList.h" 2
+
 namespace Neon::RHI
 {
 class CommandList
@@ -96223,41 +96251,47 @@ public:
 
     virtual void begin() = 0;
 
-    virtual void setUniformBuffer(const std::string& name, Buffer* buffer) = 0;
+    virtual void setUniformBuffer(const std::string& name, const Rc<Buffer>& buffer) = 0;
 
-    virtual void setTexture(const std::string& name, TextureView* texture) = 0;
-    virtual void setSampler(const std::string& name, Sampler* sampler) = 0;
+    virtual void setTexture(const std::string& name, const Rc<TextureView>& texture) = 0;
+    virtual void setSampler(const std::string& name, const Rc<Sampler>& sampler) = 0;
 
-    virtual void setPipeline(Pipeline* pipeline) = 0;
-    virtual void setFramebuffer(Framebuffer* frameBuffer) = 0;
+    virtual void setPipeline(const Rc<Pipeline>& pipeline) = 0;
+    virtual void setFramebuffer(const Rc<Framebuffer>& frameBuffer) = 0;
 
-    virtual void setVertexBuffer(uint32_t index, Buffer* vertexBuffer) = 0;
-    virtual void setIndexBuffer(Buffer* indexBuffer, IndexFormat indexFormat) = 0;
+    virtual void setVertexBuffer(uint32_t index, const Rc<Buffer>& vertexBuffer) = 0;
+    virtual void setIndexBuffer(const Rc<Buffer>& indexBuffer, IndexFormat indexFormat) = 0;
 
     virtual void clearColorTarget(uint32_t target, glm::vec4 color) = 0;
     virtual void clearDepthStencil(float value) = 0;
 
-    virtual void updateTexture(Texture* texture, TextureUploadDescription uploadDescription) = 0;
-    virtual void generateMipmaps(Texture* texture) = 0;
+    virtual void setScissor(ScissorRect rect) = 0;
+    void setScissor(const int x, const int y, const int width, const int height)
+    {
+        setScissor(ScissorRect{ x, y, width, height });
+    }
 
-    virtual void reserveBuffer(Buffer* buffer, size_t size) = 0;
+    virtual void updateTexture(const Rc<Texture>& texture, TextureUploadDescription uploadDescription) = 0;
+    virtual void generateMipmaps(const Rc<Texture>& texture) = 0;
+
+    virtual void reserveBuffer(const Rc<Buffer>& buffer, size_t size) = 0;
 
     virtual void dispatch(const glm::ivec3& numGroups) = 0;
 
     template<typename T>
-    void updateBuffer(Buffer* buffer, T& data)
+    void updateBuffer(const Rc<Buffer>& buffer, T& data)
     {
         updateBufferImpl(buffer, &data, sizeof(T));
     }
 
     template<typename T>
-    void updateBuffer(Buffer* buffer, std::vector<T> data)
+    void updateBuffer(const Rc<Buffer>& buffer, std::vector<T> data)
     {
         updateBufferImpl(buffer, data.data(), sizeof(T)*data.size());
     }
 
     template<typename T>
-    void updateBuffer(Buffer* buffer, T* data)
+    void updateBuffer(const Rc<Buffer>& buffer, T* data)
     {
         updateBufferImpl(buffer, data, sizeof(T));
     }
@@ -96274,7 +96308,7 @@ public:
 protected:
     virtual void drawImpl(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) = 0;
     virtual void drawIndexedImpl(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int vertexOffset, uint32_t firstInstance) = 0;
-    virtual void updateBufferImpl(Buffer* buffer, void* data, uint32_t size) = 0;
+    virtual void updateBufferImpl(const Rc<Buffer>& buffer, void* data, uint32_t size) = 0;
 };
 }
 # 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
@@ -96363,6 +96397,57 @@ public:
 
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 1
        
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/blendState.h" 1
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendFactor.h" 1
+       
+
+
+namespace Neon::RHI
+{
+    enum class BlendFactor
+    {
+        One,
+        Zero,
+        SrcAlpha,
+        InvSrcAlpha,
+    };
+}
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/blendState.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendOp.h" 1
+       
+
+namespace Neon::RHI
+{
+    enum class BlendOp
+    {
+        Add,
+        Subtract,
+        RevSubtract,
+        Min,
+        Max
+    };
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/blendState.h" 2
+
+namespace Neon::RHI
+{
+    struct BlendState
+    {
+        bool enableBlend = false;
+
+        BlendFactor srcColorFactor = BlendFactor::SrcAlpha;
+        BlendFactor dstColorFactor = BlendFactor::InvSrcAlpha;
+        BlendOp colorOp = BlendOp::Add;
+
+        BlendFactor srcAlphaFactor = BlendFactor::One;
+        BlendFactor dstAlphaFactor = BlendFactor::InvSrcAlpha;
+        BlendOp alphaOp = BlendOp::Add;
+    };
+}
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/depthState.h" 1
        
 
@@ -96372,9 +96457,10 @@ struct DepthState
 {
     bool hasDepthTarget = false;
     bool enableDepthTest = false;
+    bool enableDepthWrite = false;
 };
 }
-# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
+# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/inputLayout.h" 1
        
 
@@ -96449,7 +96535,45 @@ private:
     std::vector<VertexBufferDescription> vertexBuffers;
 };
 }
-# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
+# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/rasterizerState.h" 1
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/cullMode.h" 1
+       
+
+namespace Neon::RHI
+{
+enum class CullMode
+{
+    Back,
+    Front,
+    None,
+};
+}
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/rasterizerState.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/fillMode.h" 1
+       
+
+namespace Neon::RHI
+{
+enum class FillMode
+{
+    Fill,
+    Line,
+};
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/rasterizerState.h" 2
+
+namespace Neon::RHI
+{
+    struct RasterizerState
+    {
+        FillMode fillMode = FillMode::Fill;
+        CullMode cullMode = CullMode::None;
+        bool enableScissorTest = false;
+    };
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
 
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/primitiveType.h" 1
        
@@ -96465,32 +96589,7 @@ enum class PrimitiveType
     PointList
 };
 }
-# 6 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/fillMode.h" 1
-       
-
-namespace Neon::RHI
-{
-enum class FillMode
-{
-    Fill,
-    Line,
-};
-}
-# 7 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/cullMode.h" 1
-       
-
-namespace Neon::RHI
-{
-enum class CullMode
-{
-    Back,
-    Front,
-    None,
-};
-}
-# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
+# 10 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/renderTargetsDescription.h" 1
        
 
@@ -96504,28 +96603,49 @@ struct RenderTargetsDescription
     PixelFormat depthTargetFormat = PixelFormat::Invalid;
 };
 }
-# 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
-
+# 11 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/graphicsPipelineDescription.h" 2
 
 namespace Neon::RHI
 {
     struct GraphicsPipelineDescription
     {
-        Shader* shader = nullptr;
+        Rc<Shader> shader = nullptr;
         PrimitiveType primitiveType = PrimitiveType::TriangleList;
-        FillMode fillMode = FillMode::Fill;
-        CullMode cullMode = CullMode::None;
         InputLayout inputLayout{};
         DepthState depthState{};
         RenderTargetsDescription targetsDescription{};
+        RasterizerState rasterizerState{};
+        BlendState blendState{};
     };
 }
 # 9 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
 
 
 
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/swapchain.h" 1
+       
+
+
+
+namespace Neon::RHI
+{
+class Swapchain
+{
+public:
+    virtual ~Swapchain() = default;
+
+    virtual void resize(uint32_t width, uint32_t height) = 0;
+    [[nodiscard]] virtual uint32_t acquireNextImage() = 0;
+    [[nodiscard]] virtual const std::vector<Rc<Texture>>& getTextures() const = 0;
+
+    virtual void present(uint32_t imageIndex) = 0;
+};
+}
+# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/computePipelineDescription.h" 1
        
+
 
 
 
@@ -96534,12 +96654,200 @@ namespace Neon::RHI
 {
 struct ComputePipelineDescription
 {
-    Shader* shader = nullptr;
+    Rc<Shader> shader = nullptr;
 
     glm::ivec3 threadGroupSize{1};
 };
 }
-# 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/framebufferDescription.h" 1
+       
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/utility" 1 3
+# 70 "C:/msys64/mingw64/include/c++/15.2.0/utility" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 1 3
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 3
+
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 3
+namespace std
+{
+
+
+  namespace rel_ops __attribute__ ((__deprecated__ ("use '" "<=>" "' instead")))
+  {
+# 86 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 3
+    template <class _Tp>
+      inline bool
+      operator!=(const _Tp& __x, const _Tp& __y)
+      { return !(__x == __y); }
+# 99 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 3
+    template <class _Tp>
+      inline bool
+      operator>(const _Tp& __x, const _Tp& __y)
+      { return __y < __x; }
+# 112 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 3
+    template <class _Tp>
+      inline bool
+      operator<=(const _Tp& __x, const _Tp& __y)
+      { return !(__y < __x); }
+# 125 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_relops.h" 3
+    template <class _Tp>
+      inline bool
+      operator>=(const _Tp& __x, const _Tp& __y)
+      { return !(__x < __y); }
+  }
+
+
+}
+# 71 "C:/msys64/mingw64/include/c++/15.2.0/utility" 2 3
+# 103 "C:/msys64/mingw64/include/c++/15.2.0/utility" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 104 "C:/msys64/mingw64/include/c++/15.2.0/utility" 2 3
+
+namespace std
+{
+
+
+
+
+  template <typename _Tp, typename _Up = _Tp>
+    constexpr
+    inline _Tp
+    exchange(_Tp& __obj, _Up&& __new_val)
+    noexcept(__and_<is_nothrow_move_constructible<_Tp>,
+      is_nothrow_assignable<_Tp&, _Up>>::value)
+    { return std::__exchange(__obj, std::forward<_Up>(__new_val)); }
+
+
+
+  template<typename _Tp>
+    [[nodiscard]]
+    constexpr add_const_t<_Tp>&
+    as_const(_Tp& __t) noexcept
+    { return __t; }
+
+  template<typename _Tp>
+    void as_const(const _Tp&&) = delete;
+
+
+
+  template<typename _Tp, typename _Up>
+    constexpr bool
+    cmp_equal(_Tp __t, _Up __u) noexcept
+    {
+      static_assert(__is_standard_integer<_Tp>::value);
+      static_assert(__is_standard_integer<_Up>::value);
+
+      if constexpr (is_signed_v<_Tp> == is_signed_v<_Up>)
+ return __t == __u;
+      else if constexpr (is_signed_v<_Tp>)
+ return __t >= 0 && make_unsigned_t<_Tp>(__t) == __u;
+      else
+ return __u >= 0 && __t == make_unsigned_t<_Up>(__u);
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr bool
+    cmp_not_equal(_Tp __t, _Up __u) noexcept
+    { return !std::cmp_equal(__t, __u); }
+
+  template<typename _Tp, typename _Up>
+    constexpr bool
+    cmp_less(_Tp __t, _Up __u) noexcept
+    {
+      static_assert(__is_standard_integer<_Tp>::value);
+      static_assert(__is_standard_integer<_Up>::value);
+
+      if constexpr (is_signed_v<_Tp> == is_signed_v<_Up>)
+ return __t < __u;
+      else if constexpr (is_signed_v<_Tp>)
+ return __t < 0 || make_unsigned_t<_Tp>(__t) < __u;
+      else
+ return __u >= 0 && __t < make_unsigned_t<_Up>(__u);
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr bool
+    cmp_greater(_Tp __t, _Up __u) noexcept
+    { return std::cmp_less(__u, __t); }
+
+  template<typename _Tp, typename _Up>
+    constexpr bool
+    cmp_less_equal(_Tp __t, _Up __u) noexcept
+    { return !std::cmp_less(__u, __t); }
+
+  template<typename _Tp, typename _Up>
+    constexpr bool
+    cmp_greater_equal(_Tp __t, _Up __u) noexcept
+    { return !std::cmp_less(__t, __u); }
+
+  template<typename _Res, typename _Tp>
+    constexpr bool
+    in_range(_Tp __t) noexcept
+    {
+      static_assert(__is_standard_integer<_Res>::value);
+      static_assert(__is_standard_integer<_Tp>::value);
+      using __gnu_cxx::__int_traits;
+
+      if constexpr (is_signed_v<_Tp> == is_signed_v<_Res>)
+ return __int_traits<_Res>::__min <= __t
+   && __t <= __int_traits<_Res>::__max;
+      else if constexpr (is_signed_v<_Tp>)
+ return __t >= 0
+   && make_unsigned_t<_Tp>(__t) <= __int_traits<_Res>::__max;
+      else
+ return __t <= make_unsigned_t<_Res>(__int_traits<_Res>::__max);
+    }
+
+
+
+
+  template<typename _Tp>
+    [[nodiscard]]
+    constexpr underlying_type_t<_Tp>
+    to_underlying(_Tp __value) noexcept
+    { return static_cast<underlying_type_t<_Tp>>(__value); }
+# 223 "C:/msys64/mingw64/include/c++/15.2.0/utility" 3
+  [[noreturn,__gnu__::__always_inline__]]
+  inline void
+  unreachable()
+  {
+
+
+
+
+
+    __builtin_unreachable();
+
+  }
+
+
+
+}
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/framebufferDescription.h" 2
+
+
+
+
+
+
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/framebufferDescription.h"
+namespace Neon::RHI
+{
+struct FramebufferDescription
+{
+    Rc<TextureView> depthTarget{};
+    std::vector<Rc<TextureView>> colorTargets{};
+
+    FramebufferDescription() = default;
+
+    template<std::same_as<Rc<TextureView>>... Colors>
+    explicit FramebufferDescription(Rc<TextureView> depth, Colors... colors) : depthTarget(std::move(depth)), colorTargets{colors...}
+    {
+
+    }
+};
+}
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/samplerDescription.h" 1
        
 
@@ -96603,32 +96911,20 @@ struct SamplerDescription
     float lodBias = 0.0f;
 };
 }
-# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/util/memory.h" 1
+# 17 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/swapchainDescription.h" 1
        
-
 
 namespace Neon::RHI
 {
+    class Window;
 
-    template<typename T>
-    using Ref = std::shared_ptr<T>;
-
-    template<typename T>
-    using Scope = std::unique_ptr<T>;
-
-
-    template<typename T, typename... Args>
-    constexpr Ref<T> makeRef(Args&&... args) {
-        return std::make_shared<T>(std::forward<Args>(args)...);
-    }
-
-    template<typename T, typename... Args>
-    constexpr Scope<T> makeScope(Args&&... args) {
-        return std::make_unique<T>(std::forward<Args>(args)...);
-    }
+    struct SwapchainDescription
+    {
+        Rc<Window> window;
+    };
 }
-# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureDescription.h" 1
        
 
@@ -96652,14 +96948,14 @@ enum class TextureType
 
 namespace Neon::RHI
 {
-    enum class TextureUsage : uint32_t {
-        Sampler = 1u << 0,
+    enum class TextureUsage : uint32_t
+    {
+        Sampled = 1u << 0,
         ColorTarget = 1u << 1,
         DepthStencilTarget = 1u << 2,
         GraphicsStorageRead = 1u << 3,
         ComputeStorageRead = 1u << 4,
         ComputeStorageWrite = 1u << 5,
-        ComputeStorageSimultaneousReadWrite = 1u << 6
     };
 
     constexpr TextureUsage operator|(TextureUsage a, TextureUsage b) {
@@ -96678,12 +96974,14 @@ namespace Neon::RHI
 {
 struct TextureDescription
 {
-    glm::uvec3 dimensions{};
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t depth = 0;
 
     uint32_t arrayLayers = 1;
 
     PixelFormat format = PixelFormat::Invalid;
-    TextureUsage usage = TextureUsage::Sampler;
+    TextureUsage usage = TextureUsage::Sampled;
     TextureType type = TextureType::Texture2D;
 
     uint32_t numMipmaps{};
@@ -96691,13 +96989,13 @@ struct TextureDescription
     static TextureDescription Texture1D(
         const uint32_t width,
         const PixelFormat format,
-        const TextureUsage usage = TextureUsage::Sampler,
+        const TextureUsage usage = TextureUsage::Sampled,
         const uint32_t numMipmaps = 1,
         const uint32_t arrayLayers = 1)
     {
         TextureDescription desc;
         desc.type = TextureType::Texture1D;
-        desc.dimensions = glm::uvec3(width, 1, 1);
+        desc.width = width;
         desc.arrayLayers = arrayLayers;
         desc.format = format;
         desc.usage = usage;
@@ -96709,13 +97007,14 @@ struct TextureDescription
         const uint32_t width,
         const uint32_t height,
         const PixelFormat format,
-        const TextureUsage usage = TextureUsage::Sampler,
+        const TextureUsage usage = TextureUsage::Sampled,
         const uint32_t numMipmaps = 1,
         const uint32_t arrayLayers = 1)
     {
         TextureDescription desc;
         desc.type = TextureType::Texture2D;
-        desc.dimensions = glm::uvec3(width, height, 1);
+        desc.width = width;
+        desc.height = height;
         desc.arrayLayers = arrayLayers;
         desc.format = format;
         desc.usage = usage;
@@ -96728,13 +97027,15 @@ struct TextureDescription
         const uint32_t height,
         const uint32_t depth,
         const PixelFormat format,
-        const TextureUsage usage = TextureUsage::Sampler,
+        const TextureUsage usage = TextureUsage::Sampled,
         const uint32_t numMipmaps = 1,
         const uint32_t arrayLayers = 1)
     {
         TextureDescription desc;
         desc.type = TextureType::Texture3D;
-        desc.dimensions = glm::uvec3(width, height, depth);
+        desc.width = width;
+        desc.height = height;
+        desc.depth = depth;
         desc.arrayLayers = arrayLayers;
         desc.format = format;
         desc.usage = usage;
@@ -96743,7 +97044,7 @@ struct TextureDescription
     }
 };
 }
-# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 19 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/textureViewDescription.h" 1
        
 
@@ -96753,7 +97054,7 @@ namespace Neon::RHI
 {
 struct TextureViewDescription
 {
-    Texture* target{};
+    Rc<Texture> target = nullptr;
 
     uint32_t baseMipLevel = 0;
     uint32_t mipLevels = 1;
@@ -96762,7 +97063,9 @@ struct TextureViewDescription
 
     PixelFormat format = PixelFormat::R8G8B8A8Unorm;
 
-    explicit TextureViewDescription(Texture* target)
+    TextureViewDescription() = default;
+
+    explicit TextureViewDescription(const Rc<Texture>& target)
     {
         this->target = target;
         baseMipLevel = 0;
@@ -96772,7 +97075,7 @@ struct TextureViewDescription
         format = target->getFormat();
     }
 
-    TextureViewDescription(Texture* target, const PixelFormat format)
+    TextureViewDescription(const Rc<Texture>& target, const PixelFormat format)
     {
         this->target = target;
         baseMipLevel = 0;
@@ -96782,7 +97085,7 @@ struct TextureViewDescription
         this->format = format;
     }
 
-    TextureViewDescription(Texture* target, const uint32_t baseMipLevel, const uint32_t mipLevels, const uint32_t baseArrayLayer, const uint32_t arrayLayers)
+    TextureViewDescription(const Rc<Texture>& target, const uint32_t baseMipLevel, const uint32_t mipLevels, const uint32_t baseArrayLayer, const uint32_t arrayLayers)
     {
         this->target = target;
         this->baseMipLevel = baseMipLevel;
@@ -96791,7 +97094,8 @@ struct TextureViewDescription
         this->arrayLayers = arrayLayers;
         format = target->getFormat();
     }
-    TextureViewDescription(Texture* target, const PixelFormat format, const uint32_t baseMipLevel, const uint32_t mipLevels, const uint32_t baseArrayLayer, const uint32_t arrayLayers)
+
+    TextureViewDescription(const Rc<Texture>& target, const PixelFormat format, const uint32_t baseMipLevel, const uint32_t mipLevels, const uint32_t baseArrayLayer, const uint32_t arrayLayers)
     {
         this->target = target;
         this->baseMipLevel = baseMipLevel;
@@ -96802,7 +97106,7 @@ struct TextureViewDescription
     }
 };
 }
-# 17 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 20 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/shaderType.h" 1
        
 
@@ -96813,7 +97117,8 @@ enum class ShaderType
     Compute, Fragment, Vertex
 };
 }
-# 18 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+# 21 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/device.h" 2
+
 
 namespace Neon::RHI
 {
@@ -96822,28 +97127,28 @@ class Device
 public:
     virtual ~Device() = default;
 
-    virtual Pipeline* createPipeline(const GraphicsPipelineDescription& description) = 0;
-    virtual Pipeline* createPipeline(const ComputePipelineDescription& description) = 0;
+    virtual Rc<Pipeline> createPipeline(const GraphicsPipelineDescription& description) = 0;
+    virtual Rc<Pipeline> createPipeline(const ComputePipelineDescription& description) = 0;
 
-    virtual CommandList* createCommandList() = 0;
+    virtual Rc<Swapchain> createSwapchain(const SwapchainDescription& description) = 0;
 
-    virtual Texture* createTexture(const TextureDescription& description) = 0;
-    virtual Sampler* createSampler(const SamplerDescription& description) = 0;
-    virtual TextureView* createTextureView(const TextureViewDescription& description) = 0;
+    virtual Rc<CommandList> createCommandList() = 0;
 
-    Shader* createShaderFromSource(const std::string &source, const std::string &filepath = "");
+    virtual Rc<Texture> createTexture(const TextureDescription& description) = 0;
+    virtual Rc<Sampler> createSampler(const SamplerDescription& description) = 0;
+    virtual Rc<TextureView> createTextureView(const TextureViewDescription& description) = 0;
 
-    virtual Buffer* createIndexBuffer() = 0;
-    virtual Buffer* createUniformBuffer() = 0;
-    virtual Buffer* createVertexBuffer() = 0;
+    virtual Rc<Framebuffer> createFramebuffer(const FramebufferDescription& description) = 0;
 
-    virtual void submit(CommandList* commandList) = 0;
+    Rc<Shader> createShaderFromSource(const std::string &source, const std::string &filepath = "");
 
-    virtual void swapBuffers() = 0;
+    virtual Rc<Buffer> createIndexBuffer() = 0;
+    virtual Rc<Buffer> createUniformBuffer() = 0;
+    virtual Rc<Buffer> createVertexBuffer() = 0;
 
-    virtual Framebuffer* getSwapChainFramebuffer() = 0;
+    virtual void submit(const Rc<CommandList>& commandList) = 0;
 protected:
-    virtual Shader* createShaderFromSpirvImpl(std::unordered_map<ShaderType, std::vector<uint32_t>> spirv) = 0;
+    virtual Rc<Shader> createShaderFromSpirvImpl(std::unordered_map<ShaderType, std::vector<uint32_t>> spirv) = 0;
 };
 }
 # 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h" 2
@@ -97203,7 +97508,7 @@ namespace Neon::RHI
 
         struct TextInputEvent
         {
-            char text[32];
+            uint32_t codepoint;
         };
 
         Type type;
@@ -97266,7 +97571,7 @@ public:
 
   static Window* createWindow(const WindowCreationOptions& creationOptions, BackendAPI backendApi = BackendAPI::OpenGL);
 
-  virtual Device* createDevice() = 0;
+  virtual Rc<Device> createDevice() = 0;
 
   virtual void run() = 0;
   virtual void close() = 0;
@@ -97285,29 +97590,12 @@ public:
 
   virtual void setCursorLocked(bool locked) = 0;
   virtual void setCursorVisible(bool visible) = 0;
+
+  virtual void swapBuffers() = 0;
 };
 }
 # 12 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h" 2
-
-
-
-
-
-
-
-# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/descriptions/vertexBufferBinding.h" 1
-       
-
-namespace Neon::RHI
-{
-struct VertexBufferBinding
-{
-    Ref<Buffer> vertexBuffer{};
-    int offset{};
-};
-}
-# 20 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h" 2
-# 28 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h"
+# 27 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h"
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/loadOperation.h" 1
        
 
@@ -97318,7 +97606,7 @@ namespace Neon::RHI
         Clear, Load, DontCare
     };
 }
-# 29 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h" 2
+# 28 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h" 2
 
 
 
@@ -97332,7 +97620,7 @@ namespace Neon::RHI
         Store, DontCare, Resolve, ResolveAndStore
     };
 }
-# 33 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h" 2
+# 32 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/include/neonRHI/neonRHI.h" 2
 # 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/mesh.h" 2
 
 
@@ -97377,8 +97665,8 @@ namespace Neon
 
         AABB getBounds();
 
-        [[nodiscard]] RHI::Buffer* getVertexBuffer();
-        [[nodiscard]] RHI::Buffer* getIndexBuffer();
+        [[nodiscard]] Rc<RHI::Buffer> getVertexBuffer();
+        [[nodiscard]] Rc<RHI::Buffer> getIndexBuffer();
 
         void setReadable(bool readable);
     private:
@@ -97393,8 +97681,8 @@ namespace Neon
 
         AABB bounds{};
 
-        Box<RHI::Buffer> vertexBuffer = nullptr;
-        Box<RHI::Buffer> indexBuffer = nullptr;
+        Rc<RHI::Buffer> vertexBuffer = nullptr;
+        Rc<RHI::Buffer> indexBuffer = nullptr;
     };
 }
 # 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/frustum.h" 2
@@ -97421,11 +97709,14 @@ namespace Neon
 struct Camera
 {
 public:
-    bool autoAspectRatio = true;
+    bool matchWindowSize = true;
     glm::vec4 bgColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-    void setAspectRatio(float ratio);
-    [[nodiscard]] float getAspectRatio() const;
+    void setWidth(uint32_t width);
+    [[nodiscard]] uint32_t getWidth() const;
+
+    void setHeight(uint32_t height);
+    [[nodiscard]] uint32_t getHeight() const;
 
     void setFov(float fov);
     [[nodiscard]] float getFov() const;
@@ -97439,49 +97730,33495 @@ public:
     Frustum getFrustum(const glm::mat4 &view);
     [[nodiscard]] const glm::mat4& getProjectionMatrix();
 
+    Rc<RHI::Framebuffer> getFramebuffer();
+    Rc<RHI::TextureView> getDepthTexture();
+    Rc<RHI::TextureView> getColorTexture();
 private:
-    float aspectRatio = 16.0f/9.0f;
-
     float fov = 60.0f;
     float nearClip = 0.1f;
     float farClip = 1000.0f;
 
+    uint32_t width = 0;
+    uint32_t height = 0;
+
     bool projectionDirty = true;
+    bool fbDirty = true;
 
     glm::mat4 projectionMatrix{};
     glm::mat4 viewMatrix{};
 
     Frustum frustum{};
 
+    Rc<RHI::Framebuffer> framebuffer;
+    Rc<RHI::TextureView> colorView;
+    Rc<RHI::TextureView> depthView;
+
     void updateProjectionMatrix();
+    void updateFramebuffer();
 };
 }
 # 2 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/components/camera.cpp" 2
 
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/engine.h" 1
+       
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 1 3
+# 45 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 1 3
+# 39 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 1 3
+# 45 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 46 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 2 3
+
+
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 3
+namespace std
+{
+
+# 61 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 3
+  template<intmax_t _Pn>
+    struct __static_sign
+    : integral_constant<intmax_t, (_Pn < 0) ? -1 : 1>
+    { };
+
+  template<intmax_t _Pn>
+    struct __static_abs
+    : integral_constant<intmax_t, _Pn * __static_sign<_Pn>::value>
+    { };
+
+  template<intmax_t _Pn, intmax_t _Qn>
+    struct __static_gcd
+    : __static_gcd<_Qn, (_Pn % _Qn)>
+    { };
+
+  template<intmax_t _Pn>
+    struct __static_gcd<_Pn, 0>
+    : integral_constant<intmax_t, __static_abs<_Pn>::value>
+    { };
+
+  template<intmax_t _Qn>
+    struct __static_gcd<0, _Qn>
+    : integral_constant<intmax_t, __static_abs<_Qn>::value>
+    { };
+
+
+
+
+
+
+
+  template<intmax_t _Pn, intmax_t _Qn>
+    struct __safe_multiply
+    {
+    private:
+      static const uintmax_t __c = uintmax_t(1) << (sizeof(intmax_t) * 4);
+
+      static const uintmax_t __a0 = __static_abs<_Pn>::value % __c;
+      static const uintmax_t __a1 = __static_abs<_Pn>::value / __c;
+      static const uintmax_t __b0 = __static_abs<_Qn>::value % __c;
+      static const uintmax_t __b1 = __static_abs<_Qn>::value / __c;
+
+      static_assert(__a1 == 0 || __b1 == 0,
+      "overflow in multiplication");
+      static_assert(__a0 * __b1 + __b0 * __a1 < (__c >> 1),
+      "overflow in multiplication");
+      static_assert(__b0 * __a0 <= 0x7fffffffffffffffLL,
+      "overflow in multiplication");
+      static_assert((__a0 * __b1 + __b0 * __a1) * __c
+      <= 0x7fffffffffffffffLL - __b0 * __a0,
+      "overflow in multiplication");
+
+    public:
+      static const intmax_t value = _Pn * _Qn;
+    };
+
+
+
+  template<uintmax_t __hi1, uintmax_t __lo1, uintmax_t __hi2, uintmax_t __lo2>
+    struct __big_less
+    : integral_constant<bool, (__hi1 < __hi2
+          || (__hi1 == __hi2 && __lo1 < __lo2))>
+    { };
+
+  template<uintmax_t __hi1, uintmax_t __lo1, uintmax_t __hi2, uintmax_t __lo2>
+    struct __big_add
+    {
+      static constexpr uintmax_t __lo = __lo1 + __lo2;
+      static constexpr uintmax_t __hi = (__hi1 + __hi2 +
+      (__lo1 + __lo2 < __lo1));
+    };
+
+
+  template<uintmax_t __hi1, uintmax_t __lo1, uintmax_t __hi2, uintmax_t __lo2>
+    struct __big_sub
+    {
+      static_assert(!__big_less<__hi1, __lo1, __hi2, __lo2>::value,
+      "Internal library error");
+      static constexpr uintmax_t __lo = __lo1 - __lo2;
+      static constexpr uintmax_t __hi = (__hi1 - __hi2 -
+      (__lo1 < __lo2));
+    };
+
+
+  template<uintmax_t __x, uintmax_t __y>
+    struct __big_mul
+    {
+    private:
+      static constexpr uintmax_t __c = uintmax_t(1) << (sizeof(intmax_t) * 4);
+      static constexpr uintmax_t __x0 = __x % __c;
+      static constexpr uintmax_t __x1 = __x / __c;
+      static constexpr uintmax_t __y0 = __y % __c;
+      static constexpr uintmax_t __y1 = __y / __c;
+      static constexpr uintmax_t __x0y0 = __x0 * __y0;
+      static constexpr uintmax_t __x0y1 = __x0 * __y1;
+      static constexpr uintmax_t __x1y0 = __x1 * __y0;
+      static constexpr uintmax_t __x1y1 = __x1 * __y1;
+      static constexpr uintmax_t __mix = __x0y1 + __x1y0;
+      static constexpr uintmax_t __mix_lo = __mix * __c;
+      static constexpr uintmax_t __mix_hi
+      = __mix / __c + ((__mix < __x0y1) ? __c : 0);
+      typedef __big_add<__mix_hi, __mix_lo, __x1y1, __x0y0> _Res;
+    public:
+      static constexpr uintmax_t __hi = _Res::__hi;
+      static constexpr uintmax_t __lo = _Res::__lo;
+    };
+
+
+
+  template<uintmax_t __n1, uintmax_t __n0, uintmax_t __d>
+    struct __big_div_impl
+    {
+    private:
+      static_assert(__d >= (uintmax_t(1) << (sizeof(intmax_t) * 8 - 1)),
+      "Internal library error");
+      static_assert(__n1 < __d, "Internal library error");
+      static constexpr uintmax_t __c = uintmax_t(1) << (sizeof(intmax_t) * 4);
+      static constexpr uintmax_t __d1 = __d / __c;
+      static constexpr uintmax_t __d0 = __d % __c;
+
+      static constexpr uintmax_t __q1x = __n1 / __d1;
+      static constexpr uintmax_t __r1x = __n1 % __d1;
+      static constexpr uintmax_t __m = __q1x * __d0;
+      static constexpr uintmax_t __r1y = __r1x * __c + __n0 / __c;
+      static constexpr uintmax_t __r1z = __r1y + __d;
+      static constexpr uintmax_t __r1
+      = ((__r1y < __m) ? ((__r1z >= __d) && (__r1z < __m))
+  ? (__r1z + __d) : __r1z : __r1y) - __m;
+      static constexpr uintmax_t __q1
+      = __q1x - ((__r1y < __m)
+   ? ((__r1z >= __d) && (__r1z < __m)) ? 2 : 1 : 0);
+      static constexpr uintmax_t __q0x = __r1 / __d1;
+      static constexpr uintmax_t __r0x = __r1 % __d1;
+      static constexpr uintmax_t __n = __q0x * __d0;
+      static constexpr uintmax_t __r0y = __r0x * __c + __n0 % __c;
+      static constexpr uintmax_t __r0z = __r0y + __d;
+      static constexpr uintmax_t __r0
+      = ((__r0y < __n) ? ((__r0z >= __d) && (__r0z < __n))
+  ? (__r0z + __d) : __r0z : __r0y) - __n;
+      static constexpr uintmax_t __q0
+      = __q0x - ((__r0y < __n) ? ((__r0z >= __d)
+      && (__r0z < __n)) ? 2 : 1 : 0);
+
+    public:
+      static constexpr uintmax_t __quot = __q1 * __c + __q0;
+      static constexpr uintmax_t __rem = __r0;
+
+    private:
+      typedef __big_mul<__quot, __d> _Prod;
+      typedef __big_add<_Prod::__hi, _Prod::__lo, 0, __rem> _Sum;
+      static_assert(_Sum::__hi == __n1 && _Sum::__lo == __n0,
+      "Internal library error");
+  };
+
+  template<uintmax_t __n1, uintmax_t __n0, uintmax_t __d>
+    struct __big_div
+    {
+    private:
+      static_assert(__d != 0, "Internal library error");
+      static_assert(sizeof (uintmax_t) == sizeof (unsigned long long),
+      "This library calls __builtin_clzll on uintmax_t, which "
+      "is unsafe on your platform. Please complain to "
+      "http://gcc.gnu.org/bugzilla/");
+      static constexpr int __shift = __builtin_clzll(__d);
+      static constexpr int __coshift_ = sizeof(uintmax_t) * 8 - __shift;
+      static constexpr int __coshift = (__shift != 0) ? __coshift_ : 0;
+      static constexpr uintmax_t __c1 = uintmax_t(1) << __shift;
+      static constexpr uintmax_t __c2 = uintmax_t(1) << __coshift;
+      static constexpr uintmax_t __new_d = __d * __c1;
+      static constexpr uintmax_t __new_n0 = __n0 * __c1;
+      static constexpr uintmax_t __n1_shifted = (__n1 % __d) * __c1;
+      static constexpr uintmax_t __n0_top = (__shift != 0) ? (__n0 / __c2) : 0;
+      static constexpr uintmax_t __new_n1 = __n1_shifted + __n0_top;
+      typedef __big_div_impl<__new_n1, __new_n0, __new_d> _Res;
+
+    public:
+      static constexpr uintmax_t __quot_hi = __n1 / __d;
+      static constexpr uintmax_t __quot_lo = _Res::__quot;
+      static constexpr uintmax_t __rem = _Res::__rem / __c1;
+
+    private:
+      typedef __big_mul<__quot_lo, __d> _P0;
+      typedef __big_mul<__quot_hi, __d> _P1;
+      typedef __big_add<_P0::__hi, _P0::__lo, _P1::__lo, __rem> _Sum;
+
+      static_assert(_P1::__hi == 0, "Internal library error");
+      static_assert(_Sum::__hi >= _P0::__hi, "Internal library error");
+
+      static_assert(_Sum::__hi == __n1 && _Sum::__lo == __n0,
+      "Internal library error");
+      static_assert(__rem < __d, "Internal library error");
+    };
+# 270 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 3
+  template<intmax_t _Num, intmax_t _Den = 1>
+    struct ratio
+    {
+      static_assert(_Den != 0, "denominator cannot be zero");
+      static_assert(_Num >= -0x7fffffffffffffffLL && _Den >= -0x7fffffffffffffffLL,
+      "out of range");
+
+
+      static constexpr intmax_t num =
+        _Num * __static_sign<_Den>::value / __static_gcd<_Num, _Den>::value;
+
+      static constexpr intmax_t den =
+        __static_abs<_Den>::value / __static_gcd<_Num, _Den>::value;
+
+      typedef ratio<num, den> type;
+    };
+# 297 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 3
+  template<typename _Tp>
+    struct __is_ratio
+    : std::false_type
+    { };
+
+  template<intmax_t _Num, intmax_t _Den>
+    struct __is_ratio<ratio<_Num, _Den>>
+    : std::true_type
+    { };
+
+
+  template<typename _Tp>
+    constexpr bool __is_ratio_v = false;
+  template<intmax_t _Num, intmax_t _Den>
+    constexpr bool __is_ratio_v<ratio<_Num, _Den>> = true;
+
+
+  template<typename _R1, typename _R2>
+    constexpr bool
+    __are_both_ratios() noexcept
+    {
+
+      if constexpr (__is_ratio_v<_R1>)
+ if constexpr (__is_ratio_v<_R2>)
+   return true;
+      return false;
+
+
+
+    }
+
+  template<typename _R1, typename _R2>
+    struct __ratio_multiply
+    {
+      static_assert(std::__are_both_ratios<_R1, _R2>(),
+      "both template arguments must be a std::ratio");
+
+    private:
+      static const intmax_t __gcd1 =
+        __static_gcd<_R1::num, _R2::den>::value;
+      static const intmax_t __gcd2 =
+        __static_gcd<_R2::num, _R1::den>::value;
+
+    public:
+      typedef ratio<
+        __safe_multiply<(_R1::num / __gcd1),
+                        (_R2::num / __gcd2)>::value,
+        __safe_multiply<(_R1::den / __gcd2),
+                        (_R2::den / __gcd1)>::value> type;
+
+      static constexpr intmax_t num = type::num;
+      static constexpr intmax_t den = type::den;
+    };
+# 362 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 3
+  template<typename _R1, typename _R2>
+    using ratio_multiply = typename __ratio_multiply<_R1, _R2>::type;
+
+
+
+  template<typename _R1, typename _R2>
+    struct __ratio_divide
+    {
+      static_assert(_R2::num != 0, "division by 0");
+
+      typedef typename __ratio_multiply<
+        _R1,
+        ratio<_R2::den, _R2::num>>::type type;
+
+      static constexpr intmax_t num = type::num;
+      static constexpr intmax_t den = type::den;
+    };
+# 391 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 3
+  template<typename _R1, typename _R2>
+    using ratio_divide = typename __ratio_divide<_R1, _R2>::type;
+
+
+  template<typename _R1, typename _R2>
+    struct ratio_equal
+    : integral_constant<bool, _R1::num == _R2::num && _R1::den == _R2::den>
+    {
+      static_assert(std::__are_both_ratios<_R1, _R2>(),
+      "both template arguments must be a std::ratio");
+    };
+
+
+  template<typename _R1, typename _R2>
+    struct ratio_not_equal
+    : integral_constant<bool, !ratio_equal<_R1, _R2>::value>
+    { };
+
+
+
+
+  template<typename _R1, typename _R2,
+           typename _Left = __big_mul<_R1::num,_R2::den>,
+           typename _Right = __big_mul<_R2::num,_R1::den> >
+    struct __ratio_less_impl_1
+    : integral_constant<bool, __big_less<_Left::__hi, _Left::__lo,
+           _Right::__hi, _Right::__lo>::value>
+    { };
+
+  template<typename _R1, typename _R2,
+    bool = (_R1::num == 0 || _R2::num == 0
+     || (__static_sign<_R1::num>::value
+         != __static_sign<_R2::num>::value)),
+    bool = (__static_sign<_R1::num>::value == -1
+     && __static_sign<_R2::num>::value == -1)>
+    struct __ratio_less_impl
+    : __ratio_less_impl_1<_R1, _R2>::type
+    { };
+
+  template<typename _R1, typename _R2>
+    struct __ratio_less_impl<_R1, _R2, true, false>
+    : integral_constant<bool, _R1::num < _R2::num>
+    { };
+
+  template<typename _R1, typename _R2>
+    struct __ratio_less_impl<_R1, _R2, false, true>
+    : __ratio_less_impl_1<ratio<-_R2::num, _R2::den>,
+           ratio<-_R1::num, _R1::den> >::type
+    { };
+
+
+
+
+  template<typename _R1, typename _R2>
+    struct ratio_less
+    : __ratio_less_impl<_R1, _R2>::type
+    {
+      static_assert(std::__are_both_ratios<_R1, _R2>(),
+      "both template arguments must be a std::ratio");
+    };
+
+
+  template<typename _R1, typename _R2>
+    struct ratio_less_equal
+    : integral_constant<bool, !ratio_less<_R2, _R1>::value>
+    { };
+
+
+  template<typename _R1, typename _R2>
+    struct ratio_greater
+    : integral_constant<bool, ratio_less<_R2, _R1>::value>
+    { };
+
+
+  template<typename _R1, typename _R2>
+    struct ratio_greater_equal
+    : integral_constant<bool, !ratio_less<_R1, _R2>::value>
+    { };
+
+
+  template <typename _R1, typename _R2>
+    inline constexpr bool ratio_equal_v = ratio_equal<_R1, _R2>::value;
+  template <typename _R1, typename _R2>
+    inline constexpr bool ratio_not_equal_v = ratio_not_equal<_R1, _R2>::value;
+  template <typename _R1, typename _R2>
+    inline constexpr bool ratio_less_v = ratio_less<_R1, _R2>::value;
+  template <typename _R1, typename _R2>
+    inline constexpr bool ratio_less_equal_v
+      = ratio_less_equal<_R1, _R2>::value;
+  template <typename _R1, typename _R2>
+    inline constexpr bool ratio_greater_v = ratio_greater<_R1, _R2>::value;
+  template <typename _R1, typename _R2>
+    inline constexpr bool ratio_greater_equal_v
+      = ratio_greater_equal<_R1, _R2>::value;
+
+
+
+
+  template<typename _R1, typename _R2,
+      bool = (_R1::num >= 0),
+      bool = (_R2::num >= 0),
+      bool = ratio_less<ratio<__static_abs<_R1::num>::value, _R1::den>,
+        ratio<__static_abs<_R2::num>::value, _R2::den> >::value>
+    struct __ratio_add_impl
+    {
+    private:
+      typedef typename __ratio_add_impl<
+        ratio<-_R1::num, _R1::den>,
+        ratio<-_R2::num, _R2::den> >::type __t;
+    public:
+      typedef ratio<-__t::num, __t::den> type;
+    };
+
+
+  template<typename _R1, typename _R2, bool __b>
+    struct __ratio_add_impl<_R1, _R2, true, true, __b>
+    {
+    private:
+      static constexpr uintmax_t __g = __static_gcd<_R1::den, _R2::den>::value;
+      static constexpr uintmax_t __d2 = _R2::den / __g;
+      typedef __big_mul<_R1::den, __d2> __d;
+      typedef __big_mul<_R1::num, _R2::den / __g> __x;
+      typedef __big_mul<_R2::num, _R1::den / __g> __y;
+      typedef __big_add<__x::__hi, __x::__lo, __y::__hi, __y::__lo> __n;
+      static_assert(__n::__hi >= __x::__hi, "Internal library error");
+      typedef __big_div<__n::__hi, __n::__lo, __g> __ng;
+      static constexpr uintmax_t __g2 = __static_gcd<__ng::__rem, __g>::value;
+      typedef __big_div<__n::__hi, __n::__lo, __g2> __n_final;
+      static_assert(__n_final::__rem == 0, "Internal library error");
+      static_assert(__n_final::__quot_hi == 0 &&
+        __n_final::__quot_lo <= 0x7fffffffffffffffLL, "overflow in addition");
+      typedef __big_mul<_R1::den / __g2, __d2> __d_final;
+      static_assert(__d_final::__hi == 0 &&
+        __d_final::__lo <= 0x7fffffffffffffffLL, "overflow in addition");
+    public:
+      typedef ratio<__n_final::__quot_lo, __d_final::__lo> type;
+    };
+
+  template<typename _R1, typename _R2>
+    struct __ratio_add_impl<_R1, _R2, false, true, true>
+    : __ratio_add_impl<_R2, _R1>
+    { };
+
+
+  template<typename _R1, typename _R2>
+    struct __ratio_add_impl<_R1, _R2, true, false, false>
+    {
+    private:
+      static constexpr uintmax_t __g = __static_gcd<_R1::den, _R2::den>::value;
+      static constexpr uintmax_t __d2 = _R2::den / __g;
+      typedef __big_mul<_R1::den, __d2> __d;
+      typedef __big_mul<_R1::num, _R2::den / __g> __x;
+      typedef __big_mul<-_R2::num, _R1::den / __g> __y;
+      typedef __big_sub<__x::__hi, __x::__lo, __y::__hi, __y::__lo> __n;
+      typedef __big_div<__n::__hi, __n::__lo, __g> __ng;
+      static constexpr uintmax_t __g2 = __static_gcd<__ng::__rem, __g>::value;
+      typedef __big_div<__n::__hi, __n::__lo, __g2> __n_final;
+      static_assert(__n_final::__rem == 0, "Internal library error");
+      static_assert(__n_final::__quot_hi == 0 &&
+        __n_final::__quot_lo <= 0x7fffffffffffffffLL, "overflow in addition");
+      typedef __big_mul<_R1::den / __g2, __d2> __d_final;
+      static_assert(__d_final::__hi == 0 &&
+        __d_final::__lo <= 0x7fffffffffffffffLL, "overflow in addition");
+    public:
+      typedef ratio<__n_final::__quot_lo, __d_final::__lo> type;
+    };
+
+  template<typename _R1, typename _R2>
+    struct __ratio_add
+    {
+      static_assert(std::__are_both_ratios<_R1, _R2>(),
+      "both template arguments must be a std::ratio");
+
+      typedef typename __ratio_add_impl<_R1, _R2>::type type;
+      static constexpr intmax_t num = type::num;
+      static constexpr intmax_t den = type::den;
+    };
+# 580 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 3
+  template<typename _R1, typename _R2>
+    using ratio_add = typename __ratio_add<_R1, _R2>::type;
+
+
+
+  template<typename _R1, typename _R2>
+    struct __ratio_subtract
+    {
+      typedef typename __ratio_add<
+        _R1,
+        ratio<-_R2::num, _R2::den>>::type type;
+
+      static constexpr intmax_t num = type::num;
+      static constexpr intmax_t den = type::den;
+    };
+# 607 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 3
+  template<typename _R1, typename _R2>
+    using ratio_subtract = typename __ratio_subtract<_R1, _R2>::type;
+# 620 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 3
+  using atto = ratio< 1, 1000000000000000000>;
+  using femto = ratio< 1, 1000000000000000>;
+  using pico = ratio< 1, 1000000000000>;
+  using nano = ratio< 1, 1000000000>;
+  using micro = ratio< 1, 1000000>;
+  using milli = ratio< 1, 1000>;
+  using centi = ratio< 1, 100>;
+  using deci = ratio< 1, 10>;
+  using deca = ratio< 10, 1>;
+  using hecto = ratio< 100, 1>;
+  using kilo = ratio< 1000, 1>;
+  using mega = ratio< 1000000, 1>;
+  using giga = ratio< 1000000000, 1>;
+  using tera = ratio< 1000000000000, 1>;
+  using peta = ratio< 1000000000000000, 1>;
+  using exa = ratio< 1000000000000000000, 1>;
+# 648 "C:/msys64/mingw64/include/c++/15.2.0/ratio" 3
+
+}
+# 40 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 2 3
+
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/ctime" 1 3
+# 60 "C:/msys64/mingw64/include/c++/15.2.0/ctime" 3
+namespace std
+{
+  using ::clock_t;
+  using ::time_t;
+  using ::tm;
+
+  using ::clock;
+  using ::difftime;
+  using ::mktime;
+  using ::time;
+  using ::asctime;
+  using ::ctime;
+  using ::gmtime;
+  using ::localtime;
+  using ::strftime;
+}
+# 44 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 2 3
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/parse_numbers.h" 1 3
+# 44 "C:/msys64/mingw64/include/c++/15.2.0/bits/parse_numbers.h" 3
+namespace std
+{
+
+
+namespace __parse_int
+{
+  template<unsigned _Base, char _Dig>
+    struct _Digit;
+
+  template<unsigned _Base>
+    struct _Digit<_Base, '0'> : integral_constant<unsigned, 0>
+    {
+      using __valid = true_type;
+    };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, '1'> : integral_constant<unsigned, 1>
+    {
+      using __valid = true_type;
+    };
+
+  template<unsigned _Base, unsigned _Val>
+    struct _Digit_impl : integral_constant<unsigned, _Val>
+    {
+      static_assert(_Base > _Val, "invalid digit");
+      using __valid = true_type;
+    };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, '2'> : _Digit_impl<_Base, 2>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, '3'> : _Digit_impl<_Base, 3>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, '4'> : _Digit_impl<_Base, 4>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, '5'> : _Digit_impl<_Base, 5>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, '6'> : _Digit_impl<_Base, 6>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, '7'> : _Digit_impl<_Base, 7>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, '8'> : _Digit_impl<_Base, 8>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, '9'> : _Digit_impl<_Base, 9>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, 'a'> : _Digit_impl<_Base, 0xa>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, 'A'> : _Digit_impl<_Base, 0xa>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, 'b'> : _Digit_impl<_Base, 0xb>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, 'B'> : _Digit_impl<_Base, 0xb>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, 'c'> : _Digit_impl<_Base, 0xc>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, 'C'> : _Digit_impl<_Base, 0xc>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, 'd'> : _Digit_impl<_Base, 0xd>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, 'D'> : _Digit_impl<_Base, 0xd>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, 'e'> : _Digit_impl<_Base, 0xe>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, 'E'> : _Digit_impl<_Base, 0xe>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, 'f'> : _Digit_impl<_Base, 0xf>
+    { };
+
+  template<unsigned _Base>
+    struct _Digit<_Base, 'F'> : _Digit_impl<_Base, 0xf>
+    { };
+
+
+  template<unsigned _Base>
+    struct _Digit<_Base, '\''> : integral_constant<unsigned, 0>
+    {
+      using __valid = false_type;
+    };
+
+
+
+  template<unsigned long long _Val>
+    using __ull_constant = integral_constant<unsigned long long, _Val>;
+
+  template<unsigned _Base, char _Dig, char... _Digs>
+    struct _Power_help
+    {
+      using __next = typename _Power_help<_Base, _Digs...>::type;
+      using __valid_digit = typename _Digit<_Base, _Dig>::__valid;
+      using type
+ = __ull_constant<__next::value * (__valid_digit{} ? _Base : 1ULL)>;
+    };
+
+  template<unsigned _Base, char _Dig>
+    struct _Power_help<_Base, _Dig>
+    {
+      using __valid_digit = typename _Digit<_Base, _Dig>::__valid;
+      using type = __ull_constant<__valid_digit::value>;
+    };
+
+  template<unsigned _Base, char... _Digs>
+    struct _Power : _Power_help<_Base, _Digs...>::type
+    { };
+
+  template<unsigned _Base>
+    struct _Power<_Base> : __ull_constant<0>
+    { };
+
+
+
+  template<unsigned _Base, unsigned long long _Pow, char _Dig, char... _Digs>
+    struct _Number_help
+    {
+      using __digit = _Digit<_Base, _Dig>;
+      using __valid_digit = typename __digit::__valid;
+      using __next = _Number_help<_Base,
+      __valid_digit::value ? _Pow / _Base : _Pow,
+      _Digs...>;
+      using type = __ull_constant<_Pow * __digit::value + __next::type::value>;
+      static_assert((type::value / _Pow) == __digit::value,
+      "integer literal does not fit in unsigned long long");
+    };
+
+
+  template<unsigned _Base, unsigned long long _Pow, char _Dig, char..._Digs>
+    struct _Number_help<_Base, _Pow, '\'', _Dig, _Digs...>
+    : _Number_help<_Base, _Pow, _Dig, _Digs...>
+    { };
+
+
+  template<unsigned _Base, char _Dig>
+    struct _Number_help<_Base, 1ULL, _Dig>
+    {
+      using type = __ull_constant<_Digit<_Base, _Dig>::value>;
+    };
+
+  template<unsigned _Base, char... _Digs>
+    struct _Number
+    : _Number_help<_Base, _Power<_Base, _Digs...>::value, _Digs...>::type
+    { };
+
+  template<unsigned _Base>
+    struct _Number<_Base>
+    : __ull_constant<0>
+    { };
+
+
+
+  template<char... _Digs>
+    struct _Parse_int;
+
+  template<char... _Digs>
+    struct _Parse_int<'0', 'b', _Digs...>
+    : _Number<2U, _Digs...>::type
+    { };
+
+  template<char... _Digs>
+    struct _Parse_int<'0', 'B', _Digs...>
+    : _Number<2U, _Digs...>::type
+    { };
+
+  template<char... _Digs>
+    struct _Parse_int<'0', 'x', _Digs...>
+    : _Number<16U, _Digs...>::type
+    { };
+
+  template<char... _Digs>
+    struct _Parse_int<'0', 'X', _Digs...>
+    : _Number<16U, _Digs...>::type
+    { };
+
+  template<char... _Digs>
+    struct _Parse_int<'0', _Digs...>
+    : _Number<8U, _Digs...>::type
+    { };
+
+  template<char... _Digs>
+    struct _Parse_int
+    : _Number<10U, _Digs...>::type
+    { };
+
+}
+
+
+namespace __select_int
+{
+  template<unsigned long long _Val, typename... _Ints>
+    struct _Select_int_base;
+
+  template<unsigned long long _Val, typename _IntType, typename... _Ints>
+    struct _Select_int_base<_Val, _IntType, _Ints...>
+    : __conditional_t<(_Val <= __gnu_cxx::__int_traits<_IntType>::__max),
+        integral_constant<_IntType, (_IntType)_Val>,
+        _Select_int_base<_Val, _Ints...>>
+    { };
+
+  template<unsigned long long _Val>
+    struct _Select_int_base<_Val>
+    { };
+
+  template<char... _Digs>
+    using _Select_int = typename _Select_int_base<
+ __parse_int::_Parse_int<_Digs...>::value,
+ unsigned char,
+ unsigned short,
+ unsigned int,
+ unsigned long,
+ unsigned long long
+      >::type;
+
+}
+
+
+}
+# 46 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 2 3
+
+
+
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 52 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 2 3
+
+namespace std
+{
+
+
+
+  namespace filesystem { struct __file_clock; };
+
+
+  namespace chrono
+  {
+
+
+
+
+    template<typename _Rep, typename _Period = ratio<1>>
+      class duration;
+
+
+    template<typename _Clock, typename _Dur = typename _Clock::duration>
+      class time_point;
+
+  }
+# 83 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+  template<typename _CT, typename _Period1, typename _Period2, typename = void>
+    struct __duration_common_type
+    { };
+
+  template<typename _CT, typename _Period1, typename _Period2>
+    struct __duration_common_type<_CT, _Period1, _Period2,
+      __void_t<typename _CT::type>>
+    {
+    private:
+      using __gcd_num = __static_gcd<_Period1::num, _Period2::num>;
+      using __gcd_den = __static_gcd<_Period1::den, _Period2::den>;
+      using __cr = typename _CT::type;
+      using __r = ratio<__gcd_num::value,
+   (_Period1::den / __gcd_den::value) * _Period2::den>;
+
+    public:
+      using type = chrono::duration<__cr, typename __r::type>;
+    };
+
+
+
+
+
+
+
+  template<typename _Rep1, typename _Period1, typename _Rep2, typename _Period2>
+    struct common_type<chrono::duration<_Rep1, _Period1>,
+         chrono::duration<_Rep2, _Period2>>
+    : __duration_common_type<common_type<_Rep1, _Rep2>,
+        typename _Period1::type,
+        typename _Period2::type>
+    { };
+
+
+  template<typename _Rep, typename _Period>
+    struct common_type<chrono::duration<_Rep, _Period>,
+         chrono::duration<_Rep, _Period>>
+    {
+      using type = chrono::duration<typename common_type<_Rep>::type,
+        typename _Period::type>;
+    };
+
+
+  template<typename _Rep, typename _Period>
+    struct common_type<chrono::duration<_Rep, _Period>>
+    {
+      using type = chrono::duration<typename common_type<_Rep>::type,
+        typename _Period::type>;
+    };
+
+
+
+
+
+
+  template<typename _CT, typename _Clock, typename = void>
+    struct __timepoint_common_type
+    { };
+
+  template<typename _CT, typename _Clock>
+    struct __timepoint_common_type<_CT, _Clock, __void_t<typename _CT::type>>
+    {
+      using type = chrono::time_point<_Clock, typename _CT::type>;
+    };
+
+
+
+
+
+
+
+  template<typename _Clock, typename _Duration1, typename _Duration2>
+    struct common_type<chrono::time_point<_Clock, _Duration1>,
+         chrono::time_point<_Clock, _Duration2>>
+    : __timepoint_common_type<common_type<_Duration1, _Duration2>, _Clock>
+    { };
+
+
+  template<typename _Clock, typename _Duration>
+    struct common_type<chrono::time_point<_Clock, _Duration>,
+         chrono::time_point<_Clock, _Duration>>
+    { using type = chrono::time_point<_Clock, _Duration>; };
+
+
+  template<typename _Clock, typename _Duration>
+    struct common_type<chrono::time_point<_Clock, _Duration>>
+    { using type = chrono::time_point<_Clock, _Duration>; };
+
+
+
+
+  namespace chrono
+  {
+
+
+
+
+
+
+    template<typename _ToDur, typename _CF, typename _CR,
+      bool _NumIsOne = false, bool _DenIsOne = false>
+      struct __duration_cast_impl
+      {
+ template<typename _Rep, typename _Period>
+   static constexpr _ToDur
+   __cast(const duration<_Rep, _Period>& __d)
+   {
+     typedef typename _ToDur::rep __to_rep;
+     return _ToDur(static_cast<__to_rep>(static_cast<_CR>(__d.count())
+       * static_cast<_CR>(_CF::num)
+       / static_cast<_CR>(_CF::den)));
+   }
+      };
+
+    template<typename _ToDur, typename _CF, typename _CR>
+      struct __duration_cast_impl<_ToDur, _CF, _CR, true, true>
+      {
+ template<typename _Rep, typename _Period>
+   static constexpr _ToDur
+   __cast(const duration<_Rep, _Period>& __d)
+   {
+     typedef typename _ToDur::rep __to_rep;
+     return _ToDur(static_cast<__to_rep>(__d.count()));
+   }
+      };
+
+    template<typename _ToDur, typename _CF, typename _CR>
+      struct __duration_cast_impl<_ToDur, _CF, _CR, true, false>
+      {
+ template<typename _Rep, typename _Period>
+   static constexpr _ToDur
+   __cast(const duration<_Rep, _Period>& __d)
+   {
+     typedef typename _ToDur::rep __to_rep;
+     return _ToDur(static_cast<__to_rep>(
+       static_cast<_CR>(__d.count()) / static_cast<_CR>(_CF::den)));
+   }
+      };
+
+    template<typename _ToDur, typename _CF, typename _CR>
+      struct __duration_cast_impl<_ToDur, _CF, _CR, false, true>
+      {
+ template<typename _Rep, typename _Period>
+   static constexpr _ToDur
+   __cast(const duration<_Rep, _Period>& __d)
+   {
+     typedef typename _ToDur::rep __to_rep;
+     return _ToDur(static_cast<__to_rep>(
+       static_cast<_CR>(__d.count()) * static_cast<_CR>(_CF::num)));
+   }
+      };
+
+    template<typename _Tp>
+      struct __is_duration
+      : std::false_type
+      { };
+
+    template<typename _Rep, typename _Period>
+      struct __is_duration<duration<_Rep, _Period>>
+      : std::true_type
+      { };
+
+    template<typename _Tp>
+      using __enable_if_is_duration
+ = typename enable_if<__is_duration<_Tp>::value, _Tp>::type;
+
+    template<typename _Tp>
+      using __disable_if_is_duration
+ = typename enable_if<!__is_duration<_Tp>::value, _Tp>::type;
+
+
+    template<typename _Tp>
+      inline constexpr bool __is_duration_v = false;
+    template<typename _Rep, typename _Period>
+      inline constexpr bool __is_duration_v<duration<_Rep, _Period>> = true;
+    template<typename _Tp>
+      inline constexpr bool __is_time_point_v = false;
+    template<typename _Clock, typename _Dur>
+      inline constexpr bool __is_time_point_v<time_point<_Clock, _Dur>> = true;
+# 276 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _ToDur, typename _Rep, typename _Period>
+      [[__nodiscard__]]
+      constexpr __enable_if_is_duration<_ToDur>
+      duration_cast(const duration<_Rep, _Period>& __d)
+      {
+
+ if constexpr (is_same_v<_ToDur, duration<_Rep, _Period>>)
+   return __d;
+ else
+   {
+
+   using __to_period = typename _ToDur::period;
+   using __to_rep = typename _ToDur::rep;
+   using __cf = ratio_divide<_Period, __to_period>;
+   using __cr = typename common_type<__to_rep, _Rep, intmax_t>::type;
+   using __dc = __duration_cast_impl<_ToDur, __cf, __cr,
+         __cf::num == 1, __cf::den == 1>;
+   return __dc::__cast(__d);
+
+   }
+
+      }
+# 310 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _Rep>
+      struct treat_as_floating_point
+      : is_floating_point<_Rep>
+      { };
+
+
+    template <typename _Rep>
+      inline constexpr bool treat_as_floating_point_v =
+ treat_as_floating_point<_Rep>::value;
+
+    template<>
+      inline constexpr bool treat_as_floating_point_v<int> = false;
+    template<>
+      inline constexpr bool treat_as_floating_point_v<long> = false;
+    template<>
+      inline constexpr bool treat_as_floating_point_v<long long> = false;
+    template<>
+      inline constexpr bool treat_as_floating_point_v<float> = true;
+    template<>
+      inline constexpr bool treat_as_floating_point_v<double> = true;
+    template<>
+      inline constexpr bool treat_as_floating_point_v<long double> = true;
+
+
+
+
+    template<typename _Tp>
+      inline constexpr bool is_clock_v = false;
+
+    template<typename _Tp>
+      requires requires {
+ typename _Tp::rep;
+ typename _Tp::period;
+ typename _Tp::duration;
+ typename _Tp::time_point::clock;
+ typename _Tp::time_point::duration;
+ { &_Tp::is_steady } -> same_as<const bool*>;
+ { _Tp::now() } -> same_as<typename _Tp::time_point>;
+ requires same_as<typename _Tp::duration,
+    duration<typename _Tp::rep, typename _Tp::period>>;
+ requires same_as<typename _Tp::time_point::duration,
+    typename _Tp::duration>;
+      }
+    inline constexpr bool is_clock_v<_Tp> = true;
+# 373 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _Tp>
+      struct is_clock
+      : bool_constant<is_clock_v<_Tp>>
+      { };
+# 390 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _ToDur, typename _Rep, typename _Period>
+      [[nodiscard]] constexpr __enable_if_is_duration<_ToDur>
+      floor(const duration<_Rep, _Period>& __d)
+      {
+ auto __to = chrono::duration_cast<_ToDur>(__d);
+ if (__to > __d)
+   return __to - _ToDur{1};
+ return __to;
+      }
+# 410 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _ToDur, typename _Rep, typename _Period>
+      [[nodiscard]] constexpr __enable_if_is_duration<_ToDur>
+      ceil(const duration<_Rep, _Period>& __d)
+      {
+ auto __to = chrono::duration_cast<_ToDur>(__d);
+ if (__to < __d)
+   return __to + _ToDur{1};
+ return __to;
+      }
+# 431 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template <typename _ToDur, typename _Rep, typename _Period>
+      [[nodiscard]] constexpr
+      enable_if_t<
+ __and_<__is_duration<_ToDur>,
+        __not_<treat_as_floating_point<typename _ToDur::rep>>>::value,
+ _ToDur>
+      round(const duration<_Rep, _Period>& __d)
+      {
+ _ToDur __t0 = chrono::floor<_ToDur>(__d);
+ _ToDur __t1 = __t0 + _ToDur{1};
+ auto __diff0 = __d - __t0;
+ auto __diff1 = __t1 - __d;
+ if (__diff0 == __diff1)
+   {
+     if (__t0.count() & 1)
+       return __t1;
+     return __t0;
+   }
+ else if (__diff0 < __diff1)
+   return __t0;
+ return __t1;
+      }
+
+
+
+
+
+
+
+    template<typename _Rep, typename _Period>
+      [[nodiscard]] constexpr
+      enable_if_t<numeric_limits<_Rep>::is_signed, duration<_Rep, _Period>>
+      abs(duration<_Rep, _Period> __d)
+      {
+ if (__d >= __d.zero())
+   return __d;
+ return -__d;
+      }
+
+
+    namespace __detail { using chrono::ceil; }
+# 498 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _Rep>
+      struct duration_values
+      {
+ static constexpr _Rep
+ zero() noexcept
+ { return _Rep(0); }
+
+ static constexpr _Rep
+ max() noexcept
+ { return numeric_limits<_Rep>::max(); }
+
+ static constexpr _Rep
+ min() noexcept
+ { return numeric_limits<_Rep>::lowest(); }
+      };
+
+    template<typename _Rep, typename _Period>
+      class duration
+      {
+ static_assert(!__is_duration<_Rep>::value,
+        "rep cannot be a std::chrono::duration");
+ static_assert(__is_ratio<_Period>::value,
+        "period must be a specialization of std::ratio");
+ static_assert(_Period::num > 0, "period must be positive");
+
+ template<typename _Rep2>
+   using __is_float = treat_as_floating_point<_Rep2>;
+
+ static constexpr intmax_t
+ _S_gcd(intmax_t __m, intmax_t __n) noexcept
+ {
+
+
+
+   do
+     {
+       intmax_t __rem = __m % __n;
+       __m = __n;
+       __n = __rem;
+     }
+   while (__n != 0);
+   return __m;
+
+
+
+
+
+ }
+
+
+
+
+
+ template<typename _R1, typename _R2,
+   intmax_t __gcd1 = _S_gcd(_R1::num, _R2::num),
+   intmax_t __gcd2 = _S_gcd(_R1::den, _R2::den)>
+   using __divide = ratio<(_R1::num / __gcd1) * (_R2::den / __gcd2),
+     (_R1::den / __gcd2) * (_R2::num / __gcd1)>;
+
+
+ template<typename _Period2>
+   using __is_harmonic
+     = __bool_constant<__divide<_Period2, _Period>::den == 1>;
+
+      public:
+
+ using rep = _Rep;
+ using period = typename _Period::type;
+
+
+ constexpr duration() = default;
+
+ duration(const duration&) = default;
+
+
+
+ template<typename _Rep2, typename = _Require<
+   is_convertible<const _Rep2&, rep>,
+   __or_<__is_float<rep>, __not_<__is_float<_Rep2>>>>>
+   constexpr explicit duration(const _Rep2& __rep)
+   : __r(static_cast<rep>(__rep)) { }
+
+ template<typename _Rep2, typename _Period2, typename = _Require<
+   is_convertible<const _Rep2&, rep>,
+   __or_<__is_float<rep>,
+         __and_<__is_harmonic<_Period2>,
+         __not_<__is_float<_Rep2>>>>>>
+   constexpr duration(const duration<_Rep2, _Period2>& __d)
+   : __r(duration_cast<duration>(__d).count()) { }
+
+ ~duration() = default;
+ duration& operator=(const duration&) = default;
+
+
+ constexpr rep
+ count() const
+ { return __r; }
+
+
+
+ constexpr duration<typename common_type<rep>::type, period>
+ operator+() const
+ { return duration<typename common_type<rep>::type, period>(__r); }
+
+ constexpr duration<typename common_type<rep>::type, period>
+ operator-() const
+ { return duration<typename common_type<rep>::type, period>(-__r); }
+
+ constexpr duration&
+ operator++()
+ {
+   ++__r;
+   return *this;
+ }
+
+ constexpr duration
+ operator++(int)
+ { return duration(__r++); }
+
+ constexpr duration&
+ operator--()
+ {
+   --__r;
+   return *this;
+ }
+
+ constexpr duration
+ operator--(int)
+ { return duration(__r--); }
+
+ constexpr duration&
+ operator+=(const duration& __d)
+ {
+   __r += __d.count();
+   return *this;
+ }
+
+ constexpr duration&
+ operator-=(const duration& __d)
+ {
+   __r -= __d.count();
+   return *this;
+ }
+
+ constexpr duration&
+ operator*=(const rep& __rhs)
+ {
+   __r *= __rhs;
+   return *this;
+ }
+
+ constexpr duration&
+ operator/=(const rep& __rhs)
+ {
+   __r /= __rhs;
+   return *this;
+ }
+
+
+ template<typename _Rep2 = rep>
+   constexpr
+   __enable_if_t<!treat_as_floating_point<_Rep2>::value, duration&>
+   operator%=(const rep& __rhs)
+   {
+     __r %= __rhs;
+     return *this;
+   }
+
+ template<typename _Rep2 = rep>
+   constexpr
+   __enable_if_t<!treat_as_floating_point<_Rep2>::value, duration&>
+   operator%=(const duration& __d)
+   {
+     __r %= __d.count();
+     return *this;
+   }
+
+
+ static constexpr duration
+ zero() noexcept
+ { return duration(duration_values<rep>::zero()); }
+
+ static constexpr duration
+ min() noexcept
+ { return duration(duration_values<rep>::min()); }
+
+ static constexpr duration
+ max() noexcept
+ { return duration(duration_values<rep>::max()); }
+
+      private:
+ rep __r;
+      };
+
+
+
+
+
+    template<typename _Rep1, typename _Period1,
+      typename _Rep2, typename _Period2>
+      constexpr typename common_type<duration<_Rep1, _Period1>,
+         duration<_Rep2, _Period2>>::type
+      operator+(const duration<_Rep1, _Period1>& __lhs,
+  const duration<_Rep2, _Period2>& __rhs)
+      {
+ typedef duration<_Rep1, _Period1> __dur1;
+ typedef duration<_Rep2, _Period2> __dur2;
+ typedef typename common_type<__dur1,__dur2>::type __cd;
+ return __cd(__cd(__lhs).count() + __cd(__rhs).count());
+      }
+
+
+    template<typename _Rep1, typename _Period1,
+      typename _Rep2, typename _Period2>
+      constexpr typename common_type<duration<_Rep1, _Period1>,
+         duration<_Rep2, _Period2>>::type
+      operator-(const duration<_Rep1, _Period1>& __lhs,
+  const duration<_Rep2, _Period2>& __rhs)
+      {
+ typedef duration<_Rep1, _Period1> __dur1;
+ typedef duration<_Rep2, _Period2> __dur2;
+ typedef typename common_type<__dur1,__dur2>::type __cd;
+ return __cd(__cd(__lhs).count() - __cd(__rhs).count());
+      }
+# 731 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _Rep1, typename _Rep2,
+      typename _CRep = typename common_type<_Rep1, _Rep2>::type>
+      using __common_rep_t = typename
+ enable_if<is_convertible<const _Rep2&, _CRep>::value, _CRep>::type;
+# 743 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _Rep1, typename _Period, typename _Rep2>
+      constexpr duration<__common_rep_t<_Rep1, _Rep2>, _Period>
+      operator*(const duration<_Rep1, _Period>& __d, const _Rep2& __s)
+      {
+ typedef duration<typename common_type<_Rep1, _Rep2>::type, _Period>
+   __cd;
+ return __cd(__cd(__d).count() * __s);
+      }
+
+    template<typename _Rep1, typename _Rep2, typename _Period>
+      constexpr duration<__common_rep_t<_Rep2, _Rep1>, _Period>
+      operator*(const _Rep1& __s, const duration<_Rep2, _Period>& __d)
+      { return __d * __s; }
+
+    template<typename _Rep1, typename _Period, typename _Rep2>
+      constexpr
+      duration<__common_rep_t<_Rep1, __disable_if_is_duration<_Rep2>>, _Period>
+      operator/(const duration<_Rep1, _Period>& __d, const _Rep2& __s)
+      {
+ typedef duration<typename common_type<_Rep1, _Rep2>::type, _Period>
+   __cd;
+ return __cd(__cd(__d).count() / __s);
+      }
+
+    template<typename _Rep1, typename _Period1,
+      typename _Rep2, typename _Period2>
+      constexpr typename common_type<_Rep1, _Rep2>::type
+      operator/(const duration<_Rep1, _Period1>& __lhs,
+  const duration<_Rep2, _Period2>& __rhs)
+      {
+ typedef duration<_Rep1, _Period1> __dur1;
+ typedef duration<_Rep2, _Period2> __dur2;
+ typedef typename common_type<__dur1,__dur2>::type __cd;
+ return __cd(__lhs).count() / __cd(__rhs).count();
+      }
+
+
+    template<typename _Rep1, typename _Period, typename _Rep2>
+      constexpr
+      duration<__common_rep_t<_Rep1, __disable_if_is_duration<_Rep2>>, _Period>
+      operator%(const duration<_Rep1, _Period>& __d, const _Rep2& __s)
+      {
+ typedef duration<typename common_type<_Rep1, _Rep2>::type, _Period>
+   __cd;
+ return __cd(__cd(__d).count() % __s);
+      }
+
+    template<typename _Rep1, typename _Period1,
+      typename _Rep2, typename _Period2>
+      constexpr typename common_type<duration<_Rep1, _Period1>,
+         duration<_Rep2, _Period2>>::type
+      operator%(const duration<_Rep1, _Period1>& __lhs,
+  const duration<_Rep2, _Period2>& __rhs)
+      {
+ typedef duration<_Rep1, _Period1> __dur1;
+ typedef duration<_Rep2, _Period2> __dur2;
+ typedef typename common_type<__dur1,__dur2>::type __cd;
+ return __cd(__cd(__lhs).count() % __cd(__rhs).count());
+      }
+# 811 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _Rep1, typename _Period1,
+      typename _Rep2, typename _Period2>
+      constexpr bool
+      operator==(const duration<_Rep1, _Period1>& __lhs,
+   const duration<_Rep2, _Period2>& __rhs)
+      {
+ typedef duration<_Rep1, _Period1> __dur1;
+ typedef duration<_Rep2, _Period2> __dur2;
+ typedef typename common_type<__dur1,__dur2>::type __ct;
+ return __ct(__lhs).count() == __ct(__rhs).count();
+      }
+
+    template<typename _Rep1, typename _Period1,
+      typename _Rep2, typename _Period2>
+      constexpr bool
+      operator<(const duration<_Rep1, _Period1>& __lhs,
+  const duration<_Rep2, _Period2>& __rhs)
+      {
+ typedef duration<_Rep1, _Period1> __dur1;
+ typedef duration<_Rep2, _Period2> __dur2;
+ typedef typename common_type<__dur1,__dur2>::type __ct;
+ return __ct(__lhs).count() < __ct(__rhs).count();
+      }
+
+
+    template<typename _Rep1, typename _Period1,
+      typename _Rep2, typename _Period2>
+      requires three_way_comparable<common_type_t<_Rep1, _Rep2>>
+      constexpr auto
+      operator<=>(const duration<_Rep1, _Period1>& __lhs,
+    const duration<_Rep2, _Period2>& __rhs)
+      {
+ using __ct = common_type_t<duration<_Rep1, _Period1>,
+       duration<_Rep2, _Period2>>;
+ return __ct(__lhs).count() <=> __ct(__rhs).count();
+      }
+# 856 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _Rep1, typename _Period1,
+      typename _Rep2, typename _Period2>
+      constexpr bool
+      operator<=(const duration<_Rep1, _Period1>& __lhs,
+   const duration<_Rep2, _Period2>& __rhs)
+      { return !(__rhs < __lhs); }
+
+    template<typename _Rep1, typename _Period1,
+      typename _Rep2, typename _Period2>
+      constexpr bool
+      operator>(const duration<_Rep1, _Period1>& __lhs,
+  const duration<_Rep2, _Period2>& __rhs)
+      { return __rhs < __lhs; }
+
+    template<typename _Rep1, typename _Period1,
+      typename _Rep2, typename _Period2>
+      constexpr bool
+      operator>=(const duration<_Rep1, _Period1>& __lhs,
+   const duration<_Rep2, _Period2>& __rhs)
+      { return !(__lhs < __rhs); }
+# 892 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    using nanoseconds = duration<int64_t, nano>;
+
+
+    using microseconds = duration<int64_t, micro>;
+
+
+    using milliseconds = duration<int64_t, milli>;
+
+
+    using seconds = duration<int64_t>;
+
+
+    using minutes = duration<int64_t, ratio< 60>>;
+
+
+    using hours = duration<int64_t, ratio<3600>>;
+
+
+
+    using days = duration<int64_t, ratio<86400>>;
+
+
+    using weeks = duration<int64_t, ratio<604800>>;
+
+
+    using years = duration<int64_t, ratio<31556952>>;
+
+
+    using months = duration<int64_t, ratio<2629746>>;
+
+
+
+
+    template<typename _Clock, typename _Dur>
+      class time_point
+      {
+ static_assert(__is_duration<_Dur>::value,
+     "duration must be a specialization of std::chrono::duration");
+
+      public:
+ typedef _Clock clock;
+ typedef _Dur duration;
+ typedef typename duration::rep rep;
+ typedef typename duration::period period;
+
+ constexpr time_point() : __d(duration::zero())
+ { }
+
+ constexpr explicit time_point(const duration& __dur)
+ : __d(__dur)
+ { }
+
+
+ template<typename _Dur2,
+   typename = _Require<is_convertible<_Dur2, _Dur>>>
+   constexpr time_point(const time_point<clock, _Dur2>& __t)
+   : __d(__t.time_since_epoch())
+   { }
+
+
+ constexpr duration
+ time_since_epoch() const
+ { return __d; }
+
+
+ constexpr time_point&
+ operator++()
+ {
+   ++__d;
+   return *this;
+ }
+
+ constexpr time_point
+ operator++(int)
+ { return time_point{__d++}; }
+
+ constexpr time_point&
+ operator--()
+ {
+   --__d;
+   return *this;
+ }
+
+ constexpr time_point
+ operator--(int)
+ { return time_point{__d--}; }
+
+
+
+ constexpr time_point&
+ operator+=(const duration& __dur)
+ {
+   __d += __dur;
+   return *this;
+ }
+
+ constexpr time_point&
+ operator-=(const duration& __dur)
+ {
+   __d -= __dur;
+   return *this;
+ }
+
+
+ static constexpr time_point
+ min() noexcept
+ { return time_point(duration::min()); }
+
+ static constexpr time_point
+ max() noexcept
+ { return time_point(duration::max()); }
+
+      private:
+ duration __d;
+      };
+# 1020 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _ToDur, typename _Clock, typename _Dur>
+      [[__nodiscard__]] constexpr
+      __enable_if_t<__is_duration<_ToDur>::value, time_point<_Clock, _ToDur>>
+      time_point_cast(const time_point<_Clock, _Dur>& __t)
+      {
+ typedef time_point<_Clock, _ToDur> __time_point;
+ return __time_point(duration_cast<_ToDur>(__t.time_since_epoch()));
+      }
+# 1042 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _ToDur, typename _Clock, typename _Dur>
+      [[nodiscard]] constexpr
+      enable_if_t<__is_duration_v<_ToDur>, time_point<_Clock, _ToDur>>
+      floor(const time_point<_Clock, _Dur>& __tp)
+      {
+ return time_point<_Clock, _ToDur>{
+     chrono::floor<_ToDur>(__tp.time_since_epoch())};
+      }
+# 1063 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _ToDur, typename _Clock, typename _Dur>
+      [[nodiscard]] constexpr
+      enable_if_t<__is_duration_v<_ToDur>, time_point<_Clock, _ToDur>>
+      ceil(const time_point<_Clock, _Dur>& __tp)
+      {
+ return time_point<_Clock, _ToDur>{
+     chrono::ceil<_ToDur>(__tp.time_since_epoch())};
+      }
+# 1085 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _ToDur, typename _Clock, typename _Dur>
+      [[nodiscard]] constexpr
+      enable_if_t<__is_duration_v<_ToDur>
+      && !treat_as_floating_point_v<typename _ToDur::rep>,
+    time_point<_Clock, _ToDur>>
+      round(const time_point<_Clock, _Dur>& __tp)
+      {
+ return time_point<_Clock, _ToDur>{
+     chrono::round<_ToDur>(__tp.time_since_epoch())};
+      }
+
+
+
+
+
+
+    template<typename _Clock, typename _Dur1,
+      typename _Rep2, typename _Period2>
+      constexpr time_point<_Clock,
+ typename common_type<_Dur1, duration<_Rep2, _Period2>>::type>
+      operator+(const time_point<_Clock, _Dur1>& __lhs,
+  const duration<_Rep2, _Period2>& __rhs)
+      {
+ typedef duration<_Rep2, _Period2> __dur2;
+ typedef typename common_type<_Dur1,__dur2>::type __ct;
+ typedef time_point<_Clock, __ct> __time_point;
+ return __time_point(__lhs.time_since_epoch() + __rhs);
+      }
+
+
+    template<typename _Rep1, typename _Period1,
+      typename _Clock, typename _Dur2>
+      constexpr time_point<_Clock,
+ typename common_type<duration<_Rep1, _Period1>, _Dur2>::type>
+      operator+(const duration<_Rep1, _Period1>& __lhs,
+  const time_point<_Clock, _Dur2>& __rhs)
+      {
+ typedef duration<_Rep1, _Period1> __dur1;
+ typedef typename common_type<__dur1,_Dur2>::type __ct;
+ typedef time_point<_Clock, __ct> __time_point;
+ return __time_point(__rhs.time_since_epoch() + __lhs);
+      }
+
+
+    template<typename _Clock, typename _Dur1,
+      typename _Rep2, typename _Period2>
+      constexpr time_point<_Clock,
+ typename common_type<_Dur1, duration<_Rep2, _Period2>>::type>
+      operator-(const time_point<_Clock, _Dur1>& __lhs,
+  const duration<_Rep2, _Period2>& __rhs)
+      {
+ typedef duration<_Rep2, _Period2> __dur2;
+ typedef typename common_type<_Dur1,__dur2>::type __ct;
+ typedef time_point<_Clock, __ct> __time_point;
+ return __time_point(__lhs.time_since_epoch() -__rhs);
+      }
+
+
+    template<typename _Clock, typename _Dur1, typename _Dur2>
+      constexpr typename common_type<_Dur1, _Dur2>::type
+      operator-(const time_point<_Clock, _Dur1>& __lhs,
+  const time_point<_Clock, _Dur2>& __rhs)
+      { return __lhs.time_since_epoch() - __rhs.time_since_epoch(); }
+
+
+
+
+
+
+
+    template<typename _Clock, typename _Dur1, typename _Dur2>
+      constexpr bool
+      operator==(const time_point<_Clock, _Dur1>& __lhs,
+   const time_point<_Clock, _Dur2>& __rhs)
+      { return __lhs.time_since_epoch() == __rhs.time_since_epoch(); }
+
+
+    template<typename _Clock, typename _Dur1,
+      three_way_comparable_with<_Dur1> _Dur2>
+      constexpr auto
+      operator<=>(const time_point<_Clock, _Dur1>& __lhs,
+    const time_point<_Clock, _Dur2>& __rhs)
+      { return __lhs.time_since_epoch() <=> __rhs.time_since_epoch(); }
+# 1176 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    template<typename _Clock, typename _Dur1, typename _Dur2>
+      constexpr bool
+      operator<(const time_point<_Clock, _Dur1>& __lhs,
+  const time_point<_Clock, _Dur2>& __rhs)
+      { return __lhs.time_since_epoch() < __rhs.time_since_epoch(); }
+
+    template<typename _Clock, typename _Dur1, typename _Dur2>
+      constexpr bool
+      operator<=(const time_point<_Clock, _Dur1>& __lhs,
+   const time_point<_Clock, _Dur2>& __rhs)
+      { return !(__rhs < __lhs); }
+
+    template<typename _Clock, typename _Dur1, typename _Dur2>
+      constexpr bool
+      operator>(const time_point<_Clock, _Dur1>& __lhs,
+  const time_point<_Clock, _Dur2>& __rhs)
+      { return __rhs < __lhs; }
+
+    template<typename _Clock, typename _Dur1, typename _Dur2>
+      constexpr bool
+      operator>=(const time_point<_Clock, _Dur1>& __lhs,
+   const time_point<_Clock, _Dur2>& __rhs)
+      { return !(__lhs < __rhs); }
+# 1222 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+inline namespace _V2 {
+
+
+
+
+
+
+
+    struct system_clock
+    {
+      typedef chrono::nanoseconds duration;
+      typedef duration::rep rep;
+      typedef duration::period period;
+      typedef chrono::time_point<system_clock, duration> time_point;
+
+      static_assert(system_clock::duration::min()
+      < system_clock::duration::zero(),
+      "a clock's minimum duration cannot be less than its epoch");
+
+      static constexpr bool is_steady = false;
+
+      static time_point
+      now() noexcept;
+
+
+      [[__gnu__::__always_inline__]]
+      static std::time_t
+      to_time_t(const time_point& __t) noexcept
+      {
+ return std::time_t(duration_cast<chrono::seconds>
+      (__t.time_since_epoch()).count());
+      }
+
+      [[__gnu__::__always_inline__]]
+      static time_point
+      from_time_t(std::time_t __t) noexcept
+      {
+ typedef chrono::time_point<system_clock, seconds> __from;
+ return time_point_cast<system_clock::duration>
+        (__from(chrono::seconds(__t)));
+      }
+    };
+# 1272 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    struct steady_clock
+    {
+      typedef chrono::nanoseconds duration;
+      typedef duration::rep rep;
+      typedef duration::period period;
+      typedef chrono::time_point<steady_clock, duration> time_point;
+
+      static constexpr bool is_steady = true;
+
+      static time_point
+      now() noexcept;
+    };
+# 1294 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+    using high_resolution_clock = system_clock;
+
+}
+
+
+
+
+    template<typename _Duration>
+      using sys_time = time_point<system_clock, _Duration>;
+    using sys_seconds = sys_time<seconds>;
+    using sys_days = sys_time<days>;
+
+    using file_clock = ::std::filesystem::__file_clock;
+
+    template<typename _Duration>
+      using file_time = time_point<file_clock, _Duration>;
+
+    template<> struct is_clock<system_clock> : true_type { };
+    template<> struct is_clock<steady_clock> : true_type { };
+    template<> struct is_clock<file_clock> : true_type { };
+
+    template<> inline constexpr bool is_clock_v<system_clock> = true;
+    template<> inline constexpr bool is_clock_v<steady_clock> = true;
+    template<> inline constexpr bool is_clock_v<file_clock> = true;
+# 1329 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+  }
+
+
+  inline namespace literals
+  {
+# 1358 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono.h" 3
+  inline namespace chrono_literals
+  {
+
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wliteral-suffix"
+
+    template<typename _Dur, char... _Digits>
+      constexpr _Dur __check_overflow()
+      {
+ using _Val = __parse_int::_Parse_int<_Digits...>;
+ constexpr typename _Dur::rep __repval = _Val::value;
+ static_assert(__repval >= 0 && __repval == _Val::value,
+        "literal value cannot be represented by duration type");
+ return _Dur(__repval);
+      }
+
+
+
+    constexpr chrono::duration<long double, ratio<3600,1>>
+    operator""h(long double __hours)
+    { return chrono::duration<long double, ratio<3600,1>>{__hours}; }
+
+
+    template <char... _Digits>
+      constexpr chrono::hours
+      operator""h()
+      { return __check_overflow<chrono::hours, _Digits...>(); }
+
+
+    constexpr chrono::duration<long double, ratio<60,1>>
+    operator""min(long double __mins)
+    { return chrono::duration<long double, ratio<60,1>>{__mins}; }
+
+
+    template <char... _Digits>
+      constexpr chrono::minutes
+      operator""min()
+      { return __check_overflow<chrono::minutes, _Digits...>(); }
+
+
+    constexpr chrono::duration<long double>
+    operator""s(long double __secs)
+    { return chrono::duration<long double>{__secs}; }
+
+
+    template <char... _Digits>
+      constexpr chrono::seconds
+      operator""s()
+      { return __check_overflow<chrono::seconds, _Digits...>(); }
+
+
+    constexpr chrono::duration<long double, milli>
+    operator""ms(long double __msecs)
+    { return chrono::duration<long double, milli>{__msecs}; }
+
+
+    template <char... _Digits>
+      constexpr chrono::milliseconds
+      operator""ms()
+      { return __check_overflow<chrono::milliseconds, _Digits...>(); }
+
+
+    constexpr chrono::duration<long double, micro>
+    operator""us(long double __usecs)
+    { return chrono::duration<long double, micro>{__usecs}; }
+
+
+    template <char... _Digits>
+      constexpr chrono::microseconds
+      operator""us()
+      { return __check_overflow<chrono::microseconds, _Digits...>(); }
+
+
+    constexpr chrono::duration<long double, nano>
+    operator""ns(long double __nsecs)
+    { return chrono::duration<long double, nano>{__nsecs}; }
+
+
+    template <char... _Digits>
+      constexpr chrono::nanoseconds
+      operator""ns()
+      { return __check_overflow<chrono::nanoseconds, _Digits...>(); }
+
+#pragma GCC diagnostic pop
+
+  }
+  }
+
+  namespace chrono
+  {
+    using namespace literals::chrono_literals;
+  }
+
+
+
+  namespace filesystem
+  {
+    struct __file_clock
+    {
+      using duration = chrono::nanoseconds;
+      using rep = duration::rep;
+      using period = duration::period;
+      using time_point = chrono::time_point<__file_clock>;
+      static constexpr bool is_steady = false;
+
+      static time_point
+      now() noexcept
+      { return _S_from_sys(chrono::system_clock::now()); }
+
+
+      template<typename _Dur>
+ static
+ chrono::file_time<common_type_t<_Dur, chrono::seconds>>
+ from_sys(const chrono::sys_time<_Dur>& __t) noexcept
+ { return _S_from_sys(__t); }
+
+
+      template<typename _Dur>
+ static
+ chrono::sys_time<common_type_t<_Dur, chrono::seconds>>
+ to_sys(const chrono::file_time<_Dur>& __t) noexcept
+ { return _S_to_sys(__t); }
+
+
+    private:
+      using __sys_clock = chrono::system_clock;
+
+
+
+
+      static constexpr chrono::seconds _S_epoch_diff{6437664000};
+
+    protected:
+
+      template<typename _Dur>
+ static
+ chrono::time_point<__file_clock, common_type_t<_Dur, chrono::seconds>>
+ _S_from_sys(const chrono::time_point<__sys_clock, _Dur>& __t) noexcept
+ {
+   using _CDur = common_type_t<_Dur, chrono::seconds>;
+   using __file_time = chrono::time_point<__file_clock, _CDur>;
+   return __file_time{__t.time_since_epoch()} - _S_epoch_diff;
+ }
+
+
+      template<typename _Dur>
+ static
+ chrono::time_point<__sys_clock, common_type_t<_Dur, chrono::seconds>>
+ _S_to_sys(const chrono::time_point<__file_clock, _Dur>& __t) noexcept
+ {
+   using _CDur = common_type_t<_Dur, chrono::seconds>;
+   using __sys_time = chrono::time_point<__sys_clock, _CDur>;
+   return __sys_time{__t.time_since_epoch()} + _S_epoch_diff;
+ }
+    };
+  }
+
+
+
+}
+# 46 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 2 3
+
+
+
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 1 3
+# 42 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/istream" 1 3
+# 43 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/ostream" 1 3
+# 44 "C:/msys64/mingw64/include/c++/15.2.0/ostream" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/format" 1 3
+# 41 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 42 "C:/msys64/mingw64/include/c++/15.2.0/format" 2 3
+
+
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/charconv" 1 3
+# 36 "C:/msys64/mingw64/include/c++/15.2.0/charconv" 3
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+# 55 "C:/msys64/mingw64/include/c++/15.2.0/charconv" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 56 "C:/msys64/mingw64/include/c++/15.2.0/charconv" 2 3
+
+namespace std
+{
+
+
+
+  struct to_chars_result
+  {
+    char* ptr;
+    errc ec;
+
+
+    friend bool
+    operator==(const to_chars_result&, const to_chars_result&) = default;
+
+
+
+
+  };
+
+
+  struct from_chars_result
+  {
+    const char* ptr;
+    errc ec;
+
+
+    friend bool
+    operator==(const from_chars_result&, const from_chars_result&) = default;
+
+
+
+
+  };
+
+namespace __detail
+{
+
+
+
+
+
+  template<typename _Tp>
+    struct __to_chars_unsigned_type : __make_unsigned_selector_base
+    {
+      using _UInts = _List<unsigned int, unsigned long, unsigned long long
+
+ , unsigned __int128
+
+ >;
+      using type = typename __select<sizeof(_Tp), _UInts>::__type;
+    };
+
+  template<typename _Tp>
+    using __unsigned_least_t = typename __to_chars_unsigned_type<_Tp>::type;
+
+
+
+  template<typename _Tp>
+    constexpr unsigned
+    __to_chars_len(_Tp __value, int __base ) noexcept;
+
+  template<typename _Tp>
+    constexpr unsigned
+    __to_chars_len_2(_Tp __value) noexcept
+    { return std::__bit_width(__value); }
+
+
+  template<typename _Tp>
+    constexpr to_chars_result
+    __to_chars(char* __first, char* __last, _Tp __val, int __base) noexcept
+    {
+      static_assert(__integer_to_chars_is_unsigned<_Tp>, "implementation bug");
+
+      to_chars_result __res;
+
+      const unsigned __len = __to_chars_len(__val, __base);
+
+      if (__builtin_expect(size_t(__last - __first) < __len, 0))
+ {
+   __res.ptr = __last;
+   __res.ec = errc::value_too_large;
+   return __res;
+ }
+
+      unsigned __pos = __len - 1;
+
+      constexpr char __digits[] = {
+ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+ 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+ 'u', 'v', 'w', 'x', 'y', 'z'
+      };
+
+      while (__val >= (unsigned)__base)
+ {
+   auto const __quo = __val / __base;
+   auto const __rem = __val % __base;
+   __first[__pos--] = __digits[__rem];
+   __val = __quo;
+ }
+      *__first = __digits[__val];
+
+      __res.ptr = __first + __len;
+      __res.ec = {};
+      return __res;
+    }
+
+  template<typename _Tp>
+    constexpr to_chars_result
+    __to_chars_16(char* __first, char* __last, _Tp __val) noexcept
+    {
+      static_assert(__integer_to_chars_is_unsigned<_Tp>, "implementation bug");
+
+      to_chars_result __res;
+
+      const unsigned __len = (__to_chars_len_2(__val) + 3) / 4;
+
+      if (__builtin_expect(size_t(__last - __first) < __len, 0))
+ {
+   __res.ptr = __last;
+   __res.ec = errc::value_too_large;
+   return __res;
+ }
+
+      constexpr char __digits[] = {
+ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+ 'a', 'b', 'c', 'd', 'e', 'f'
+      };
+      unsigned __pos = __len - 1;
+      while (__val >= 0x100)
+ {
+   auto __num = __val & 0xF;
+   __val >>= 4;
+   __first[__pos] = __digits[__num];
+   __num = __val & 0xF;
+   __val >>= 4;
+   __first[__pos - 1] = __digits[__num];
+   __pos -= 2;
+ }
+      if (__val >= 0x10)
+ {
+   const auto __num = __val & 0xF;
+   __val >>= 4;
+   __first[1] = __digits[__num];
+   __first[0] = __digits[__val];
+ }
+      else
+ __first[0] = __digits[__val];
+      __res.ptr = __first + __len;
+      __res.ec = {};
+      return __res;
+    }
+
+  template<typename _Tp>
+    constexpr to_chars_result
+    __to_chars_10(char* __first, char* __last, _Tp __val) noexcept
+    {
+      static_assert(__integer_to_chars_is_unsigned<_Tp>, "implementation bug");
+
+      to_chars_result __res;
+
+      const unsigned __len = __to_chars_len(__val, 10);
+
+      if (__builtin_expect(size_t(__last - __first) < __len, 0))
+ {
+   __res.ptr = __last;
+   __res.ec = errc::value_too_large;
+   return __res;
+ }
+
+      __detail::__to_chars_10_impl(__first, __len, __val);
+      __res.ptr = __first + __len;
+      __res.ec = {};
+      return __res;
+    }
+
+  template<typename _Tp>
+    constexpr to_chars_result
+    __to_chars_8(char* __first, char* __last, _Tp __val) noexcept
+    {
+      static_assert(__integer_to_chars_is_unsigned<_Tp>, "implementation bug");
+
+      to_chars_result __res;
+      unsigned __len = 0;
+
+      if constexpr (__gnu_cxx::__int_traits<_Tp>::__digits <= 16)
+ {
+   __len = __val > 077777u ? 6u
+     : __val > 07777u ? 5u
+     : __val > 0777u ? 4u
+     : __val > 077u ? 3u
+     : __val > 07u ? 2u
+     : 1u;
+ }
+      else
+ __len = (__to_chars_len_2(__val) + 2) / 3;
+
+      if (__builtin_expect(size_t(__last - __first) < __len, 0))
+ {
+   __res.ptr = __last;
+   __res.ec = errc::value_too_large;
+   return __res;
+ }
+
+      unsigned __pos = __len - 1;
+      while (__val >= 0100)
+ {
+   auto __num = __val & 7;
+   __val >>= 3;
+   __first[__pos] = '0' + __num;
+   __num = __val & 7;
+   __val >>= 3;
+   __first[__pos - 1] = '0' + __num;
+   __pos -= 2;
+ }
+      if (__val >= 010)
+ {
+   auto const __num = __val & 7;
+   __val >>= 3;
+   __first[1] = '0' + __num;
+   __first[0] = '0' + __val;
+ }
+      else
+ __first[0] = '0' + __val;
+      __res.ptr = __first + __len;
+      __res.ec = {};
+      return __res;
+    }
+
+  template<typename _Tp>
+    constexpr to_chars_result
+    __to_chars_2(char* __first, char* __last, _Tp __val) noexcept
+    {
+      static_assert(__integer_to_chars_is_unsigned<_Tp>, "implementation bug");
+
+      to_chars_result __res;
+
+      const unsigned __len = __to_chars_len_2(__val);
+
+      if (__builtin_expect(size_t(__last - __first) < __len, 0))
+ {
+   __res.ptr = __last;
+   __res.ec = errc::value_too_large;
+   return __res;
+ }
+
+      unsigned __pos = __len - 1;
+
+      while (__pos)
+ {
+   __first[__pos--] = '0' + (__val & 1);
+   __val >>= 1;
+ }
+
+
+
+      __first[0] = '1';
+
+      __res.ptr = __first + __len;
+      __res.ec = {};
+      return __res;
+    }
+
+}
+
+  template<typename _Tp>
+    constexpr to_chars_result
+    __to_chars_i(char* __first, char* __last, _Tp __value, int __base = 10)
+    {
+      do { if (std::__is_constant_evaluated() && !bool(2 <= __base && __base <= 36)) std::__glibcxx_assert_fail(); } while (false);
+
+      using _Up = __detail::__unsigned_least_t<_Tp>;
+      _Up __unsigned_val = __value;
+
+      if (__first >= __last) [[__unlikely__]]
+ return { __last, errc::value_too_large };
+
+      if (__value == 0)
+ {
+   *__first = '0';
+   return { __first + 1, errc{} };
+ }
+      else if constexpr (std::is_signed<_Tp>::value)
+ if (__value < 0)
+   {
+     *__first++ = '-';
+     __unsigned_val = _Up(~__value) + _Up(1);
+   }
+
+      switch (__base)
+      {
+      case 16:
+ return __detail::__to_chars_16(__first, __last, __unsigned_val);
+      case 10:
+ return __detail::__to_chars_10(__first, __last, __unsigned_val);
+      case 8:
+ return __detail::__to_chars_8(__first, __last, __unsigned_val);
+      case 2:
+ return __detail::__to_chars_2(__first, __last, __unsigned_val);
+      default:
+ return __detail::__to_chars(__first, __last, __unsigned_val, __base);
+      }
+    }
+
+
+
+
+
+constexpr inline to_chars_result to_chars(char* __first, char* __last, char __value, int __base = 10) { return std::__to_chars_i<char>(__first, __last, __value, __base); }
+constexpr inline to_chars_result to_chars(char* __first, char* __last, signed char __value, int __base = 10) { return std::__to_chars_i<signed char>(__first, __last, __value, __base); }
+constexpr inline to_chars_result to_chars(char* __first, char* __last, unsigned char __value, int __base = 10) { return std::__to_chars_i<unsigned char>(__first, __last, __value, __base); }
+constexpr inline to_chars_result to_chars(char* __first, char* __last, signed short __value, int __base = 10) { return std::__to_chars_i<signed short>(__first, __last, __value, __base); }
+constexpr inline to_chars_result to_chars(char* __first, char* __last, unsigned short __value, int __base = 10) { return std::__to_chars_i<unsigned short>(__first, __last, __value, __base); }
+constexpr inline to_chars_result to_chars(char* __first, char* __last, signed int __value, int __base = 10) { return std::__to_chars_i<signed int>(__first, __last, __value, __base); }
+constexpr inline to_chars_result to_chars(char* __first, char* __last, unsigned int __value, int __base = 10) { return std::__to_chars_i<unsigned int>(__first, __last, __value, __base); }
+constexpr inline to_chars_result to_chars(char* __first, char* __last, signed long __value, int __base = 10) { return std::__to_chars_i<signed long>(__first, __last, __value, __base); }
+constexpr inline to_chars_result to_chars(char* __first, char* __last, unsigned long __value, int __base = 10) { return std::__to_chars_i<unsigned long>(__first, __last, __value, __base); }
+constexpr inline to_chars_result to_chars(char* __first, char* __last, signed long long __value, int __base = 10) { return std::__to_chars_i<signed long long>(__first, __last, __value, __base); }
+constexpr inline to_chars_result to_chars(char* __first, char* __last, unsigned long long __value, int __base = 10) { return std::__to_chars_i<unsigned long long>(__first, __last, __value, __base); }
+
+constexpr inline to_chars_result to_chars(char* __first, char* __last, signed __int128 __value, int __base = 10) { return std::__to_chars_i<signed __int128>(__first, __last, __value, __base); }
+constexpr inline to_chars_result to_chars(char* __first, char* __last, unsigned __int128 __value, int __base = 10) { return std::__to_chars_i<unsigned __int128>(__first, __last, __value, __base); }
+# 396 "C:/msys64/mingw64/include/c++/15.2.0/charconv" 3
+  to_chars_result to_chars(char*, char*, bool, int = 10) = delete;
+
+namespace __detail
+{
+  template<typename _Tp>
+    constexpr bool
+    __raise_and_add(_Tp& __val, int __base, unsigned char __c)
+    {
+      if (__builtin_mul_overflow(__val, __base, &__val)
+   || __builtin_add_overflow(__val, __c, &__val))
+ return false;
+      return true;
+    }
+
+  template<bool _DecOnly>
+    struct __from_chars_alnum_to_val_table
+    {
+      struct type { unsigned char __data[1u << 8] = {}; };
+
+
+
+      static constexpr type
+      _S_make_table()
+      {
+ constexpr unsigned char __lower_letters[27] = "abcdefghijklmnopqrstuvwxyz";
+ constexpr unsigned char __upper_letters[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+ type __table;
+ for (auto& __entry : __table.__data)
+   __entry = 127;
+ for (int __i = 0; __i < 10; ++__i)
+   __table.__data['0' + __i] = __i;
+ for (int __i = 0; __i < 26; ++__i)
+   {
+     __table.__data[__lower_letters[__i]] = 10 + __i;
+     __table.__data[__upper_letters[__i]] = 10 + __i;
+   }
+ return __table;
+      }
+
+
+
+
+      static constexpr type value = (_DecOnly, _S_make_table());
+    };
+# 451 "C:/msys64/mingw64/include/c++/15.2.0/charconv" 3
+  template<bool _DecOnly = false>
+    constexpr unsigned char
+    __from_chars_alnum_to_val(unsigned char __c)
+    {
+      if constexpr (_DecOnly)
+ return static_cast<unsigned char>(__c - '0');
+      else
+ return __from_chars_alnum_to_val_table<_DecOnly>::value.__data[__c];
+    }
+
+
+
+  template<bool _DecOnly, typename _Tp>
+    constexpr bool
+    __from_chars_pow2_base(const char*& __first, const char* __last, _Tp& __val,
+      int __base)
+    {
+      static_assert(is_integral<_Tp>::value, "implementation bug");
+      static_assert(is_unsigned<_Tp>::value, "implementation bug");
+
+
+
+      const int __log2_base = __countr_zero(unsigned(__base & 0x3f));
+
+      const ptrdiff_t __len = __last - __first;
+      ptrdiff_t __i = 0;
+      while (__i < __len && __first[__i] == '0')
+ ++__i;
+      const ptrdiff_t __leading_zeroes = __i;
+      if (__i >= __len) [[__unlikely__]]
+ {
+   __first += __i;
+   return true;
+ }
+
+
+      unsigned char __leading_c = 0;
+      if (__base != 2)
+ {
+   __leading_c = __from_chars_alnum_to_val<_DecOnly>(__first[__i]);
+
+   if (__leading_c >= __base) [[__unlikely__]]
+     {
+       __first += __i;
+       return true;
+     }
+   __val = __leading_c;
+   ++__i;
+ }
+
+      for (; __i < __len; ++__i)
+ {
+   const unsigned char __c = __from_chars_alnum_to_val<_DecOnly>(__first[__i]);
+   if (__c >= __base)
+     break;
+   __val = (__val << __log2_base) | __c;
+ }
+      __first += __i;
+      auto __significant_bits = (__i - __leading_zeroes) * __log2_base;
+      if (__base != 2)
+
+
+ __significant_bits -= __log2_base - __bit_width(__leading_c);
+
+      return __significant_bits <= __gnu_cxx::__int_traits<_Tp>::__digits;
+    }
+
+
+
+  template<bool _DecOnly, typename _Tp>
+    constexpr bool
+    __from_chars_alnum(const char*& __first, const char* __last, _Tp& __val,
+         int __base)
+    {
+
+
+      const int __bits_per_digit = __bit_width(unsigned(__base & 0x3f));
+      int __unused_bits_lower_bound = __gnu_cxx::__int_traits<_Tp>::__digits;
+      for (; __first != __last; ++__first)
+ {
+   const unsigned char __c = __from_chars_alnum_to_val<_DecOnly>(*__first);
+   if (__c >= __base)
+     return true;
+
+   __unused_bits_lower_bound -= __bits_per_digit;
+   if (__unused_bits_lower_bound >= 0) [[__likely__]]
+
+     __val = __val * __base + __c;
+   else if (!__raise_and_add(__val, __base, __c)) [[__unlikely__]]
+     {
+       while (++__first != __last
+       && __from_chars_alnum_to_val<_DecOnly>(*__first) < __base)
+  ;
+       return false;
+     }
+ }
+      return true;
+    }
+
+}
+
+
+  template<typename _Tp,
+    enable_if_t<__or_<__is_standard_integer<_Tp>,
+        is_same<char, remove_cv_t<_Tp>>>::value, int> = 0>
+    constexpr from_chars_result
+    from_chars(const char* __first, const char* __last, _Tp& __value,
+        int __base = 10)
+    {
+      do { if (std::__is_constant_evaluated() && !bool(2 <= __base && __base <= 36)) std::__glibcxx_assert_fail(); } while (false);
+
+      from_chars_result __res{__first, {}};
+
+      int __sign = 1;
+      if constexpr (std::is_signed<_Tp>::value)
+ if (__first != __last && *__first == '-')
+   {
+     __sign = -1;
+     ++__first;
+   }
+
+      using _Up = __detail::__unsigned_least_t<_Tp>;
+      _Up __val = 0;
+
+      const auto __start = __first;
+      bool __valid;
+      if ((__base & (__base - 1)) == 0)
+ {
+   if (__base <= 8)
+     __valid = __detail::__from_chars_pow2_base<true>(__first, __last, __val, __base);
+   else
+     __valid = __detail::__from_chars_pow2_base<false>(__first, __last, __val, __base);
+ }
+      else if (__base <= 10)
+ __valid = __detail::__from_chars_alnum<true>(__first, __last, __val, __base);
+      else
+ __valid = __detail::__from_chars_alnum<false>(__first, __last, __val, __base);
+
+      if (__builtin_expect(__first == __start, 0))
+ __res.ec = errc::invalid_argument;
+      else
+ {
+   __res.ptr = __first;
+   if (!__valid)
+     __res.ec = errc::result_out_of_range;
+   else
+     {
+       if constexpr (std::is_signed<_Tp>::value)
+  {
+    _Tp __tmp;
+    if (__builtin_mul_overflow(__val, __sign, &__tmp))
+      __res.ec = errc::result_out_of_range;
+    else
+      __value = __tmp;
+  }
+       else
+  {
+    if constexpr (__gnu_cxx::__int_traits<_Up>::__max
+        > __gnu_cxx::__int_traits<_Tp>::__max)
+      {
+        if (__val > __gnu_cxx::__int_traits<_Tp>::__max)
+   __res.ec = errc::result_out_of_range;
+        else
+   __value = __val;
+      }
+    else
+      __value = __val;
+  }
+     }
+ }
+      return __res;
+    }
+
+
+  enum class chars_format
+  {
+    scientific = 1, fixed = 2, hex = 4, general = fixed | scientific
+  };
+
+  [[nodiscard]]
+  constexpr chars_format
+  operator|(chars_format __lhs, chars_format __rhs) noexcept
+  { return (chars_format)((unsigned)__lhs | (unsigned)__rhs); }
+
+  [[nodiscard]]
+  constexpr chars_format
+  operator&(chars_format __lhs, chars_format __rhs) noexcept
+  { return (chars_format)((unsigned)__lhs & (unsigned)__rhs); }
+
+  [[nodiscard]]
+  constexpr chars_format
+  operator^(chars_format __lhs, chars_format __rhs) noexcept
+  { return (chars_format)((unsigned)__lhs ^ (unsigned)__rhs); }
+
+  [[nodiscard]]
+  constexpr chars_format
+  operator~(chars_format __fmt) noexcept
+  { return (chars_format)~(unsigned)__fmt; }
+
+  constexpr chars_format&
+  operator|=(chars_format& __lhs, chars_format __rhs) noexcept
+  { return __lhs = __lhs | __rhs; }
+
+  constexpr chars_format&
+  operator&=(chars_format& __lhs, chars_format __rhs) noexcept
+  { return __lhs = __lhs & __rhs; }
+
+  constexpr chars_format&
+  operator^=(chars_format& __lhs, chars_format __rhs) noexcept
+  { return __lhs = __lhs ^ __rhs; }
+
+
+  from_chars_result
+  from_chars(const char* __first, const char* __last, float& __value,
+      chars_format __fmt = chars_format::general) noexcept;
+
+  from_chars_result
+  from_chars(const char* __first, const char* __last, double& __value,
+      chars_format __fmt = chars_format::general) noexcept;
+
+  from_chars_result
+  from_chars(const char* __first, const char* __last, long double& __value,
+      chars_format __fmt = chars_format::general) noexcept;
+
+
+
+  from_chars_result
+  __from_chars_float16_t(const char* __first, const char* __last,
+    float& __value,
+    chars_format __fmt = chars_format::general) noexcept;
+  from_chars_result
+  __from_chars_bfloat16_t(const char* __first, const char* __last,
+     float& __value,
+     chars_format __fmt = chars_format::general) noexcept;
+
+
+
+  inline from_chars_result
+  from_chars(const char* __first, const char* __last, _Float16& __value,
+      chars_format __fmt = chars_format::general) noexcept
+  {
+    float __val;
+    from_chars_result __res
+      = __from_chars_float16_t(__first, __last, __val, __fmt);
+    if (__res.ec == errc{})
+      __value = _Float16(__val);
+    return __res;
+  }
+
+
+
+  inline from_chars_result
+  from_chars(const char* __first, const char* __last, _Float32& __value,
+      chars_format __fmt = chars_format::general) noexcept
+  {
+    float __val;
+    from_chars_result __res = from_chars(__first, __last, __val, __fmt);
+    if (__res.ec == errc{})
+      __value = _Float32(__val);
+    return __res;
+  }
+
+
+
+  inline from_chars_result
+  from_chars(const char* __first, const char* __last, _Float64& __value,
+      chars_format __fmt = chars_format::general) noexcept
+  {
+    double __val;
+    from_chars_result __res = from_chars(__first, __last, __val, __fmt);
+    if (__res.ec == errc{})
+      __value = _Float64(__val);
+    return __res;
+  }
+# 763 "C:/msys64/mingw64/include/c++/15.2.0/charconv" 3
+  inline from_chars_result
+  from_chars(const char* __first, const char* __last,
+      __gnu_cxx::__bfloat16_t & __value,
+      chars_format __fmt = chars_format::general) noexcept
+  {
+    float __val;
+    from_chars_result __res
+      = __from_chars_bfloat16_t(__first, __last, __val, __fmt);
+    if (__res.ec == errc{})
+      __value = __gnu_cxx::__bfloat16_t(__val);
+    return __res;
+  }
+
+
+
+
+
+
+
+  to_chars_result to_chars(char* __first, char* __last, float __value) noexcept;
+  to_chars_result to_chars(char* __first, char* __last, float __value,
+      chars_format __fmt) noexcept;
+  to_chars_result to_chars(char* __first, char* __last, float __value,
+      chars_format __fmt, int __precision) noexcept;
+
+
+  to_chars_result to_chars(char* __first, char* __last, double __value) noexcept;
+  to_chars_result to_chars(char* __first, char* __last, double __value,
+      chars_format __fmt) noexcept;
+  to_chars_result to_chars(char* __first, char* __last, double __value,
+      chars_format __fmt, int __precision) noexcept;
+
+
+  to_chars_result to_chars(char* __first, char* __last, long double __value)
+    noexcept;
+  to_chars_result to_chars(char* __first, char* __last, long double __value,
+      chars_format __fmt) noexcept;
+  to_chars_result to_chars(char* __first, char* __last, long double __value,
+      chars_format __fmt, int __precision) noexcept;
+
+
+
+  to_chars_result __to_chars_float16_t(char* __first, char* __last,
+           float __value,
+           chars_format __fmt) noexcept;
+  to_chars_result __to_chars_bfloat16_t(char* __first, char* __last,
+     float __value,
+     chars_format __fmt) noexcept;
+
+
+  inline to_chars_result
+  to_chars(char* __first, char* __last, _Float16 __value) noexcept
+  {
+    return __to_chars_float16_t(__first, __last, float(__value),
+    chars_format{});
+  }
+  inline to_chars_result
+  to_chars(char* __first, char* __last, _Float16 __value,
+    chars_format __fmt) noexcept
+  { return __to_chars_float16_t(__first, __last, float(__value), __fmt); }
+  inline to_chars_result
+  to_chars(char* __first, char* __last, _Float16 __value,
+    chars_format __fmt, int __precision) noexcept
+  { return to_chars(__first, __last, float(__value), __fmt, __precision); }
+
+
+
+  inline to_chars_result
+  to_chars(char* __first, char* __last, _Float32 __value) noexcept
+  { return to_chars(__first, __last, float(__value)); }
+  inline to_chars_result
+  to_chars(char* __first, char* __last, _Float32 __value,
+    chars_format __fmt) noexcept
+  { return to_chars(__first, __last, float(__value), __fmt); }
+  inline to_chars_result
+  to_chars(char* __first, char* __last, _Float32 __value,
+    chars_format __fmt, int __precision) noexcept
+  { return to_chars(__first, __last, float(__value), __fmt, __precision); }
+
+
+
+  inline to_chars_result
+  to_chars(char* __first, char* __last, _Float64 __value) noexcept
+  { return to_chars(__first, __last, double(__value)); }
+  inline to_chars_result
+  to_chars(char* __first, char* __last, _Float64 __value,
+    chars_format __fmt) noexcept
+  { return to_chars(__first, __last, double(__value), __fmt); }
+  inline to_chars_result
+  to_chars(char* __first, char* __last, _Float64 __value,
+    chars_format __fmt, int __precision) noexcept
+  { return to_chars(__first, __last, double(__value), __fmt, __precision); }
+# 919 "C:/msys64/mingw64/include/c++/15.2.0/charconv" 3
+  inline to_chars_result
+  to_chars(char* __first, char* __last,
+    __gnu_cxx::__bfloat16_t __value) noexcept
+  {
+    return __to_chars_bfloat16_t(__first, __last, float(__value),
+     chars_format{});
+  }
+  inline to_chars_result
+  to_chars(char* __first, char* __last, __gnu_cxx::__bfloat16_t __value,
+    chars_format __fmt) noexcept
+  { return __to_chars_bfloat16_t(__first, __last, float(__value), __fmt); }
+  inline to_chars_result
+  to_chars(char* __first, char* __last, __gnu_cxx::__bfloat16_t __value,
+    chars_format __fmt, int __precision) noexcept
+  { return to_chars(__first, __last, float(__value), __fmt, __precision); }
+
+
+
+
+}
+
+#pragma GCC diagnostic pop
+# 47 "C:/msys64/mingw64/include/c++/15.2.0/format" 2 3
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/locale" 1 3
+# 45 "C:/msys64/mingw64/include/c++/15.2.0/locale" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 1 3
+# 43 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+namespace std
+{
+
+# 54 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+  class time_base
+  {
+  public:
+    enum dateorder { no_order, dmy, mdy, ymd, ydm };
+  };
+
+  template<typename _CharT>
+    struct __timepunct_cache : public locale::facet
+    {
+
+      static const _CharT* _S_timezones[14];
+
+      const _CharT* _M_date_format;
+      const _CharT* _M_date_era_format;
+      const _CharT* _M_time_format;
+      const _CharT* _M_time_era_format;
+      const _CharT* _M_date_time_format;
+      const _CharT* _M_date_time_era_format;
+      const _CharT* _M_am;
+      const _CharT* _M_pm;
+      const _CharT* _M_am_pm_format;
+
+
+      const _CharT* _M_day1;
+      const _CharT* _M_day2;
+      const _CharT* _M_day3;
+      const _CharT* _M_day4;
+      const _CharT* _M_day5;
+      const _CharT* _M_day6;
+      const _CharT* _M_day7;
+
+
+      const _CharT* _M_aday1;
+      const _CharT* _M_aday2;
+      const _CharT* _M_aday3;
+      const _CharT* _M_aday4;
+      const _CharT* _M_aday5;
+      const _CharT* _M_aday6;
+      const _CharT* _M_aday7;
+
+
+      const _CharT* _M_month01;
+      const _CharT* _M_month02;
+      const _CharT* _M_month03;
+      const _CharT* _M_month04;
+      const _CharT* _M_month05;
+      const _CharT* _M_month06;
+      const _CharT* _M_month07;
+      const _CharT* _M_month08;
+      const _CharT* _M_month09;
+      const _CharT* _M_month10;
+      const _CharT* _M_month11;
+      const _CharT* _M_month12;
+
+
+      const _CharT* _M_amonth01;
+      const _CharT* _M_amonth02;
+      const _CharT* _M_amonth03;
+      const _CharT* _M_amonth04;
+      const _CharT* _M_amonth05;
+      const _CharT* _M_amonth06;
+      const _CharT* _M_amonth07;
+      const _CharT* _M_amonth08;
+      const _CharT* _M_amonth09;
+      const _CharT* _M_amonth10;
+      const _CharT* _M_amonth11;
+      const _CharT* _M_amonth12;
+
+      bool _M_allocated;
+
+      __timepunct_cache(size_t __refs = 0) : facet(__refs),
+      _M_date_format(0), _M_date_era_format(0), _M_time_format(0),
+      _M_time_era_format(0), _M_date_time_format(0),
+      _M_date_time_era_format(0), _M_am(0), _M_pm(0),
+      _M_am_pm_format(0), _M_day1(0), _M_day2(0), _M_day3(0),
+      _M_day4(0), _M_day5(0), _M_day6(0), _M_day7(0),
+      _M_aday1(0), _M_aday2(0), _M_aday3(0), _M_aday4(0),
+      _M_aday5(0), _M_aday6(0), _M_aday7(0), _M_month01(0),
+      _M_month02(0), _M_month03(0), _M_month04(0), _M_month05(0),
+      _M_month06(0), _M_month07(0), _M_month08(0), _M_month09(0),
+      _M_month10(0), _M_month11(0), _M_month12(0), _M_amonth01(0),
+      _M_amonth02(0), _M_amonth03(0), _M_amonth04(0),
+      _M_amonth05(0), _M_amonth06(0), _M_amonth07(0),
+      _M_amonth08(0), _M_amonth09(0), _M_amonth10(0),
+      _M_amonth11(0), _M_amonth12(0), _M_allocated(false)
+      { }
+
+      ~__timepunct_cache();
+
+    private:
+      __timepunct_cache&
+      operator=(const __timepunct_cache&);
+
+      explicit
+      __timepunct_cache(const __timepunct_cache&);
+    };
+
+  template<typename _CharT>
+    __timepunct_cache<_CharT>::~__timepunct_cache()
+    {
+      if (_M_allocated)
+ {
+
+ }
+    }
+
+
+  template<>
+    const char*
+    __timepunct_cache<char>::_S_timezones[14];
+
+
+  template<>
+    const wchar_t*
+    __timepunct_cache<wchar_t>::_S_timezones[14];
+
+
+
+  template<typename _CharT>
+    const _CharT* __timepunct_cache<_CharT>::_S_timezones[14];
+
+  template<typename _CharT>
+    class __timepunct : public locale::facet
+    {
+    public:
+
+      typedef _CharT __char_type;
+      typedef __timepunct_cache<_CharT> __cache_type;
+
+    protected:
+      __cache_type* _M_data;
+      __c_locale _M_c_locale_timepunct;
+      const char* _M_name_timepunct;
+
+    public:
+
+      static locale::id id;
+
+      explicit
+      __timepunct(size_t __refs = 0);
+
+      explicit
+      __timepunct(__cache_type* __cache, size_t __refs = 0);
+# 208 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      explicit
+      __timepunct(__c_locale __cloc, const char* __s, size_t __refs = 0);
+
+
+
+      void
+      _M_put(_CharT* __s, size_t __maxlen, const _CharT* __format,
+      const tm* __tm) const throw ();
+
+      void
+      _M_date_formats(const _CharT** __date) const
+      {
+
+ __date[0] = _M_data->_M_date_format;
+ __date[1] = _M_data->_M_date_era_format;
+      }
+
+      void
+      _M_time_formats(const _CharT** __time) const
+      {
+
+ __time[0] = _M_data->_M_time_format;
+ __time[1] = _M_data->_M_time_era_format;
+      }
+
+      void
+      _M_date_time_formats(const _CharT** __dt) const
+      {
+
+ __dt[0] = _M_data->_M_date_time_format;
+ __dt[1] = _M_data->_M_date_time_era_format;
+      }
+
+
+      void
+      _M_am_pm_format(const _CharT*) const
+      { }
+
+
+      void
+      _M_am_pm_format(const _CharT** __ampm_format) const
+      {
+ __ampm_format[0] = _M_data->_M_am_pm_format;
+      }
+
+      void
+      _M_am_pm(const _CharT** __ampm) const
+      {
+ __ampm[0] = _M_data->_M_am;
+ __ampm[1] = _M_data->_M_pm;
+      }
+
+      void
+      _M_days(const _CharT** __days) const
+      {
+ __days[0] = _M_data->_M_day1;
+ __days[1] = _M_data->_M_day2;
+ __days[2] = _M_data->_M_day3;
+ __days[3] = _M_data->_M_day4;
+ __days[4] = _M_data->_M_day5;
+ __days[5] = _M_data->_M_day6;
+ __days[6] = _M_data->_M_day7;
+      }
+
+      void
+      _M_days_abbreviated(const _CharT** __days) const
+      {
+ __days[0] = _M_data->_M_aday1;
+ __days[1] = _M_data->_M_aday2;
+ __days[2] = _M_data->_M_aday3;
+ __days[3] = _M_data->_M_aday4;
+ __days[4] = _M_data->_M_aday5;
+ __days[5] = _M_data->_M_aday6;
+ __days[6] = _M_data->_M_aday7;
+      }
+
+      void
+      _M_months(const _CharT** __months) const
+      {
+ __months[0] = _M_data->_M_month01;
+ __months[1] = _M_data->_M_month02;
+ __months[2] = _M_data->_M_month03;
+ __months[3] = _M_data->_M_month04;
+ __months[4] = _M_data->_M_month05;
+ __months[5] = _M_data->_M_month06;
+ __months[6] = _M_data->_M_month07;
+ __months[7] = _M_data->_M_month08;
+ __months[8] = _M_data->_M_month09;
+ __months[9] = _M_data->_M_month10;
+ __months[10] = _M_data->_M_month11;
+ __months[11] = _M_data->_M_month12;
+      }
+
+      void
+      _M_months_abbreviated(const _CharT** __months) const
+      {
+ __months[0] = _M_data->_M_amonth01;
+ __months[1] = _M_data->_M_amonth02;
+ __months[2] = _M_data->_M_amonth03;
+ __months[3] = _M_data->_M_amonth04;
+ __months[4] = _M_data->_M_amonth05;
+ __months[5] = _M_data->_M_amonth06;
+ __months[6] = _M_data->_M_amonth07;
+ __months[7] = _M_data->_M_amonth08;
+ __months[8] = _M_data->_M_amonth09;
+ __months[9] = _M_data->_M_amonth10;
+ __months[10] = _M_data->_M_amonth11;
+ __months[11] = _M_data->_M_amonth12;
+      }
+
+    protected:
+      virtual
+      ~__timepunct();
+
+
+      void
+      _M_initialize_timepunct(__c_locale __cloc = 0);
+    };
+
+  template<typename _CharT>
+    locale::id __timepunct<_CharT>::id;
+
+
+  template<>
+    void
+    __timepunct<char>::_M_initialize_timepunct(__c_locale __cloc);
+
+  template<>
+    void
+    __timepunct<char>::_M_put(char*, size_t, const char*, const tm*) const throw ();
+
+
+  template<>
+    void
+    __timepunct<wchar_t>::_M_initialize_timepunct(__c_locale __cloc);
+
+  template<>
+    void
+    __timepunct<wchar_t>::_M_put(wchar_t*, size_t, const wchar_t*,
+     const tm*) const throw ();
+
+
+
+}
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/time_members.h" 1 3
+# 37 "C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/time_members.h" 3
+namespace std
+{
+
+
+  template<typename _CharT>
+    __timepunct<_CharT>::__timepunct(size_t __refs)
+    : facet(__refs), _M_data(0)
+    {
+      _M_name_timepunct = _S_get_c_name();
+      _M_initialize_timepunct();
+    }
+
+  template<typename _CharT>
+    __timepunct<_CharT>::__timepunct(__cache_type* __cache, size_t __refs)
+    : facet(__refs), _M_data(__cache)
+    {
+      _M_name_timepunct = _S_get_c_name();
+      _M_initialize_timepunct();
+    }
+
+  template<typename _CharT>
+    __timepunct<_CharT>::__timepunct(__c_locale __cloc, const char* __s,
+         size_t __refs)
+    : facet(__refs), _M_data(0)
+    {
+      if (__builtin_strcmp(__s, _S_get_c_name()) != 0)
+ {
+   const size_t __len = __builtin_strlen(__s) + 1;
+   char* __tmp = new char[__len];
+   __builtin_memcpy(__tmp, __s, __len);
+   _M_name_timepunct = __tmp;
+ }
+      else
+ _M_name_timepunct = _S_get_c_name();
+
+      try
+ { _M_initialize_timepunct(__cloc); }
+      catch(...)
+ {
+   if (_M_name_timepunct != _S_get_c_name())
+     delete [] _M_name_timepunct;
+   throw;
+ }
+    }
+
+  template<typename _CharT>
+    __timepunct<_CharT>::~__timepunct()
+    {
+      if (_M_name_timepunct != _S_get_c_name())
+ delete [] _M_name_timepunct;
+      delete _M_data;
+      _S_destroy_c_locale(_M_c_locale_timepunct);
+    }
+
+
+}
+# 355 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 2 3
+
+namespace std
+{
+
+
+  struct __time_get_state
+  {
+
+    void
+    _M_finalize_state(tm* __tm);
+
+    unsigned int _M_have_I : 1;
+    unsigned int _M_have_wday : 1;
+    unsigned int _M_have_yday : 1;
+    unsigned int _M_have_mon : 1;
+    unsigned int _M_have_mday : 1;
+    unsigned int _M_have_uweek : 1;
+    unsigned int _M_have_wweek : 1;
+    unsigned int _M_have_century : 1;
+    unsigned int _M_is_pm : 1;
+    unsigned int _M_want_century : 1;
+    unsigned int _M_want_xday : 1;
+    unsigned int _M_pad1 : 5;
+    unsigned int _M_week_no : 6;
+    unsigned int _M_pad2 : 10;
+    int _M_century;
+    int _M_pad3;
+  };
+
+namespace __cxx11 {
+# 399 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+  template<typename _CharT, typename _InIter>
+    class time_get : public locale::facet, public time_base
+    {
+    public:
+
+
+
+      typedef _CharT char_type;
+      typedef _InIter iter_type;
+
+
+
+      static locale::id id;
+# 420 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      explicit
+      time_get(size_t __refs = 0)
+      : facet (__refs) { }
+# 437 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      dateorder
+      date_order() const
+      { return this->do_date_order(); }
+# 461 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      iter_type
+      get_time(iter_type __beg, iter_type __end, ios_base& __io,
+        ios_base::iostate& __err, tm* __tm) const
+      { return this->do_get_time(__beg, __end, __io, __err, __tm); }
+# 486 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      iter_type
+      get_date(iter_type __beg, iter_type __end, ios_base& __io,
+        ios_base::iostate& __err, tm* __tm) const
+      { return this->do_get_date(__beg, __end, __io, __err, __tm); }
+# 514 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      iter_type
+      get_weekday(iter_type __beg, iter_type __end, ios_base& __io,
+    ios_base::iostate& __err, tm* __tm) const
+      { return this->do_get_weekday(__beg, __end, __io, __err, __tm); }
+# 543 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      iter_type
+      get_monthname(iter_type __beg, iter_type __end, ios_base& __io,
+      ios_base::iostate& __err, tm* __tm) const
+      { return this->do_get_monthname(__beg, __end, __io, __err, __tm); }
+# 569 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      iter_type
+      get_year(iter_type __beg, iter_type __end, ios_base& __io,
+        ios_base::iostate& __err, tm* __tm) const
+      { return this->do_get_year(__beg, __end, __io, __err, __tm); }
+# 590 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      inline
+      iter_type get(iter_type __s, iter_type __end, ios_base& __io,
+                    ios_base::iostate& __err, tm* __tm, char __format,
+                    char __modifier = 0) const
+      {
+        return this->do_get(__s, __end, __io, __err, __tm, __format,
+                            __modifier);
+      }
+# 617 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      iter_type get(iter_type __s, iter_type __end, ios_base& __io,
+                    ios_base::iostate& __err, tm* __tm, const char_type* __fmt,
+                    const char_type* __fmtend) const;
+
+
+    protected:
+
+      virtual
+      ~time_get() { }
+# 637 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual dateorder
+      do_date_order() const;
+# 655 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual iter_type
+      do_get_time(iter_type __beg, iter_type __end, ios_base& __io,
+    ios_base::iostate& __err, tm* __tm) const;
+# 674 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual iter_type
+      do_get_date(iter_type __beg, iter_type __end, ios_base& __io,
+    ios_base::iostate& __err, tm* __tm) const;
+# 693 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual iter_type
+      do_get_weekday(iter_type __beg, iter_type __end, ios_base&,
+       ios_base::iostate& __err, tm* __tm) const;
+# 712 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual iter_type
+      do_get_monthname(iter_type __beg, iter_type __end, ios_base&,
+         ios_base::iostate& __err, tm* __tm) const;
+# 731 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual iter_type
+      do_get_year(iter_type __beg, iter_type __end, ios_base& __io,
+    ios_base::iostate& __err, tm* __tm) const;
+# 754 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual
+
+      iter_type
+      do_get(iter_type __s, iter_type __end, ios_base& __f,
+             ios_base::iostate& __err, tm* __tm,
+             char __format, char __modifier) const;
+
+
+
+      iter_type
+      _M_extract_num(iter_type __beg, iter_type __end, int& __member,
+       int __min, int __max, size_t __len,
+       ios_base& __io, ios_base::iostate& __err) const;
+
+
+      iter_type
+      _M_extract_name(iter_type __beg, iter_type __end, int& __member,
+        const _CharT** __names, size_t __indexlen,
+        ios_base& __io, ios_base::iostate& __err) const;
+
+
+      iter_type
+      _M_extract_wday_or_month(iter_type __beg, iter_type __end, int& __member,
+          const _CharT** __names, size_t __indexlen,
+          ios_base& __io, ios_base::iostate& __err) const;
+
+
+      iter_type
+      _M_extract_via_format(iter_type __beg, iter_type __end, ios_base& __io,
+       ios_base::iostate& __err, tm* __tm,
+       const _CharT* __format) const;
+
+
+
+      iter_type
+      _M_extract_via_format(iter_type __beg, iter_type __end, ios_base& __io,
+       ios_base::iostate& __err, tm* __tm,
+       const _CharT* __format,
+       __time_get_state &__state) const;
+    };
+
+  template<typename _CharT, typename _InIter>
+    locale::id time_get<_CharT, _InIter>::id;
+
+
+  template<typename _CharT, typename _InIter>
+    class time_get_byname : public time_get<_CharT, _InIter>
+    {
+    public:
+
+      typedef _CharT char_type;
+      typedef _InIter iter_type;
+
+      explicit
+      time_get_byname(const char*, size_t __refs = 0)
+      : time_get<_CharT, _InIter>(__refs) { }
+
+
+      explicit
+      time_get_byname(const string& __s, size_t __refs = 0)
+      : time_get_byname(__s.c_str(), __refs) { }
+
+
+    protected:
+      virtual
+      ~time_get_byname() { }
+    };
+
+}
+# 836 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+  template<typename _CharT, typename _OutIter>
+    class time_put : public locale::facet
+    {
+    public:
+
+
+
+      typedef _CharT char_type;
+      typedef _OutIter iter_type;
+
+
+
+      static locale::id id;
+# 857 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      explicit
+      time_put(size_t __refs = 0)
+      : facet(__refs) { }
+# 876 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      iter_type
+      put(iter_type __s, ios_base& __io, char_type __fill, const tm* __tm,
+   const _CharT* __beg, const _CharT* __end) const;
+# 896 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      iter_type
+      put(iter_type __s, ios_base& __io, char_type __fill,
+   const tm* __tm, char __format, char __mod = 0) const
+      { return this->do_put(__s, __io, __fill, __tm, __format, __mod); }
+
+    protected:
+
+      virtual
+      ~time_put()
+      { }
+# 923 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual iter_type
+      do_put(iter_type __s, ios_base& __io, char_type __fill, const tm* __tm,
+      char __format, char __mod) const;
+    };
+
+  template<typename _CharT, typename _OutIter>
+    locale::id time_put<_CharT, _OutIter>::id;
+
+
+  template<typename _CharT, typename _OutIter>
+    class time_put_byname : public time_put<_CharT, _OutIter>
+    {
+    public:
+
+      typedef _CharT char_type;
+      typedef _OutIter iter_type;
+
+      explicit
+      time_put_byname(const char*, size_t __refs = 0)
+      : time_put<_CharT, _OutIter>(__refs)
+      { }
+
+
+      explicit
+      time_put_byname(const string& __s, size_t __refs = 0)
+      : time_put_byname(__s.c_str(), __refs) { }
+
+
+    protected:
+      virtual
+      ~time_put_byname() { }
+    };
+# 968 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+  class money_base
+  {
+  public:
+    enum part { none, space, symbol, sign, value };
+    struct pattern { char field[4]; };
+
+    static const pattern _S_default_pattern;
+
+    enum
+    {
+      _S_minus,
+      _S_zero,
+      _S_end = 11
+    };
+
+
+
+    static const char* _S_atoms;
+
+
+
+    __attribute__ ((__const__)) static pattern
+    _S_construct_pattern(char __precedes, char __space, char __posn) throw ();
+  };
+
+  template<typename _CharT, bool _Intl>
+    struct __moneypunct_cache : public locale::facet
+    {
+      const char* _M_grouping;
+      size_t _M_grouping_size;
+      bool _M_use_grouping;
+      _CharT _M_decimal_point;
+      _CharT _M_thousands_sep;
+      const _CharT* _M_curr_symbol;
+      size_t _M_curr_symbol_size;
+      const _CharT* _M_positive_sign;
+      size_t _M_positive_sign_size;
+      const _CharT* _M_negative_sign;
+      size_t _M_negative_sign_size;
+      int _M_frac_digits;
+      money_base::pattern _M_pos_format;
+      money_base::pattern _M_neg_format;
+
+
+
+
+      _CharT _M_atoms[money_base::_S_end];
+
+      bool _M_allocated;
+
+      __moneypunct_cache(size_t __refs = 0) : facet(__refs),
+      _M_grouping(0), _M_grouping_size(0), _M_use_grouping(false),
+      _M_decimal_point(_CharT()), _M_thousands_sep(_CharT()),
+      _M_curr_symbol(0), _M_curr_symbol_size(0),
+      _M_positive_sign(0), _M_positive_sign_size(0),
+      _M_negative_sign(0), _M_negative_sign_size(0),
+      _M_frac_digits(0),
+      _M_pos_format(money_base::pattern()),
+      _M_neg_format(money_base::pattern()), _M_allocated(false)
+      { }
+
+      ~__moneypunct_cache();
+
+      void
+      _M_cache(const locale& __loc);
+
+    private:
+      __moneypunct_cache&
+      operator=(const __moneypunct_cache&);
+
+      explicit
+      __moneypunct_cache(const __moneypunct_cache&);
+    };
+
+  template<typename _CharT, bool _Intl>
+    __moneypunct_cache<_CharT, _Intl>::~__moneypunct_cache()
+    {
+      if (_M_allocated)
+ {
+   delete [] _M_grouping;
+   delete [] _M_curr_symbol;
+   delete [] _M_positive_sign;
+   delete [] _M_negative_sign;
+ }
+    }
+
+namespace __cxx11 {
+# 1063 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+  template<typename _CharT, bool _Intl>
+    class moneypunct : public locale::facet, public money_base
+    {
+    public:
+
+
+
+      typedef _CharT char_type;
+      typedef basic_string<_CharT> string_type;
+
+      typedef __moneypunct_cache<_CharT, _Intl> __cache_type;
+
+    private:
+      __cache_type* _M_data;
+
+    public:
+
+
+      static const bool intl = _Intl;
+
+      static locale::id id;
+# 1092 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      explicit
+      moneypunct(size_t __refs = 0)
+      : facet(__refs), _M_data(0)
+      { _M_initialize_moneypunct(); }
+# 1105 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      explicit
+      moneypunct(__cache_type* __cache, size_t __refs = 0)
+      : facet(__refs), _M_data(__cache)
+      { _M_initialize_moneypunct(); }
+# 1120 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      explicit
+      moneypunct(__c_locale __cloc, const char* __s, size_t __refs = 0)
+      : facet(__refs), _M_data(0)
+      { _M_initialize_moneypunct(__cloc, __s); }
+# 1134 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      char_type
+      decimal_point() const
+      { return this->do_decimal_point(); }
+# 1147 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      char_type
+      thousands_sep() const
+      { return this->do_thousands_sep(); }
+# 1177 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      string
+      grouping() const
+      { return this->do_grouping(); }
+# 1190 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      string_type
+      curr_symbol() const
+      { return this->do_curr_symbol(); }
+# 1207 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      string_type
+      positive_sign() const
+      { return this->do_positive_sign(); }
+# 1224 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      string_type
+      negative_sign() const
+      { return this->do_negative_sign(); }
+# 1240 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      int
+      frac_digits() const
+      { return this->do_frac_digits(); }
+# 1276 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      pattern
+      pos_format() const
+      { return this->do_pos_format(); }
+
+      pattern
+      neg_format() const
+      { return this->do_neg_format(); }
+
+
+    protected:
+
+      virtual
+      ~moneypunct();
+# 1298 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual char_type
+      do_decimal_point() const
+      { return _M_data->_M_decimal_point; }
+# 1310 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual char_type
+      do_thousands_sep() const
+      { return _M_data->_M_thousands_sep; }
+# 1323 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual string
+      do_grouping() const
+      { return _M_data->_M_grouping; }
+# 1336 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual string_type
+      do_curr_symbol() const
+      { return _M_data->_M_curr_symbol; }
+# 1349 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual string_type
+      do_positive_sign() const
+      { return _M_data->_M_positive_sign; }
+# 1362 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual string_type
+      do_negative_sign() const
+      { return _M_data->_M_negative_sign; }
+# 1376 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual int
+      do_frac_digits() const
+      { return _M_data->_M_frac_digits; }
+# 1390 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual pattern
+      do_pos_format() const
+      { return _M_data->_M_pos_format; }
+# 1404 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual pattern
+      do_neg_format() const
+      { return _M_data->_M_neg_format; }
+
+
+       void
+       _M_initialize_moneypunct(__c_locale __cloc = 0,
+    const char* __name = 0);
+    };
+
+  template<typename _CharT, bool _Intl>
+    locale::id moneypunct<_CharT, _Intl>::id;
+
+  template<typename _CharT, bool _Intl>
+    const bool moneypunct<_CharT, _Intl>::intl;
+
+  template<>
+    moneypunct<char, true>::~moneypunct();
+
+  template<>
+    moneypunct<char, false>::~moneypunct();
+
+  template<>
+    void
+    moneypunct<char, true>::_M_initialize_moneypunct(__c_locale, const char*);
+
+  template<>
+    void
+    moneypunct<char, false>::_M_initialize_moneypunct(__c_locale, const char*);
+
+
+  template<>
+    moneypunct<wchar_t, true>::~moneypunct();
+
+  template<>
+    moneypunct<wchar_t, false>::~moneypunct();
+
+  template<>
+    void
+    moneypunct<wchar_t, true>::_M_initialize_moneypunct(__c_locale,
+       const char*);
+
+  template<>
+    void
+    moneypunct<wchar_t, false>::_M_initialize_moneypunct(__c_locale,
+        const char*);
+
+
+
+  template<typename _CharT, bool _Intl>
+    class moneypunct_byname : public moneypunct<_CharT, _Intl>
+    {
+    public:
+      typedef _CharT char_type;
+      typedef basic_string<_CharT> string_type;
+
+      static const bool intl = _Intl;
+
+      explicit
+      moneypunct_byname(const char* __s, size_t __refs = 0)
+      : moneypunct<_CharT, _Intl>(__refs)
+      {
+ if (__builtin_strcmp(__s, "C") != 0
+     && __builtin_strcmp(__s, "POSIX") != 0)
+   {
+     __c_locale __tmp;
+     this->_S_create_c_locale(__tmp, __s);
+     this->_M_initialize_moneypunct(__tmp);
+     this->_S_destroy_c_locale(__tmp);
+   }
+      }
+
+
+      explicit
+      moneypunct_byname(const string& __s, size_t __refs = 0)
+      : moneypunct_byname(__s.c_str(), __refs) { }
+
+
+    protected:
+      virtual
+      ~moneypunct_byname() { }
+    };
+
+  template<typename _CharT, bool _Intl>
+    const bool moneypunct_byname<_CharT, _Intl>::intl;
+
+}
+
+namespace __cxx11 {
+# 1507 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+  template<typename _CharT, typename _InIter>
+    class money_get : public locale::facet
+    {
+    public:
+
+
+
+      typedef _CharT char_type;
+      typedef _InIter iter_type;
+      typedef basic_string<_CharT> string_type;
+
+
+
+      static locale::id id;
+# 1529 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      explicit
+      money_get(size_t __refs = 0) : facet(__refs) { }
+# 1559 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      iter_type
+      get(iter_type __s, iter_type __end, bool __intl, ios_base& __io,
+   ios_base::iostate& __err, long double& __units) const
+      { return this->do_get(__s, __end, __intl, __io, __err, __units); }
+# 1590 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      iter_type
+      get(iter_type __s, iter_type __end, bool __intl, ios_base& __io,
+   ios_base::iostate& __err, string_type& __digits) const
+      { return this->do_get(__s, __end, __intl, __io, __err, __digits); }
+
+    protected:
+
+      virtual
+      ~money_get() { }
+# 1614 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual iter_type
+      do_get(iter_type __s, iter_type __end, bool __intl, ios_base& __io,
+      ios_base::iostate& __err, long double& __units) const;
+# 1626 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual iter_type
+      do_get(iter_type __s, iter_type __end, bool __intl, ios_base& __io,
+      ios_base::iostate& __err, string_type& __digits) const;
+# 1646 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      template<bool _Intl>
+        iter_type
+        _M_extract(iter_type __s, iter_type __end, ios_base& __io,
+     ios_base::iostate& __err, string& __digits) const;
+    };
+
+  template<typename _CharT, typename _InIter>
+    locale::id money_get<_CharT, _InIter>::id;
+# 1668 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+  template<typename _CharT, typename _OutIter>
+    class money_put : public locale::facet
+    {
+    public:
+
+
+      typedef _CharT char_type;
+      typedef _OutIter iter_type;
+      typedef basic_string<_CharT> string_type;
+
+
+
+      static locale::id id;
+# 1689 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      explicit
+      money_put(size_t __refs = 0) : facet(__refs) { }
+# 1709 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      iter_type
+      put(iter_type __s, bool __intl, ios_base& __io,
+   char_type __fill, long double __units) const
+      { return this->do_put(__s, __intl, __io, __fill, __units); }
+# 1732 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      iter_type
+      put(iter_type __s, bool __intl, ios_base& __io,
+   char_type __fill, const string_type& __digits) const
+      { return this->do_put(__s, __intl, __io, __fill, __digits); }
+
+    protected:
+
+      virtual
+      ~money_put() { }
+# 1767 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual iter_type
+      do_put(iter_type __s, bool __intl, ios_base& __io, char_type __fill,
+      long double __units) const;
+# 1791 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual iter_type
+      do_put(iter_type __s, bool __intl, ios_base& __io, char_type __fill,
+      const string_type& __digits) const;
+# 1811 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      template<bool _Intl>
+        iter_type
+        _M_insert(iter_type __s, ios_base& __io, char_type __fill,
+    const string_type& __digits) const;
+    };
+
+  template<typename _CharT, typename _OutIter>
+    locale::id money_put<_CharT, _OutIter>::id;
+
+}
+
+
+
+
+
+  struct messages_base
+  {
+    typedef int catalog;
+  };
+
+namespace __cxx11 {
+# 1854 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+  template<typename _CharT>
+    class messages : public locale::facet, public messages_base
+    {
+    public:
+
+
+
+      typedef _CharT char_type;
+      typedef basic_string<_CharT> string_type;
+
+
+    protected:
+
+
+      __c_locale _M_c_locale_messages;
+      const char* _M_name_messages;
+
+    public:
+
+      static locale::id id;
+# 1882 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      explicit
+      messages(size_t __refs = 0);
+# 1896 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      explicit
+      messages(__c_locale __cloc, const char* __s, size_t __refs = 0);
+# 1909 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      catalog
+      open(const basic_string<char>& __s, const locale& __loc) const
+      { return this->do_open(__s, __loc); }
+# 1927 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      catalog
+      open(const basic_string<char>&, const locale&, const char*) const;
+# 1945 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      string_type
+      get(catalog __c, int __set, int __msgid, const string_type& __s) const
+      { return this->do_get(__c, __set, __msgid, __s); }
+# 1956 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      void
+      close(catalog __c) const
+      { return this->do_close(__c); }
+
+    protected:
+
+      virtual
+      ~messages();
+# 1976 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual catalog
+      do_open(const basic_string<char>&, const locale&) const;
+# 1995 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 3
+      virtual string_type
+      do_get(catalog, int, int, const string_type& __dfault) const;
+
+
+
+
+
+
+      virtual void
+      do_close(catalog) const;
+
+
+      char*
+      _M_convert_to_char(const string_type& __msg) const
+      {
+
+ return reinterpret_cast<char*>(const_cast<_CharT*>(__msg.c_str()));
+      }
+
+
+      string_type
+      _M_convert_from_char(char*) const
+      {
+
+ return string_type();
+      }
+     };
+
+  template<typename _CharT>
+    locale::id messages<_CharT>::id;
+
+
+  template<>
+    string
+    messages<char>::do_get(catalog, int, int, const string&) const;
+
+
+  template<>
+    wstring
+    messages<wchar_t>::do_get(catalog, int, int, const wstring&) const;
+
+
+
+   template<typename _CharT>
+    class messages_byname : public messages<_CharT>
+    {
+    public:
+      typedef _CharT char_type;
+      typedef basic_string<_CharT> string_type;
+
+      explicit
+      messages_byname(const char* __s, size_t __refs = 0);
+
+
+      explicit
+      messages_byname(const string& __s, size_t __refs = 0)
+      : messages_byname(__s.c_str(), __refs) { }
+
+
+    protected:
+      virtual
+      ~messages_byname()
+      { }
+    };
+
+}
+
+
+}
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/messages_members.h" 1 3
+# 36 "C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/messages_members.h" 3
+namespace std
+{
+
+
+
+  template<typename _CharT>
+     messages<_CharT>::messages(size_t __refs)
+     : facet(__refs)
+     { _M_c_locale_messages = _S_get_c_locale(); }
+
+  template<typename _CharT>
+     messages<_CharT>::messages(__c_locale, const char*, size_t __refs)
+     : facet(__refs)
+     { _M_c_locale_messages = _S_get_c_locale(); }
+
+  template<typename _CharT>
+    typename messages<_CharT>::catalog
+    messages<_CharT>::open(const basic_string<char>& __s, const locale& __loc,
+      const char*) const
+    { return this->do_open(__s, __loc); }
+
+
+  template<typename _CharT>
+    messages<_CharT>::~messages()
+    { _S_destroy_c_locale(_M_c_locale_messages); }
+
+  template<typename _CharT>
+    typename messages<_CharT>::catalog
+    messages<_CharT>::do_open(const basic_string<char>&, const locale&) const
+    { return 0; }
+
+  template<typename _CharT>
+    typename messages<_CharT>::string_type
+    messages<_CharT>::do_get(catalog, int, int,
+        const string_type& __dfault) const
+    { return __dfault; }
+
+  template<typename _CharT>
+    void
+    messages<_CharT>::do_close(catalog) const
+    { }
+
+
+   template<typename _CharT>
+     messages_byname<_CharT>::messages_byname(const char* __s, size_t __refs)
+     : messages<_CharT>(__refs)
+     {
+ if (__builtin_strcmp(__s, "C") != 0
+     && __builtin_strcmp(__s, "POSIX") != 0)
+   {
+     this->_S_destroy_c_locale(this->_M_c_locale_messages);
+     this->_S_create_c_locale(this->_M_c_locale_messages, __s);
+   }
+     }
+
+
+}
+# 2067 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 2 3
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/codecvt.h" 1 3
+# 46 "C:/msys64/mingw64/include/c++/15.2.0/bits/codecvt.h" 3
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wc++11-extensions"
+
+namespace std
+{
+
+
+
+  class codecvt_base
+  {
+  public:
+    enum result
+    {
+      ok,
+      partial,
+      error,
+      noconv
+    };
+  };
+# 75 "C:/msys64/mingw64/include/c++/15.2.0/bits/codecvt.h" 3
+  template<typename _InternT, typename _ExternT, typename _StateT>
+    class __codecvt_abstract_base
+    : public locale::facet, public codecvt_base
+    {
+    public:
+
+      typedef codecvt_base::result result;
+      typedef _InternT intern_type;
+      typedef _ExternT extern_type;
+      typedef _StateT state_type;
+# 123 "C:/msys64/mingw64/include/c++/15.2.0/bits/codecvt.h" 3
+      result
+      out(state_type& __state, const intern_type* __from,
+   const intern_type* __from_end, const intern_type*& __from_next,
+   extern_type* __to, extern_type* __to_end,
+   extern_type*& __to_next) const
+      {
+ return this->do_out(__state, __from, __from_end, __from_next,
+       __to, __to_end, __to_next);
+      }
+# 162 "C:/msys64/mingw64/include/c++/15.2.0/bits/codecvt.h" 3
+      result
+      unshift(state_type& __state, extern_type* __to, extern_type* __to_end,
+       extern_type*& __to_next) const
+      { return this->do_unshift(__state, __to,__to_end,__to_next); }
+# 203 "C:/msys64/mingw64/include/c++/15.2.0/bits/codecvt.h" 3
+      result
+      in(state_type& __state, const extern_type* __from,
+  const extern_type* __from_end, const extern_type*& __from_next,
+  intern_type* __to, intern_type* __to_end,
+  intern_type*& __to_next) const
+      {
+ return this->do_in(__state, __from, __from_end, __from_next,
+      __to, __to_end, __to_next);
+      }
+
+      int
+      encoding() const throw()
+      { return this->do_encoding(); }
+
+      bool
+      always_noconv() const throw()
+      { return this->do_always_noconv(); }
+
+      int
+      length(state_type& __state, const extern_type* __from,
+      const extern_type* __end, size_t __max) const
+      { return this->do_length(__state, __from, __end, __max); }
+
+      int
+      max_length() const throw()
+      { return this->do_max_length(); }
+
+    protected:
+      explicit
+      __codecvt_abstract_base(size_t __refs = 0) : locale::facet(__refs) { }
+
+      virtual
+      ~__codecvt_abstract_base() { }
+# 244 "C:/msys64/mingw64/include/c++/15.2.0/bits/codecvt.h" 3
+      virtual result
+      do_out(state_type& __state, const intern_type* __from,
+      const intern_type* __from_end, const intern_type*& __from_next,
+      extern_type* __to, extern_type* __to_end,
+      extern_type*& __to_next) const = 0;
+
+      virtual result
+      do_unshift(state_type& __state, extern_type* __to,
+   extern_type* __to_end, extern_type*& __to_next) const = 0;
+
+      virtual result
+      do_in(state_type& __state, const extern_type* __from,
+     const extern_type* __from_end, const extern_type*& __from_next,
+     intern_type* __to, intern_type* __to_end,
+     intern_type*& __to_next) const = 0;
+
+      virtual int
+      do_encoding() const throw() = 0;
+
+      virtual bool
+      do_always_noconv() const throw() = 0;
+
+      virtual int
+      do_length(state_type&, const extern_type* __from,
+  const extern_type* __end, size_t __max) const = 0;
+
+      virtual int
+      do_max_length() const throw() = 0;
+    };
+# 281 "C:/msys64/mingw64/include/c++/15.2.0/bits/codecvt.h" 3
+   template<typename _InternT, typename _ExternT, typename _StateT>
+    class codecvt
+    : public __codecvt_abstract_base<_InternT, _ExternT, _StateT>
+    {
+    public:
+
+      typedef codecvt_base::result result;
+      typedef _InternT intern_type;
+      typedef _ExternT extern_type;
+      typedef _StateT state_type;
+
+    protected:
+      __c_locale _M_c_locale_codecvt;
+
+    public:
+      static locale::id id;
+
+      explicit
+      codecvt(size_t __refs = 0)
+      : __codecvt_abstract_base<_InternT, _ExternT, _StateT> (__refs),
+ _M_c_locale_codecvt(0)
+      { }
+
+      explicit
+      codecvt(__c_locale __cloc, size_t __refs = 0);
+
+    protected:
+      virtual
+      ~codecvt() { }
+
+      virtual result
+      do_out(state_type& __state, const intern_type* __from,
+      const intern_type* __from_end, const intern_type*& __from_next,
+      extern_type* __to, extern_type* __to_end,
+      extern_type*& __to_next) const;
+
+      virtual result
+      do_unshift(state_type& __state, extern_type* __to,
+   extern_type* __to_end, extern_type*& __to_next) const;
+
+      virtual result
+      do_in(state_type& __state, const extern_type* __from,
+     const extern_type* __from_end, const extern_type*& __from_next,
+     intern_type* __to, intern_type* __to_end,
+     intern_type*& __to_next) const;
+
+      virtual int
+      do_encoding() const throw();
+
+      virtual bool
+      do_always_noconv() const throw();
+
+      virtual int
+      do_length(state_type&, const extern_type* __from,
+  const extern_type* __end, size_t __max) const;
+
+      virtual int
+      do_max_length() const throw();
+    };
+
+  template<typename _InternT, typename _ExternT, typename _StateT>
+    locale::id codecvt<_InternT, _ExternT, _StateT>::id;
+
+
+  template<>
+    class codecvt<char, char, mbstate_t>
+    : public __codecvt_abstract_base<char, char, mbstate_t>
+    {
+      friend class messages<char>;
+
+    public:
+
+      typedef char intern_type;
+      typedef char extern_type;
+      typedef mbstate_t state_type;
+
+    protected:
+      __c_locale _M_c_locale_codecvt;
+
+    public:
+      static locale::id id;
+
+      explicit
+      codecvt(size_t __refs = 0);
+
+      explicit
+      codecvt(__c_locale __cloc, size_t __refs = 0);
+
+    protected:
+      virtual
+      ~codecvt();
+
+      virtual result
+      do_out(state_type& __state, const intern_type* __from,
+      const intern_type* __from_end, const intern_type*& __from_next,
+      extern_type* __to, extern_type* __to_end,
+      extern_type*& __to_next) const;
+
+      virtual result
+      do_unshift(state_type& __state, extern_type* __to,
+   extern_type* __to_end, extern_type*& __to_next) const;
+
+      virtual result
+      do_in(state_type& __state, const extern_type* __from,
+     const extern_type* __from_end, const extern_type*& __from_next,
+     intern_type* __to, intern_type* __to_end,
+     intern_type*& __to_next) const;
+
+      virtual int
+      do_encoding() const throw();
+
+      virtual bool
+      do_always_noconv() const throw();
+
+      virtual int
+      do_length(state_type&, const extern_type* __from,
+  const extern_type* __end, size_t __max) const;
+
+      virtual int
+      do_max_length() const throw();
+  };
+
+
+
+
+
+
+  template<>
+    class codecvt<wchar_t, char, mbstate_t>
+    : public __codecvt_abstract_base<wchar_t, char, mbstate_t>
+    {
+      friend class messages<wchar_t>;
+
+    public:
+
+      typedef wchar_t intern_type;
+      typedef char extern_type;
+      typedef mbstate_t state_type;
+
+    protected:
+      __c_locale _M_c_locale_codecvt;
+
+    public:
+      static locale::id id;
+
+      explicit
+      codecvt(size_t __refs = 0);
+
+      explicit
+      codecvt(__c_locale __cloc, size_t __refs = 0);
+
+    protected:
+      virtual
+      ~codecvt();
+
+      virtual result
+      do_out(state_type& __state, const intern_type* __from,
+      const intern_type* __from_end, const intern_type*& __from_next,
+      extern_type* __to, extern_type* __to_end,
+      extern_type*& __to_next) const;
+
+      virtual result
+      do_unshift(state_type& __state,
+   extern_type* __to, extern_type* __to_end,
+   extern_type*& __to_next) const;
+
+      virtual result
+      do_in(state_type& __state,
+      const extern_type* __from, const extern_type* __from_end,
+      const extern_type*& __from_next,
+      intern_type* __to, intern_type* __to_end,
+      intern_type*& __to_next) const;
+
+      virtual
+      int do_encoding() const throw();
+
+      virtual
+      bool do_always_noconv() const throw();
+
+      virtual
+      int do_length(state_type&, const extern_type* __from,
+      const extern_type* __end, size_t __max) const;
+
+      virtual int
+      do_max_length() const throw();
+    };
+
+
+
+
+
+
+
+  template<>
+    class codecvt<char16_t, char, mbstate_t>
+    : public __codecvt_abstract_base<char16_t, char, mbstate_t>
+    {
+    public:
+
+      typedef char16_t intern_type;
+      typedef char extern_type;
+      typedef mbstate_t state_type;
+
+    public:
+      static locale::id id;
+
+      explicit
+      codecvt(size_t __refs = 0)
+      : __codecvt_abstract_base<char16_t, char, mbstate_t>(__refs) { }
+
+    protected:
+      virtual
+      ~codecvt();
+
+      virtual result
+      do_out(state_type& __state, const intern_type* __from,
+      const intern_type* __from_end, const intern_type*& __from_next,
+      extern_type* __to, extern_type* __to_end,
+      extern_type*& __to_next) const;
+
+      virtual result
+      do_unshift(state_type& __state,
+   extern_type* __to, extern_type* __to_end,
+   extern_type*& __to_next) const;
+
+      virtual result
+      do_in(state_type& __state,
+      const extern_type* __from, const extern_type* __from_end,
+      const extern_type*& __from_next,
+      intern_type* __to, intern_type* __to_end,
+      intern_type*& __to_next) const;
+
+      virtual
+      int do_encoding() const throw();
+
+      virtual
+      bool do_always_noconv() const throw();
+
+      virtual
+      int do_length(state_type&, const extern_type* __from,
+      const extern_type* __end, size_t __max) const;
+
+      virtual int
+      do_max_length() const throw();
+    };
+
+
+
+
+
+  template<>
+    class codecvt<char32_t, char, mbstate_t>
+    : public __codecvt_abstract_base<char32_t, char, mbstate_t>
+    {
+    public:
+
+      typedef char32_t intern_type;
+      typedef char extern_type;
+      typedef mbstate_t state_type;
+
+    public:
+      static locale::id id;
+
+      explicit
+      codecvt(size_t __refs = 0)
+      : __codecvt_abstract_base<char32_t, char, mbstate_t>(__refs) { }
+
+    protected:
+      virtual
+      ~codecvt();
+
+      virtual result
+      do_out(state_type& __state, const intern_type* __from,
+      const intern_type* __from_end, const intern_type*& __from_next,
+      extern_type* __to, extern_type* __to_end,
+      extern_type*& __to_next) const;
+
+      virtual result
+      do_unshift(state_type& __state,
+   extern_type* __to, extern_type* __to_end,
+   extern_type*& __to_next) const;
+
+      virtual result
+      do_in(state_type& __state,
+      const extern_type* __from, const extern_type* __from_end,
+      const extern_type*& __from_next,
+      intern_type* __to, intern_type* __to_end,
+      intern_type*& __to_next) const;
+
+      virtual
+      int do_encoding() const throw();
+
+      virtual
+      bool do_always_noconv() const throw();
+
+      virtual
+      int do_length(state_type&, const extern_type* __from,
+      const extern_type* __end, size_t __max) const;
+
+      virtual int
+      do_max_length() const throw();
+    };
+
+
+
+
+
+
+  template<>
+    class codecvt<char16_t, char8_t, mbstate_t>
+    : public __codecvt_abstract_base<char16_t, char8_t, mbstate_t>
+    {
+    public:
+
+      typedef char16_t intern_type;
+      typedef char8_t extern_type;
+      typedef mbstate_t state_type;
+
+    public:
+      static locale::id id;
+
+      explicit
+      codecvt(size_t __refs = 0)
+      : __codecvt_abstract_base<char16_t, char8_t, mbstate_t>(__refs) { }
+
+    protected:
+      virtual
+      ~codecvt();
+
+      virtual result
+      do_out(state_type& __state, const intern_type* __from,
+      const intern_type* __from_end, const intern_type*& __from_next,
+      extern_type* __to, extern_type* __to_end,
+      extern_type*& __to_next) const;
+
+      virtual result
+      do_unshift(state_type& __state,
+   extern_type* __to, extern_type* __to_end,
+   extern_type*& __to_next) const;
+
+      virtual result
+      do_in(state_type& __state,
+      const extern_type* __from, const extern_type* __from_end,
+      const extern_type*& __from_next,
+      intern_type* __to, intern_type* __to_end,
+      intern_type*& __to_next) const;
+
+      virtual
+      int do_encoding() const throw();
+
+      virtual
+      bool do_always_noconv() const throw();
+
+      virtual
+      int do_length(state_type&, const extern_type* __from,
+      const extern_type* __end, size_t __max) const;
+
+      virtual int
+      do_max_length() const throw();
+    };
+
+
+
+
+
+  template<>
+    class codecvt<char32_t, char8_t, mbstate_t>
+    : public __codecvt_abstract_base<char32_t, char8_t, mbstate_t>
+    {
+    public:
+
+      typedef char32_t intern_type;
+      typedef char8_t extern_type;
+      typedef mbstate_t state_type;
+
+    public:
+      static locale::id id;
+
+      explicit
+      codecvt(size_t __refs = 0)
+      : __codecvt_abstract_base<char32_t, char8_t, mbstate_t>(__refs) { }
+
+    protected:
+      virtual
+      ~codecvt();
+
+      virtual result
+      do_out(state_type& __state, const intern_type* __from,
+      const intern_type* __from_end, const intern_type*& __from_next,
+      extern_type* __to, extern_type* __to_end,
+      extern_type*& __to_next) const;
+
+      virtual result
+      do_unshift(state_type& __state,
+   extern_type* __to, extern_type* __to_end,
+   extern_type*& __to_next) const;
+
+      virtual result
+      do_in(state_type& __state,
+      const extern_type* __from, const extern_type* __from_end,
+      const extern_type*& __from_next,
+      intern_type* __to, intern_type* __to_end,
+      intern_type*& __to_next) const;
+
+      virtual
+      int do_encoding() const throw();
+
+      virtual
+      bool do_always_noconv() const throw();
+
+      virtual
+      int do_length(state_type&, const extern_type* __from,
+      const extern_type* __end, size_t __max) const;
+
+      virtual int
+      do_max_length() const throw();
+    };
+
+
+
+
+
+  template<typename _InternT, typename _ExternT, typename _StateT>
+    class codecvt_byname : public codecvt<_InternT, _ExternT, _StateT>
+    {
+    public:
+      explicit
+      codecvt_byname(const char* __s, size_t __refs = 0)
+      : codecvt<_InternT, _ExternT, _StateT>(__refs)
+      {
+ if (__builtin_strcmp(__s, "C") != 0
+     && __builtin_strcmp(__s, "POSIX") != 0)
+   {
+     this->_S_destroy_c_locale(this->_M_c_locale_codecvt);
+     this->_S_create_c_locale(this->_M_c_locale_codecvt, __s);
+   }
+      }
+
+
+      explicit
+      codecvt_byname(const string& __s, size_t __refs = 0)
+      : codecvt_byname(__s.c_str(), __refs) { }
+
+
+    protected:
+      virtual
+      ~codecvt_byname() { }
+    };
+
+
+  template<>
+    class codecvt_byname<char16_t, char, mbstate_t>
+    : public codecvt<char16_t, char, mbstate_t>
+    {
+    public:
+      explicit
+      codecvt_byname(const char*, size_t __refs = 0)
+      : codecvt<char16_t, char, mbstate_t>(__refs) { }
+
+      explicit
+      codecvt_byname(const string& __s, size_t __refs = 0)
+      : codecvt_byname(__s.c_str(), __refs) { }
+
+    protected:
+      virtual
+      ~codecvt_byname() { }
+    };
+
+  template<>
+    class codecvt_byname<char32_t, char, mbstate_t>
+    : public codecvt<char32_t, char, mbstate_t>
+    {
+    public:
+      explicit
+      codecvt_byname(const char*, size_t __refs = 0)
+      : codecvt<char32_t, char, mbstate_t>(__refs) { }
+
+      explicit
+      codecvt_byname(const string& __s, size_t __refs = 0)
+      : codecvt_byname(__s.c_str(), __refs) { }
+
+    protected:
+      virtual
+      ~codecvt_byname() { }
+    };
+
+
+  template<>
+    class codecvt_byname<char16_t, char8_t, mbstate_t>
+    : public codecvt<char16_t, char8_t, mbstate_t>
+    {
+    public:
+      explicit
+      codecvt_byname(const char*, size_t __refs = 0)
+      : codecvt<char16_t, char8_t, mbstate_t>(__refs) { }
+
+      explicit
+      codecvt_byname(const string& __s, size_t __refs = 0)
+      : codecvt_byname(__s.c_str(), __refs) { }
+
+    protected:
+      virtual
+      ~codecvt_byname() { }
+    };
+
+  template<>
+    class codecvt_byname<char32_t, char8_t, mbstate_t>
+    : public codecvt<char32_t, char8_t, mbstate_t>
+    {
+    public:
+      explicit
+      codecvt_byname(const char*, size_t __refs = 0)
+      : codecvt<char32_t, char8_t, mbstate_t>(__refs) { }
+
+      explicit
+      codecvt_byname(const string& __s, size_t __refs = 0)
+      : codecvt_byname(__s.c_str(), __refs) { }
+
+    protected:
+      virtual
+      ~codecvt_byname() { }
+    };
+
+
+
+
+
+
+
+  extern template class codecvt_byname<char, char, mbstate_t>;
+
+  extern template
+    const codecvt<char, char, mbstate_t>&
+    use_facet<codecvt<char, char, mbstate_t> >(const locale&);
+
+  extern template
+    bool
+    has_facet<codecvt<char, char, mbstate_t> >(const locale&);
+
+
+  extern template class codecvt_byname<wchar_t, char, mbstate_t>;
+
+  extern template
+    const codecvt<wchar_t, char, mbstate_t>&
+    use_facet<codecvt<wchar_t, char, mbstate_t> >(const locale&);
+
+  extern template
+    bool
+    has_facet<codecvt<wchar_t, char, mbstate_t> >(const locale&);
+
+
+
+  extern template class codecvt_byname<char16_t, char, mbstate_t>;
+  extern template class codecvt_byname<char32_t, char, mbstate_t>;
+
+
+  extern template class codecvt_byname<char16_t, char8_t, mbstate_t>;
+  extern template class codecvt_byname<char32_t, char8_t, mbstate_t>;
+
+
+
+
+
+
+
+}
+
+#pragma GCC diagnostic pop
+# 2070 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 2 3
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.tcc" 1 3
+# 37 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.tcc" 3
+namespace std
+{
+
+
+  template<typename _CharT, bool _Intl>
+    struct __use_cache<__moneypunct_cache<_CharT, _Intl> >
+    {
+      const __moneypunct_cache<_CharT, _Intl>*
+      operator() (const locale& __loc) const
+      {
+ const size_t __i = moneypunct<_CharT, _Intl>::id._M_id();
+ const locale::facet** __caches = __loc._M_impl->_M_caches;
+ if (!__caches[__i])
+   {
+     __moneypunct_cache<_CharT, _Intl>* __tmp = 0;
+     try
+       {
+  __tmp = new __moneypunct_cache<_CharT, _Intl>;
+  __tmp->_M_cache(__loc);
+       }
+     catch(...)
+       {
+  delete __tmp;
+  throw;
+       }
+     __loc._M_impl->_M_install_cache(__tmp, __i);
+   }
+ return static_cast<
+   const __moneypunct_cache<_CharT, _Intl>*>(__caches[__i]);
+      }
+    };
+
+  template<typename _CharT, bool _Intl>
+    void
+    __moneypunct_cache<_CharT, _Intl>::_M_cache(const locale& __loc)
+    {
+      const moneypunct<_CharT, _Intl>& __mp =
+ use_facet<moneypunct<_CharT, _Intl> >(__loc);
+
+      struct _Scoped_str
+      {
+ size_t _M_len;
+ _CharT* _M_str;
+
+ explicit
+ _Scoped_str(const basic_string<_CharT>& __str)
+ : _M_len(__str.size()), _M_str(new _CharT[_M_len])
+ { __str.copy(_M_str, _M_len); }
+
+ ~_Scoped_str() { delete[] _M_str; }
+
+ void
+ _M_release(const _CharT*& __p, size_t& __n)
+ {
+   __p = _M_str;
+   __n = _M_len;
+   _M_str = 0;
+ }
+      };
+
+      _Scoped_str __curr_symbol(__mp.curr_symbol());
+      _Scoped_str __positive_sign(__mp.positive_sign());
+      _Scoped_str __negative_sign(__mp.negative_sign());
+
+      const string& __g = __mp.grouping();
+      const size_t __g_size = __g.size();
+      char* const __grouping = new char[__g_size];
+      __g.copy(__grouping, __g_size);
+
+
+
+      _M_grouping = __grouping;
+      _M_grouping_size = __g_size;
+      _M_use_grouping = (__g_size
+    && static_cast<signed char>(__grouping[0]) > 0
+    && (__grouping[0]
+        != __gnu_cxx::__numeric_traits<char>::__max));
+
+      _M_decimal_point = __mp.decimal_point();
+      _M_thousands_sep = __mp.thousands_sep();
+
+      __curr_symbol._M_release(_M_curr_symbol, _M_curr_symbol_size);
+      __positive_sign._M_release(_M_positive_sign, _M_positive_sign_size);
+      __negative_sign._M_release(_M_negative_sign, _M_negative_sign_size);
+
+      _M_frac_digits = __mp.frac_digits();
+      _M_pos_format = __mp.pos_format();
+      _M_neg_format = __mp.neg_format();
+
+      const ctype<_CharT>& __ct = use_facet<ctype<_CharT> >(__loc);
+      __ct.widen(money_base::_S_atoms,
+   money_base::_S_atoms + money_base::_S_end, _M_atoms);
+
+      _M_allocated = true;
+    }
+
+namespace __cxx11 {
+
+  template<typename _CharT, typename _InIter>
+    template<bool _Intl>
+      _InIter
+      money_get<_CharT, _InIter>::
+      _M_extract(iter_type __beg, iter_type __end, ios_base& __io,
+   ios_base::iostate& __err, string& __units) const
+      {
+ typedef char_traits<_CharT> __traits_type;
+ typedef typename string_type::size_type size_type;
+ typedef money_base::part part;
+ typedef __moneypunct_cache<_CharT, _Intl> __cache_type;
+
+ const locale& __loc = __io._M_getloc();
+ const ctype<_CharT>& __ctype = use_facet<ctype<_CharT> >(__loc);
+
+ __use_cache<__cache_type> __uc;
+ const __cache_type* __lc = __uc(__loc);
+ const char_type* __lit = __lc->_M_atoms;
+
+
+ bool __negative = false;
+
+ size_type __sign_size = 0;
+
+ const bool __mandatory_sign = (__lc->_M_positive_sign_size
+           && __lc->_M_negative_sign_size);
+
+ string __grouping_tmp;
+ if (__lc->_M_use_grouping)
+   __grouping_tmp.reserve(32);
+
+ int __last_pos = 0;
+
+ int __n = 0;
+
+ bool __testvalid = true;
+
+ bool __testdecfound = false;
+
+
+ string __res;
+ __res.reserve(32);
+
+ const char_type* __lit_zero = __lit + money_base::_S_zero;
+ const money_base::pattern __p = __lc->_M_neg_format;
+ for (int __i = 0; __i < 4 && __testvalid; ++__i)
+   {
+     const part __which = static_cast<part>(__p.field[__i]);
+     switch (__which)
+       {
+       case money_base::symbol:
+
+
+
+
+  if (__io.flags() & ios_base::showbase || __sign_size > 1
+      || __i == 0
+      || (__i == 1 && (__mandatory_sign
+         || (static_cast<part>(__p.field[0])
+      == money_base::sign)
+         || (static_cast<part>(__p.field[2])
+      == money_base::space)))
+      || (__i == 2 && ((static_cast<part>(__p.field[3])
+          == money_base::value)
+         || (__mandatory_sign
+      && (static_cast<part>(__p.field[3])
+          == money_base::sign)))))
+    {
+      const size_type __len = __lc->_M_curr_symbol_size;
+      size_type __j = 0;
+      for (; __beg != __end && __j < __len
+      && *__beg == __lc->_M_curr_symbol[__j];
+    ++__beg, (void)++__j);
+      if (__j != __len
+   && (__j || __io.flags() & ios_base::showbase))
+        __testvalid = false;
+    }
+  break;
+       case money_base::sign:
+
+  if (__lc->_M_positive_sign_size && __beg != __end
+      && *__beg == __lc->_M_positive_sign[0])
+    {
+      __sign_size = __lc->_M_positive_sign_size;
+      ++__beg;
+    }
+  else if (__lc->_M_negative_sign_size && __beg != __end
+    && *__beg == __lc->_M_negative_sign[0])
+    {
+      __negative = true;
+      __sign_size = __lc->_M_negative_sign_size;
+      ++__beg;
+    }
+  else if (__lc->_M_positive_sign_size
+    && !__lc->_M_negative_sign_size)
+
+
+    __negative = true;
+  else if (__mandatory_sign)
+    __testvalid = false;
+  break;
+       case money_base::value:
+
+
+  for (; __beg != __end; ++__beg)
+    {
+      const char_type __c = *__beg;
+      const char_type* __q = __traits_type::find(__lit_zero,
+              10, __c);
+      if (__q != 0)
+        {
+   __res += money_base::_S_atoms[__q - __lit];
+   ++__n;
+        }
+      else if (__c == __lc->_M_decimal_point
+        && !__testdecfound)
+        {
+   if (__lc->_M_frac_digits <= 0)
+     break;
+
+   __last_pos = __n;
+   __n = 0;
+   __testdecfound = true;
+        }
+      else if (__lc->_M_use_grouping
+        && __c == __lc->_M_thousands_sep
+        && !__testdecfound)
+        {
+   if (__n)
+     {
+
+       __grouping_tmp += static_cast<char>(__n);
+       __n = 0;
+     }
+   else
+     {
+       __testvalid = false;
+       break;
+     }
+        }
+      else
+        break;
+    }
+  if (__res.empty())
+    __testvalid = false;
+  break;
+       case money_base::space:
+
+  if (__beg != __end && __ctype.is(ctype_base::space, *__beg))
+    ++__beg;
+  else
+    __testvalid = false;
+
+       case money_base::none:
+
+  if (__i != 3)
+    for (; __beg != __end
+    && __ctype.is(ctype_base::space, *__beg); ++__beg);
+  break;
+       }
+   }
+
+
+ if (__sign_size > 1 && __testvalid)
+   {
+     const char_type* __sign = __negative ? __lc->_M_negative_sign
+                                          : __lc->_M_positive_sign;
+     size_type __i = 1;
+     for (; __beg != __end && __i < __sign_size
+     && *__beg == __sign[__i]; ++__beg, (void)++__i);
+
+     if (__i != __sign_size)
+       __testvalid = false;
+   }
+
+ if (__testvalid)
+   {
+
+     if (__res.size() > 1)
+       {
+  const size_type __first = __res.find_first_not_of('0');
+  const bool __only_zeros = __first == string::npos;
+  if (__first)
+    __res.erase(0, __only_zeros ? __res.size() - 1 : __first);
+       }
+
+
+     if (__negative && __res[0] != '0')
+       __res.insert(__res.begin(), '-');
+
+
+     if (__grouping_tmp.size())
+       {
+
+  __grouping_tmp += static_cast<char>(__testdecfound ? __last_pos
+                         : __n);
+  if (!std::__verify_grouping(__lc->_M_grouping,
+         __lc->_M_grouping_size,
+         __grouping_tmp))
+    __err |= ios_base::failbit;
+       }
+
+
+     if (__testdecfound && __n != __lc->_M_frac_digits)
+       __testvalid = false;
+   }
+
+
+ if (!__testvalid)
+   __err |= ios_base::failbit;
+ else
+   __units.swap(__res);
+
+
+ if (__beg == __end)
+   __err |= ios_base::eofbit;
+ return __beg;
+      }
+# 370 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.tcc" 3
+  template<typename _CharT, typename _InIter>
+    _InIter
+    money_get<_CharT, _InIter>::
+    do_get(iter_type __beg, iter_type __end, bool __intl, ios_base& __io,
+    ios_base::iostate& __err, long double& __units) const
+    {
+      string __str;
+      __beg = __intl ? _M_extract<true>(__beg, __end, __io, __err, __str)
+              : _M_extract<false>(__beg, __end, __io, __err, __str);
+      std::__convert_to_v(__str.c_str(), __units, __err, _S_get_c_locale());
+      return __beg;
+    }
+
+  template<typename _CharT, typename _InIter>
+    _InIter
+    money_get<_CharT, _InIter>::
+    do_get(iter_type __beg, iter_type __end, bool __intl, ios_base& __io,
+    ios_base::iostate& __err, string_type& __digits) const
+    {
+      typedef typename string::size_type size_type;
+
+      const locale& __loc = __io._M_getloc();
+      const ctype<_CharT>& __ctype = use_facet<ctype<_CharT> >(__loc);
+
+      string __str;
+      __beg = __intl ? _M_extract<true>(__beg, __end, __io, __err, __str)
+              : _M_extract<false>(__beg, __end, __io, __err, __str);
+      const size_type __len = __str.size();
+      if (__len)
+ {
+   __digits.resize(__len);
+   __ctype.widen(__str.data(), __str.data() + __len, &__digits[0]);
+ }
+      return __beg;
+    }
+# 422 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.tcc" 3
+  template<typename _CharT, typename _OutIter>
+    template<bool _Intl>
+      _OutIter
+      money_put<_CharT, _OutIter>::
+      _M_insert(iter_type __s, ios_base& __io, char_type __fill,
+  const string_type& __digits) const
+      {
+ typedef typename string_type::size_type size_type;
+ typedef money_base::part part;
+ typedef __moneypunct_cache<_CharT, _Intl> __cache_type;
+
+ const locale& __loc = __io._M_getloc();
+ const ctype<_CharT>& __ctype = use_facet<ctype<_CharT> >(__loc);
+
+ __use_cache<__cache_type> __uc;
+ const __cache_type* __lc = __uc(__loc);
+ const char_type* __lit = __lc->_M_atoms;
+
+
+
+ const char_type* __beg = __digits.data();
+
+ money_base::pattern __p;
+ const char_type* __sign;
+ size_type __sign_size;
+ if (!(*__beg == __lit[money_base::_S_minus]))
+   {
+     __p = __lc->_M_pos_format;
+     __sign = __lc->_M_positive_sign;
+     __sign_size = __lc->_M_positive_sign_size;
+   }
+ else
+   {
+     __p = __lc->_M_neg_format;
+     __sign = __lc->_M_negative_sign;
+     __sign_size = __lc->_M_negative_sign_size;
+     if (__digits.size())
+       ++__beg;
+   }
+
+
+ size_type __len = __ctype.scan_not(ctype_base::digit, __beg,
+        __beg + __digits.size()) - __beg;
+ if (__len)
+   {
+
+
+
+     string_type __value;
+     __value.reserve(2 * __len);
+
+
+
+     long __paddec = __len - __lc->_M_frac_digits;
+     if (__paddec > 0)
+       {
+  if (__lc->_M_frac_digits < 0)
+    __paddec = __len;
+  if (__lc->_M_grouping_size)
+    {
+      __value.assign(2 * __paddec, char_type());
+      _CharT* __vend =
+        std::__add_grouping(&__value[0], __lc->_M_thousands_sep,
+       __lc->_M_grouping,
+       __lc->_M_grouping_size,
+       __beg, __beg + __paddec);
+      __value.erase(__vend - &__value[0]);
+    }
+  else
+    __value.assign(__beg, __paddec);
+       }
+
+
+     if (__lc->_M_frac_digits > 0)
+       {
+  __value += __lc->_M_decimal_point;
+  if (__paddec >= 0)
+    __value.append(__beg + __paddec, __lc->_M_frac_digits);
+  else
+    {
+
+      __value.append(-__paddec, __lit[money_base::_S_zero]);
+      __value.append(__beg, __len);
+    }
+       }
+
+
+     const ios_base::fmtflags __f = __io.flags()
+                                    & ios_base::adjustfield;
+     __len = __value.size() + __sign_size;
+     __len += ((__io.flags() & ios_base::showbase)
+        ? __lc->_M_curr_symbol_size : 0);
+
+     string_type __res;
+     __res.reserve(2 * __len);
+
+     const size_type __width = static_cast<size_type>(__io.width());
+     const bool __testipad = (__f == ios_base::internal
+         && __len < __width);
+
+     for (int __i = 0; __i < 4; ++__i)
+       {
+  const part __which = static_cast<part>(__p.field[__i]);
+  switch (__which)
+    {
+    case money_base::symbol:
+      if (__io.flags() & ios_base::showbase)
+        __res.append(__lc->_M_curr_symbol,
+       __lc->_M_curr_symbol_size);
+      break;
+    case money_base::sign:
+
+
+
+      if (__sign_size)
+        __res += __sign[0];
+      break;
+    case money_base::value:
+      __res += __value;
+      break;
+    case money_base::space:
+
+
+
+      if (__testipad)
+        __res.append(__width - __len, __fill);
+      else
+        __res += __fill;
+      break;
+    case money_base::none:
+      if (__testipad)
+        __res.append(__width - __len, __fill);
+      break;
+    }
+       }
+
+
+     if (__sign_size > 1)
+       __res.append(__sign + 1, __sign_size - 1);
+
+
+     __len = __res.size();
+     if (__width > __len)
+       {
+  if (__f == ios_base::left)
+
+    __res.append(__width - __len, __fill);
+  else
+
+    __res.insert(0, __width - __len, __fill);
+  __len = __width;
+       }
+
+
+     __s = std::__write(__s, __res.data(), __len);
+   }
+ __io.width(0);
+ return __s;
+      }
+# 592 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.tcc" 3
+  template<typename _CharT, typename _OutIter>
+    _OutIter
+    money_put<_CharT, _OutIter>::
+    do_put(iter_type __s, bool __intl, ios_base& __io, char_type __fill,
+    long double __units) const
+    {
+      const locale __loc = __io.getloc();
+      const ctype<_CharT>& __ctype = use_facet<ctype<_CharT> >(__loc);
+
+
+      int __cs_size = 64;
+      char* __cs = static_cast<char*>(__builtin_alloca(__cs_size));
+
+
+      int __len = std::__convert_from_v(_S_get_c_locale(), __cs, __cs_size,
+     "%.*Lf", 0, __units);
+
+      if (__len >= __cs_size)
+ {
+   __cs_size = __len + 1;
+   __cs = static_cast<char*>(__builtin_alloca(__cs_size));
+   __len = std::__convert_from_v(_S_get_c_locale(), __cs, __cs_size,
+     "%.*Lf", 0, __units);
+ }
+# 624 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.tcc" 3
+      string_type __digits(__len, char_type());
+      __ctype.widen(__cs, __cs + __len, &__digits[0]);
+      return __intl ? _M_insert<true>(__s, __io, __fill, __digits)
+             : _M_insert<false>(__s, __io, __fill, __digits);
+    }
+
+  template<typename _CharT, typename _OutIter>
+    _OutIter
+    money_put<_CharT, _OutIter>::
+    do_put(iter_type __s, bool __intl, ios_base& __io, char_type __fill,
+    const string_type& __digits) const
+    { return __intl ? _M_insert<true>(__s, __io, __fill, __digits)
+             : _M_insert<false>(__s, __io, __fill, __digits); }
+# 682 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.tcc" 3
+}
+
+
+
+
+  template<typename _CharT, typename _InIter>
+    time_base::dateorder
+    time_get<_CharT, _InIter>::do_date_order() const
+    { return time_base::no_order; }
+
+
+
+  template<typename _CharT, typename _InIter>
+    _InIter
+    time_get<_CharT, _InIter>::
+    _M_extract_via_format(iter_type __beg, iter_type __end, ios_base& __io,
+     ios_base::iostate& __err, tm* __tm,
+     const _CharT* __format,
+     __time_get_state &__state) const
+    {
+      const locale& __loc = __io._M_getloc();
+      const __timepunct<_CharT>& __tp = use_facet<__timepunct<_CharT> >(__loc);
+      const ctype<_CharT>& __ctype = use_facet<ctype<_CharT> >(__loc);
+      const size_t __len = char_traits<_CharT>::length(__format);
+
+      ios_base::iostate __tmperr = ios_base::goodbit;
+      size_t __i = 0;
+      for (; __beg != __end && __i < __len && !__tmperr; ++__i)
+ {
+   if (__ctype.narrow(__format[__i], 0) == '%')
+     {
+
+       char __c = __ctype.narrow(__format[++__i], 0);
+       int __mem = 0;
+       if (__c == 'E' || __c == 'O')
+  __c = __ctype.narrow(__format[++__i], 0);
+       switch (__c)
+  {
+    const char* __cs;
+    _CharT __wcs[10];
+  case 'a':
+  case 'A':
+
+    const char_type* __days[14];
+    __tp._M_days(&__days[0]);
+    __tp._M_days_abbreviated(&__days[7]);
+    __beg = _M_extract_name(__beg, __end, __mem, __days,
+       14, __io, __tmperr);
+    if (!__tmperr)
+      {
+        __tm->tm_wday = __mem % 7;
+        __state._M_have_wday = 1;
+      }
+    break;
+  case 'h':
+  case 'b':
+  case 'B':
+
+    const char_type* __months[24];
+    __tp._M_months(&__months[0]);
+    __tp._M_months_abbreviated(&__months[12]);
+    __beg = _M_extract_name(__beg, __end, __mem,
+       __months, 24, __io, __tmperr);
+    if (!__tmperr)
+      {
+        __tm->tm_mon = __mem % 12;
+        __state._M_have_mon = 1;
+        __state._M_want_xday = 1;
+      }
+    break;
+  case 'c':
+
+    const char_type* __dt[2];
+    __tp._M_date_time_formats(__dt);
+    __beg = _M_extract_via_format(__beg, __end, __io, __tmperr,
+      __tm, __dt[0], __state);
+    if (!__tmperr)
+      __state._M_want_xday = 1;
+    break;
+  case 'C':
+
+    __beg = _M_extract_num(__beg, __end, __mem, 0, 99, 2,
+      __io, __tmperr);
+    if (!__tmperr)
+      {
+        __state._M_century = __mem;
+        __state._M_have_century = 1;
+        __state._M_want_xday = 1;
+      }
+    break;
+  case 'd':
+  case 'e':
+
+    if (__ctype.is(ctype_base::space, *__beg))
+      ++__beg;
+    __beg = _M_extract_num(__beg, __end, __mem, 1, 31, 2,
+      __io, __tmperr);
+    if (!__tmperr)
+      {
+        __tm->tm_mday = __mem;
+        __state._M_have_mday = 1;
+        __state._M_want_xday = 1;
+      }
+    break;
+  case 'D':
+
+    __cs = "%m/%d/%y";
+    __ctype.widen(__cs, __cs + 9, __wcs);
+    __beg = _M_extract_via_format(__beg, __end, __io, __tmperr,
+      __tm, __wcs, __state);
+    if (!__tmperr)
+      __state._M_want_xday = 1;
+    break;
+  case 'H':
+
+    __beg = _M_extract_num(__beg, __end, __mem, 0, 23, 2,
+      __io, __tmperr);
+    if (!__tmperr)
+      {
+        __tm->tm_hour = __mem;
+        __state._M_have_I = 0;
+      }
+    break;
+  case 'I':
+
+    __beg = _M_extract_num(__beg, __end, __mem, 1, 12, 2,
+      __io, __tmperr);
+    if (!__tmperr)
+      {
+        __tm->tm_hour = __mem % 12;
+        __state._M_have_I = 1;
+      }
+    break;
+  case 'j':
+
+    __beg = _M_extract_num(__beg, __end, __mem, 1, 366, 3,
+      __io, __tmperr);
+    if (!__tmperr)
+      {
+        __tm->tm_yday = __mem - 1;
+        __state._M_have_yday = 1;
+      }
+    break;
+  case 'm':
+
+    __beg = _M_extract_num(__beg, __end, __mem, 1, 12, 2,
+      __io, __tmperr);
+    if (!__tmperr)
+      {
+        __tm->tm_mon = __mem - 1;
+        __state._M_have_mon = 1;
+      }
+    break;
+  case 'M':
+
+    __beg = _M_extract_num(__beg, __end, __mem, 0, 59, 2,
+      __io, __tmperr);
+    if (!__tmperr)
+      __tm->tm_min = __mem;
+    break;
+  case 'n':
+  case 't':
+    while (__beg != __end
+    && __ctype.is(ctype_base::space, *__beg))
+      ++__beg;
+    break;
+  case 'p':
+
+    const char_type* __ampm[2];
+    __tp._M_am_pm(&__ampm[0]);
+    if (!__ampm[0][0] || !__ampm[1][0])
+      break;
+    __beg = _M_extract_name(__beg, __end, __mem, __ampm,
+       2, __io, __tmperr);
+    if (!__tmperr && __mem)
+      __state._M_is_pm = 1;
+    break;
+  case 'r':
+
+    const char_type* __ampm_format;
+    __tp._M_am_pm_format(&__ampm_format);
+    __beg = _M_extract_via_format(__beg, __end, __io, __tmperr,
+      __tm, __ampm_format, __state);
+    break;
+  case 'R':
+
+    __cs = "%H:%M";
+    __ctype.widen(__cs, __cs + 6, __wcs);
+    __beg = _M_extract_via_format(__beg, __end, __io, __tmperr,
+      __tm, __wcs, __state);
+    break;
+  case 'S':
+
+
+
+    __beg = _M_extract_num(__beg, __end, __mem, 0, 60, 2,
+
+
+
+      __io, __tmperr);
+    if (!__tmperr)
+      __tm->tm_sec = __mem;
+    break;
+  case 'T':
+
+    __cs = "%H:%M:%S";
+    __ctype.widen(__cs, __cs + 9, __wcs);
+    __beg = _M_extract_via_format(__beg, __end, __io, __tmperr,
+      __tm, __wcs, __state);
+    break;
+  case 'U':
+
+    __beg = _M_extract_num(__beg, __end, __mem, 0, 53, 2,
+      __io, __tmperr);
+    if (!__tmperr)
+      {
+        __state._M_week_no = __mem;
+        __state._M_have_uweek = 1;
+      }
+    break;
+  case 'w':
+
+    __beg = _M_extract_num(__beg, __end, __mem, 0, 6, 1,
+      __io, __tmperr);
+    if (!__tmperr)
+      {
+        __tm->tm_wday = __mem;
+        __state._M_have_wday = 1;
+      }
+    break;
+  case 'W':
+
+    __beg = _M_extract_num(__beg, __end, __mem, 0, 53, 2,
+      __io, __tmperr);
+    if (!__tmperr)
+      {
+        __state._M_week_no = __mem;
+        __state._M_have_wweek = 1;
+      }
+    break;
+  case 'x':
+
+    const char_type* __dates[2];
+    __tp._M_date_formats(__dates);
+    __beg = _M_extract_via_format(__beg, __end, __io, __tmperr,
+      __tm, __dates[0], __state);
+    break;
+  case 'X':
+
+    const char_type* __times[2];
+    __tp._M_time_formats(__times);
+    __beg = _M_extract_via_format(__beg, __end, __io, __tmperr,
+      __tm, __times[0], __state);
+    break;
+  case 'y':
+
+    __beg = _M_extract_num(__beg, __end, __mem, 0, 99, 2,
+      __io, __tmperr);
+    if (!__tmperr)
+      {
+        __state._M_want_century = 1;
+        __state._M_want_xday = 1;
+
+
+        __c = 0;
+        if (__beg != __end)
+   __c = __ctype.narrow(*__beg, '*');
+        if (__c >= '0' && __c <= '9')
+   {
+     ++__beg;
+     __mem = __mem * 10 + (__c - '0');
+     if (__beg != __end)
+       {
+         __c = __ctype.narrow(*__beg, '*');
+         if (__c >= '0' && __c <= '9')
+    {
+      ++__beg;
+      __mem = __mem * 10 + (__c - '0');
+    }
+       }
+     __mem -= 1900;
+     __state._M_want_century = 0;
+   }
+
+
+        else if (__mem < 69)
+   __mem += 100;
+        __tm->tm_year = __mem;
+      }
+    break;
+  case 'Y':
+
+    __beg = _M_extract_num(__beg, __end, __mem, 0, 9999, 4,
+      __io, __tmperr);
+    if (!__tmperr)
+      {
+        __tm->tm_year = __mem - 1900;
+        __state._M_want_century = 0;
+        __state._M_want_xday = 1;
+      }
+    break;
+  case 'Z':
+
+    if (__ctype.is(ctype_base::upper, *__beg))
+      {
+        int __tmp;
+        __beg = _M_extract_name(__beg, __end, __tmp,
+           __timepunct_cache<_CharT>::_S_timezones,
+           14, __io, __tmperr);
+
+
+        if (__beg != __end && !__tmperr && __tmp == 0
+     && (*__beg == __ctype.widen('-')
+         || *__beg == __ctype.widen('+')))
+   {
+     __beg = _M_extract_num(__beg, __end, __tmp, 0, 23, 2,
+       __io, __tmperr);
+     __beg = _M_extract_num(__beg, __end, __tmp, 0, 59, 2,
+       __io, __tmperr);
+   }
+      }
+    else
+      __tmperr |= ios_base::failbit;
+    break;
+  case '%':
+    if (*__beg == __ctype.widen('%'))
+      ++__beg;
+    else
+      __tmperr |= ios_base::failbit;
+    break;
+  default:
+
+    __tmperr |= ios_base::failbit;
+  }
+     }
+   else if (__ctype.is(ctype_base::space, __format[__i]))
+     {
+
+       while (__beg != __end
+       && __ctype.is(ctype_base::space, *__beg))
+  ++__beg;
+     }
+   else
+     {
+
+
+       if (__ctype.tolower(__format[__i]) == __ctype.tolower(*__beg)
+    || __ctype.toupper(__format[__i]) == __ctype.toupper(*__beg))
+  ++__beg;
+       else
+  __tmperr |= ios_base::failbit;
+     }
+ }
+
+      if (__tmperr || __i != __len)
+ __err |= ios_base::failbit;
+
+      return __beg;
+    }
+
+  template<typename _CharT, typename _InIter>
+    _InIter
+    time_get<_CharT, _InIter>::
+    _M_extract_via_format(iter_type __beg, iter_type __end, ios_base& __io,
+     ios_base::iostate& __err, tm* __tm,
+     const _CharT* __format) const
+    {
+      __time_get_state __state = __time_get_state();
+      return _M_extract_via_format(__beg, __end, __io, __err, __tm,
+       __format, __state);
+    }
+
+  template<typename _CharT, typename _InIter>
+    _InIter
+    time_get<_CharT, _InIter>::
+    _M_extract_num(iter_type __beg, iter_type __end, int& __member,
+     int __min, int __max, size_t __len,
+     ios_base& __io, ios_base::iostate& __err) const
+    {
+      const locale& __loc = __io._M_getloc();
+      const ctype<_CharT>& __ctype = use_facet<ctype<_CharT> >(__loc);
+
+      size_t __i = 0;
+      int __value = 0;
+      for (; __beg != __end && __i < __len; ++__beg, (void)++__i)
+ {
+   const char __c = __ctype.narrow(*__beg, '*');
+   if (__c >= '0' && __c <= '9')
+     {
+       __value = __value * 10 + (__c - '0');
+       if (__value > __max)
+  break;
+     }
+   else
+     break;
+ }
+      if (__i && __value >= __min && __value <= __max)
+ __member = __value;
+      else
+ __err |= ios_base::failbit;
+
+      return __beg;
+    }
+
+
+
+
+
+
+  template<typename _CharT, typename _InIter>
+    _InIter
+    time_get<_CharT, _InIter>::
+    _M_extract_name(iter_type __beg, iter_type __end, int& __member,
+      const _CharT** __names, size_t __indexlen,
+      ios_base& __io, ios_base::iostate& __err) const
+    {
+      typedef char_traits<_CharT> __traits_type;
+      const locale& __loc = __io._M_getloc();
+      const ctype<_CharT>& __ctype = use_facet<ctype<_CharT> >(__loc);
+
+      size_t* __matches
+ = static_cast<size_t*>(__builtin_alloca(2 * sizeof(size_t)
+      * __indexlen));
+      size_t* __lengths = __matches + __indexlen;
+      size_t __nmatches = 0;
+      size_t __pos = 0;
+      bool __testvalid = true;
+      const char_type* __name;
+      bool __begupdated = false;
+
+
+      if (__beg != __end)
+ {
+   const char_type __c = *__beg;
+
+   const char_type __cl = __ctype.tolower(__c);
+   const char_type __cu = __ctype.toupper(__c);
+   for (size_t __i1 = 0; __i1 < __indexlen; ++__i1)
+     if (__cl == __ctype.tolower(__names[__i1][0])
+  || __cu == __ctype.toupper(__names[__i1][0]))
+       {
+  __lengths[__nmatches]
+    = __traits_type::length(__names[__i1]);
+  __matches[__nmatches++] = __i1;
+       }
+ }
+
+      while (__nmatches > 1)
+ {
+
+   size_t __minlen = __lengths[0];
+   for (size_t __i2 = 1; __i2 < __nmatches; ++__i2)
+     __minlen = std::min(__minlen, __lengths[__i2]);
+   ++__pos;
+   ++__beg;
+   if (__pos == __minlen)
+     {
+
+
+
+
+
+
+       bool __match_longer = false;
+
+       if (__beg != __end)
+  {
+
+    const char_type __cl = __ctype.tolower(*__beg);
+    const char_type __cu = __ctype.toupper(*__beg);
+    for (size_t __i3 = 0; __i3 < __nmatches; ++__i3)
+      {
+        __name = __names[__matches[__i3]];
+        if (__lengths[__i3] > __pos
+     && (__ctype.tolower(__name[__pos]) == __cl
+         || __ctype.toupper(__name[__pos]) == __cu))
+   {
+     __match_longer = true;
+     break;
+   }
+      }
+  }
+       for (size_t __i4 = 0; __i4 < __nmatches;)
+  if (__match_longer == (__lengths[__i4] == __pos))
+    {
+      __matches[__i4] = __matches[--__nmatches];
+      __lengths[__i4] = __lengths[__nmatches];
+    }
+  else
+    ++__i4;
+       if (__match_longer)
+  {
+    __minlen = __lengths[0];
+    for (size_t __i5 = 1; __i5 < __nmatches; ++__i5)
+      __minlen = std::min(__minlen, __lengths[__i5]);
+  }
+       else
+  {
+
+
+    if (__nmatches == 2 && (__indexlen & 1) == 0)
+      {
+        if (__matches[0] < __indexlen / 2)
+   {
+     if (__matches[1] == __matches[0] + __indexlen / 2)
+       __nmatches = 1;
+   }
+        else if (__matches[1] == __matches[0] - __indexlen / 2)
+   {
+     __matches[0] = __matches[1];
+     __lengths[0] = __lengths[1];
+     __nmatches = 1;
+   }
+      }
+    __begupdated = true;
+    break;
+  }
+     }
+   if (__pos < __minlen && __beg != __end)
+     {
+
+       const char_type __cl = __ctype.tolower(*__beg);
+       const char_type __cu = __ctype.toupper(*__beg);
+       for (size_t __i6 = 0; __i6 < __nmatches;)
+  {
+    __name = __names[__matches[__i6]];
+    if (__ctype.tolower(__name[__pos]) != __cl
+        && __ctype.toupper(__name[__pos]) != __cu)
+      {
+        __matches[__i6] = __matches[--__nmatches];
+        __lengths[__i6] = __lengths[__nmatches];
+      }
+    else
+      ++__i6;
+  }
+     }
+   else
+     break;
+ }
+
+      if (__nmatches == 1)
+ {
+
+   if (!__begupdated)
+     {
+       ++__beg;
+       ++__pos;
+     }
+   __name = __names[__matches[0]];
+   const size_t __len = __lengths[0];
+   while (__pos < __len
+   && __beg != __end
+
+   && (__ctype.tolower(__name[__pos]) == __ctype.tolower(*__beg)
+       || (__ctype.toupper(__name[__pos])
+    == __ctype.toupper(*__beg))))
+     ++__beg, (void)++__pos;
+
+   if (__len == __pos)
+     __member = __matches[0];
+   else
+     __testvalid = false;
+ }
+      else
+ __testvalid = false;
+      if (!__testvalid)
+ __err |= ios_base::failbit;
+
+      return __beg;
+    }
+
+  template<typename _CharT, typename _InIter>
+    _InIter
+    time_get<_CharT, _InIter>::
+    _M_extract_wday_or_month(iter_type __beg, iter_type __end, int& __member,
+        const _CharT** __names, size_t __indexlen,
+        ios_base& __io, ios_base::iostate& __err) const
+    {
+      typedef char_traits<_CharT> __traits_type;
+      const locale& __loc = __io._M_getloc();
+      const ctype<_CharT>& __ctype = use_facet<ctype<_CharT> >(__loc);
+
+      int* __matches = static_cast<int*>(__builtin_alloca(2 * sizeof(int)
+         * __indexlen));
+      size_t __nmatches = 0;
+      size_t* __matches_lengths = 0;
+      size_t __pos = 0;
+
+      if (__beg != __end)
+ {
+   const char_type __c = *__beg;
+   for (size_t __i = 0; __i < 2 * __indexlen; ++__i)
+     if (__c == __names[__i][0]
+  || __c == __ctype.toupper(__names[__i][0]))
+       __matches[__nmatches++] = __i;
+ }
+
+      if (__nmatches)
+ {
+   ++__beg;
+   ++__pos;
+
+   __matches_lengths
+     = static_cast<size_t*>(__builtin_alloca(sizeof(size_t)
+          * __nmatches));
+   for (size_t __i = 0; __i < __nmatches; ++__i)
+     __matches_lengths[__i]
+       = __traits_type::length(__names[__matches[__i]]);
+ }
+
+      for (; __beg != __end; ++__beg, (void)++__pos)
+ {
+   size_t __nskipped = 0;
+   const char_type __c = *__beg;
+   for (size_t __i = 0; __i < __nmatches;)
+     {
+       const char_type* __name = __names[__matches[__i]];
+       if (__pos >= __matches_lengths[__i])
+  ++__nskipped, ++__i;
+       else if (!(__name[__pos] == __c))
+  {
+    --__nmatches;
+    __matches[__i] = __matches[__nmatches];
+    __matches_lengths[__i] = __matches_lengths[__nmatches];
+  }
+       else
+  ++__i;
+     }
+   if (__nskipped == __nmatches)
+     break;
+ }
+
+      if ((__nmatches == 1 && __matches_lengths[0] == __pos)
+   || (__nmatches == 2 && (__matches_lengths[0] == __pos
+      || __matches_lengths[1] == __pos)))
+ __member = (__matches[0] >= (int)__indexlen
+      ? __matches[0] - (int)__indexlen : __matches[0]);
+      else
+ __err |= ios_base::failbit;
+
+      return __beg;
+    }
+
+  template<typename _CharT, typename _InIter>
+    _InIter
+    time_get<_CharT, _InIter>::
+    do_get_time(iter_type __beg, iter_type __end, ios_base& __io,
+  ios_base::iostate& __err, tm* __tm) const
+    {
+      const locale& __loc = __io._M_getloc();
+      const __timepunct<_CharT>& __tp = use_facet<__timepunct<_CharT> >(__loc);
+      const char_type* __times[2];
+      __tp._M_time_formats(__times);
+      __time_get_state __state = __time_get_state();
+      __beg = _M_extract_via_format(__beg, __end, __io, __err,
+        __tm, __times[0], __state);
+      __state._M_finalize_state(__tm);
+      if (__beg == __end)
+ __err |= ios_base::eofbit;
+      return __beg;
+    }
+
+  template<typename _CharT, typename _InIter>
+    _InIter
+    time_get<_CharT, _InIter>::
+    do_get_date(iter_type __beg, iter_type __end, ios_base& __io,
+  ios_base::iostate& __err, tm* __tm) const
+    {
+      const locale& __loc = __io._M_getloc();
+      const __timepunct<_CharT>& __tp = use_facet<__timepunct<_CharT> >(__loc);
+      const char_type* __dates[2];
+      __tp._M_date_formats(__dates);
+      __time_get_state __state = __time_get_state();
+      __beg = _M_extract_via_format(__beg, __end, __io, __err,
+        __tm, __dates[0], __state);
+      __state._M_finalize_state(__tm);
+      if (__beg == __end)
+ __err |= ios_base::eofbit;
+      return __beg;
+    }
+
+  template<typename _CharT, typename _InIter>
+    _InIter
+    time_get<_CharT, _InIter>::
+    do_get_weekday(iter_type __beg, iter_type __end, ios_base& __io,
+     ios_base::iostate& __err, tm* __tm) const
+    {
+      const locale& __loc = __io._M_getloc();
+      const __timepunct<_CharT>& __tp = use_facet<__timepunct<_CharT> >(__loc);
+      const char_type* __days[14];
+      __tp._M_days_abbreviated(__days);
+      __tp._M_days(__days + 7);
+      int __tmpwday;
+      ios_base::iostate __tmperr = ios_base::goodbit;
+
+      __beg = _M_extract_wday_or_month(__beg, __end, __tmpwday, __days, 7,
+           __io, __tmperr);
+      if (!__tmperr)
+ __tm->tm_wday = __tmpwday;
+      else
+ __err |= ios_base::failbit;
+
+      if (__beg == __end)
+ __err |= ios_base::eofbit;
+      return __beg;
+     }
+
+  template<typename _CharT, typename _InIter>
+    _InIter
+    time_get<_CharT, _InIter>::
+    do_get_monthname(iter_type __beg, iter_type __end,
+                     ios_base& __io, ios_base::iostate& __err, tm* __tm) const
+    {
+      const locale& __loc = __io._M_getloc();
+      const __timepunct<_CharT>& __tp = use_facet<__timepunct<_CharT> >(__loc);
+      const char_type* __months[24];
+      __tp._M_months_abbreviated(__months);
+      __tp._M_months(__months + 12);
+      int __tmpmon;
+      ios_base::iostate __tmperr = ios_base::goodbit;
+
+      __beg = _M_extract_wday_or_month(__beg, __end, __tmpmon, __months, 12,
+           __io, __tmperr);
+      if (!__tmperr)
+ __tm->tm_mon = __tmpmon;
+      else
+ __err |= ios_base::failbit;
+
+      if (__beg == __end)
+ __err |= ios_base::eofbit;
+      return __beg;
+    }
+
+  template<typename _CharT, typename _InIter>
+    _InIter
+    time_get<_CharT, _InIter>::
+    do_get_year(iter_type __beg, iter_type __end, ios_base& __io,
+  ios_base::iostate& __err, tm* __tm) const
+    {
+      int __tmpyear;
+      ios_base::iostate __tmperr = ios_base::goodbit;
+      const locale& __loc = __io._M_getloc();
+      const ctype<_CharT>& __ctype = use_facet<ctype<_CharT> >(__loc);
+
+      __beg = _M_extract_num(__beg, __end, __tmpyear, 0, 99, 2,
+        __io, __tmperr);
+      if (!__tmperr)
+ {
+   char __c = 0;
+   if (__beg != __end)
+     __c = __ctype.narrow(*__beg, '*');
+
+
+
+   if (__c >= '0' && __c <= '9')
+     {
+       ++__beg;
+       __tmpyear = __tmpyear * 10 + (__c - '0');
+       if (__beg != __end)
+  {
+    __c = __ctype.narrow(*__beg, '*');
+    if (__c >= '0' && __c <= '9')
+      {
+        ++__beg;
+        __tmpyear = __tmpyear * 10 + (__c - '0');
+      }
+  }
+       __tmpyear -= 1900;
+     }
+   else if (__tmpyear < 69)
+     __tmpyear += 100;
+   __tm->tm_year = __tmpyear;
+ }
+      else
+ __err |= ios_base::failbit;
+
+      if (__beg == __end)
+ __err |= ios_base::eofbit;
+      return __beg;
+    }
+
+
+  template<typename _CharT, typename _InIter>
+    inline
+    _InIter
+    time_get<_CharT, _InIter>::
+    get(iter_type __s, iter_type __end, ios_base& __io,
+        ios_base::iostate& __err, tm* __tm, const char_type* __fmt,
+        const char_type* __fmtend) const
+    {
+      const locale& __loc = __io._M_getloc();
+      ctype<_CharT> const& __ctype = use_facet<ctype<_CharT> >(__loc);
+      __err = ios_base::goodbit;
+      bool __use_state = false;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpmf-conversions"
+
+
+
+
+
+
+      if ((void*)(this->*(&time_get::do_get)) == (void*)(&time_get::do_get))
+ __use_state = true;
+#pragma GCC diagnostic pop
+
+      __time_get_state __state = __time_get_state();
+      while (__fmt != __fmtend &&
+             __err == ios_base::goodbit)
+        {
+          if (__s == __end)
+            {
+              __err = ios_base::eofbit | ios_base::failbit;
+              break;
+            }
+          else if (__ctype.narrow(*__fmt, 0) == '%')
+            {
+       const char_type* __fmt_start = __fmt;
+              char __format;
+              char __mod = 0;
+              if (++__fmt == __fmtend)
+                {
+                  __err = ios_base::failbit;
+                  break;
+                }
+              const char __c = __ctype.narrow(*__fmt, 0);
+              if (__c != 'E' && __c != 'O')
+                __format = __c;
+              else if (++__fmt != __fmtend)
+                {
+                  __mod = __c;
+                  __format = __ctype.narrow(*__fmt, 0);
+                }
+              else
+                {
+                  __err = ios_base::failbit;
+                  break;
+                }
+       if (__use_state)
+  {
+    char_type __new_fmt[4];
+    __new_fmt[0] = __fmt_start[0];
+    __new_fmt[1] = __fmt_start[1];
+    if (__mod)
+      {
+        __new_fmt[2] = __fmt_start[2];
+        __new_fmt[3] = char_type();
+      }
+    else
+      __new_fmt[2] = char_type();
+    __s = _M_extract_via_format(__s, __end, __io, __err, __tm,
+           __new_fmt, __state);
+    if (__s == __end)
+      __err |= ios_base::eofbit;
+  }
+       else
+  __s = this->do_get(__s, __end, __io, __err, __tm, __format,
+       __mod);
+              ++__fmt;
+            }
+          else if (__ctype.is(ctype_base::space, *__fmt))
+            {
+              ++__fmt;
+              while (__fmt != __fmtend &&
+                     __ctype.is(ctype_base::space, *__fmt))
+                ++__fmt;
+
+              while (__s != __end &&
+                     __ctype.is(ctype_base::space, *__s))
+                ++__s;
+            }
+
+          else if (__ctype.tolower(*__s) == __ctype.tolower(*__fmt) ||
+                   __ctype.toupper(*__s) == __ctype.toupper(*__fmt))
+            {
+              ++__s;
+              ++__fmt;
+            }
+          else
+            {
+              __err = ios_base::failbit;
+              break;
+            }
+        }
+      if (__use_state)
+ __state._M_finalize_state(__tm);
+      return __s;
+    }
+
+  template<typename _CharT, typename _InIter>
+    inline
+    _InIter
+    time_get<_CharT, _InIter>::
+    do_get(iter_type __beg, iter_type __end, ios_base& __io,
+           ios_base::iostate& __err, tm* __tm,
+           char __format, char __mod) const
+    {
+      const locale& __loc = __io._M_getloc();
+      ctype<_CharT> const& __ctype = use_facet<ctype<_CharT> >(__loc);
+      __err = ios_base::goodbit;
+
+      char_type __fmt[4];
+      __fmt[0] = __ctype.widen('%');
+      if (!__mod)
+        {
+          __fmt[1] = __format;
+          __fmt[2] = char_type();
+        }
+      else
+        {
+          __fmt[1] = __mod;
+          __fmt[2] = __format;
+          __fmt[3] = char_type();
+        }
+
+      __time_get_state __state = __time_get_state();
+      __beg = _M_extract_via_format(__beg, __end, __io, __err, __tm, __fmt,
+        __state);
+      __state._M_finalize_state(__tm);
+      if (__beg == __end)
+ __err |= ios_base::eofbit;
+      return __beg;
+    }
+
+
+
+  template<typename _CharT, typename _OutIter>
+    _OutIter
+    time_put<_CharT, _OutIter>::
+    put(iter_type __s, ios_base& __io, char_type __fill, const tm* __tm,
+ const _CharT* __beg, const _CharT* __end) const
+    {
+      const locale& __loc = __io._M_getloc();
+      ctype<_CharT> const& __ctype = use_facet<ctype<_CharT> >(__loc);
+      for (; __beg != __end; ++__beg)
+ if (__ctype.narrow(*__beg, 0) != '%')
+   {
+     *__s = *__beg;
+     ++__s;
+   }
+ else if (++__beg != __end)
+   {
+     char __format;
+     char __mod = 0;
+     const char __c = __ctype.narrow(*__beg, 0);
+     if (__c != 'E' && __c != 'O')
+       __format = __c;
+     else if (++__beg != __end)
+       {
+  __mod = __c;
+  __format = __ctype.narrow(*__beg, 0);
+       }
+     else
+       break;
+     __s = this->do_put(__s, __io, __fill, __tm, __format, __mod);
+   }
+ else
+   break;
+      return __s;
+    }
+
+  template<typename _CharT, typename _OutIter>
+    _OutIter
+    time_put<_CharT, _OutIter>::
+    do_put(iter_type __s, ios_base& __io, char_type, const tm* __tm,
+    char __format, char __mod) const
+    {
+      const locale& __loc = __io._M_getloc();
+      ctype<_CharT> const& __ctype = use_facet<ctype<_CharT> >(__loc);
+      __timepunct<_CharT> const& __tp = use_facet<__timepunct<_CharT> >(__loc);
+
+
+
+      const size_t __maxlen = 128;
+      char_type __res[__maxlen];
+
+
+
+
+
+
+      char_type __fmt[4];
+      __fmt[0] = __ctype.widen('%');
+      if (!__mod)
+ {
+   __fmt[1] = __format;
+   __fmt[2] = char_type();
+ }
+      else
+ {
+   __fmt[1] = __mod;
+   __fmt[2] = __format;
+   __fmt[3] = char_type();
+ }
+
+      __tp._M_put(__res, __maxlen, __fmt, __tm);
+
+
+      return std::__write(__s, __res, char_traits<char_type>::length(__res));
+    }
+
+
+
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wc++11-extensions"
+#pragma GCC diagnostic ignored "-Wlong-long"
+  extern template class moneypunct<char, false>;
+  extern template class moneypunct<char, true>;
+  extern template class moneypunct_byname<char, false>;
+  extern template class moneypunct_byname<char, true>;
+  extern template class __cxx11:: money_get<char>;
+  extern template class __cxx11:: money_put<char>;
+  extern template class __timepunct<char>;
+  extern template class time_put<char>;
+  extern template class time_put_byname<char>;
+  extern template class time_get<char>;
+  extern template class time_get_byname<char>;
+  extern template class messages<char>;
+  extern template class messages_byname<char>;
+
+  extern template
+    const moneypunct<char, true>*
+    __try_use_facet<moneypunct<char, true> >(const locale&) noexcept;
+
+  extern template
+    const moneypunct<char, false>*
+    __try_use_facet<moneypunct<char, false> >(const locale&) noexcept;
+
+  extern template
+    const money_put<char>*
+    __try_use_facet<money_put<char> >(const locale&) noexcept;
+
+  extern template
+    const money_get<char>*
+    __try_use_facet<money_get<char> >(const locale&) noexcept;
+
+  extern template
+    const __timepunct<char>*
+    __try_use_facet<__timepunct<char> >(const locale&) noexcept;
+
+  extern template
+    const time_put<char>*
+    __try_use_facet<time_put<char> >(const locale&) noexcept;
+
+  extern template
+    const time_get<char>*
+    __try_use_facet<time_get<char> >(const locale&) noexcept;
+
+  extern template
+    const messages<char>*
+    __try_use_facet<messages<char> >(const locale&) noexcept;
+
+  extern template
+    const moneypunct<char, true>&
+    use_facet<moneypunct<char, true> >(const locale&);
+
+  extern template
+    const moneypunct<char, false>&
+    use_facet<moneypunct<char, false> >(const locale&);
+
+  extern template
+    const money_put<char>&
+    use_facet<money_put<char> >(const locale&);
+
+  extern template
+    const money_get<char>&
+    use_facet<money_get<char> >(const locale&);
+
+  extern template
+    const __timepunct<char>&
+    use_facet<__timepunct<char> >(const locale&);
+
+  extern template
+    const time_put<char>&
+    use_facet<time_put<char> >(const locale&);
+
+  extern template
+    const time_get<char>&
+    use_facet<time_get<char> >(const locale&);
+
+  extern template
+    const messages<char>&
+    use_facet<messages<char> >(const locale&);
+
+  extern template
+    bool
+    has_facet<moneypunct<char> >(const locale&);
+
+  extern template
+    bool
+    has_facet<money_put<char> >(const locale&);
+
+  extern template
+    bool
+    has_facet<money_get<char> >(const locale&);
+
+  extern template
+    bool
+    has_facet<__timepunct<char> >(const locale&);
+
+  extern template
+    bool
+    has_facet<time_put<char> >(const locale&);
+
+  extern template
+    bool
+    has_facet<time_get<char> >(const locale&);
+
+  extern template
+    bool
+    has_facet<messages<char> >(const locale&);
+
+
+  extern template class moneypunct<wchar_t, false>;
+  extern template class moneypunct<wchar_t, true>;
+  extern template class moneypunct_byname<wchar_t, false>;
+  extern template class moneypunct_byname<wchar_t, true>;
+  extern template class __cxx11:: money_get<wchar_t>;
+  extern template class __cxx11:: money_put<wchar_t>;
+  extern template class __timepunct<wchar_t>;
+  extern template class time_put<wchar_t>;
+  extern template class time_put_byname<wchar_t>;
+  extern template class time_get<wchar_t>;
+  extern template class time_get_byname<wchar_t>;
+  extern template class messages<wchar_t>;
+  extern template class messages_byname<wchar_t>;
+
+  extern template
+    const moneypunct<wchar_t, true>*
+    __try_use_facet<moneypunct<wchar_t, true> >(const locale&) noexcept;
+
+  extern template
+    const moneypunct<wchar_t, false>*
+    __try_use_facet<moneypunct<wchar_t, false> >(const locale&) noexcept;
+
+  extern template
+    const money_put<wchar_t>*
+    __try_use_facet<money_put<wchar_t> >(const locale&) noexcept;
+
+  extern template
+    const money_get<wchar_t>*
+    __try_use_facet<money_get<wchar_t> >(const locale&) noexcept;
+
+  extern template
+    const __timepunct<wchar_t>*
+    __try_use_facet<__timepunct<wchar_t> >(const locale&) noexcept;
+
+  extern template
+    const time_put<wchar_t>*
+    __try_use_facet<time_put<wchar_t> >(const locale&) noexcept;
+
+  extern template
+    const time_get<wchar_t>*
+    __try_use_facet<time_get<wchar_t> >(const locale&) noexcept;
+
+  extern template
+    const messages<wchar_t>*
+    __try_use_facet<messages<wchar_t> >(const locale&) noexcept;
+
+  extern template
+    const moneypunct<wchar_t, true>&
+    use_facet<moneypunct<wchar_t, true> >(const locale&);
+
+  extern template
+    const moneypunct<wchar_t, false>&
+    use_facet<moneypunct<wchar_t, false> >(const locale&);
+
+  extern template
+    const money_put<wchar_t>&
+    use_facet<money_put<wchar_t> >(const locale&);
+
+  extern template
+    const money_get<wchar_t>&
+    use_facet<money_get<wchar_t> >(const locale&);
+
+  extern template
+    const __timepunct<wchar_t>&
+    use_facet<__timepunct<wchar_t> >(const locale&);
+
+  extern template
+    const time_put<wchar_t>&
+    use_facet<time_put<wchar_t> >(const locale&);
+
+  extern template
+    const time_get<wchar_t>&
+    use_facet<time_get<wchar_t> >(const locale&);
+
+  extern template
+    const messages<wchar_t>&
+    use_facet<messages<wchar_t> >(const locale&);
+
+  extern template
+    bool
+    has_facet<moneypunct<wchar_t> >(const locale&);
+
+  extern template
+    bool
+    has_facet<money_put<wchar_t> >(const locale&);
+
+  extern template
+    bool
+    has_facet<money_get<wchar_t> >(const locale&);
+
+  extern template
+    bool
+    has_facet<__timepunct<wchar_t> >(const locale&);
+
+  extern template
+    bool
+    has_facet<time_put<wchar_t> >(const locale&);
+
+  extern template
+    bool
+    has_facet<time_get<wchar_t> >(const locale&);
+
+  extern template
+    bool
+    has_facet<messages<wchar_t> >(const locale&);
+
+#pragma GCC diagnostic pop
+
+
+
+}
+# 2072 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_facets_nonio.h" 2 3
+# 46 "C:/msys64/mingw64/include/c++/15.2.0/locale" 2 3
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_conv.h" 1 3
+# 42 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_conv.h" 3
+namespace std
+{
+
+
+
+
+
+
+
+  template<typename _OutStr, typename _InChar, typename _Codecvt,
+    typename _State, typename _Fn>
+    bool
+    __do_str_codecvt(const _InChar* __first, const _InChar* __last,
+       _OutStr& __outstr, const _Codecvt& __cvt, _State& __state,
+       size_t& __count, _Fn __fn)
+    {
+      if (__first == __last)
+ {
+   __outstr.clear();
+   __count = 0;
+   return true;
+ }
+
+      size_t __outchars = 0;
+      auto __next = __first;
+      const auto __maxlen = __cvt.max_length() + 1;
+
+      codecvt_base::result __result;
+      do
+ {
+   __outstr.resize(__outstr.size() + (__last - __next) * __maxlen);
+   auto __outnext = &__outstr.front() + __outchars;
+   auto const __outlast = &__outstr.back() + 1;
+   __result = (__cvt.*__fn)(__state, __next, __last, __next,
+     __outnext, __outlast, __outnext);
+   __outchars = __outnext - &__outstr.front();
+ }
+      while (__result == codecvt_base::partial && __next != __last
+      && ptrdiff_t(__outstr.size() - __outchars) < __maxlen);
+
+      if (__result == codecvt_base::error)
+ {
+   __count = __next - __first;
+   return false;
+ }
+
+
+
+      if constexpr (is_same<typename _Codecvt::intern_type,
+           typename _Codecvt::extern_type>())
+ if (__result == codecvt_base::noconv)
+   {
+     __outstr.assign(__first, __last);
+     __count = __last - __first;
+     return true;
+   }
+
+      __outstr.resize(__outchars);
+      __count = __next - __first;
+      return true;
+    }
+
+
+  template<typename _CharT, typename _Traits, typename _Alloc, typename _State>
+    inline bool
+    __str_codecvt_in(const char* __first, const char* __last,
+       basic_string<_CharT, _Traits, _Alloc>& __outstr,
+       const codecvt<_CharT, char, _State>& __cvt,
+       _State& __state, size_t& __count)
+    {
+      using _Codecvt = codecvt<_CharT, char, _State>;
+      using _ConvFn
+ = codecvt_base::result
+   (_Codecvt::*)(_State&, const char*, const char*, const char*&,
+   _CharT*, _CharT*, _CharT*&) const;
+      _ConvFn __fn = &codecvt<_CharT, char, _State>::in;
+      return __do_str_codecvt(__first, __last, __outstr, __cvt, __state,
+         __count, __fn);
+    }
+
+
+  template<typename _CharT, typename _Traits, typename _Alloc, typename _State>
+    inline bool
+    __str_codecvt_in(const char* __first, const char* __last,
+       basic_string<_CharT, _Traits, _Alloc>& __outstr,
+       const codecvt<_CharT, char, _State>& __cvt)
+    {
+      _State __state = {};
+      size_t __n;
+      return __str_codecvt_in(__first, __last, __outstr, __cvt, __state, __n);
+    }
+
+
+  template<typename _CharT, typename _Traits, typename _Alloc, typename _State>
+    inline bool
+    __str_codecvt_in_all(const char* __first, const char* __last,
+    basic_string<_CharT, _Traits, _Alloc>& __outstr,
+    const codecvt<_CharT, char, _State>& __cvt)
+    {
+      _State __state = {};
+      size_t __n;
+      return __str_codecvt_in(__first, __last, __outstr, __cvt, __state, __n)
+ && (__n == size_t(__last - __first));
+    }
+
+
+  template<typename _CharT, typename _Traits, typename _Alloc, typename _State>
+    inline bool
+    __str_codecvt_out(const _CharT* __first, const _CharT* __last,
+        basic_string<char, _Traits, _Alloc>& __outstr,
+        const codecvt<_CharT, char, _State>& __cvt,
+        _State& __state, size_t& __count)
+    {
+      using _Codecvt = codecvt<_CharT, char, _State>;
+      using _ConvFn
+ = codecvt_base::result
+   (_Codecvt::*)(_State&, const _CharT*, const _CharT*, const _CharT*&,
+   char*, char*, char*&) const;
+      _ConvFn __fn = &codecvt<_CharT, char, _State>::out;
+      return __do_str_codecvt(__first, __last, __outstr, __cvt, __state,
+         __count, __fn);
+    }
+
+
+  template<typename _CharT, typename _Traits, typename _Alloc, typename _State>
+    inline bool
+    __str_codecvt_out(const _CharT* __first, const _CharT* __last,
+        basic_string<char, _Traits, _Alloc>& __outstr,
+        const codecvt<_CharT, char, _State>& __cvt)
+    {
+      _State __state = {};
+      size_t __n;
+      return __str_codecvt_out(__first, __last, __outstr, __cvt, __state, __n);
+    }
+
+
+  template<typename _CharT, typename _Traits, typename _Alloc, typename _State>
+    inline bool
+    __str_codecvt_out_all(const _CharT* __first, const _CharT* __last,
+     basic_string<char, _Traits, _Alloc>& __outstr,
+     const codecvt<_CharT, char, _State>& __cvt)
+    {
+      _State __state = {};
+      size_t __n;
+      return __str_codecvt_out(__first, __last, __outstr, __cvt, __state, __n)
+ && (__n == size_t(__last - __first));
+    }
+
+
+
+
+  template<typename _CharT, typename _Traits, typename _Alloc, typename _State>
+    inline bool
+    __str_codecvt_out(const _CharT* __first, const _CharT* __last,
+        basic_string<char8_t, _Traits, _Alloc>& __outstr,
+        const codecvt<_CharT, char8_t, _State>& __cvt,
+        _State& __state, size_t& __count)
+    {
+      using _Codecvt = codecvt<_CharT, char8_t, _State>;
+      using _ConvFn
+ = codecvt_base::result
+   (_Codecvt::*)(_State&, const _CharT*, const _CharT*, const _CharT*&,
+   char8_t*, char8_t*, char8_t*&) const;
+      _ConvFn __fn = &codecvt<_CharT, char8_t, _State>::out;
+      return __do_str_codecvt(__first, __last, __outstr, __cvt, __state,
+         __count, __fn);
+    }
+
+  template<typename _CharT, typename _Traits, typename _Alloc, typename _State>
+    inline bool
+    __str_codecvt_out(const _CharT* __first, const _CharT* __last,
+        basic_string<char8_t, _Traits, _Alloc>& __outstr,
+        const codecvt<_CharT, char8_t, _State>& __cvt)
+    {
+      _State __state = {};
+      size_t __n;
+      return __str_codecvt_out(__first, __last, __outstr, __cvt, __state, __n);
+    }
+
+
+
+  namespace __detail
+  {
+    template<typename _Tp>
+      struct _Scoped_ptr
+      {
+ __attribute__((__nonnull__(2)))
+ explicit
+ _Scoped_ptr(_Tp* __ptr) noexcept
+ : _M_ptr(__ptr)
+ { }
+
+ _Scoped_ptr(_Tp* __ptr, const char* __msg)
+ : _M_ptr(__ptr)
+ {
+   if (!__ptr)
+     __throw_logic_error(__msg);
+ }
+
+ ~_Scoped_ptr() { delete _M_ptr; }
+
+ _Scoped_ptr(const _Scoped_ptr&) = delete;
+ _Scoped_ptr& operator=(const _Scoped_ptr&) = delete;
+
+ __attribute__((__returns_nonnull__))
+ _Tp* operator->() const noexcept { return _M_ptr; }
+
+ _Tp& operator*() const noexcept { return *_M_ptr; }
+
+      private:
+ _Tp* _M_ptr;
+      };
+  }
+
+namespace __cxx11 {
+
+
+  template<typename _Codecvt, typename _Elem = wchar_t,
+    typename _Wide_alloc = allocator<_Elem>,
+    typename _Byte_alloc = allocator<char>>
+    class [[__deprecated__]] wstring_convert
+    {
+    public:
+      typedef basic_string<char, char_traits<char>, _Byte_alloc> byte_string;
+      typedef basic_string<_Elem, char_traits<_Elem>, _Wide_alloc> wide_string;
+      typedef typename _Codecvt::state_type state_type;
+      typedef typename wide_string::traits_type::int_type int_type;
+
+
+      wstring_convert() : _M_cvt(new _Codecvt()) { }
+
+
+
+
+
+
+
+      explicit
+      wstring_convert(_Codecvt* __pcvt) : _M_cvt(__pcvt, "wstring_convert")
+      { }
+# 291 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_conv.h" 3
+      wstring_convert(_Codecvt* __pcvt, state_type __state)
+      : _M_cvt(__pcvt, "std::wstring_convert"),
+ _M_state(__state), _M_with_cvtstate(true)
+      { }
+
+
+
+
+
+
+      explicit
+      wstring_convert(const byte_string& __byte_err,
+        const wide_string& __wide_err = wide_string())
+      : _M_cvt(new _Codecvt),
+ _M_byte_err_string(__byte_err), _M_wide_err_string(__wide_err),
+ _M_with_strings(true)
+      { }
+
+      ~wstring_convert() = default;
+
+
+
+      wstring_convert(const wstring_convert&) = delete;
+      wstring_convert& operator=(const wstring_convert&) = delete;
+
+
+      wide_string
+      from_bytes(char __byte)
+      {
+ char __bytes[2] = { __byte };
+ return from_bytes(__bytes, __bytes+1);
+      }
+
+      wide_string
+      from_bytes(const char* __ptr)
+      { return from_bytes(__ptr, __ptr+char_traits<char>::length(__ptr)); }
+
+      wide_string
+      from_bytes(const byte_string& __str)
+      {
+ auto __ptr = __str.data();
+ return from_bytes(__ptr, __ptr + __str.size());
+      }
+
+      wide_string
+      from_bytes(const char* __first, const char* __last)
+      {
+ if (!_M_with_cvtstate)
+   _M_state = state_type();
+ wide_string __out{ _M_wide_err_string.get_allocator() };
+ if (__str_codecvt_in(__first, __last, __out, *_M_cvt, _M_state,
+        _M_count))
+   return __out;
+ if (_M_with_strings)
+   return _M_wide_err_string;
+ __throw_range_error("wstring_convert::from_bytes");
+      }
+
+
+
+      byte_string
+      to_bytes(_Elem __wchar)
+      {
+ _Elem __wchars[2] = { __wchar };
+ return to_bytes(__wchars, __wchars+1);
+      }
+
+      byte_string
+      to_bytes(const _Elem* __ptr)
+      {
+ return to_bytes(__ptr, __ptr+wide_string::traits_type::length(__ptr));
+      }
+
+      byte_string
+      to_bytes(const wide_string& __wstr)
+      {
+ auto __ptr = __wstr.data();
+ return to_bytes(__ptr, __ptr + __wstr.size());
+      }
+
+      byte_string
+      to_bytes(const _Elem* __first, const _Elem* __last)
+      {
+ if (!_M_with_cvtstate)
+   _M_state = state_type();
+ byte_string __out{ _M_byte_err_string.get_allocator() };
+ if (__str_codecvt_out(__first, __last, __out, *_M_cvt, _M_state,
+         _M_count))
+   return __out;
+ if (_M_with_strings)
+   return _M_byte_err_string;
+ __throw_range_error("wstring_convert::to_bytes");
+      }
+
+
+
+
+
+      size_t converted() const noexcept { return _M_count; }
+
+
+      state_type state() const { return _M_state; }
+
+    private:
+      __detail::_Scoped_ptr<_Codecvt> _M_cvt;
+      byte_string _M_byte_err_string;
+      wide_string _M_wide_err_string;
+      state_type _M_state = state_type();
+      size_t _M_count = 0;
+      bool _M_with_cvtstate = false;
+      bool _M_with_strings = false;
+    };
+
+}
+
+
+  template<typename _Codecvt, typename _Elem = wchar_t,
+    typename _Tr = char_traits<_Elem>>
+    class [[__deprecated__]] wbuffer_convert
+    : public basic_streambuf<_Elem, _Tr>
+    {
+      typedef basic_streambuf<_Elem, _Tr> _Wide_streambuf;
+
+    public:
+      typedef typename _Codecvt::state_type state_type;
+
+
+      wbuffer_convert() : wbuffer_convert(nullptr) { }
+# 428 "C:/msys64/mingw64/include/c++/15.2.0/bits/locale_conv.h" 3
+      explicit
+      wbuffer_convert(streambuf* __bytebuf, _Codecvt* __pcvt = new _Codecvt,
+        state_type __state = state_type())
+      : _M_buf(__bytebuf), _M_cvt(__pcvt, "std::wbuffer_convert"),
+ _M_state(__state), _M_always_noconv(_M_cvt->always_noconv())
+      {
+ if (_M_buf)
+   {
+     this->setp(_M_put_area, _M_put_area + _S_buffer_length);
+     this->setg(_M_get_area + _S_putback_length,
+         _M_get_area + _S_putback_length,
+         _M_get_area + _S_putback_length);
+   }
+      }
+
+      ~wbuffer_convert() = default;
+
+
+
+      wbuffer_convert(const wbuffer_convert&) = delete;
+      wbuffer_convert& operator=(const wbuffer_convert&) = delete;
+
+      streambuf* rdbuf() const noexcept { return _M_buf; }
+
+      streambuf*
+      rdbuf(streambuf *__bytebuf) noexcept
+      {
+ auto __prev = _M_buf;
+ _M_buf = __bytebuf;
+ return __prev;
+      }
+
+
+      state_type state() const noexcept { return _M_state; }
+
+    protected:
+      int
+      sync()
+      { return _M_buf && _M_conv_put() && !_M_buf->pubsync() ? 0 : -1; }
+
+      typename _Wide_streambuf::int_type
+      overflow(typename _Wide_streambuf::int_type __out)
+      {
+ if (!_M_buf || !_M_conv_put())
+   return _Tr::eof();
+ else if (!_Tr::eq_int_type(__out, _Tr::eof()))
+   return this->sputc(__out);
+ return _Tr::not_eof(__out);
+      }
+
+      typename _Wide_streambuf::int_type
+      underflow()
+      {
+ if (!_M_buf)
+   return _Tr::eof();
+
+ if (this->gptr() < this->egptr() || (_M_buf && _M_conv_get()))
+   return _Tr::to_int_type(*this->gptr());
+ else
+   return _Tr::eof();
+      }
+
+      streamsize
+      xsputn(const typename _Wide_streambuf::char_type* __s, streamsize __n)
+      {
+ if (!_M_buf || __n == 0)
+   return 0;
+ streamsize __done = 0;
+ do
+ {
+   auto __nn = std::min<streamsize>(this->epptr() - this->pptr(),
+        __n - __done);
+   _Tr::copy(this->pptr(), __s + __done, __nn);
+   this->pbump(__nn);
+   __done += __nn;
+ } while (__done < __n && _M_conv_put());
+ return __done;
+      }
+
+    private:
+
+      bool
+      _M_conv_get()
+      {
+ const streamsize __pb1 = this->gptr() - this->eback();
+ const streamsize __pb2 = _S_putback_length;
+ const streamsize __npb = std::min(__pb1, __pb2);
+
+ _Tr::move(_M_get_area + _S_putback_length - __npb,
+    this->gptr() - __npb, __npb);
+
+ streamsize __nbytes = sizeof(_M_get_buf) - _M_unconv;
+ __nbytes = std::min(__nbytes, _M_buf->in_avail());
+ if (__nbytes < 1)
+   __nbytes = 1;
+ __nbytes = _M_buf->sgetn(_M_get_buf + _M_unconv, __nbytes);
+ if (__nbytes < 1)
+   return false;
+ __nbytes += _M_unconv;
+
+
+
+ _Elem* __outbuf = _M_get_area + _S_putback_length;
+ _Elem* __outnext = __outbuf;
+ const char* __bnext = _M_get_buf;
+
+ codecvt_base::result __result;
+ if (_M_always_noconv)
+   __result = codecvt_base::noconv;
+ else
+   {
+     _Elem* __outend = _M_get_area + _S_buffer_length;
+
+     __result = _M_cvt->in(_M_state,
+      __bnext, __bnext + __nbytes, __bnext,
+      __outbuf, __outend, __outnext);
+   }
+
+ if (__result == codecvt_base::noconv)
+   {
+
+     auto __get_buf = reinterpret_cast<const _Elem*>(_M_get_buf);
+     _Tr::copy(__outbuf, __get_buf, __nbytes);
+     _M_unconv = 0;
+     return true;
+   }
+
+ if ((_M_unconv = _M_get_buf + __nbytes - __bnext))
+   char_traits<char>::move(_M_get_buf, __bnext, _M_unconv);
+
+ this->setg(__outbuf, __outbuf, __outnext);
+
+ return __result != codecvt_base::error;
+      }
+
+
+      bool
+      _M_put(...)
+      { return false; }
+
+      bool
+      _M_put(const char* __p, streamsize __n)
+      {
+ if (_M_buf->sputn(__p, __n) < __n)
+   return false;
+ return true;
+      }
+
+
+      bool
+      _M_conv_put()
+      {
+ _Elem* const __first = this->pbase();
+ const _Elem* const __last = this->pptr();
+ const streamsize __pending = __last - __first;
+
+ if (_M_always_noconv)
+   return _M_put(__first, __pending);
+
+ char __outbuf[2 * _S_buffer_length];
+
+ const _Elem* __next = __first;
+ const _Elem* __start;
+ do
+   {
+     __start = __next;
+     char* __outnext = __outbuf;
+     char* const __outlast = __outbuf + sizeof(__outbuf);
+     auto __result = _M_cvt->out(_M_state, __next, __last, __next,
+     __outnext, __outlast, __outnext);
+     if (__result == codecvt_base::error)
+       return false;
+     else if (__result == codecvt_base::noconv)
+       return _M_put(__next, __pending);
+
+     if (!_M_put(__outbuf, __outnext - __outbuf))
+       return false;
+   }
+ while (__next != __last && __next != __start);
+
+ if (__next != __last)
+   _Tr::move(__first, __next, __last - __next);
+
+ this->pbump(__first - __next);
+ return __next != __first;
+      }
+
+      streambuf* _M_buf;
+      __detail::_Scoped_ptr<_Codecvt> _M_cvt;
+      state_type _M_state;
+
+      static const streamsize _S_buffer_length = 32;
+      static const streamsize _S_putback_length = 3;
+      _Elem _M_put_area[_S_buffer_length];
+      _Elem _M_get_area[_S_buffer_length];
+      streamsize _M_unconv = 0;
+      char _M_get_buf[_S_buffer_length-_S_putback_length];
+      bool _M_always_noconv;
+    };
+
+
+
+
+}
+# 48 "C:/msys64/mingw64/include/c++/15.2.0/locale" 2 3
+# 50 "C:/msys64/mingw64/include/c++/15.2.0/format" 2 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/optional" 1 3
+# 40 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 41 "C:/msys64/mingw64/include/c++/15.2.0/optional" 2 3
+# 61 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+namespace std
+{
+
+
+
+
+
+
+
+  template<typename _Tp>
+    class optional;
+
+
+  struct nullopt_t
+  {
+
+
+
+
+
+    enum class _Construct { _Token };
+
+
+    explicit constexpr nullopt_t(_Construct) noexcept { }
+  };
+
+
+  inline constexpr nullopt_t nullopt { nullopt_t::_Construct::_Token };
+
+  template<typename _Fn> struct _Optional_func { _Fn& _M_f; };
+
+
+
+
+
+
+  class bad_optional_access : public exception
+  {
+  public:
+    bad_optional_access() = default;
+    virtual ~bad_optional_access() = default;
+
+    const char* what() const noexcept override
+    { return "bad optional access"; }
+  };
+
+
+  [[__noreturn__]] inline void
+  __throw_bad_optional_access()
+  { (throw (bad_optional_access())); }
+
+
+
+  template <typename _Tp>
+    struct _Optional_payload_base
+    {
+      using _Stored_type = remove_const_t<_Tp>;
+
+      _Optional_payload_base() = default;
+      ~_Optional_payload_base() = default;
+
+      template<typename... _Args>
+ constexpr
+ _Optional_payload_base(in_place_t __tag, _Args&&... __args)
+ : _M_payload(__tag, std::forward<_Args>(__args)...),
+   _M_engaged(true)
+ { }
+
+      template<typename _Up, typename... _Args>
+ constexpr
+ _Optional_payload_base(std::initializer_list<_Up> __il,
+          _Args&&... __args)
+ : _M_payload(__il, std::forward<_Args>(__args)...),
+   _M_engaged(true)
+ { }
+
+
+
+      constexpr
+      _Optional_payload_base(bool ,
+        const _Optional_payload_base& __other)
+      {
+ if (__other._M_engaged)
+   this->_M_construct(__other._M_get());
+      }
+
+
+
+      constexpr
+      _Optional_payload_base(bool ,
+        _Optional_payload_base&& __other)
+      {
+ if (__other._M_engaged)
+   this->_M_construct(std::move(__other._M_get()));
+      }
+
+
+
+      _Optional_payload_base(const _Optional_payload_base&) = default;
+
+
+
+      _Optional_payload_base(_Optional_payload_base&&) = default;
+
+      _Optional_payload_base&
+      operator=(const _Optional_payload_base&) = default;
+
+      _Optional_payload_base&
+      operator=(_Optional_payload_base&&) = default;
+
+
+      constexpr void
+      _M_copy_assign(const _Optional_payload_base& __other)
+      {
+ if (this->_M_engaged && __other._M_engaged)
+   this->_M_get() = __other._M_get();
+ else
+   {
+     if (__other._M_engaged)
+       this->_M_construct(__other._M_get());
+     else
+       this->_M_reset();
+   }
+      }
+
+
+      constexpr void
+      _M_move_assign(_Optional_payload_base&& __other)
+      noexcept(__and_v<is_nothrow_move_constructible<_Tp>,
+         is_nothrow_move_assignable<_Tp>>)
+      {
+ if (this->_M_engaged && __other._M_engaged)
+   this->_M_get() = std::move(__other._M_get());
+ else
+   {
+     if (__other._M_engaged)
+       this->_M_construct(std::move(__other._M_get()));
+     else
+       this->_M_reset();
+   }
+      }
+
+      struct _Empty_byte { };
+
+      template<typename _Up, bool = is_trivially_destructible_v<_Up>>
+ union _Storage
+ {
+   constexpr _Storage() noexcept : _M_empty() { }
+
+   template<typename... _Args>
+     constexpr
+     _Storage(in_place_t, _Args&&... __args)
+     : _M_value(std::forward<_Args>(__args)...)
+     { }
+
+   template<typename _Vp, typename... _Args>
+     constexpr
+     _Storage(std::initializer_list<_Vp> __il, _Args&&... __args)
+     : _M_value(__il, std::forward<_Args>(__args)...)
+     { }
+
+
+   template<typename _Fn, typename _Arg>
+     constexpr
+     _Storage(_Optional_func<_Fn> __f, _Arg&& __arg)
+     : _M_value(std::__invoke(std::forward<_Fn>(__f._M_f),
+         std::forward<_Arg>(__arg)))
+     { }
+
+
+
+   ~_Storage() = default;
+
+
+   constexpr
+   ~_Storage() requires (!is_trivially_destructible_v<_Up>)
+   { }
+
+   _Storage(const _Storage&) = default;
+   _Storage(_Storage&&) = default;
+   _Storage& operator=(const _Storage&) = default;
+   _Storage& operator=(_Storage&&) = default;
+
+
+   _Empty_byte _M_empty;
+   _Up _M_value;
+ };
+# 289 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+      _Storage<_Stored_type> _M_payload;
+
+      bool _M_engaged = false;
+
+      template<typename... _Args>
+ constexpr void
+ _M_construct(_Args&&... __args)
+ noexcept(is_nothrow_constructible_v<_Stored_type, _Args...>)
+ {
+   std::_Construct(std::__addressof(this->_M_payload._M_value),
+     std::forward<_Args>(__args)...);
+   this->_M_engaged = true;
+ }
+
+      constexpr void
+      _M_destroy() noexcept
+      {
+ _M_engaged = false;
+ _M_payload._M_value.~_Stored_type();
+      }
+
+
+      template<typename _Fn, typename _Up>
+ constexpr void
+ _M_apply(_Optional_func<_Fn> __f, _Up&& __x)
+ {
+   std::construct_at(std::__addressof(this->_M_payload),
+       __f, std::forward<_Up>(__x));
+   _M_engaged = true;
+ }
+
+
+
+
+
+
+      constexpr _Tp&
+      _M_get() noexcept
+      { return this->_M_payload._M_value; }
+
+      constexpr const _Tp&
+      _M_get() const noexcept
+      { return this->_M_payload._M_value; }
+
+
+      constexpr void
+      _M_reset() noexcept
+      {
+ if (this->_M_engaged)
+   _M_destroy();
+ else
+   this->_M_engaged = false;
+      }
+    };
+
+
+  template <typename _Tp,
+     bool =
+       is_trivially_destructible_v<_Tp>,
+     bool =
+       is_trivially_copy_assignable_v<_Tp>
+       && is_trivially_copy_constructible_v<_Tp>,
+     bool =
+       is_trivially_move_assignable_v<_Tp>
+       && is_trivially_move_constructible_v<_Tp>>
+    struct _Optional_payload;
+
+
+  template <typename _Tp>
+    struct _Optional_payload<_Tp, true, true, true>
+    : _Optional_payload_base<_Tp>
+    {
+      using _Optional_payload_base<_Tp>::_Optional_payload_base;
+
+      _Optional_payload() = default;
+    };
+
+
+  template <typename _Tp>
+    struct _Optional_payload<_Tp, true, false, true>
+    : _Optional_payload_base<_Tp>
+    {
+      using _Optional_payload_base<_Tp>::_Optional_payload_base;
+
+      _Optional_payload() = default;
+      ~_Optional_payload() = default;
+      _Optional_payload(const _Optional_payload&) = default;
+      _Optional_payload(_Optional_payload&&) = default;
+      _Optional_payload& operator=(_Optional_payload&&) = default;
+
+
+      constexpr
+      _Optional_payload&
+      operator=(const _Optional_payload& __other)
+      {
+ this->_M_copy_assign(__other);
+ return *this;
+      }
+    };
+
+
+  template <typename _Tp>
+    struct _Optional_payload<_Tp, true, true, false>
+    : _Optional_payload_base<_Tp>
+    {
+      using _Optional_payload_base<_Tp>::_Optional_payload_base;
+
+      _Optional_payload() = default;
+      ~_Optional_payload() = default;
+      _Optional_payload(const _Optional_payload&) = default;
+      _Optional_payload(_Optional_payload&&) = default;
+      _Optional_payload& operator=(const _Optional_payload&) = default;
+
+
+      constexpr
+      _Optional_payload&
+      operator=(_Optional_payload&& __other)
+      noexcept(__and_v<is_nothrow_move_constructible<_Tp>,
+         is_nothrow_move_assignable<_Tp>>)
+      {
+ this->_M_move_assign(std::move(__other));
+ return *this;
+      }
+    };
+
+
+  template <typename _Tp>
+    struct _Optional_payload<_Tp, true, false, false>
+    : _Optional_payload_base<_Tp>
+    {
+      using _Optional_payload_base<_Tp>::_Optional_payload_base;
+
+      _Optional_payload() = default;
+      ~_Optional_payload() = default;
+      _Optional_payload(const _Optional_payload&) = default;
+      _Optional_payload(_Optional_payload&&) = default;
+
+
+      constexpr
+      _Optional_payload&
+      operator=(const _Optional_payload& __other)
+      {
+ this->_M_copy_assign(__other);
+ return *this;
+      }
+
+
+      constexpr
+      _Optional_payload&
+      operator=(_Optional_payload&& __other)
+      noexcept(__and_v<is_nothrow_move_constructible<_Tp>,
+         is_nothrow_move_assignable<_Tp>>)
+      {
+ this->_M_move_assign(std::move(__other));
+ return *this;
+      }
+    };
+
+
+  template <typename _Tp, bool _Copy, bool _Move>
+    struct _Optional_payload<_Tp, false, _Copy, _Move>
+    : _Optional_payload<_Tp, true, false, false>
+    {
+
+      using _Optional_payload<_Tp, true, false, false>::_Optional_payload;
+      _Optional_payload() = default;
+      _Optional_payload(const _Optional_payload&) = default;
+      _Optional_payload(_Optional_payload&&) = default;
+      _Optional_payload& operator=(const _Optional_payload&) = default;
+      _Optional_payload& operator=(_Optional_payload&&) = default;
+
+
+      constexpr ~_Optional_payload() { this->_M_reset(); }
+    };
+# 482 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+  template<typename _Tp,
+    bool = is_trivially_copy_constructible_v<_Tp>,
+    bool = is_trivially_move_constructible_v<_Tp>>
+    struct _Optional_base
+    {
+
+      constexpr _Optional_base() = default;
+
+
+      template<typename... _Args,
+        enable_if_t<is_constructible_v<_Tp, _Args...>, bool> = false>
+ constexpr explicit
+ _Optional_base(in_place_t, _Args&&... __args)
+ : _M_payload(in_place, std::forward<_Args>(__args)...)
+ { }
+
+      template<typename _Up, typename... _Args,
+        enable_if_t<is_constructible_v<_Tp,
+           initializer_list<_Up>&,
+           _Args...>, bool> = false>
+ constexpr explicit
+ _Optional_base(in_place_t,
+         initializer_list<_Up> __il,
+         _Args&&... __args)
+ : _M_payload(in_place, __il, std::forward<_Args>(__args)...)
+ { }
+
+
+      constexpr
+      _Optional_base(const _Optional_base& __other)
+      noexcept(is_nothrow_copy_constructible_v<_Tp>)
+      : _M_payload(__other._M_payload._M_engaged, __other._M_payload)
+      { }
+
+      constexpr
+      _Optional_base(_Optional_base&& __other)
+      noexcept(is_nothrow_move_constructible_v<_Tp>)
+      : _M_payload(__other._M_payload._M_engaged,
+     std::move(__other._M_payload))
+      { }
+
+
+
+
+      constexpr _Optional_base(const _Optional_base&)
+ requires is_trivially_copy_constructible_v<_Tp> = default;
+
+      constexpr _Optional_base(_Optional_base&&)
+ requires is_trivially_move_constructible_v<_Tp> = default;
+
+
+
+      _Optional_base& operator=(const _Optional_base&) = default;
+      _Optional_base& operator=(_Optional_base&&) = default;
+
+      _Optional_payload<_Tp> _M_payload;
+
+    protected:
+
+      using _Stored_type = remove_const_t<_Tp>;
+
+
+
+      template<typename... _Args>
+ constexpr void
+ _M_construct(_Args&&... __args)
+ noexcept(is_nothrow_constructible_v<_Stored_type, _Args...>)
+ {
+   _M_payload._M_construct(std::forward<_Args>(__args)...);
+ }
+
+      constexpr void
+      _M_destruct() noexcept
+      { _M_payload._M_destroy(); }
+
+
+      constexpr void
+      _M_reset() noexcept
+      { _M_payload._M_reset(); }
+
+      constexpr bool _M_is_engaged() const noexcept
+      { return _M_payload._M_engaged; }
+
+
+      constexpr _Tp&
+      _M_get() noexcept
+      { return _M_payload._M_get(); }
+
+      constexpr const _Tp&
+      _M_get() const noexcept
+      { return _M_payload._M_get(); }
+    };
+# 746 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+  template<typename _Tp>
+    inline constexpr bool __is_optional_v = false;
+  template<typename _Tp>
+    inline constexpr bool __is_optional_v<optional<_Tp>> = true;
+
+  template<typename _Tp, typename _Wp>
+    using __converts_from_any_cvref = __or_<
+ is_constructible<_Tp, _Wp&>, is_convertible<_Wp&, _Tp>,
+ is_constructible<_Tp, _Wp>, is_convertible<_Wp, _Tp>,
+ is_constructible<_Tp, const _Wp&>, is_convertible<const _Wp&, _Tp>,
+ is_constructible<_Tp, const _Wp>, is_convertible<const _Wp, _Tp>
+      >;
+
+  template<typename _Tp, typename _Up>
+    using __converts_from_optional
+      = __converts_from_any_cvref<_Tp, optional<_Up>>;
+
+  template<typename _Tp, typename _Up>
+    using __assigns_from_optional =
+      __or_<is_assignable<_Tp&, const optional<_Up>&>,
+     is_assignable<_Tp&, optional<_Up>&>,
+     is_assignable<_Tp&, const optional<_Up>&&>,
+     is_assignable<_Tp&, optional<_Up>&&>>;
+# 777 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+  template<typename _Tp>
+    class optional
+    : private _Optional_base<_Tp>,
+      private _Enable_copy_move<
+
+ is_copy_constructible_v<_Tp>,
+
+ __and_v<is_copy_constructible<_Tp>, is_copy_assignable<_Tp>>,
+
+ is_move_constructible_v<_Tp>,
+
+ __and_v<is_move_constructible<_Tp>, is_move_assignable<_Tp>>,
+
+ optional<_Tp>>
+    {
+      static_assert(!is_same_v<remove_cv_t<_Tp>, nullopt_t>);
+      static_assert(!is_same_v<remove_cv_t<_Tp>, in_place_t>);
+      static_assert(is_object_v<_Tp> && !is_array_v<_Tp>);
+
+    private:
+      using _Base = _Optional_base<_Tp>;
+# 806 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+      template<typename _From, typename = remove_cv_t<_Tp>>
+ static constexpr bool __not_constructing_bool_from_optional
+   = true;
+
+
+
+      template<typename _From>
+ static constexpr bool
+ __not_constructing_bool_from_optional<_From, bool>
+   = !__is_optional_v<remove_cvref_t<_From>>;
+
+
+
+
+
+      template<typename _From, typename = remove_cv_t<_Tp>>
+ static constexpr bool __construct_from_contained_value
+   = !__converts_from_optional<_Tp, _From>::value;
+
+
+
+      template<typename _From>
+ static constexpr bool __construct_from_contained_value<_From, bool>
+   = true;
+# 859 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+    public:
+      using value_type = _Tp;
+
+      constexpr optional() noexcept { }
+
+      constexpr optional(nullopt_t) noexcept { }
+
+
+
+      template<typename _Up = remove_cv_t<_Tp>>
+ requires (!is_same_v<optional, remove_cvref_t<_Up>>)
+   && (!is_same_v<in_place_t, remove_cvref_t<_Up>>)
+   && is_constructible_v<_Tp, _Up>
+   && __not_constructing_bool_from_optional<_Up>
+ constexpr explicit(!is_convertible_v<_Up, _Tp>)
+ optional(_Up&& __t)
+ noexcept(is_nothrow_constructible_v<_Tp, _Up>)
+ : _Base(std::in_place, std::forward<_Up>(__t)) { }
+
+      template<typename _Up>
+ requires (!is_same_v<_Tp, _Up>)
+   && is_constructible_v<_Tp, const _Up&>
+   && __construct_from_contained_value<_Up>
+ constexpr explicit(!is_convertible_v<const _Up&, _Tp>)
+ optional(const optional<_Up>& __t)
+ noexcept(is_nothrow_constructible_v<_Tp, const _Up&>)
+ {
+   if (__t)
+     emplace(__t._M_get());
+ }
+
+      template<typename _Up>
+ requires (!is_same_v<_Tp, _Up>)
+   && is_constructible_v<_Tp, _Up>
+   && __construct_from_contained_value<_Up>
+ constexpr explicit(!is_convertible_v<_Up, _Tp>)
+ optional(optional<_Up>&& __t)
+ noexcept(is_nothrow_constructible_v<_Tp, _Up>)
+ {
+   if (__t)
+     emplace(std::move(__t._M_get()));
+ }
+
+      template<typename... _Args>
+ requires is_constructible_v<_Tp, _Args...>
+ explicit constexpr
+ optional(in_place_t, _Args&&... __args)
+ noexcept(is_nothrow_constructible_v<_Tp, _Args...>)
+ : _Base(std::in_place, std::forward<_Args>(__args)...)
+ { }
+
+      template<typename _Up, typename... _Args>
+ requires is_constructible_v<_Tp, initializer_list<_Up>&, _Args...>
+ explicit constexpr
+ optional(in_place_t, initializer_list<_Up> __il, _Args&&... __args)
+ noexcept(is_nothrow_constructible_v<_Tp, initializer_list<_Up>&,
+         _Args...>)
+ : _Base(std::in_place, __il, std::forward<_Args>(__args)...)
+ { }
+# 1010 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+      constexpr optional&
+      operator=(nullopt_t) noexcept
+      {
+ this->_M_reset();
+ return *this;
+      }
+
+      template<typename _Up = remove_cv_t<_Tp>>
+
+ requires (!is_same_v<optional, remove_cvref_t<_Up>>)
+   && (!(is_scalar_v<_Tp> && is_same_v<_Tp, decay_t<_Up>>))
+   && is_constructible_v<_Tp, _Up>
+   && is_assignable_v<_Tp&, _Up>
+ constexpr optional&
+# 1032 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+ operator=(_Up&& __u)
+ noexcept(__and_v<is_nothrow_constructible<_Tp, _Up>,
+    is_nothrow_assignable<_Tp&, _Up>>)
+ {
+   if (this->_M_is_engaged())
+     this->_M_get() = std::forward<_Up>(__u);
+   else
+     this->_M_construct(std::forward<_Up>(__u));
+
+   return *this;
+ }
+
+      template<typename _Up>
+
+ requires (!is_same_v<_Tp, _Up>)
+   && is_constructible_v<_Tp, const _Up&>
+   && is_assignable_v<_Tp&, const _Up&>
+   && (!__converts_from_optional<_Tp, _Up>::value)
+   && (!__assigns_from_optional<_Tp, _Up>::value)
+ constexpr optional&
+# 1060 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+ operator=(const optional<_Up>& __u)
+ noexcept(__and_v<is_nothrow_constructible<_Tp, const _Up&>,
+    is_nothrow_assignable<_Tp&, const _Up&>>)
+ {
+   if (__u)
+     {
+       if (this->_M_is_engaged())
+  this->_M_get() = __u._M_get();
+       else
+  this->_M_construct(__u._M_get());
+     }
+   else
+     {
+       this->_M_reset();
+     }
+   return *this;
+ }
+
+      template<typename _Up>
+
+ requires (!is_same_v<_Tp, _Up>)
+   && is_constructible_v<_Tp, _Up>
+   && is_assignable_v<_Tp&, _Up>
+   && (!__converts_from_optional<_Tp, _Up>::value)
+   && (!__assigns_from_optional<_Tp, _Up>::value)
+ constexpr optional&
+# 1094 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+ operator=(optional<_Up>&& __u)
+ noexcept(__and_v<is_nothrow_constructible<_Tp, _Up>,
+    is_nothrow_assignable<_Tp&, _Up>>)
+ {
+   if (__u)
+     {
+       if (this->_M_is_engaged())
+  this->_M_get() = std::move(__u._M_get());
+       else
+  this->_M_construct(std::move(__u._M_get()));
+     }
+   else
+     {
+       this->_M_reset();
+     }
+
+   return *this;
+ }
+
+      template<typename... _Args>
+ constexpr
+ enable_if_t<is_constructible_v<_Tp, _Args...>, _Tp&>
+ emplace(_Args&&... __args)
+ noexcept(is_nothrow_constructible_v<_Tp, _Args...>)
+ {
+   this->_M_reset();
+   this->_M_construct(std::forward<_Args>(__args)...);
+   return this->_M_get();
+ }
+
+      template<typename _Up, typename... _Args>
+ constexpr
+ enable_if_t<is_constructible_v<_Tp, initializer_list<_Up>&, _Args...>,
+      _Tp&>
+ emplace(initializer_list<_Up> __il, _Args&&... __args)
+ noexcept(is_nothrow_constructible_v<_Tp, initializer_list<_Up>&,
+         _Args...>)
+ {
+   this->_M_reset();
+   this->_M_construct(__il, std::forward<_Args>(__args)...);
+   return this->_M_get();
+ }
+
+
+
+
+      constexpr void
+      swap(optional& __other)
+      noexcept(is_nothrow_move_constructible_v<_Tp>
+        && is_nothrow_swappable_v<_Tp>)
+      {
+ using std::swap;
+
+ if (this->_M_is_engaged() && __other._M_is_engaged())
+   swap(this->_M_get(), __other._M_get());
+ else if (this->_M_is_engaged())
+   {
+     __other._M_construct(std::move(this->_M_get()));
+     this->_M_destruct();
+   }
+ else if (__other._M_is_engaged())
+   {
+     this->_M_construct(std::move(__other._M_get()));
+     __other._M_destruct();
+   }
+      }
+
+
+      constexpr const _Tp*
+      operator->() const noexcept
+      {
+ do { if (std::__is_constant_evaluated() && !bool(this->_M_is_engaged())) std::__glibcxx_assert_fail(); } while (false);
+ return std::__addressof(this->_M_get());
+      }
+
+      constexpr _Tp*
+      operator->() noexcept
+      {
+ do { if (std::__is_constant_evaluated() && !bool(this->_M_is_engaged())) std::__glibcxx_assert_fail(); } while (false);
+ return std::__addressof(this->_M_get());
+      }
+
+      constexpr const _Tp&
+      operator*() const& noexcept
+      {
+ do { if (std::__is_constant_evaluated() && !bool(this->_M_is_engaged())) std::__glibcxx_assert_fail(); } while (false);
+ return this->_M_get();
+      }
+
+      constexpr _Tp&
+      operator*()& noexcept
+      {
+ do { if (std::__is_constant_evaluated() && !bool(this->_M_is_engaged())) std::__glibcxx_assert_fail(); } while (false);
+ return this->_M_get();
+      }
+
+      constexpr _Tp&&
+      operator*()&& noexcept
+      {
+ do { if (std::__is_constant_evaluated() && !bool(this->_M_is_engaged())) std::__glibcxx_assert_fail(); } while (false);
+ return std::move(this->_M_get());
+      }
+
+      constexpr const _Tp&&
+      operator*() const&& noexcept
+      {
+ do { if (std::__is_constant_evaluated() && !bool(this->_M_is_engaged())) std::__glibcxx_assert_fail(); } while (false);
+ return std::move(this->_M_get());
+      }
+
+      constexpr explicit operator bool() const noexcept
+      { return this->_M_is_engaged(); }
+
+      constexpr bool has_value() const noexcept
+      { return this->_M_is_engaged(); }
+
+      constexpr const _Tp&
+      value() const&
+      {
+ if (this->_M_is_engaged())
+   return this->_M_get();
+ __throw_bad_optional_access();
+      }
+
+      constexpr _Tp&
+      value()&
+      {
+ if (this->_M_is_engaged())
+   return this->_M_get();
+ __throw_bad_optional_access();
+      }
+
+      constexpr _Tp&&
+      value()&&
+      {
+ if (this->_M_is_engaged())
+   return std::move(this->_M_get());
+ __throw_bad_optional_access();
+      }
+
+      constexpr const _Tp&&
+      value() const&&
+      {
+ if (this->_M_is_engaged())
+   return std::move(this->_M_get());
+ __throw_bad_optional_access();
+      }
+
+      template<typename _Up = remove_cv_t<_Tp>>
+ constexpr _Tp
+ value_or(_Up&& __u) const&
+ {
+   static_assert(is_copy_constructible_v<_Tp>);
+   static_assert(is_convertible_v<_Up&&, _Tp>);
+
+   if (this->_M_is_engaged())
+     return this->_M_get();
+   else
+     return static_cast<_Tp>(std::forward<_Up>(__u));
+ }
+
+      template<typename _Up = remove_cv_t<_Tp>>
+ constexpr _Tp
+ value_or(_Up&& __u) &&
+ {
+   static_assert(is_move_constructible_v<_Tp>);
+   static_assert(is_convertible_v<_Up&&, _Tp>);
+
+   if (this->_M_is_engaged())
+     return std::move(this->_M_get());
+   else
+     return static_cast<_Tp>(std::forward<_Up>(__u));
+ }
+
+
+
+
+      template<typename _Fn>
+ constexpr auto
+ and_then(_Fn&& __f) &
+ {
+   using _Up = remove_cvref_t<invoke_result_t<_Fn, _Tp&>>;
+   static_assert(__is_optional_v<remove_cvref_t<_Up>>,
+   "the function passed to std::optional<T>::and_then "
+   "must return a std::optional");
+   if (has_value())
+     return std::__invoke(std::forward<_Fn>(__f), _M_get());
+   else
+     return _Up();
+ }
+
+      template<typename _Fn>
+ constexpr auto
+ and_then(_Fn&& __f) const &
+ {
+   using _Up = remove_cvref_t<invoke_result_t<_Fn, const _Tp&>>;
+   static_assert(__is_optional_v<_Up>,
+   "the function passed to std::optional<T>::and_then "
+   "must return a std::optional");
+   if (has_value())
+     return std::__invoke(std::forward<_Fn>(__f), _M_get());
+   else
+     return _Up();
+ }
+
+      template<typename _Fn>
+ constexpr auto
+ and_then(_Fn&& __f) &&
+ {
+   using _Up = remove_cvref_t<invoke_result_t<_Fn, _Tp>>;
+   static_assert(__is_optional_v<remove_cvref_t<_Up>>,
+   "the function passed to std::optional<T>::and_then "
+   "must return a std::optional");
+   if (has_value())
+     return std::__invoke(std::forward<_Fn>(__f), std::move(_M_get()));
+   else
+     return _Up();
+ }
+
+      template<typename _Fn>
+ constexpr auto
+ and_then(_Fn&& __f) const &&
+ {
+   using _Up = remove_cvref_t<invoke_result_t<_Fn, const _Tp>>;
+   static_assert(__is_optional_v<remove_cvref_t<_Up>>,
+   "the function passed to std::optional<T>::and_then "
+   "must return a std::optional");
+   if (has_value())
+     return std::__invoke(std::forward<_Fn>(__f), std::move(_M_get()));
+   else
+     return _Up();
+ }
+
+      template<typename _Fn>
+ constexpr auto
+ transform(_Fn&& __f) &
+ {
+   using _Up = remove_cv_t<invoke_result_t<_Fn, _Tp&>>;
+   if (has_value())
+     return optional<_Up>(_Optional_func<_Fn>{__f}, _M_get());
+   else
+     return optional<_Up>();
+ }
+
+      template<typename _Fn>
+ constexpr auto
+ transform(_Fn&& __f) const &
+ {
+   using _Up = remove_cv_t<invoke_result_t<_Fn, const _Tp&>>;
+   if (has_value())
+     return optional<_Up>(_Optional_func<_Fn>{__f}, _M_get());
+   else
+     return optional<_Up>();
+ }
+
+      template<typename _Fn>
+ constexpr auto
+ transform(_Fn&& __f) &&
+ {
+   using _Up = remove_cv_t<invoke_result_t<_Fn, _Tp>>;
+   if (has_value())
+     return optional<_Up>(_Optional_func<_Fn>{__f}, std::move(_M_get()));
+   else
+     return optional<_Up>();
+ }
+
+      template<typename _Fn>
+ constexpr auto
+ transform(_Fn&& __f) const &&
+ {
+   using _Up = remove_cv_t<invoke_result_t<_Fn, const _Tp>>;
+   if (has_value())
+     return optional<_Up>(_Optional_func<_Fn>{__f}, std::move(_M_get()));
+   else
+     return optional<_Up>();
+ }
+
+      template<typename _Fn> requires invocable<_Fn> && copy_constructible<_Tp>
+ constexpr optional
+ or_else(_Fn&& __f) const&
+ {
+   using _Up = invoke_result_t<_Fn>;
+   static_assert(is_same_v<remove_cvref_t<_Up>, optional>,
+   "the function passed to std::optional<T>::or_else "
+   "must return a std::optional<T>");
+
+   if (has_value())
+     return *this;
+   else
+     return std::forward<_Fn>(__f)();
+ }
+
+      template<typename _Fn> requires invocable<_Fn> && move_constructible<_Tp>
+ constexpr optional
+ or_else(_Fn&& __f) &&
+ {
+   using _Up = invoke_result_t<_Fn>;
+   static_assert(is_same_v<remove_cvref_t<_Up>, optional>,
+   "the function passed to std::optional<T>::or_else "
+   "must return a std::optional<T>");
+
+   if (has_value())
+     return std::move(*this);
+   else
+     return std::forward<_Fn>(__f)();
+ }
+
+
+      constexpr void reset() noexcept { this->_M_reset(); }
+
+    private:
+      using _Base::_M_get;
+
+      template<typename _Up> friend class optional;
+
+
+      template<typename _Fn, typename _Value>
+ explicit constexpr
+ optional(_Optional_func<_Fn> __f, _Value&& __v)
+ {
+   this->_M_payload._M_apply(__f, std::forward<_Value>(__v));
+ }
+
+    };
+
+  template<typename _Tp>
+    using __optional_relop_t =
+      enable_if_t<is_convertible_v<_Tp, bool>, bool>;
+
+  template<typename _Tp, typename _Up>
+    using __optional_eq_t = __optional_relop_t<
+      decltype(std::declval<const _Tp&>() == std::declval<const _Up&>())
+      >;
+
+  template<typename _Tp, typename _Up>
+    using __optional_ne_t = __optional_relop_t<
+      decltype(std::declval<const _Tp&>() != std::declval<const _Up&>())
+      >;
+
+  template<typename _Tp, typename _Up>
+    using __optional_lt_t = __optional_relop_t<
+      decltype(std::declval<const _Tp&>() < std::declval<const _Up&>())
+      >;
+
+  template<typename _Tp, typename _Up>
+    using __optional_gt_t = __optional_relop_t<
+      decltype(std::declval<const _Tp&>() > std::declval<const _Up&>())
+      >;
+
+  template<typename _Tp, typename _Up>
+    using __optional_le_t = __optional_relop_t<
+      decltype(std::declval<const _Tp&>() <= std::declval<const _Up&>())
+      >;
+
+  template<typename _Tp, typename _Up>
+    using __optional_ge_t = __optional_relop_t<
+      decltype(std::declval<const _Tp&>() >= std::declval<const _Up&>())
+      >;
+
+
+  template<typename _Tp, typename _Up>
+    constexpr auto
+    operator==(const optional<_Tp>& __lhs, const optional<_Up>& __rhs)
+    -> __optional_eq_t<_Tp, _Up>
+    {
+      return static_cast<bool>(__lhs) == static_cast<bool>(__rhs)
+      && (!__lhs || *__lhs == *__rhs);
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr auto
+    operator!=(const optional<_Tp>& __lhs, const optional<_Up>& __rhs)
+    -> __optional_ne_t<_Tp, _Up>
+    {
+      return static_cast<bool>(__lhs) != static_cast<bool>(__rhs)
+ || (static_cast<bool>(__lhs) && *__lhs != *__rhs);
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr auto
+    operator<(const optional<_Tp>& __lhs, const optional<_Up>& __rhs)
+    -> __optional_lt_t<_Tp, _Up>
+    {
+      return static_cast<bool>(__rhs) && (!__lhs || *__lhs < *__rhs);
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr auto
+    operator>(const optional<_Tp>& __lhs, const optional<_Up>& __rhs)
+    -> __optional_gt_t<_Tp, _Up>
+    {
+      return static_cast<bool>(__lhs) && (!__rhs || *__lhs > *__rhs);
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr auto
+    operator<=(const optional<_Tp>& __lhs, const optional<_Up>& __rhs)
+    -> __optional_le_t<_Tp, _Up>
+    {
+      return !__lhs || (static_cast<bool>(__rhs) && *__lhs <= *__rhs);
+    }
+
+  template<typename _Tp, typename _Up>
+    constexpr auto
+    operator>=(const optional<_Tp>& __lhs, const optional<_Up>& __rhs)
+    -> __optional_ge_t<_Tp, _Up>
+    {
+      return !__rhs || (static_cast<bool>(__lhs) && *__lhs >= *__rhs);
+    }
+
+
+  template<typename _Tp, three_way_comparable_with<_Tp> _Up>
+    [[nodiscard]]
+    constexpr compare_three_way_result_t<_Tp, _Up>
+    operator<=>(const optional<_Tp>& __x, const optional<_Up>& __y)
+    {
+      return __x && __y ? *__x <=> *__y : bool(__x) <=> bool(__y);
+    }
+
+
+
+  template<typename _Tp>
+    [[nodiscard]]
+    constexpr bool
+    operator==(const optional<_Tp>& __lhs, nullopt_t) noexcept
+    { return !__lhs; }
+
+
+  template<typename _Tp>
+    [[nodiscard]]
+    constexpr strong_ordering
+    operator<=>(const optional<_Tp>& __x, nullopt_t) noexcept
+    { return bool(__x) <=> false; }
+# 1593 "C:/msys64/mingw64/include/c++/15.2.0/optional" 3
+  template<typename _Tp, typename _Up>
+    requires (!__is_optional_v<_Up>)
+    constexpr auto
+    operator== [[nodiscard]] (const optional<_Tp>& __lhs, const _Up& __rhs)
+    -> __optional_eq_t<_Tp, _Up>
+    { return __lhs && *__lhs == __rhs; }
+
+  template<typename _Tp, typename _Up>
+    requires (!__is_optional_v<_Tp>)
+    constexpr auto
+    operator== [[nodiscard]] (const _Tp& __lhs, const optional<_Up>& __rhs)
+    -> __optional_eq_t<_Tp, _Up>
+    { return __rhs && __lhs == *__rhs; }
+
+  template<typename _Tp, typename _Up>
+    requires (!__is_optional_v<_Up>)
+    constexpr auto
+    operator!= [[nodiscard]] (const optional<_Tp>& __lhs, const _Up& __rhs)
+    -> __optional_ne_t<_Tp, _Up>
+    { return !__lhs || *__lhs != __rhs; }
+
+  template<typename _Tp, typename _Up>
+    requires (!__is_optional_v<_Tp>)
+    constexpr auto
+    operator!= [[nodiscard]] (const _Tp& __lhs, const optional<_Up>& __rhs)
+    -> __optional_ne_t<_Tp, _Up>
+    { return !__rhs || __lhs != *__rhs; }
+
+  template<typename _Tp, typename _Up>
+    requires (!__is_optional_v<_Up>)
+    constexpr auto
+    operator< [[nodiscard]] (const optional<_Tp>& __lhs, const _Up& __rhs)
+    -> __optional_lt_t<_Tp, _Up>
+    { return !__lhs || *__lhs < __rhs; }
+
+  template<typename _Tp, typename _Up>
+    requires (!__is_optional_v<_Tp>)
+    constexpr auto
+    operator< [[nodiscard]] (const _Tp& __lhs, const optional<_Up>& __rhs)
+    -> __optional_lt_t<_Tp, _Up>
+    { return __rhs && __lhs < *__rhs; }
+
+  template<typename _Tp, typename _Up>
+    requires (!__is_optional_v<_Up>)
+    constexpr auto
+    operator> [[nodiscard]] (const optional<_Tp>& __lhs, const _Up& __rhs)
+    -> __optional_gt_t<_Tp, _Up>
+    { return __lhs && *__lhs > __rhs; }
+
+  template<typename _Tp, typename _Up>
+    requires (!__is_optional_v<_Tp>)
+    constexpr auto
+    operator> [[nodiscard]] (const _Tp& __lhs, const optional<_Up>& __rhs)
+    -> __optional_gt_t<_Tp, _Up>
+    { return !__rhs || __lhs > *__rhs; }
+
+  template<typename _Tp, typename _Up>
+    requires (!__is_optional_v<_Up>)
+    constexpr auto
+    operator<= [[nodiscard]] (const optional<_Tp>& __lhs, const _Up& __rhs)
+    -> __optional_le_t<_Tp, _Up>
+    { return !__lhs || *__lhs <= __rhs; }
+
+  template<typename _Tp, typename _Up>
+    requires (!__is_optional_v<_Tp>)
+    constexpr auto
+    operator<= [[nodiscard]] (const _Tp& __lhs, const optional<_Up>& __rhs)
+    -> __optional_le_t<_Tp, _Up>
+    { return __rhs && __lhs <= *__rhs; }
+
+  template<typename _Tp, typename _Up>
+    requires (!__is_optional_v<_Up>)
+    constexpr auto
+    operator>= [[nodiscard]] (const optional<_Tp>& __lhs, const _Up& __rhs)
+    -> __optional_ge_t<_Tp, _Up>
+    { return __lhs && *__lhs >= __rhs; }
+
+  template<typename _Tp, typename _Up>
+    requires (!__is_optional_v<_Tp>)
+    constexpr auto
+    operator>= [[nodiscard]] (const _Tp& __lhs, const optional<_Up>& __rhs)
+    -> __optional_ge_t<_Tp, _Up>
+    { return !__rhs || __lhs >= *__rhs; }
+
+
+
+
+
+  template<typename _Tp>
+    concept __is_derived_from_optional = requires (const _Tp& __t) {
+      []<typename _Up>(const optional<_Up>&){ }(__t);
+    };
+
+  template<typename _Tp, typename _Up>
+    requires (!__is_derived_from_optional<_Up>)
+      && requires { typename compare_three_way_result_t<_Tp, _Up>; }
+      && three_way_comparable_with<_Tp, _Up>
+    constexpr compare_three_way_result_t<_Tp, _Up>
+    operator<=> [[nodiscard]] (const optional<_Tp>& __x, const _Up& __v)
+    { return bool(__x) ? *__x <=> __v : strong_ordering::less; }
+
+
+
+
+
+
+  template<typename _Tp>
+    constexpr
+    inline enable_if_t<is_move_constructible_v<_Tp> && is_swappable_v<_Tp>>
+    swap(optional<_Tp>& __lhs, optional<_Tp>& __rhs)
+    noexcept(noexcept(__lhs.swap(__rhs)))
+    { __lhs.swap(__rhs); }
+
+  template<typename _Tp>
+    enable_if_t<!(is_move_constructible_v<_Tp> && is_swappable_v<_Tp>)>
+    swap(optional<_Tp>&, optional<_Tp>&) = delete;
+
+  template<typename _Tp>
+    constexpr
+    enable_if_t<is_constructible_v<decay_t<_Tp>, _Tp>,
+  optional<decay_t<_Tp>>>
+    make_optional(_Tp&& __t)
+    noexcept(is_nothrow_constructible_v<optional<decay_t<_Tp>>, _Tp>)
+    { return optional<decay_t<_Tp>>{ std::forward<_Tp>(__t) }; }
+
+  template<typename _Tp, typename... _Args>
+    constexpr
+    enable_if_t<is_constructible_v<_Tp, _Args...>,
+  optional<_Tp>>
+    make_optional(_Args&&... __args)
+    noexcept(is_nothrow_constructible_v<_Tp, _Args...>)
+    { return optional<_Tp>{ in_place, std::forward<_Args>(__args)... }; }
+
+  template<typename _Tp, typename _Up, typename... _Args>
+    constexpr
+    enable_if_t<is_constructible_v<_Tp, initializer_list<_Up>&, _Args...>,
+  optional<_Tp>>
+    make_optional(initializer_list<_Up> __il, _Args&&... __args)
+    noexcept(is_nothrow_constructible_v<_Tp, initializer_list<_Up>&, _Args...>)
+    { return optional<_Tp>{ in_place, __il, std::forward<_Args>(__args)... }; }
+
+
+
+  template<typename _Tp, typename _Up = remove_const_t<_Tp>>
+    struct __optional_hash
+
+    : public __hash_empty_base<_Up>
+
+    {
+
+
+
+
+
+      size_t
+      operator()(const optional<_Tp>& __t) const
+      noexcept(noexcept(hash<_Up>{}(*__t)))
+      {
+
+
+ constexpr size_t __magic_disengaged_hash = static_cast<size_t>(-3333);
+ return __t ? hash<_Up>{}(*__t) : __magic_disengaged_hash;
+      }
+    };
+
+  template<typename _Tp>
+    struct hash<optional<_Tp>>
+    : public __conditional_t<__is_hash_enabled_for<remove_const_t<_Tp>>,
+        __optional_hash<_Tp>,
+        __hash_not_enabled<_Tp>>
+    { };
+
+  template<typename _Tp>
+    struct __is_fast_hash<hash<optional<_Tp>>> : __is_fast_hash<hash<_Tp>>
+    { };
+
+
+
+
+  template <typename _Tp> optional(_Tp) -> optional<_Tp>;
+
+
+
+
+
+}
+# 51 "C:/msys64/mingw64/include/c++/15.2.0/format" 2 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/span" 1 3
+# 43 "C:/msys64/mingw64/include/c++/15.2.0/span" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 44 "C:/msys64/mingw64/include/c++/15.2.0/span" 2 3
+# 53 "C:/msys64/mingw64/include/c++/15.2.0/span" 3
+namespace std
+{
+
+
+  inline constexpr size_t dynamic_extent = static_cast<size_t>(-1);
+
+  template<typename _Type, size_t _Extent>
+    class span;
+
+  namespace __detail
+  {
+    template<typename _Tp>
+      inline constexpr bool __is_span = false;
+
+    template<typename _Tp, size_t _Num>
+      inline constexpr bool __is_span<span<_Tp, _Num>> = true;
+
+    template<typename _Tp>
+      inline constexpr bool __is_std_array = false;
+
+    template<typename _Tp, size_t _Num>
+      inline constexpr bool __is_std_array<std::array<_Tp, _Num>> = true;
+
+    template<size_t _Extent>
+      class __extent_storage
+      {
+      public:
+
+ constexpr
+ __extent_storage([[maybe_unused]] size_t __n) noexcept
+ { do { if (std::__is_constant_evaluated() && !bool(__n == _Extent)) std::__glibcxx_assert_fail(); } while (false); }
+
+
+ consteval
+ __extent_storage(integral_constant<size_t, _Extent>) noexcept
+ { }
+
+
+ template<size_t _Gob>
+   __extent_storage(integral_constant<size_t, _Gob>) = delete;
+
+ [[__gnu__::__always_inline__]]
+ static constexpr size_t
+ _M_extent() noexcept
+ { return _Extent; }
+      };
+
+    template<>
+      class __extent_storage<dynamic_extent>
+      {
+      public:
+ [[__gnu__::__always_inline__]]
+ constexpr
+ __extent_storage(size_t __extent) noexcept
+ : _M_extent_value(__extent)
+ { }
+
+ [[__gnu__::__always_inline__]]
+ constexpr size_t
+ _M_extent() const noexcept
+ { return this->_M_extent_value; }
+
+      private:
+ size_t _M_extent_value;
+      };
+
+    template<typename _Type> struct __span_ptr { _Type* const _M_ptr; };
+
+  }
+
+  template<typename _Type, size_t _Extent = dynamic_extent>
+    class span
+    {
+      template<size_t _Offset, size_t _Count>
+ static constexpr size_t
+ _S_subspan_extent()
+ {
+   if constexpr (_Count != dynamic_extent)
+     return _Count;
+   else if constexpr (extent != dynamic_extent)
+     return _Extent - _Offset;
+   else
+     return dynamic_extent;
+ }
+
+
+
+      template<typename _Tp, size_t _ArrayExtent>
+ requires (_Extent == dynamic_extent || _ArrayExtent == _Extent)
+ using __is_compatible_array = __is_array_convertible<_Type, _Tp>;
+
+      template<typename _Ref>
+ using __is_compatible_ref
+   = __is_array_convertible<_Type, remove_reference_t<_Ref>>;
+
+
+      struct __iter_tag;
+
+      template<size_t _Nm>
+ static inline constexpr integral_constant<size_t, _Nm> __v{};
+
+    public:
+
+      using element_type = _Type;
+      using value_type = remove_cv_t<_Type>;
+      using size_type = size_t;
+      using difference_type = ptrdiff_t;
+      using pointer = _Type*;
+      using const_pointer = const _Type*;
+      using reference = element_type&;
+      using const_reference = const element_type&;
+      using iterator = __gnu_cxx::__normal_iterator<pointer, __iter_tag>;
+      using reverse_iterator = std::reverse_iterator<iterator>;
+
+      using const_iterator = std::const_iterator<iterator>;
+      using const_reverse_iterator = std::const_iterator<reverse_iterator>;
+
+
+
+      static constexpr size_t extent = _Extent;
+
+
+
+      constexpr
+      span() noexcept
+      requires (_Extent == dynamic_extent || _Extent == 0)
+      : _M_ptr(nullptr), _M_extent(__v<0>)
+      { }
+
+      template<contiguous_iterator _It>
+ requires __is_compatible_ref<iter_reference_t<_It>>::value
+ constexpr explicit(extent != dynamic_extent)
+ span(_It __first, size_type __count)
+ noexcept
+ : _M_ptr(std::to_address(__first)), _M_extent(__count)
+ { ; }
+
+      template<contiguous_iterator _It, sized_sentinel_for<_It> _End>
+ requires __is_compatible_ref<iter_reference_t<_It>>::value
+   && (!is_convertible_v<_End, size_type>)
+ constexpr explicit(extent != dynamic_extent)
+ span(_It __first, _End __last)
+ noexcept(noexcept(__last - __first))
+ : _M_ptr(std::to_address(__first)),
+   _M_extent(static_cast<size_type>(__last - __first))
+ { ; }
+
+      template<size_t _ArrayExtent>
+ requires (_Extent == dynamic_extent || _ArrayExtent == _Extent)
+ constexpr
+ span(type_identity_t<element_type> (&__arr)[_ArrayExtent]) noexcept
+ : _M_ptr(__arr), _M_extent(__v<_ArrayExtent>)
+ { }
+
+      template<typename _Tp, size_t _ArrayExtent>
+ requires __is_compatible_array<_Tp, _ArrayExtent>::value
+ constexpr
+ span(array<_Tp, _ArrayExtent>& __arr) noexcept
+ : _M_ptr(__arr.data()), _M_extent(__v<_ArrayExtent>)
+ { }
+
+      template<typename _Tp, size_t _ArrayExtent>
+ requires __is_compatible_array<const _Tp, _ArrayExtent>::value
+ constexpr
+ span(const array<_Tp, _ArrayExtent>& __arr) noexcept
+ : _M_ptr(__arr.data()), _M_extent(__v<_ArrayExtent>)
+ { }
+
+      template<typename _Range>
+ requires (!__detail::__is_span<remove_cvref_t<_Range>>)
+   && (!__detail::__is_std_array<remove_cvref_t<_Range>>)
+   && (!is_array_v<remove_cvref_t<_Range>>)
+   && ranges::contiguous_range<_Range> && ranges::sized_range<_Range>
+   && (ranges::borrowed_range<_Range> || is_const_v<element_type>)
+   && __is_compatible_ref<ranges::range_reference_t<_Range>>::value
+ constexpr explicit(extent != dynamic_extent)
+ span(_Range&& __range)
+ noexcept(noexcept(ranges::data(__range))
+    && noexcept(ranges::size(__range)))
+ : _M_ptr(ranges::data(__range)), _M_extent(ranges::size(__range))
+ { }
+# 247 "C:/msys64/mingw64/include/c++/15.2.0/span" 3
+      constexpr
+      span(const span&) noexcept = default;
+
+      template<typename _OType, size_t _OExtent>
+ requires (_Extent == dynamic_extent || _OExtent == dynamic_extent
+    || _Extent == _OExtent)
+   && (__is_array_convertible<_Type, _OType>::value)
+ constexpr
+ explicit(extent != dynamic_extent && _OExtent == dynamic_extent)
+ span(const span<_OType, _OExtent>& __s) noexcept
+ : _M_ptr(__s.data()), _M_extent(__s.size())
+ { }
+
+      constexpr span&
+      operator=(const span&) noexcept = default;
+
+
+
+      [[nodiscard]]
+      constexpr size_type
+      size() const noexcept
+      { return this->_M_extent._M_extent(); }
+
+      [[nodiscard]]
+      constexpr size_type
+      size_bytes() const noexcept
+      { return this->_M_extent._M_extent() * sizeof(element_type); }
+
+      [[nodiscard]]
+      constexpr bool
+      empty() const noexcept
+      { return size() == 0; }
+
+
+
+      [[nodiscard]]
+      constexpr reference
+      front() const noexcept
+      {
+ do { if (std::__is_constant_evaluated() && !bool(!empty())) std::__glibcxx_assert_fail(); } while (false);
+ return *this->_M_ptr;
+      }
+
+      [[nodiscard]]
+      constexpr reference
+      back() const noexcept
+      {
+ do { if (std::__is_constant_evaluated() && !bool(!empty())) std::__glibcxx_assert_fail(); } while (false);
+ return *(this->_M_ptr + (size() - 1));
+      }
+
+      [[nodiscard]]
+      constexpr reference
+      operator[](size_type __idx) const noexcept
+      {
+ do { if (std::__is_constant_evaluated() && !bool(__idx < size())) std::__glibcxx_assert_fail(); } while (false);
+ return *(this->_M_ptr + __idx);
+      }
+# 318 "C:/msys64/mingw64/include/c++/15.2.0/span" 3
+      [[nodiscard]]
+      constexpr pointer
+      data() const noexcept
+      { return this->_M_ptr; }
+
+
+
+      [[nodiscard]]
+      constexpr iterator
+      begin() const noexcept
+      { return iterator(this->_M_ptr); }
+
+      [[nodiscard]]
+      constexpr iterator
+      end() const noexcept
+      { return iterator(this->_M_ptr + this->size()); }
+
+      [[nodiscard]]
+      constexpr reverse_iterator
+      rbegin() const noexcept
+      { return reverse_iterator(this->end()); }
+
+      [[nodiscard]]
+      constexpr reverse_iterator
+      rend() const noexcept
+      { return reverse_iterator(this->begin()); }
+
+
+      [[nodiscard]]
+      constexpr const_iterator
+      cbegin() const noexcept
+      { return begin(); }
+
+      [[nodiscard]]
+      constexpr const_iterator
+      cend() const noexcept
+      { return end(); }
+
+      [[nodiscard]]
+      constexpr const_reverse_iterator
+      crbegin() const noexcept
+      { return rbegin(); }
+
+      [[nodiscard]]
+      constexpr const_reverse_iterator
+      crend() const noexcept
+      { return rend(); }
+
+
+
+
+      template<size_t _Count>
+ [[nodiscard]]
+ constexpr span<element_type, _Count>
+ first() const noexcept
+ {
+   if constexpr (_Extent == dynamic_extent)
+     do { if (std::__is_constant_evaluated() && !bool(_Count <= size())) std::__glibcxx_assert_fail(); } while (false);
+   else
+     static_assert(_Count <= extent);
+   using _Sp = span<element_type, _Count>;
+   return _Sp(_SizedPtr{this->data()});
+ }
+
+      [[nodiscard]]
+      constexpr span<element_type, dynamic_extent>
+      first(size_type __count) const noexcept
+      {
+ do { if (std::__is_constant_evaluated() && !bool(__count <= size())) std::__glibcxx_assert_fail(); } while (false);
+ return span<element_type>(this->data(), __count);
+      }
+
+      template<size_t _Count>
+ [[nodiscard]]
+ constexpr span<element_type, _Count>
+ last() const noexcept
+ {
+   if constexpr (_Extent == dynamic_extent)
+     do { if (std::__is_constant_evaluated() && !bool(_Count <= size())) std::__glibcxx_assert_fail(); } while (false);
+   else
+     static_assert(_Count <= extent);
+   using _Sp = span<element_type, _Count>;
+   return _Sp(_SizedPtr{this->data() + (this->size() - _Count)});
+ }
+
+      [[nodiscard]]
+      constexpr span<element_type, dynamic_extent>
+      last(size_type __count) const noexcept
+      {
+ do { if (std::__is_constant_evaluated() && !bool(__count <= size())) std::__glibcxx_assert_fail(); } while (false);
+ return span<element_type>(this->data() + (this->size() - __count),
+      __count);
+      }
+
+      template<size_t _Offset, size_t _Count = dynamic_extent>
+ [[nodiscard]]
+ constexpr auto
+ subspan() const noexcept
+ -> span<element_type, _S_subspan_extent<_Offset, _Count>()>
+ {
+   if constexpr (_Extent == dynamic_extent)
+     {
+       do { if (std::__is_constant_evaluated() && !bool(_Offset <= size())) std::__glibcxx_assert_fail(); } while (false);
+     }
+   else
+     static_assert(_Offset <= extent);
+
+   using _Sp = span<element_type, _S_subspan_extent<_Offset, _Count>()>;
+
+   if constexpr (_Count == dynamic_extent)
+     return _Sp(this->data() + _Offset, this->size() - _Offset);
+   else
+     {
+       if constexpr (_Extent == dynamic_extent)
+  {
+    do { if (std::__is_constant_evaluated() && !bool(_Count <= size())) std::__glibcxx_assert_fail(); } while (false);
+    do { if (std::__is_constant_evaluated() && !bool(_Count <= (size() - _Offset))) std::__glibcxx_assert_fail(); } while (false);
+  }
+       else
+  {
+    static_assert(_Count <= extent);
+    static_assert(_Count <= (extent - _Offset));
+  }
+       return _Sp(_SizedPtr{this->data() + _Offset});
+     }
+ }
+
+      [[nodiscard]]
+      constexpr span<element_type, dynamic_extent>
+      subspan(size_type __offset, size_type __count = dynamic_extent) const
+      noexcept
+      {
+ do { if (std::__is_constant_evaluated() && !bool(__offset <= size())) std::__glibcxx_assert_fail(); } while (false);
+ if (__count == dynamic_extent)
+   __count = this->size() - __offset;
+ else
+   {
+     do { if (std::__is_constant_evaluated() && !bool(__count <= size())) std::__glibcxx_assert_fail(); } while (false);
+     do { if (std::__is_constant_evaluated() && !bool(__offset + __count <= size())) std::__glibcxx_assert_fail(); } while (false);
+   }
+ return span<element_type>(this->data() + __offset, __count);
+      }
+
+    private:
+      template<typename, size_t> friend class span;
+
+
+      using _SizedPtr = __detail::__span_ptr<_Type>;
+
+
+      [[__gnu__::__always_inline__]]
+      constexpr explicit
+      span(_SizedPtr __ptr) noexcept
+      requires (extent != dynamic_extent)
+      : _M_ptr(__ptr._M_ptr), _M_extent(__v<extent>)
+      { }
+
+      pointer _M_ptr;
+      [[no_unique_address]] __detail::__extent_storage<extent> _M_extent;
+    };
+
+
+
+  template<typename _Type, size_t _ArrayExtent>
+    span(_Type(&)[_ArrayExtent]) -> span<_Type, _ArrayExtent>;
+
+  template<typename _Type, size_t _ArrayExtent>
+    span(array<_Type, _ArrayExtent>&) -> span<_Type, _ArrayExtent>;
+
+  template<typename _Type, size_t _ArrayExtent>
+    span(const array<_Type, _ArrayExtent>&)
+      -> span<const _Type, _ArrayExtent>;
+
+  template<contiguous_iterator _Iter, typename _End>
+    span(_Iter, _End)
+      -> span<remove_reference_t<iter_reference_t<_Iter>>>;
+
+  template<ranges::contiguous_range _Range>
+    span(_Range &&)
+      -> span<remove_reference_t<ranges::range_reference_t<_Range&>>>;
+
+  template<typename _Type, size_t _Extent>
+    [[nodiscard]]
+    inline
+    span<const byte, _Extent == dynamic_extent
+ ? dynamic_extent : _Extent * sizeof(_Type)>
+    as_bytes(span<_Type, _Extent> __sp) noexcept
+    {
+      auto data = reinterpret_cast<const byte*>(__sp.data());
+      auto size = __sp.size_bytes();
+      constexpr auto extent = _Extent == dynamic_extent
+ ? dynamic_extent : _Extent * sizeof(_Type);
+      return span<const byte, extent>{data, size};
+    }
+
+  template<typename _Type, size_t _Extent>
+    requires (!is_const_v<_Type>)
+    inline
+    span<byte, _Extent == dynamic_extent
+       ? dynamic_extent : _Extent * sizeof(_Type)>
+    as_writable_bytes [[nodiscard]] (span<_Type, _Extent> __sp) noexcept
+    {
+      auto data = reinterpret_cast<byte*>(__sp.data());
+      auto size = __sp.size_bytes();
+      constexpr auto extent = _Extent == dynamic_extent
+ ? dynamic_extent : _Extent * sizeof(_Type);
+      return span<byte, extent>{data, size};
+    }
+
+  namespace ranges
+  {
+
+    template<typename _ElementType, size_t _Extent>
+      inline constexpr bool
+ enable_borrowed_range<span<_ElementType, _Extent>> = true;
+
+
+    template<typename _ElementType, size_t _Extent>
+      inline constexpr bool
+ enable_view<span<_ElementType, _Extent>> = true;
+  }
+
+}
+# 52 "C:/msys64/mingw64/include/c++/15.2.0/format" 2 3
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/monostate.h" 1 3
+# 33 "C:/msys64/mingw64/include/c++/15.2.0/bits/monostate.h" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 34 "C:/msys64/mingw64/include/c++/15.2.0/bits/monostate.h" 2 3
+# 42 "C:/msys64/mingw64/include/c++/15.2.0/bits/monostate.h" 3
+namespace std
+{
+
+  struct monostate { };
+
+  constexpr bool operator==(monostate, monostate) noexcept { return true; }
+
+  constexpr strong_ordering
+  operator<=>(monostate, monostate) noexcept { return strong_ordering::equal; }
+# 59 "C:/msys64/mingw64/include/c++/15.2.0/bits/monostate.h" 3
+  template<>
+    struct hash<monostate>
+    {
+
+
+
+
+
+      size_t
+      operator()(const monostate&) const noexcept
+      {
+ constexpr size_t __magic_monostate_hash = -7777;
+ return __magic_monostate_hash;
+      }
+    };
+
+
+}
+# 55 "C:/msys64/mingw64/include/c++/15.2.0/format" 2 3
+
+
+
+
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/unicode.h" 1 3
+# 39 "C:/msys64/mingw64/include/c++/15.2.0/bits/unicode.h" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 1 3
+# 59 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/algorithmfwd.h" 1 3
+# 44 "C:/msys64/mingw64/include/c++/15.2.0/bits/algorithmfwd.h" 3
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wc++11-extensions"
+
+namespace std
+{
+
+# 200 "C:/msys64/mingw64/include/c++/15.2.0/bits/algorithmfwd.h" 3
+  template<typename _IIter, typename _Predicate>
+    constexpr
+    bool
+    all_of(_IIter, _IIter, _Predicate);
+
+  template<typename _IIter, typename _Predicate>
+    constexpr
+    bool
+    any_of(_IIter, _IIter, _Predicate);
+
+
+  template<typename _FIter, typename _Tp >
+    constexpr
+    bool
+    binary_search(_FIter, _FIter, const _Tp&);
+
+  template<typename _FIter, typename _Tp ,
+    typename _Compare>
+    constexpr
+    bool
+    binary_search(_FIter, _FIter, const _Tp&, _Compare);
+
+
+  template<typename _Tp>
+    constexpr
+    const _Tp&
+    clamp(const _Tp&, const _Tp&, const _Tp&);
+
+  template<typename _Tp, typename _Compare>
+    constexpr
+    const _Tp&
+    clamp(const _Tp&, const _Tp&, const _Tp&, _Compare);
+
+
+  template<typename _IIter, typename _OIter>
+    constexpr
+    _OIter
+    copy(_IIter, _IIter, _OIter);
+
+  template<typename _BIter1, typename _BIter2>
+    constexpr
+    _BIter2
+    copy_backward(_BIter1, _BIter1, _BIter2);
+
+
+  template<typename _IIter, typename _OIter, typename _Predicate>
+    constexpr
+    _OIter
+    copy_if(_IIter, _IIter, _OIter, _Predicate);
+
+  template<typename _IIter, typename _Size, typename _OIter>
+    constexpr
+    _OIter
+    copy_n(_IIter, _Size, _OIter);
+
+
+
+
+
+  template<typename _FIter, typename _Tp >
+    constexpr
+    pair<_FIter, _FIter>
+    equal_range(_FIter, _FIter, const _Tp&);
+
+  template<typename _FIter, typename _Tp ,
+    typename _Compare>
+    constexpr
+    pair<_FIter, _FIter>
+    equal_range(_FIter, _FIter, const _Tp&, _Compare);
+
+  template<typename _FIter, typename _Tp >
+    constexpr
+    void
+    fill(_FIter, _FIter, const _Tp&);
+
+  template<typename _OIter, typename _Size,
+    typename _Tp >
+    constexpr
+    _OIter
+    fill_n(_OIter, _Size, const _Tp&);
+
+
+
+  template<typename _FIter1, typename _FIter2>
+    constexpr
+    _FIter1
+    find_end(_FIter1, _FIter1, _FIter2, _FIter2);
+
+  template<typename _FIter1, typename _FIter2, typename _BinaryPredicate>
+    constexpr
+    _FIter1
+    find_end(_FIter1, _FIter1, _FIter2, _FIter2, _BinaryPredicate);
+
+
+
+
+
+  template<typename _IIter, typename _Predicate>
+    constexpr
+    _IIter
+    find_if_not(_IIter, _IIter, _Predicate);
+
+
+
+
+
+
+  template<typename _IIter1, typename _IIter2>
+    constexpr
+    bool
+    includes(_IIter1, _IIter1, _IIter2, _IIter2);
+
+  template<typename _IIter1, typename _IIter2, typename _Compare>
+    constexpr
+    bool
+    includes(_IIter1, _IIter1, _IIter2, _IIter2, _Compare);
+
+  template<typename _BIter>
+   
+    void
+    inplace_merge(_BIter, _BIter, _BIter);
+
+  template<typename _BIter, typename _Compare>
+   
+    void
+    inplace_merge(_BIter, _BIter, _BIter, _Compare);
+
+
+  template<typename _RAIter>
+    constexpr
+    bool
+    is_heap(_RAIter, _RAIter);
+
+  template<typename _RAIter, typename _Compare>
+    constexpr
+    bool
+    is_heap(_RAIter, _RAIter, _Compare);
+
+  template<typename _RAIter>
+    constexpr
+    _RAIter
+    is_heap_until(_RAIter, _RAIter);
+
+  template<typename _RAIter, typename _Compare>
+    constexpr
+    _RAIter
+    is_heap_until(_RAIter, _RAIter, _Compare);
+
+  template<typename _IIter, typename _Predicate>
+    constexpr
+    bool
+    is_partitioned(_IIter, _IIter, _Predicate);
+
+  template<typename _FIter1, typename _FIter2>
+    constexpr
+    bool
+    is_permutation(_FIter1, _FIter1, _FIter2);
+
+  template<typename _FIter1, typename _FIter2,
+    typename _BinaryPredicate>
+    constexpr
+    bool
+    is_permutation(_FIter1, _FIter1, _FIter2, _BinaryPredicate);
+
+  template<typename _FIter>
+    constexpr
+    bool
+    is_sorted(_FIter, _FIter);
+
+  template<typename _FIter, typename _Compare>
+    constexpr
+    bool
+    is_sorted(_FIter, _FIter, _Compare);
+
+  template<typename _FIter>
+    constexpr
+    _FIter
+    is_sorted_until(_FIter, _FIter);
+
+  template<typename _FIter, typename _Compare>
+    constexpr
+    _FIter
+    is_sorted_until(_FIter, _FIter, _Compare);
+
+
+  template<typename _FIter1, typename _FIter2>
+    constexpr
+    void
+    iter_swap(_FIter1, _FIter2);
+
+  template<typename _FIter, typename _Tp >
+    constexpr
+    _FIter
+    lower_bound(_FIter, _FIter, const _Tp&);
+
+  template<typename _FIter, typename _Tp ,
+    typename _Compare>
+    constexpr
+    _FIter
+    lower_bound(_FIter, _FIter, const _Tp&, _Compare);
+
+  template<typename _RAIter>
+    constexpr
+    void
+    make_heap(_RAIter, _RAIter);
+
+  template<typename _RAIter, typename _Compare>
+    constexpr
+    void
+    make_heap(_RAIter, _RAIter, _Compare);
+
+  template<typename _Tp>
+    constexpr
+    const _Tp&
+    max(const _Tp&, const _Tp&);
+
+  template<typename _Tp, typename _Compare>
+    constexpr
+    const _Tp&
+    max(const _Tp&, const _Tp&, _Compare);
+
+
+
+
+  template<typename _Tp>
+    constexpr
+    const _Tp&
+    min(const _Tp&, const _Tp&);
+
+  template<typename _Tp, typename _Compare>
+    constexpr
+    const _Tp&
+    min(const _Tp&, const _Tp&, _Compare);
+
+
+
+
+  template<typename _Tp>
+    constexpr
+    pair<const _Tp&, const _Tp&>
+    minmax(const _Tp&, const _Tp&);
+
+  template<typename _Tp, typename _Compare>
+    constexpr
+    pair<const _Tp&, const _Tp&>
+    minmax(const _Tp&, const _Tp&, _Compare);
+
+  template<typename _FIter>
+    constexpr
+    pair<_FIter, _FIter>
+    minmax_element(_FIter, _FIter);
+
+  template<typename _FIter, typename _Compare>
+    constexpr
+    pair<_FIter, _FIter>
+    minmax_element(_FIter, _FIter, _Compare);
+
+  template<typename _Tp>
+    constexpr
+    _Tp
+    min(initializer_list<_Tp>);
+
+  template<typename _Tp, typename _Compare>
+    constexpr
+    _Tp
+    min(initializer_list<_Tp>, _Compare);
+
+  template<typename _Tp>
+    constexpr
+    _Tp
+    max(initializer_list<_Tp>);
+
+  template<typename _Tp, typename _Compare>
+    constexpr
+    _Tp
+    max(initializer_list<_Tp>, _Compare);
+
+  template<typename _Tp>
+    constexpr
+    pair<_Tp, _Tp>
+    minmax(initializer_list<_Tp>);
+
+  template<typename _Tp, typename _Compare>
+    constexpr
+    pair<_Tp, _Tp>
+    minmax(initializer_list<_Tp>, _Compare);
+
+
+
+
+  template<typename _BIter>
+    constexpr
+    bool
+    next_permutation(_BIter, _BIter);
+
+  template<typename _BIter, typename _Compare>
+    constexpr
+    bool
+    next_permutation(_BIter, _BIter, _Compare);
+
+
+  template<typename _IIter, typename _Predicate>
+    constexpr
+    bool
+    none_of(_IIter, _IIter, _Predicate);
+
+
+
+
+
+  template<typename _IIter, typename _RAIter>
+    constexpr
+    _RAIter
+    partial_sort_copy(_IIter, _IIter, _RAIter, _RAIter);
+
+  template<typename _IIter, typename _RAIter, typename _Compare>
+    constexpr
+    _RAIter
+    partial_sort_copy(_IIter, _IIter, _RAIter, _RAIter, _Compare);
+
+
+
+
+  template<typename _IIter, typename _OIter1,
+    typename _OIter2, typename _Predicate>
+    constexpr
+    pair<_OIter1, _OIter2>
+    partition_copy(_IIter, _IIter, _OIter1, _OIter2, _Predicate);
+
+  template<typename _FIter, typename _Predicate>
+    constexpr
+    _FIter
+    partition_point(_FIter, _FIter, _Predicate);
+
+
+  template<typename _RAIter>
+    constexpr
+    void
+    pop_heap(_RAIter, _RAIter);
+
+  template<typename _RAIter, typename _Compare>
+    constexpr
+    void
+    pop_heap(_RAIter, _RAIter, _Compare);
+
+  template<typename _BIter>
+    constexpr
+    bool
+    prev_permutation(_BIter, _BIter);
+
+  template<typename _BIter, typename _Compare>
+    constexpr
+    bool
+    prev_permutation(_BIter, _BIter, _Compare);
+
+  template<typename _RAIter>
+    constexpr
+    void
+    push_heap(_RAIter, _RAIter);
+
+  template<typename _RAIter, typename _Compare>
+    constexpr
+    void
+    push_heap(_RAIter, _RAIter, _Compare);
+
+
+
+  template<typename _FIter, typename _Tp >
+    constexpr
+    _FIter
+    remove(_FIter, _FIter, const _Tp&);
+
+  template<typename _FIter, typename _Predicate>
+    constexpr
+    _FIter
+    remove_if(_FIter, _FIter, _Predicate);
+
+  template<typename _IIter, typename _OIter,
+    typename _Tp >
+    constexpr
+    _OIter
+    remove_copy(_IIter, _IIter, _OIter, const _Tp&);
+
+  template<typename _IIter, typename _OIter, typename _Predicate>
+    constexpr
+    _OIter
+    remove_copy_if(_IIter, _IIter, _OIter, _Predicate);
+
+
+
+  template<typename _IIter, typename _OIter, typename _Tp>
+    constexpr
+    _OIter
+    replace_copy(_IIter, _IIter, _OIter, const _Tp&, const _Tp&);
+
+  template<typename _Iter, typename _OIter, typename _Predicate,
+    typename _Tp >
+    constexpr
+    _OIter
+    replace_copy_if(_Iter, _Iter, _OIter, _Predicate, const _Tp&);
+
+
+
+  template<typename _BIter>
+    constexpr
+    void
+    reverse(_BIter, _BIter);
+
+  template<typename _BIter, typename _OIter>
+    constexpr
+    _OIter
+    reverse_copy(_BIter, _BIter, _OIter);
+
+inline namespace _V2 {
+
+  template<typename _FIter>
+    constexpr
+    _FIter
+    rotate(_FIter, _FIter, _FIter);
+
+}
+
+  template<typename _FIter, typename _OIter>
+    constexpr
+    _OIter
+    rotate_copy(_FIter, _FIter, _FIter, _OIter);
+# 635 "C:/msys64/mingw64/include/c++/15.2.0/bits/algorithmfwd.h" 3
+  template<typename _RAIter, typename _UGenerator>
+    void
+    shuffle(_RAIter, _RAIter, _UGenerator&&);
+
+
+  template<typename _RAIter>
+    constexpr
+    void
+    sort_heap(_RAIter, _RAIter);
+
+  template<typename _RAIter, typename _Compare>
+    constexpr
+    void
+    sort_heap(_RAIter, _RAIter, _Compare);
+
+
+  template<typename _BIter, typename _Predicate>
+   
+    _BIter
+    stable_partition(_BIter, _BIter, _Predicate);
+# 671 "C:/msys64/mingw64/include/c++/15.2.0/bits/algorithmfwd.h" 3
+  template<typename _FIter1, typename _FIter2>
+    constexpr
+    _FIter2
+    swap_ranges(_FIter1, _FIter1, _FIter2);
+
+
+
+  template<typename _FIter>
+    constexpr
+    _FIter
+    unique(_FIter, _FIter);
+
+  template<typename _FIter, typename _BinaryPredicate>
+    constexpr
+    _FIter
+    unique(_FIter, _FIter, _BinaryPredicate);
+
+
+
+  template<typename _FIter, typename _Tp >
+    constexpr
+    _FIter
+    upper_bound(_FIter, _FIter, const _Tp&);
+
+  template<typename _FIter, typename _Tp ,
+    typename _Compare>
+    constexpr
+    _FIter
+    upper_bound(_FIter, _FIter, const _Tp&, _Compare);
+
+
+
+  template<typename _FIter>
+    constexpr
+    _FIter
+    adjacent_find(_FIter, _FIter);
+
+  template<typename _FIter, typename _BinaryPredicate>
+    constexpr
+    _FIter
+    adjacent_find(_FIter, _FIter, _BinaryPredicate);
+
+  template<typename _IIter, typename _Tp >
+    constexpr
+    typename iterator_traits<_IIter>::difference_type
+    count(_IIter, _IIter, const _Tp&);
+
+  template<typename _IIter, typename _Predicate>
+    constexpr
+    typename iterator_traits<_IIter>::difference_type
+    count_if(_IIter, _IIter, _Predicate);
+
+  template<typename _IIter1, typename _IIter2>
+    constexpr
+    bool
+    equal(_IIter1, _IIter1, _IIter2);
+
+  template<typename _IIter1, typename _IIter2, typename _BinaryPredicate>
+    constexpr
+    bool
+    equal(_IIter1, _IIter1, _IIter2, _BinaryPredicate);
+
+  template<typename _IIter, typename _Tp >
+    constexpr
+    _IIter
+    find(_IIter, _IIter, const _Tp&);
+
+  template<typename _FIter1, typename _FIter2>
+    constexpr
+    _FIter1
+    find_first_of(_FIter1, _FIter1, _FIter2, _FIter2);
+
+  template<typename _FIter1, typename _FIter2, typename _BinaryPredicate>
+    constexpr
+    _FIter1
+    find_first_of(_FIter1, _FIter1, _FIter2, _FIter2, _BinaryPredicate);
+
+  template<typename _IIter, typename _Predicate>
+    constexpr
+    _IIter
+    find_if(_IIter, _IIter, _Predicate);
+
+  template<typename _IIter, typename _Funct>
+    constexpr
+    _Funct
+    for_each(_IIter, _IIter, _Funct);
+
+  template<typename _FIter, typename _Generator>
+    constexpr
+    void
+    generate(_FIter, _FIter, _Generator);
+
+  template<typename _OIter, typename _Size, typename _Generator>
+    constexpr
+    _OIter
+    generate_n(_OIter, _Size, _Generator);
+
+  template<typename _IIter1, typename _IIter2>
+    constexpr
+    bool
+    lexicographical_compare(_IIter1, _IIter1, _IIter2, _IIter2);
+
+  template<typename _IIter1, typename _IIter2, typename _Compare>
+    constexpr
+    bool
+    lexicographical_compare(_IIter1, _IIter1, _IIter2, _IIter2, _Compare);
+
+  template<typename _FIter>
+    constexpr
+    _FIter
+    max_element(_FIter, _FIter);
+
+  template<typename _FIter, typename _Compare>
+    constexpr
+    _FIter
+    max_element(_FIter, _FIter, _Compare);
+
+  template<typename _IIter1, typename _IIter2, typename _OIter>
+    constexpr
+    _OIter
+    merge(_IIter1, _IIter1, _IIter2, _IIter2, _OIter);
+
+  template<typename _IIter1, typename _IIter2, typename _OIter,
+    typename _Compare>
+    constexpr
+    _OIter
+    merge(_IIter1, _IIter1, _IIter2, _IIter2, _OIter, _Compare);
+
+  template<typename _FIter>
+    constexpr
+    _FIter
+    min_element(_FIter, _FIter);
+
+  template<typename _FIter, typename _Compare>
+    constexpr
+    _FIter
+    min_element(_FIter, _FIter, _Compare);
+
+  template<typename _IIter1, typename _IIter2>
+    constexpr
+    pair<_IIter1, _IIter2>
+    mismatch(_IIter1, _IIter1, _IIter2);
+
+  template<typename _IIter1, typename _IIter2, typename _BinaryPredicate>
+    constexpr
+    pair<_IIter1, _IIter2>
+    mismatch(_IIter1, _IIter1, _IIter2, _BinaryPredicate);
+
+  template<typename _RAIter>
+    constexpr
+    void
+    nth_element(_RAIter, _RAIter, _RAIter);
+
+  template<typename _RAIter, typename _Compare>
+    constexpr
+    void
+    nth_element(_RAIter, _RAIter, _RAIter, _Compare);
+
+  template<typename _RAIter>
+    constexpr
+    void
+    partial_sort(_RAIter, _RAIter, _RAIter);
+
+  template<typename _RAIter, typename _Compare>
+    constexpr
+    void
+    partial_sort(_RAIter, _RAIter, _RAIter, _Compare);
+
+  template<typename _BIter, typename _Predicate>
+    constexpr
+    _BIter
+    partition(_BIter, _BIter, _Predicate);
+
+
+  template<typename _RAIter>
+    __attribute__ ((__deprecated__ ("use '" "std::shuffle" "' instead")))
+    void
+    random_shuffle(_RAIter, _RAIter);
+
+  template<typename _RAIter, typename _Generator>
+    __attribute__ ((__deprecated__ ("use '" "std::shuffle" "' instead")))
+    void
+    random_shuffle(_RAIter, _RAIter,
+
+     _Generator&&);
+
+
+
+
+
+  template<typename _FIter, typename _Tp >
+    constexpr
+    void
+    replace(_FIter, _FIter, const _Tp&, const _Tp&);
+
+  template<typename _FIter, typename _Predicate,
+    typename _Tp >
+    constexpr
+    void
+    replace_if(_FIter, _FIter, _Predicate, const _Tp&);
+
+  template<typename _FIter1, typename _FIter2>
+    constexpr
+    _FIter1
+    search(_FIter1, _FIter1, _FIter2, _FIter2);
+
+  template<typename _FIter1, typename _FIter2, typename _BinaryPredicate>
+    constexpr
+    _FIter1
+    search(_FIter1, _FIter1, _FIter2, _FIter2, _BinaryPredicate);
+
+  template<typename _FIter, typename _Size,
+    typename _Tp >
+    constexpr
+    _FIter
+    search_n(_FIter, _FIter, _Size, const _Tp&);
+
+  template<typename _FIter, typename _Size,
+    typename _Tp ,
+    typename _BinaryPredicate>
+    constexpr
+    _FIter
+    search_n(_FIter, _FIter, _Size, const _Tp&, _BinaryPredicate);
+
+  template<typename _IIter1, typename _IIter2, typename _OIter>
+    constexpr
+    _OIter
+    set_difference(_IIter1, _IIter1, _IIter2, _IIter2, _OIter);
+
+  template<typename _IIter1, typename _IIter2, typename _OIter,
+    typename _Compare>
+    constexpr
+    _OIter
+    set_difference(_IIter1, _IIter1, _IIter2, _IIter2, _OIter, _Compare);
+
+  template<typename _IIter1, typename _IIter2, typename _OIter>
+    constexpr
+    _OIter
+    set_intersection(_IIter1, _IIter1, _IIter2, _IIter2, _OIter);
+
+  template<typename _IIter1, typename _IIter2, typename _OIter,
+    typename _Compare>
+    constexpr
+    _OIter
+    set_intersection(_IIter1, _IIter1, _IIter2, _IIter2, _OIter, _Compare);
+
+  template<typename _IIter1, typename _IIter2, typename _OIter>
+    constexpr
+    _OIter
+    set_symmetric_difference(_IIter1, _IIter1, _IIter2, _IIter2, _OIter);
+
+  template<typename _IIter1, typename _IIter2, typename _OIter,
+    typename _Compare>
+    constexpr
+    _OIter
+    set_symmetric_difference(_IIter1, _IIter1, _IIter2, _IIter2,
+        _OIter, _Compare);
+
+  template<typename _IIter1, typename _IIter2, typename _OIter>
+    constexpr
+    _OIter
+    set_union(_IIter1, _IIter1, _IIter2, _IIter2, _OIter);
+
+  template<typename _IIter1, typename _IIter2, typename _OIter,
+    typename _Compare>
+    constexpr
+    _OIter
+    set_union(_IIter1, _IIter1, _IIter2, _IIter2, _OIter, _Compare);
+
+  template<typename _RAIter>
+    constexpr
+    void
+    sort(_RAIter, _RAIter);
+
+  template<typename _RAIter, typename _Compare>
+    constexpr
+    void
+    sort(_RAIter, _RAIter, _Compare);
+
+  template<typename _RAIter>
+   
+    void
+    stable_sort(_RAIter, _RAIter);
+
+  template<typename _RAIter, typename _Compare>
+   
+    void
+    stable_sort(_RAIter, _RAIter, _Compare);
+
+  template<typename _IIter, typename _OIter, typename _UnaryOperation>
+    constexpr
+    _OIter
+    transform(_IIter, _IIter, _OIter, _UnaryOperation);
+
+  template<typename _IIter1, typename _IIter2, typename _OIter,
+    typename _BinaryOperation>
+    constexpr
+    _OIter
+    transform(_IIter1, _IIter1, _IIter2, _OIter, _BinaryOperation);
+
+  template<typename _IIter, typename _OIter>
+    constexpr
+    _OIter
+    unique_copy(_IIter, _IIter, _OIter);
+
+  template<typename _IIter, typename _OIter, typename _BinaryPredicate>
+    constexpr
+    _OIter
+    unique_copy(_IIter, _IIter, _OIter, _BinaryPredicate);
+
+
+
+}
+
+#pragma GCC diagnostic pop
+# 60 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 2 3
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 1 3
+# 63 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+namespace std
+{
+
+
+
+
+
+
+
+  template<typename _RandomAccessIterator, typename _Distance,
+    typename _Compare>
+    constexpr
+    _Distance
+    __is_heap_until(_RandomAccessIterator __first, _Distance __n,
+      _Compare& __comp)
+    {
+      _Distance __parent = 0;
+      for (_Distance __child = 1; __child < __n; ++__child)
+ {
+   if (__comp(__first + __parent, __first + __child))
+     return __child;
+   if ((__child & 1) == 0)
+     ++__parent;
+ }
+      return __n;
+    }
+
+
+
+  template<typename _RandomAccessIterator, typename _Distance>
+    constexpr
+    inline bool
+    __is_heap(_RandomAccessIterator __first, _Distance __n)
+    {
+      __gnu_cxx::__ops::_Iter_less_iter __comp;
+      return std::__is_heap_until(__first, __n, __comp) == __n;
+    }
+
+  template<typename _RandomAccessIterator, typename _Compare,
+    typename _Distance>
+    constexpr
+    inline bool
+    __is_heap(_RandomAccessIterator __first, _Compare __comp, _Distance __n)
+    {
+      typedef __decltype(__comp) _Cmp;
+      __gnu_cxx::__ops::_Iter_comp_iter<_Cmp> __cmp(std::move(__comp));
+      return std::__is_heap_until(__first, __n, __cmp) == __n;
+    }
+
+  template<typename _RandomAccessIterator>
+    constexpr
+    inline bool
+    __is_heap(_RandomAccessIterator __first, _RandomAccessIterator __last)
+    { return std::__is_heap(__first, std::distance(__first, __last)); }
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline bool
+    __is_heap(_RandomAccessIterator __first, _RandomAccessIterator __last,
+       _Compare __comp)
+    {
+      return std::__is_heap(__first, std::move(__comp),
+       std::distance(__first, __last));
+    }
+
+
+
+
+  template<typename _RandomAccessIterator, typename _Distance, typename _Tp,
+    typename _Compare>
+    constexpr
+    void
+    __push_heap(_RandomAccessIterator __first,
+  _Distance __holeIndex, _Distance __topIndex, _Tp __value,
+  _Compare& __comp)
+    {
+      _Distance __parent = (__holeIndex - 1) / 2;
+      while (__holeIndex > __topIndex && __comp(__first + __parent, __value))
+ {
+   *(__first + __holeIndex) = std::move(*(__first + __parent));
+   __holeIndex = __parent;
+   __parent = (__holeIndex - 1) / 2;
+ }
+      *(__first + __holeIndex) = std::move(__value);
+    }
+# 159 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+  template<typename _RandomAccessIterator>
+    constexpr
+    inline void
+    push_heap(_RandomAccessIterator __first, _RandomAccessIterator __last)
+    {
+      typedef typename iterator_traits<_RandomAccessIterator>::value_type
+   _ValueType;
+      typedef typename iterator_traits<_RandomAccessIterator>::difference_type
+   _DistanceType;
+
+
+     
+
+     
+      ;
+      ;
+      ;
+
+      __gnu_cxx::__ops::_Iter_less_val __comp;
+      _ValueType __value = std::move(*(__last - 1));
+      std::__push_heap(__first, _DistanceType((__last - __first) - 1),
+         _DistanceType(0), std::move(__value), __comp);
+    }
+# 195 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline void
+    push_heap(_RandomAccessIterator __first, _RandomAccessIterator __last,
+       _Compare __comp)
+    {
+      typedef typename iterator_traits<_RandomAccessIterator>::value_type
+   _ValueType;
+      typedef typename iterator_traits<_RandomAccessIterator>::difference_type
+   _DistanceType;
+
+
+     
+
+      ;
+      ;
+      ;
+
+      __decltype(__gnu_cxx::__ops::__iter_comp_val(std::move(__comp)))
+ __cmp(std::move(__comp));
+      _ValueType __value = std::move(*(__last - 1));
+      std::__push_heap(__first, _DistanceType((__last - __first) - 1),
+         _DistanceType(0), std::move(__value), __cmp);
+    }
+
+  template<typename _RandomAccessIterator, typename _Distance,
+    typename _Tp, typename _Compare>
+    constexpr
+    void
+    __adjust_heap(_RandomAccessIterator __first, _Distance __holeIndex,
+    _Distance __len, _Tp __value, _Compare __comp)
+    {
+      const _Distance __topIndex = __holeIndex;
+      _Distance __secondChild = __holeIndex;
+      while (__secondChild < (__len - 1) / 2)
+ {
+   __secondChild = 2 * (__secondChild + 1);
+   if (__comp(__first + __secondChild,
+       __first + (__secondChild - 1)))
+     __secondChild--;
+   *(__first + __holeIndex) = std::move(*(__first + __secondChild));
+   __holeIndex = __secondChild;
+ }
+      if ((__len & 1) == 0 && __secondChild == (__len - 2) / 2)
+ {
+   __secondChild = 2 * (__secondChild + 1);
+   *(__first + __holeIndex) = std::move(*(__first + (__secondChild - 1)))
+                                  ;
+   __holeIndex = __secondChild - 1;
+ }
+      __decltype(__gnu_cxx::__ops::__iter_comp_val(std::move(__comp)))
+ __cmp(std::move(__comp));
+      std::__push_heap(__first, __holeIndex, __topIndex,
+         std::move(__value), __cmp);
+    }
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline void
+    __pop_heap(_RandomAccessIterator __first, _RandomAccessIterator __last,
+        _RandomAccessIterator __result, _Compare& __comp)
+    {
+      typedef typename iterator_traits<_RandomAccessIterator>::value_type
+ _ValueType;
+      typedef typename iterator_traits<_RandomAccessIterator>::difference_type
+ _DistanceType;
+
+      _ValueType __value = std::move(*__result);
+      *__result = std::move(*__first);
+      std::__adjust_heap(__first, _DistanceType(0),
+    _DistanceType(__last - __first),
+    std::move(__value), __comp);
+    }
+# 280 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+  template<typename _RandomAccessIterator>
+    constexpr
+    inline void
+    pop_heap(_RandomAccessIterator __first, _RandomAccessIterator __last)
+    {
+
+     
+
+     
+
+      do { if (std::__is_constant_evaluated() && !bool(__first != __last)) std::__glibcxx_assert_fail(); } while (false);
+      ;
+      ;
+      ;
+
+      if (__last - __first > 1)
+ {
+   --__last;
+   __gnu_cxx::__ops::_Iter_less_iter __comp;
+   std::__pop_heap(__first, __last, __last, __comp);
+ }
+    }
+# 314 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline void
+    pop_heap(_RandomAccessIterator __first,
+      _RandomAccessIterator __last, _Compare __comp)
+    {
+
+     
+
+      ;
+      ;
+      do { if (std::__is_constant_evaluated() && !bool(__first != __last)) std::__glibcxx_assert_fail(); } while (false);
+      ;
+
+      if (__last - __first > 1)
+ {
+   typedef __decltype(__comp) _Cmp;
+   __gnu_cxx::__ops::_Iter_comp_iter<_Cmp> __cmp(std::move(__comp));
+   --__last;
+   std::__pop_heap(__first, __last, __last, __cmp);
+ }
+    }
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    void
+    __make_heap(_RandomAccessIterator __first, _RandomAccessIterator __last,
+  _Compare& __comp)
+    {
+      typedef typename iterator_traits<_RandomAccessIterator>::value_type
+   _ValueType;
+      typedef typename iterator_traits<_RandomAccessIterator>::difference_type
+   _DistanceType;
+
+      if (__last - __first < 2)
+ return;
+
+      const _DistanceType __len = __last - __first;
+      _DistanceType __parent = (__len - 2) / 2;
+      while (true)
+ {
+   _ValueType __value = std::move(*(__first + __parent));
+   std::__adjust_heap(__first, __parent, __len, std::move(__value),
+        __comp);
+   if (__parent == 0)
+     return;
+   __parent--;
+ }
+    }
+# 372 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+  template<typename _RandomAccessIterator>
+    constexpr
+    inline void
+    make_heap(_RandomAccessIterator __first, _RandomAccessIterator __last)
+    {
+
+     
+
+     
+
+      ;
+      ;
+
+      __gnu_cxx::__ops::_Iter_less_iter __comp;
+      std::__make_heap(__first, __last, __comp);
+    }
+# 399 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline void
+    make_heap(_RandomAccessIterator __first, _RandomAccessIterator __last,
+       _Compare __comp)
+    {
+
+     
+
+      ;
+      ;
+
+      typedef __decltype(__comp) _Cmp;
+      __gnu_cxx::__ops::_Iter_comp_iter<_Cmp> __cmp(std::move(__comp));
+      std::__make_heap(__first, __last, __cmp);
+    }
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    void
+    __sort_heap(_RandomAccessIterator __first, _RandomAccessIterator __last,
+  _Compare& __comp)
+    {
+      while (__last - __first > 1)
+ {
+   --__last;
+   std::__pop_heap(__first, __last, __last, __comp);
+ }
+    }
+# 437 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+  template<typename _RandomAccessIterator>
+    constexpr
+    inline void
+    sort_heap(_RandomAccessIterator __first, _RandomAccessIterator __last)
+    {
+
+     
+
+     
+
+      ;
+      ;
+      ;
+
+      __gnu_cxx::__ops::_Iter_less_iter __comp;
+      std::__sort_heap(__first, __last, __comp);
+    }
+# 465 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline void
+    sort_heap(_RandomAccessIterator __first, _RandomAccessIterator __last,
+       _Compare __comp)
+    {
+
+     
+
+      ;
+      ;
+      ;
+
+      typedef __decltype(__comp) _Cmp;
+      __gnu_cxx::__ops::_Iter_comp_iter<_Cmp> __cmp(std::move(__comp));
+      std::__sort_heap(__first, __last, __cmp);
+    }
+# 494 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+  template<typename _RandomAccessIterator>
+    [[__nodiscard__]] constexpr
+    inline _RandomAccessIterator
+    is_heap_until(_RandomAccessIterator __first, _RandomAccessIterator __last)
+    {
+
+     
+
+     
+
+      ;
+      ;
+
+      __gnu_cxx::__ops::_Iter_less_iter __comp;
+      return __first +
+ std::__is_heap_until(__first, std::distance(__first, __last), __comp);
+    }
+# 523 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+  template<typename _RandomAccessIterator, typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline _RandomAccessIterator
+    is_heap_until(_RandomAccessIterator __first, _RandomAccessIterator __last,
+    _Compare __comp)
+    {
+
+     
+
+      ;
+      ;
+
+      typedef __decltype(__comp) _Cmp;
+      __gnu_cxx::__ops::_Iter_comp_iter<_Cmp> __cmp(std::move(__comp));
+      return __first
+ + std::__is_heap_until(__first, std::distance(__first, __last), __cmp);
+    }
+# 548 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+  template<typename _RandomAccessIterator>
+    [[__nodiscard__]] constexpr
+    inline bool
+    is_heap(_RandomAccessIterator __first, _RandomAccessIterator __last)
+    { return std::is_heap_until(__first, __last) == __last; }
+# 562 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_heap.h" 3
+  template<typename _RandomAccessIterator, typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline bool
+    is_heap(_RandomAccessIterator __first, _RandomAccessIterator __last,
+     _Compare __comp)
+    {
+
+     
+
+      ;
+      ;
+
+      const auto __dist = std::distance(__first, __last);
+      typedef __decltype(__comp) _Cmp;
+      __gnu_cxx::__ops::_Iter_comp_iter<_Cmp> __cmp(std::move(__comp));
+      return std::__is_heap_until(__first, __dist, __cmp) == __dist;
+    }
+
+
+
+}
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 2 3
+
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/uniform_int_dist.h" 1 3
+# 41 "C:/msys64/mingw64/include/c++/15.2.0/bits/uniform_int_dist.h" 3
+namespace std
+{
+
+# 52 "C:/msys64/mingw64/include/c++/15.2.0/bits/uniform_int_dist.h" 3
+  template<typename _Gen>
+    concept uniform_random_bit_generator
+      = invocable<_Gen&> && unsigned_integral<invoke_result_t<_Gen&>>
+      && requires
+      {
+ { _Gen::min() } -> same_as<invoke_result_t<_Gen&>>;
+ { _Gen::max() } -> same_as<invoke_result_t<_Gen&>>;
+ requires bool_constant<(_Gen::min() < _Gen::max())>::value;
+      };
+
+
+
+  namespace __detail
+  {
+
+
+
+    template<typename _Tp>
+      constexpr bool
+      _Power_of_2(_Tp __x)
+      {
+ return ((__x - 1) & __x) == 0;
+      }
+  }
+# 87 "C:/msys64/mingw64/include/c++/15.2.0/bits/uniform_int_dist.h" 3
+  template<typename _IntType = int>
+    class uniform_int_distribution
+    {
+      static_assert(std::is_integral<_IntType>::value,
+      "template argument must be an integral type");
+
+    public:
+
+      typedef _IntType result_type;
+
+      struct param_type
+      {
+ typedef uniform_int_distribution<_IntType> distribution_type;
+
+ param_type() : param_type(0) { }
+
+ explicit
+ param_type(_IntType __a,
+     _IntType __b = __gnu_cxx::__int_traits<_IntType>::__max)
+ : _M_a(__a), _M_b(__b)
+ {
+   do { if (std::__is_constant_evaluated() && !bool(_M_a <= _M_b)) std::__glibcxx_assert_fail(); } while (false);
+ }
+
+ result_type
+ a() const
+ { return _M_a; }
+
+ result_type
+ b() const
+ { return _M_b; }
+
+ friend bool
+ operator==(const param_type& __p1, const param_type& __p2)
+ { return __p1._M_a == __p2._M_a && __p1._M_b == __p2._M_b; }
+
+ friend bool
+ operator!=(const param_type& __p1, const param_type& __p2)
+ { return !(__p1 == __p2); }
+
+      private:
+ _IntType _M_a;
+ _IntType _M_b;
+      };
+
+    public:
+
+
+
+      uniform_int_distribution() : uniform_int_distribution(0) { }
+
+
+
+
+      explicit
+      uniform_int_distribution(_IntType __a,
+          _IntType __b
+     = __gnu_cxx::__int_traits<_IntType>::__max)
+      : _M_param(__a, __b)
+      { }
+
+      explicit
+      uniform_int_distribution(const param_type& __p)
+      : _M_param(__p)
+      { }
+
+
+
+
+
+
+      void
+      reset() { }
+
+      result_type
+      a() const
+      { return _M_param.a(); }
+
+      result_type
+      b() const
+      { return _M_param.b(); }
+
+
+
+
+      param_type
+      param() const
+      { return _M_param; }
+
+
+
+
+
+      void
+      param(const param_type& __param)
+      { _M_param = __param; }
+
+
+
+
+      result_type
+      min() const
+      { return this->a(); }
+
+
+
+
+      result_type
+      max() const
+      { return this->b(); }
+
+
+
+
+      template<typename _UniformRandomBitGenerator>
+ result_type
+ operator()(_UniformRandomBitGenerator& __urng)
+        { return this->operator()(__urng, _M_param); }
+
+      template<typename _UniformRandomBitGenerator>
+ result_type
+ operator()(_UniformRandomBitGenerator& __urng,
+     const param_type& __p);
+
+      template<typename _ForwardIterator,
+        typename _UniformRandomBitGenerator>
+ void
+ __generate(_ForwardIterator __f, _ForwardIterator __t,
+     _UniformRandomBitGenerator& __urng)
+ { this->__generate(__f, __t, __urng, _M_param); }
+
+      template<typename _ForwardIterator,
+        typename _UniformRandomBitGenerator>
+ void
+ __generate(_ForwardIterator __f, _ForwardIterator __t,
+     _UniformRandomBitGenerator& __urng,
+     const param_type& __p)
+ { this->__generate_impl(__f, __t, __urng, __p); }
+
+      template<typename _UniformRandomBitGenerator>
+ void
+ __generate(result_type* __f, result_type* __t,
+     _UniformRandomBitGenerator& __urng,
+     const param_type& __p)
+ { this->__generate_impl(__f, __t, __urng, __p); }
+
+
+
+
+
+      friend bool
+      operator==(const uniform_int_distribution& __d1,
+   const uniform_int_distribution& __d2)
+      { return __d1._M_param == __d2._M_param; }
+
+    private:
+      template<typename _ForwardIterator,
+        typename _UniformRandomBitGenerator>
+ void
+ __generate_impl(_ForwardIterator __f, _ForwardIterator __t,
+   _UniformRandomBitGenerator& __urng,
+   const param_type& __p);
+
+      param_type _M_param;
+
+
+
+
+      template<typename _Wp, typename _Urbg, typename _Up>
+ static _Up
+ _S_nd(_Urbg& __g, _Up __range)
+ {
+   using _Up_traits = __gnu_cxx::__int_traits<_Up>;
+   using _Wp_traits = __gnu_cxx::__int_traits<_Wp>;
+   static_assert(!_Up_traits::__is_signed, "U must be unsigned");
+   static_assert(!_Wp_traits::__is_signed, "W must be unsigned");
+   static_assert(_Wp_traits::__digits == (2 * _Up_traits::__digits),
+   "W must be twice as wide as U");
+
+
+
+
+   _Wp __product = _Wp(__g()) * _Wp(__range);
+   _Up __low = _Up(__product);
+   if (__low < __range)
+     {
+       _Up __threshold = -__range % __range;
+       while (__low < __threshold)
+  {
+    __product = _Wp(__g()) * _Wp(__range);
+    __low = _Up(__product);
+  }
+     }
+   return __product >> _Up_traits::__digits;
+ }
+    };
+
+  template<typename _IntType>
+    template<typename _UniformRandomBitGenerator>
+      typename uniform_int_distribution<_IntType>::result_type
+      uniform_int_distribution<_IntType>::
+      operator()(_UniformRandomBitGenerator& __urng,
+   const param_type& __param)
+      {
+ typedef typename _UniformRandomBitGenerator::result_type _Gresult_type;
+ typedef typename make_unsigned<result_type>::type __utype;
+ typedef typename common_type<_Gresult_type, __utype>::type __uctype;
+
+ constexpr __uctype __urngmin = _UniformRandomBitGenerator::min();
+ constexpr __uctype __urngmax = _UniformRandomBitGenerator::max();
+ static_assert( __urngmin < __urngmax,
+     "Uniform random bit generator must define min() < max()");
+ constexpr __uctype __urngrange = __urngmax - __urngmin;
+
+ const __uctype __urange
+   = __uctype(__param.b()) - __uctype(__param.a());
+
+ __uctype __ret;
+ if (__urngrange > __urange)
+   {
+
+
+     const __uctype __uerange = __urange + 1;
+
+
+
+     if constexpr (__urngrange == 0xffffffffffffffffULL)
+       {
+
+
+  long long unsigned int __u64erange = __uerange;
+  __ret = __extension__ _S_nd<unsigned __int128>(__urng,
+              __u64erange);
+       }
+     else
+
+     if constexpr (__urngrange == 0xffffffffU)
+       {
+
+
+  unsigned int __u32erange = __uerange;
+  __ret = _S_nd<long long unsigned int>(__urng, __u32erange);
+       }
+     else
+
+       {
+
+  const __uctype __scaling = __urngrange / __uerange;
+  const __uctype __past = __uerange * __scaling;
+  do
+    __ret = __uctype(__urng()) - __urngmin;
+  while (__ret >= __past);
+  __ret /= __scaling;
+       }
+   }
+ else if (__urngrange < __urange)
+   {
+# 359 "C:/msys64/mingw64/include/c++/15.2.0/bits/uniform_int_dist.h" 3
+     __uctype __tmp;
+     do
+       {
+  const __uctype __uerngrange = __urngrange + 1;
+  __tmp = (__uerngrange * operator()
+    (__urng, param_type(0, __urange / __uerngrange)));
+  __ret = __tmp + (__uctype(__urng()) - __urngmin);
+       }
+     while (__ret > __urange || __ret < __tmp);
+   }
+ else
+   __ret = __uctype(__urng()) - __urngmin;
+
+ return __ret + __param.a();
+      }
+
+
+  template<typename _IntType>
+    template<typename _ForwardIterator,
+      typename _UniformRandomBitGenerator>
+      void
+      uniform_int_distribution<_IntType>::
+      __generate_impl(_ForwardIterator __f, _ForwardIterator __t,
+        _UniformRandomBitGenerator& __urng,
+        const param_type& __param)
+      {
+
+ typedef typename _UniformRandomBitGenerator::result_type _Gresult_type;
+ typedef typename make_unsigned<result_type>::type __utype;
+ typedef typename common_type<_Gresult_type, __utype>::type __uctype;
+
+ static_assert( __urng.min() < __urng.max(),
+     "Uniform random bit generator must define min() < max()");
+
+ constexpr __uctype __urngmin = __urng.min();
+ constexpr __uctype __urngmax = __urng.max();
+ constexpr __uctype __urngrange = __urngmax - __urngmin;
+ const __uctype __urange
+   = __uctype(__param.b()) - __uctype(__param.a());
+
+ __uctype __ret;
+
+ if (__urngrange > __urange)
+   {
+     if (__detail::_Power_of_2(__urngrange + 1)
+  && __detail::_Power_of_2(__urange + 1))
+       {
+  while (__f != __t)
+    {
+      __ret = __uctype(__urng()) - __urngmin;
+      *__f++ = (__ret & __urange) + __param.a();
+    }
+       }
+     else
+       {
+
+  const __uctype __uerange = __urange + 1;
+  const __uctype __scaling = __urngrange / __uerange;
+  const __uctype __past = __uerange * __scaling;
+  while (__f != __t)
+    {
+      do
+        __ret = __uctype(__urng()) - __urngmin;
+      while (__ret >= __past);
+      *__f++ = __ret / __scaling + __param.a();
+    }
+       }
+   }
+ else if (__urngrange < __urange)
+   {
+# 444 "C:/msys64/mingw64/include/c++/15.2.0/bits/uniform_int_dist.h" 3
+     __uctype __tmp;
+     while (__f != __t)
+       {
+  do
+    {
+      constexpr __uctype __uerngrange = __urngrange + 1;
+      __tmp = (__uerngrange * operator()
+        (__urng, param_type(0, __urange / __uerngrange)));
+      __ret = __tmp + (__uctype(__urng()) - __urngmin);
+    }
+  while (__ret > __urange || __ret < __tmp);
+  *__f++ = __ret;
+       }
+   }
+ else
+   while (__f != __t)
+     *__f++ = __uctype(__urng()) - __urngmin + __param.a();
+      }
+
+
+
+
+}
+# 66 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 2 3
+# 75 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wc++11-extensions"
+
+
+
+namespace std
+{
+
+
+
+  template<typename _Iterator, typename _Compare>
+    constexpr
+    void
+    __move_median_to_first(_Iterator __result,_Iterator __a, _Iterator __b,
+      _Iterator __c, _Compare __comp)
+    {
+      if (__comp(__a, __b))
+ {
+   if (__comp(__b, __c))
+     std::iter_swap(__result, __b);
+   else if (__comp(__a, __c))
+     std::iter_swap(__result, __c);
+   else
+     std::iter_swap(__result, __a);
+ }
+      else if (__comp(__a, __c))
+ std::iter_swap(__result, __a);
+      else if (__comp(__b, __c))
+ std::iter_swap(__result, __c);
+      else
+ std::iter_swap(__result, __b);
+    }
+
+
+  template<typename _InputIterator, typename _Predicate>
+    constexpr
+    inline _InputIterator
+    __find_if_not(_InputIterator __first, _InputIterator __last,
+    _Predicate __pred)
+    {
+      return std::__find_if(__first, __last,
+       __gnu_cxx::__ops::__negate(__pred));
+    }
+
+
+
+
+  template<typename _InputIterator, typename _Predicate, typename _Distance>
+    constexpr
+    _InputIterator
+    __find_if_not_n(_InputIterator __first, _Distance& __len, _Predicate __pred)
+    {
+      for (; __len; --__len, (void) ++__first)
+ if (!__pred(__first))
+   break;
+      return __first;
+    }
+# 150 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Integer,
+    typename _UnaryPredicate>
+    constexpr
+    _ForwardIterator
+    __search_n_aux(_ForwardIterator __first, _ForwardIterator __last,
+     _Integer __count, _UnaryPredicate __unary_pred,
+     std::forward_iterator_tag)
+    {
+      __first = std::__find_if(__first, __last, __unary_pred);
+      while (__first != __last)
+ {
+   typename iterator_traits<_ForwardIterator>::difference_type
+     __n = __count;
+   _ForwardIterator __i = __first;
+   ++__i;
+   while (__i != __last && __n != 1 && __unary_pred(__i))
+     {
+       ++__i;
+       --__n;
+     }
+   if (__n == 1)
+     return __first;
+   if (__i == __last)
+     return __last;
+   __first = std::__find_if(++__i, __last, __unary_pred);
+ }
+      return __last;
+    }
+
+
+
+
+
+  template<typename _RandomAccessIter, typename _Integer,
+    typename _UnaryPredicate>
+    constexpr
+    _RandomAccessIter
+    __search_n_aux(_RandomAccessIter __first, _RandomAccessIter __last,
+     _Integer __count, _UnaryPredicate __unary_pred,
+     std::random_access_iterator_tag)
+    {
+      typedef typename std::iterator_traits<_RandomAccessIter>::difference_type
+ _DistanceType;
+
+      _DistanceType __tailSize = __last - __first;
+      _DistanceType __remainder = __count;
+
+      while (__remainder <= __tailSize)
+ {
+   __first += __remainder;
+   __tailSize -= __remainder;
+
+
+   _RandomAccessIter __backTrack = __first;
+   while (__unary_pred(--__backTrack))
+     {
+       if (--__remainder == 0)
+  return (__first - __count);
+     }
+   __remainder = __count + 1 - (__first - __backTrack);
+ }
+      return __last;
+    }
+
+  template<typename _ForwardIterator, typename _Integer,
+    typename _UnaryPredicate>
+    constexpr
+    _ForwardIterator
+    __search_n(_ForwardIterator __first, _ForwardIterator __last,
+        _Integer __count,
+        _UnaryPredicate __unary_pred)
+    {
+      if (__count <= 0)
+ return __first;
+
+      if (__count == 1)
+ return std::__find_if(__first, __last, __unary_pred);
+
+      return std::__search_n_aux(__first, __last, __count, __unary_pred,
+     std::__iterator_category(__first));
+    }
+
+
+  template<typename _ForwardIterator1, typename _ForwardIterator2,
+    typename _BinaryPredicate>
+    constexpr
+    _ForwardIterator1
+    __find_end(_ForwardIterator1 __first1, _ForwardIterator1 __last1,
+        _ForwardIterator2 __first2, _ForwardIterator2 __last2,
+        forward_iterator_tag, forward_iterator_tag,
+        _BinaryPredicate __comp)
+    {
+      if (__first2 == __last2)
+ return __last1;
+
+      _ForwardIterator1 __result = __last1;
+      while (1)
+ {
+   _ForwardIterator1 __new_result
+     = std::__search(__first1, __last1, __first2, __last2, __comp);
+   if (__new_result == __last1)
+     return __result;
+   else
+     {
+       __result = __new_result;
+       __first1 = __new_result;
+       ++__first1;
+     }
+ }
+    }
+
+
+  template<typename _BidirectionalIterator1, typename _BidirectionalIterator2,
+    typename _BinaryPredicate>
+    constexpr
+    _BidirectionalIterator1
+    __find_end(_BidirectionalIterator1 __first1,
+        _BidirectionalIterator1 __last1,
+        _BidirectionalIterator2 __first2,
+        _BidirectionalIterator2 __last2,
+        bidirectional_iterator_tag, bidirectional_iterator_tag,
+        _BinaryPredicate __comp)
+    {
+
+     
+
+     
+
+
+      typedef reverse_iterator<_BidirectionalIterator1> _RevIterator1;
+      typedef reverse_iterator<_BidirectionalIterator2> _RevIterator2;
+
+      _RevIterator1 __rlast1(__first1);
+      _RevIterator2 __rlast2(__first2);
+      _RevIterator1 __rresult = std::__search(_RevIterator1(__last1), __rlast1,
+           _RevIterator2(__last2), __rlast2,
+           __comp);
+
+      if (__rresult == __rlast1)
+ return __last1;
+      else
+ {
+   _BidirectionalIterator1 __result = __rresult.base();
+   std::advance(__result, -std::distance(__first2, __last2));
+   return __result;
+ }
+    }
+# 324 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator1, typename _ForwardIterator2>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator1
+    find_end(_ForwardIterator1 __first1, _ForwardIterator1 __last1,
+      _ForwardIterator2 __first2, _ForwardIterator2 __last2)
+    {
+
+     
+     
+     
+
+
+      ;
+      ;
+
+      return std::__find_end(__first1, __last1, __first2, __last2,
+        std::__iterator_category(__first1),
+        std::__iterator_category(__first2),
+        __gnu_cxx::__ops::__iter_equal_to_iter());
+    }
+# 373 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator1, typename _ForwardIterator2,
+    typename _BinaryPredicate>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator1
+    find_end(_ForwardIterator1 __first1, _ForwardIterator1 __last1,
+      _ForwardIterator2 __first2, _ForwardIterator2 __last2,
+      _BinaryPredicate __comp)
+    {
+
+     
+     
+     
+
+
+      ;
+      ;
+
+      return std::__find_end(__first1, __last1, __first2, __last2,
+        std::__iterator_category(__first1),
+        std::__iterator_category(__first2),
+        __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+# 409 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _Predicate>
+    [[__nodiscard__]] constexpr
+    inline bool
+    all_of(_InputIterator __first, _InputIterator __last, _Predicate __pred)
+    { return __last == std::find_if_not(__first, __last, __pred); }
+# 427 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _Predicate>
+    [[__nodiscard__]] constexpr
+    inline bool
+    none_of(_InputIterator __first, _InputIterator __last, _Predicate __pred)
+    { return __last == std::find_if(__first, __last, __pred); }
+# 446 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _Predicate>
+    [[__nodiscard__]] constexpr
+    inline bool
+    any_of(_InputIterator __first, _InputIterator __last, _Predicate __pred)
+    { return !std::none_of(__first, __last, __pred); }
+# 462 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _Predicate>
+    [[__nodiscard__]] constexpr
+    inline _InputIterator
+    find_if_not(_InputIterator __first, _InputIterator __last,
+  _Predicate __pred)
+    {
+
+     
+     
+
+      ;
+      return std::__find_if_not(__first, __last,
+    __gnu_cxx::__ops::__pred_iter(__pred));
+    }
+# 487 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _Predicate>
+    [[__nodiscard__]] constexpr
+    inline bool
+    is_partitioned(_InputIterator __first, _InputIterator __last,
+     _Predicate __pred)
+    {
+      __first = std::find_if_not(__first, __last, __pred);
+      if (__first == __last)
+ return true;
+      ++__first;
+      return std::none_of(__first, __last, __pred);
+    }
+# 509 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Predicate>
+    [[__nodiscard__]] constexpr
+    _ForwardIterator
+    partition_point(_ForwardIterator __first, _ForwardIterator __last,
+      _Predicate __pred)
+    {
+
+     
+     
+
+
+
+      ;
+
+      typedef typename iterator_traits<_ForwardIterator>::difference_type
+ _DistanceType;
+
+      _DistanceType __len = std::distance(__first, __last);
+
+      while (__len > 0)
+ {
+   _DistanceType __half = __len >> 1;
+   _ForwardIterator __middle = __first;
+   std::advance(__middle, __half);
+   if (__pred(*__middle))
+     {
+       __first = __middle;
+       ++__first;
+       __len = __len - __half - 1;
+     }
+   else
+     __len = __half;
+ }
+      return __first;
+    }
+
+
+  template<typename _InputIterator, typename _OutputIterator,
+    typename _Predicate>
+    constexpr
+    _OutputIterator
+    __remove_copy_if(_InputIterator __first, _InputIterator __last,
+       _OutputIterator __result, _Predicate __pred)
+    {
+      for (; __first != __last; ++__first)
+ if (!__pred(__first))
+   {
+     *__result = *__first;
+     ++__result;
+   }
+      return __result;
+    }
+# 576 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _OutputIterator, typename _Tp>
+    constexpr
+    inline _OutputIterator
+    remove_copy(_InputIterator __first, _InputIterator __last,
+  _OutputIterator __result, const _Tp& __value)
+    {
+
+     
+     
+
+     
+
+      ;
+
+      return std::__remove_copy_if(__first, __last, __result,
+ __gnu_cxx::__ops::__iter_equals_val(__value));
+    }
+# 609 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _OutputIterator,
+    typename _Predicate>
+    constexpr
+    inline _OutputIterator
+    remove_copy_if(_InputIterator __first, _InputIterator __last,
+     _OutputIterator __result, _Predicate __pred)
+    {
+
+     
+     
+
+     
+
+      ;
+
+      return std::__remove_copy_if(__first, __last, __result,
+       __gnu_cxx::__ops::__pred_iter(__pred));
+    }
+# 644 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _OutputIterator,
+    typename _Predicate>
+    constexpr
+    _OutputIterator
+    copy_if(_InputIterator __first, _InputIterator __last,
+     _OutputIterator __result, _Predicate __pred)
+    {
+
+     
+     
+
+     
+
+      ;
+
+      for (; __first != __last; ++__first)
+ if (__pred(*__first))
+   {
+     *__result = *__first;
+     ++__result;
+   }
+      return __result;
+    }
+# 681 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _Size, typename _OutputIterator>
+    constexpr
+    inline _OutputIterator
+    copy_n(_InputIterator __first, _Size __n, _OutputIterator __result)
+    {
+
+     
+     
+
+
+      const auto __n2 = std::__size_to_integer(__n);
+      if (__n2 <= 0)
+ return __result;
+
+      ;
+      ;
+
+      auto __res = std::__copy_n_a(std::__niter_base(__first), __n2,
+       std::__niter_base(__result), true);
+      return std::__niter_wrap(__result, std::move(__res));
+    }
+# 718 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _OutputIterator1,
+    typename _OutputIterator2, typename _Predicate>
+    constexpr
+    pair<_OutputIterator1, _OutputIterator2>
+    partition_copy(_InputIterator __first, _InputIterator __last,
+     _OutputIterator1 __out_true, _OutputIterator2 __out_false,
+     _Predicate __pred)
+    {
+
+     
+     
+
+     
+
+     
+
+      ;
+
+      for (; __first != __last; ++__first)
+ if (__pred(*__first))
+   {
+     *__out_true = *__first;
+     ++__out_true;
+   }
+ else
+   {
+     *__out_false = *__first;
+     ++__out_false;
+   }
+
+      return pair<_OutputIterator1, _OutputIterator2>(__out_true, __out_false);
+    }
+# 769 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Tp>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    remove(_ForwardIterator __first, _ForwardIterator __last,
+    const _Tp& __value)
+    {
+
+     
+
+     
+
+      ;
+
+      return std::__remove_if(__first, __last,
+  __gnu_cxx::__ops::__iter_equals_val(__value));
+    }
+# 803 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Predicate>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    remove_if(_ForwardIterator __first, _ForwardIterator __last,
+       _Predicate __pred)
+    {
+
+     
+
+     
+
+      ;
+
+      return std::__remove_if(__first, __last,
+         __gnu_cxx::__ops::__pred_iter(__pred));
+    }
+
+  template<typename _ForwardIterator, typename _BinaryPredicate>
+    constexpr
+    _ForwardIterator
+    __adjacent_find(_ForwardIterator __first, _ForwardIterator __last,
+      _BinaryPredicate __binary_pred)
+    {
+      if (__first == __last)
+ return __last;
+      _ForwardIterator __next = __first;
+      while (++__next != __last)
+ {
+   if (__binary_pred(__first, __next))
+     return __first;
+   __first = __next;
+ }
+      return __last;
+    }
+
+  template<typename _ForwardIterator, typename _BinaryPredicate>
+    constexpr
+    _ForwardIterator
+    __unique(_ForwardIterator __first, _ForwardIterator __last,
+      _BinaryPredicate __binary_pred)
+    {
+
+      __first = std::__adjacent_find(__first, __last, __binary_pred);
+      if (__first == __last)
+ return __last;
+
+
+      _ForwardIterator __dest = __first;
+      ++__first;
+      while (++__first != __last)
+ if (!__binary_pred(__dest, __first))
+   *++__dest = std::move(*__first);
+      return ++__dest;
+    }
+# 872 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    unique(_ForwardIterator __first, _ForwardIterator __last)
+    {
+
+     
+
+     
+
+      ;
+
+      return std::__unique(__first, __last,
+      __gnu_cxx::__ops::__iter_equal_to_iter());
+    }
+# 903 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _BinaryPredicate>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    unique(_ForwardIterator __first, _ForwardIterator __last,
+    _BinaryPredicate __binary_pred)
+    {
+
+     
+
+     
+
+
+      ;
+
+      return std::__unique(__first, __last,
+      __gnu_cxx::__ops::__iter_comp_iter(__binary_pred));
+    }
+
+
+
+
+
+
+
+  template<typename _ForwardIterator, typename _OutputIterator,
+    typename _BinaryPredicate>
+    constexpr
+    _OutputIterator
+    __unique_copy(_ForwardIterator __first, _ForwardIterator __last,
+    _OutputIterator __result, _BinaryPredicate __binary_pred,
+    forward_iterator_tag, output_iterator_tag)
+    {
+
+     
+
+
+
+      _ForwardIterator __next = __first;
+      *__result = *__first;
+      while (++__next != __last)
+ if (!__binary_pred(__first, __next))
+   {
+     __first = __next;
+     *++__result = *__first;
+   }
+      return ++__result;
+    }
+
+
+
+
+
+
+
+  template<typename _InputIterator, typename _OutputIterator,
+    typename _BinaryPredicate>
+    constexpr
+    _OutputIterator
+    __unique_copy(_InputIterator __first, _InputIterator __last,
+    _OutputIterator __result, _BinaryPredicate __binary_pred,
+    input_iterator_tag, output_iterator_tag)
+    {
+
+     
+
+
+
+      typename iterator_traits<_InputIterator>::value_type __value = *__first;
+      __decltype(__gnu_cxx::__ops::__iter_comp_val(__binary_pred))
+ __rebound_pred
+ = __gnu_cxx::__ops::__iter_comp_val(__binary_pred);
+      *__result = __value;
+      while (++__first != __last)
+ if (!__rebound_pred(__first, __value))
+   {
+     __value = *__first;
+     *++__result = __value;
+   }
+      return ++__result;
+    }
+
+
+
+
+
+
+
+  template<typename _InputIterator, typename _ForwardIterator,
+    typename _BinaryPredicate>
+    constexpr
+    _ForwardIterator
+    __unique_copy(_InputIterator __first, _InputIterator __last,
+    _ForwardIterator __result, _BinaryPredicate __binary_pred,
+    input_iterator_tag, forward_iterator_tag)
+    {
+
+     
+
+
+      *__result = *__first;
+      while (++__first != __last)
+ if (!__binary_pred(__result, __first))
+   *++__result = *__first;
+      return ++__result;
+    }
+
+
+
+
+
+
+  template<typename _BidirectionalIterator>
+    constexpr
+    void
+    __reverse(_BidirectionalIterator __first, _BidirectionalIterator __last,
+       bidirectional_iterator_tag)
+    {
+      while (true)
+ if (__first == __last || __first == --__last)
+   return;
+ else
+   {
+     std::iter_swap(__first, __last);
+     ++__first;
+   }
+    }
+
+
+
+
+
+
+  template<typename _RandomAccessIterator>
+    constexpr
+    void
+    __reverse(_RandomAccessIterator __first, _RandomAccessIterator __last,
+       random_access_iterator_tag)
+    {
+      if (__first == __last)
+ return;
+      --__last;
+      while (__first < __last)
+ {
+   std::iter_swap(__first, __last);
+   ++__first;
+   --__last;
+ }
+    }
+# 1064 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _BidirectionalIterator>
+    constexpr
+    inline void
+    reverse(_BidirectionalIterator __first, _BidirectionalIterator __last)
+    {
+
+     
+
+      ;
+      std::__reverse(__first, __last, std::__iterator_category(__first));
+    }
+# 1092 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _BidirectionalIterator, typename _OutputIterator>
+    constexpr
+    _OutputIterator
+    reverse_copy(_BidirectionalIterator __first, _BidirectionalIterator __last,
+   _OutputIterator __result)
+    {
+
+     
+
+     
+
+      ;
+
+      while (__first != __last)
+ {
+   --__last;
+   *__result = *__last;
+   ++__result;
+ }
+      return __result;
+    }
+
+
+
+
+
+  template<typename _EuclideanRingElement>
+    constexpr
+    _EuclideanRingElement
+    __gcd(_EuclideanRingElement __m, _EuclideanRingElement __n)
+    {
+      while (__n != 0)
+ {
+   _EuclideanRingElement __t = __m % __n;
+   __m = __n;
+   __n = __t;
+ }
+      return __m;
+    }
+
+inline namespace _V2 {
+
+
+  template<typename _ForwardIterator>
+    constexpr
+    _ForwardIterator
+    __rotate(_ForwardIterator __first,
+      _ForwardIterator __middle,
+      _ForwardIterator __last,
+      forward_iterator_tag)
+    {
+      if (__first == __middle)
+ return __last;
+      else if (__last == __middle)
+ return __first;
+
+      _ForwardIterator __first2 = __middle;
+      do
+ {
+   std::iter_swap(__first, __first2);
+   ++__first;
+   ++__first2;
+   if (__first == __middle)
+     __middle = __first2;
+ }
+      while (__first2 != __last);
+
+      _ForwardIterator __ret = __first;
+
+      __first2 = __middle;
+
+      while (__first2 != __last)
+ {
+   std::iter_swap(__first, __first2);
+   ++__first;
+   ++__first2;
+   if (__first == __middle)
+     __middle = __first2;
+   else if (__first2 == __last)
+     __first2 = __middle;
+ }
+      return __ret;
+    }
+
+
+  template<typename _BidirectionalIterator>
+    constexpr
+    _BidirectionalIterator
+    __rotate(_BidirectionalIterator __first,
+      _BidirectionalIterator __middle,
+      _BidirectionalIterator __last,
+       bidirectional_iterator_tag)
+    {
+
+     
+
+
+      if (__first == __middle)
+ return __last;
+      else if (__last == __middle)
+ return __first;
+
+      std::__reverse(__first, __middle, bidirectional_iterator_tag());
+      std::__reverse(__middle, __last, bidirectional_iterator_tag());
+
+      while (__first != __middle && __middle != __last)
+ {
+   std::iter_swap(__first, --__last);
+   ++__first;
+ }
+
+      if (__first == __middle)
+ {
+   std::__reverse(__middle, __last, bidirectional_iterator_tag());
+   return __last;
+ }
+      else
+ {
+   std::__reverse(__first, __middle, bidirectional_iterator_tag());
+   return __first;
+ }
+    }
+
+
+  template<typename _RandomAccessIterator>
+    constexpr
+    _RandomAccessIterator
+    __rotate(_RandomAccessIterator __first,
+      _RandomAccessIterator __middle,
+      _RandomAccessIterator __last,
+      random_access_iterator_tag)
+    {
+
+     
+
+
+      if (__first == __middle)
+ return __last;
+      else if (__last == __middle)
+ return __first;
+
+      typedef typename iterator_traits<_RandomAccessIterator>::difference_type
+ _Distance;
+      typedef typename iterator_traits<_RandomAccessIterator>::value_type
+ _ValueType;
+
+
+      typedef typename make_unsigned<_Distance>::type _UDistance;
+
+
+
+
+      _Distance __n = __last - __first;
+      _Distance __k = __middle - __first;
+
+      if (__k == __n - __k)
+ {
+   std::swap_ranges(__first, __middle, __middle);
+   return __middle;
+ }
+
+      _RandomAccessIterator __p = __first;
+      _RandomAccessIterator __ret = __first + (__last - __middle);
+
+      for (;;)
+ {
+   if (__k < __n - __k)
+     {
+       if (__is_pod(_ValueType) && __k == 1)
+  {
+    _ValueType __t = std::move(*__p);
+    std::move(__p + 1, __p + __n, __p);
+    *(__p + __n - 1) = std::move(__t);
+    return __ret;
+  }
+       _RandomAccessIterator __q = __p + __k;
+       for (_Distance __i = 0; __i < __n - __k; ++ __i)
+  {
+    std::iter_swap(__p, __q);
+    ++__p;
+    ++__q;
+  }
+       __n = static_cast<_UDistance>(__n) % static_cast<_UDistance>(__k);
+       if (__n == 0)
+  return __ret;
+       std::swap(__n, __k);
+       __k = __n - __k;
+     }
+   else
+     {
+       __k = __n - __k;
+       if (__is_pod(_ValueType) && __k == 1)
+  {
+    _ValueType __t = std::move(*(__p + __n - 1));
+    std::move_backward(__p, __p + __n - 1, __p + __n);
+    *__p = std::move(__t);
+    return __ret;
+  }
+       _RandomAccessIterator __q = __p + __n;
+       __p = __q - __k;
+       for (_Distance __i = 0; __i < __n - __k; ++ __i)
+  {
+    --__p;
+    --__q;
+    std::iter_swap(__p, __q);
+  }
+       __n = static_cast<_UDistance>(__n) % static_cast<_UDistance>(__k);
+       if (__n == 0)
+  return __ret;
+       std::swap(__n, __k);
+     }
+ }
+    }
+# 1329 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator>
+    constexpr
+    inline _ForwardIterator
+    rotate(_ForwardIterator __first, _ForwardIterator __middle,
+    _ForwardIterator __last)
+    {
+
+     
+
+      ;
+      ;
+
+      return std::__rotate(__first, __middle, __last,
+      std::__iterator_category(__first));
+    }
+
+}
+# 1367 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _OutputIterator>
+    constexpr
+    inline _OutputIterator
+    rotate_copy(_ForwardIterator __first, _ForwardIterator __middle,
+  _ForwardIterator __last, _OutputIterator __result)
+    {
+
+     
+     
+
+      ;
+      ;
+
+      return std::copy(__first, __middle,
+         std::copy(__middle, __last, __result));
+    }
+
+
+  template<typename _ForwardIterator, typename _Predicate>
+    constexpr
+    _ForwardIterator
+    __partition(_ForwardIterator __first, _ForwardIterator __last,
+  _Predicate __pred, forward_iterator_tag)
+    {
+      if (__first == __last)
+ return __first;
+
+      while (__pred(*__first))
+ if (++__first == __last)
+   return __first;
+
+      _ForwardIterator __next = __first;
+
+      while (++__next != __last)
+ if (__pred(*__next))
+   {
+     std::iter_swap(__first, __next);
+     ++__first;
+   }
+
+      return __first;
+    }
+
+
+  template<typename _BidirectionalIterator, typename _Predicate>
+    constexpr
+    _BidirectionalIterator
+    __partition(_BidirectionalIterator __first, _BidirectionalIterator __last,
+  _Predicate __pred, bidirectional_iterator_tag)
+    {
+      while (true)
+ {
+   while (true)
+     if (__first == __last)
+       return __first;
+     else if (__pred(*__first))
+       ++__first;
+     else
+       break;
+   --__last;
+   while (true)
+     if (__first == __last)
+       return __first;
+     else if (!bool(__pred(*__last)))
+       --__last;
+     else
+       break;
+   std::iter_swap(__first, __last);
+   ++__first;
+ }
+    }
+# 1448 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Pointer, typename _Predicate,
+    typename _Distance>
+   
+    _ForwardIterator
+    __stable_partition_adaptive(_ForwardIterator __first,
+    _ForwardIterator __last,
+    _Predicate __pred, _Distance __len,
+    _Pointer __buffer,
+    _Distance __buffer_size)
+    {
+      if (__len == 1)
+ return __first;
+
+      if (__len <= __buffer_size)
+ {
+   _ForwardIterator __result1 = __first;
+   _Pointer __result2 = __buffer;
+
+
+
+
+   *__result2 = std::move(*__first);
+   ++__result2;
+   ++__first;
+   for (; __first != __last; ++__first)
+     if (__pred(__first))
+       {
+  *__result1 = std::move(*__first);
+  ++__result1;
+       }
+     else
+       {
+  *__result2 = std::move(*__first);
+  ++__result2;
+       }
+
+   std::move(__buffer, __result2, __result1);
+   return __result1;
+ }
+
+      _ForwardIterator __middle = __first;
+      std::advance(__middle, __len / 2);
+      _ForwardIterator __left_split =
+ std::__stable_partition_adaptive(__first, __middle, __pred,
+      __len / 2, __buffer,
+      __buffer_size);
+
+
+
+      _Distance __right_len = __len - __len / 2;
+      _ForwardIterator __right_split =
+ std::__find_if_not_n(__middle, __right_len, __pred);
+
+      if (__right_len)
+ __right_split =
+   std::__stable_partition_adaptive(__right_split, __last, __pred,
+        __right_len,
+        __buffer, __buffer_size);
+
+      return std::rotate(__left_split, __middle, __right_split);
+    }
+
+  template<typename _ForwardIterator, typename _Predicate>
+   
+    _ForwardIterator
+    __stable_partition(_ForwardIterator __first, _ForwardIterator __last,
+         _Predicate __pred)
+    {
+      __first = std::__find_if_not(__first, __last, __pred);
+
+      if (__first == __last)
+ return __first;
+
+      typedef typename iterator_traits<_ForwardIterator>::value_type
+ _ValueType;
+      typedef typename iterator_traits<_ForwardIterator>::difference_type
+ _DistanceType;
+
+      const _DistanceType __len = std::distance(__first, __last);
+# 1540 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+      _Temporary_buffer<_ForwardIterator, _ValueType>
+ __buf(__first, __len);
+      return
+ std::__stable_partition_adaptive(__first, __last, __pred,
+      __len,
+      __buf.begin(),
+      _DistanceType(__buf.size()));
+    }
+# 1566 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Predicate>
+   
+    inline _ForwardIterator
+    stable_partition(_ForwardIterator __first, _ForwardIterator __last,
+       _Predicate __pred)
+    {
+
+     
+
+     
+
+      ;
+
+      return std::__stable_partition(__first, __last,
+         __gnu_cxx::__ops::__pred_iter(__pred));
+    }
+
+
+
+
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    void
+    __heap_select(_RandomAccessIterator __first,
+    _RandomAccessIterator __middle,
+    _RandomAccessIterator __last, _Compare __comp)
+    {
+      std::__make_heap(__first, __middle, __comp);
+      for (_RandomAccessIterator __i = __middle; __i < __last; ++__i)
+ if (__comp(__i, __first))
+   std::__pop_heap(__first, __middle, __i, __comp);
+    }
+
+
+
+  template<typename _InputIterator, typename _RandomAccessIterator,
+    typename _Compare>
+    constexpr
+    _RandomAccessIterator
+    __partial_sort_copy(_InputIterator __first, _InputIterator __last,
+   _RandomAccessIterator __result_first,
+   _RandomAccessIterator __result_last,
+   _Compare __comp)
+    {
+      typedef typename iterator_traits<_InputIterator>::value_type
+ _InputValueType;
+      typedef iterator_traits<_RandomAccessIterator> _RItTraits;
+      typedef typename _RItTraits::difference_type _DistanceType;
+
+      if (__result_first == __result_last)
+ return __result_last;
+      _RandomAccessIterator __result_real_last = __result_first;
+      while (__first != __last && __result_real_last != __result_last)
+ {
+   *__result_real_last = *__first;
+   ++__result_real_last;
+   ++__first;
+ }
+
+      std::__make_heap(__result_first, __result_real_last, __comp);
+      while (__first != __last)
+ {
+   if (__comp(__first, __result_first))
+     std::__adjust_heap(__result_first, _DistanceType(0),
+          _DistanceType(__result_real_last
+          - __result_first),
+          _InputValueType(*__first), __comp);
+   ++__first;
+ }
+      std::__sort_heap(__result_first, __result_real_last, __comp);
+      return __result_real_last;
+    }
+# 1660 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _RandomAccessIterator>
+    constexpr
+    inline _RandomAccessIterator
+    partial_sort_copy(_InputIterator __first, _InputIterator __last,
+        _RandomAccessIterator __result_first,
+        _RandomAccessIterator __result_last)
+    {
+# 1675 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+     
+     
+
+     
+
+     
+      ;
+      ;
+      ;
+
+      return std::__partial_sort_copy(__first, __last,
+          __result_first, __result_last,
+          __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 1710 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _RandomAccessIterator,
+    typename _Compare>
+    constexpr
+    inline _RandomAccessIterator
+    partial_sort_copy(_InputIterator __first, _InputIterator __last,
+        _RandomAccessIterator __result_first,
+        _RandomAccessIterator __result_last,
+        _Compare __comp)
+    {
+# 1727 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+     
+     
+
+     
+
+     
+
+     
+
+      ;
+      ;
+      ;
+
+      return std::__partial_sort_copy(__first, __last,
+          __result_first, __result_last,
+    __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+
+
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    void
+    __unguarded_linear_insert(_RandomAccessIterator __last,
+         _Compare __comp)
+    {
+      typename iterator_traits<_RandomAccessIterator>::value_type
+ __val = std::move(*__last);
+      _RandomAccessIterator __next = __last;
+      --__next;
+      while (__comp(__val, __next))
+ {
+   *__last = std::move(*__next);
+   __last = __next;
+   --__next;
+ }
+      *__last = std::move(__val);
+    }
+
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    void
+    __insertion_sort(_RandomAccessIterator __first,
+       _RandomAccessIterator __last, _Compare __comp)
+    {
+      if (__first == __last) return;
+
+      for (_RandomAccessIterator __i = __first + 1; __i != __last; ++__i)
+ {
+   if (__comp(__i, __first))
+     {
+       typename iterator_traits<_RandomAccessIterator>::value_type
+  __val = std::move(*__i);
+       std::move_backward(__first, __i, __i + 1);
+       *__first = std::move(__val);
+     }
+   else
+     std::__unguarded_linear_insert(__i,
+    __gnu_cxx::__ops::__val_comp_iter(__comp));
+ }
+    }
+
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline void
+    __unguarded_insertion_sort(_RandomAccessIterator __first,
+          _RandomAccessIterator __last, _Compare __comp)
+    {
+      for (_RandomAccessIterator __i = __first; __i != __last; ++__i)
+ std::__unguarded_linear_insert(__i,
+    __gnu_cxx::__ops::__val_comp_iter(__comp));
+    }
+
+
+
+
+
+  enum { _S_threshold = 16 };
+
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    void
+    __final_insertion_sort(_RandomAccessIterator __first,
+      _RandomAccessIterator __last, _Compare __comp)
+    {
+      if (__last - __first > int(_S_threshold))
+ {
+   std::__insertion_sort(__first, __first + int(_S_threshold), __comp);
+   std::__unguarded_insertion_sort(__first + int(_S_threshold), __last,
+       __comp);
+ }
+      else
+ std::__insertion_sort(__first, __last, __comp);
+    }
+
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    _RandomAccessIterator
+    __unguarded_partition(_RandomAccessIterator __first,
+     _RandomAccessIterator __last,
+     _RandomAccessIterator __pivot, _Compare __comp)
+    {
+      while (true)
+ {
+   while (__comp(__first, __pivot))
+     ++__first;
+   --__last;
+   while (__comp(__pivot, __last))
+     --__last;
+   if (!(__first < __last))
+     return __first;
+   std::iter_swap(__first, __last);
+   ++__first;
+ }
+    }
+
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline _RandomAccessIterator
+    __unguarded_partition_pivot(_RandomAccessIterator __first,
+    _RandomAccessIterator __last, _Compare __comp)
+    {
+      _RandomAccessIterator __mid = __first + (__last - __first) / 2;
+      std::__move_median_to_first(__first, __first + 1, __mid, __last - 1,
+      __comp);
+      return std::__unguarded_partition(__first + 1, __last, __first, __comp);
+    }
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline void
+    __partial_sort(_RandomAccessIterator __first,
+     _RandomAccessIterator __middle,
+     _RandomAccessIterator __last,
+     _Compare __comp)
+    {
+      std::__heap_select(__first, __middle, __last, __comp);
+      std::__sort_heap(__first, __middle, __comp);
+    }
+
+
+  template<typename _RandomAccessIterator, typename _Size, typename _Compare>
+    constexpr
+    void
+    __introsort_loop(_RandomAccessIterator __first,
+       _RandomAccessIterator __last,
+       _Size __depth_limit, _Compare __comp)
+    {
+      while (__last - __first > int(_S_threshold))
+ {
+   if (__depth_limit == 0)
+     {
+       std::__partial_sort(__first, __last, __last, __comp);
+       return;
+     }
+   --__depth_limit;
+   _RandomAccessIterator __cut =
+     std::__unguarded_partition_pivot(__first, __last, __comp);
+   std::__introsort_loop(__cut, __last, __depth_limit, __comp);
+   __last = __cut;
+ }
+    }
+
+
+
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline void
+    __sort(_RandomAccessIterator __first, _RandomAccessIterator __last,
+    _Compare __comp)
+    {
+      if (__first != __last)
+ {
+   std::__introsort_loop(__first, __last,
+    std::__lg(__last - __first) * 2,
+    __comp);
+   std::__final_insertion_sort(__first, __last, __comp);
+ }
+    }
+
+  template<typename _RandomAccessIterator, typename _Size, typename _Compare>
+    constexpr
+    void
+    __introselect(_RandomAccessIterator __first, _RandomAccessIterator __nth,
+    _RandomAccessIterator __last, _Size __depth_limit,
+    _Compare __comp)
+    {
+      while (__last - __first > 3)
+ {
+   if (__depth_limit == 0)
+     {
+       std::__heap_select(__first, __nth + 1, __last, __comp);
+
+       std::iter_swap(__first, __nth);
+       return;
+     }
+   --__depth_limit;
+   _RandomAccessIterator __cut =
+     std::__unguarded_partition_pivot(__first, __last, __comp);
+   if (__cut <= __nth)
+     __first = __cut;
+   else
+     __last = __cut;
+ }
+      std::__insertion_sort(__first, __last, __comp);
+    }
+# 1961 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Tp, typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    lower_bound(_ForwardIterator __first, _ForwardIterator __last,
+  const _Tp& __val, _Compare __comp)
+    {
+
+     
+     
+
+     
+                    ;
+
+      return std::__lower_bound(__first, __last, __val,
+    __gnu_cxx::__ops::__iter_comp_val(__comp));
+    }
+
+  template<typename _ForwardIterator, typename _Tp, typename _Compare>
+    constexpr
+    _ForwardIterator
+    __upper_bound(_ForwardIterator __first, _ForwardIterator __last,
+    const _Tp& __val, _Compare __comp)
+    {
+      typedef typename iterator_traits<_ForwardIterator>::difference_type
+ _DistanceType;
+
+      _DistanceType __len = std::distance(__first, __last);
+
+      while (__len > 0)
+ {
+   _DistanceType __half = __len >> 1;
+   _ForwardIterator __middle = __first;
+   std::advance(__middle, __half);
+   if (__comp(__val, __middle))
+     __len = __half;
+   else
+     {
+       __first = __middle;
+       ++__first;
+       __len = __len - __half - 1;
+     }
+ }
+      return __first;
+    }
+# 2017 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Tp>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    upper_bound(_ForwardIterator __first, _ForwardIterator __last,
+  const _Tp& __val)
+    {
+
+     
+     
+
+      ;
+
+      return std::__upper_bound(__first, __last, __val,
+    __gnu_cxx::__ops::__val_less_iter());
+    }
+# 2048 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Tp, typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    upper_bound(_ForwardIterator __first, _ForwardIterator __last,
+  const _Tp& __val, _Compare __comp)
+    {
+
+     
+     
+
+     
+                    ;
+
+      return std::__upper_bound(__first, __last, __val,
+    __gnu_cxx::__ops::__val_comp_iter(__comp));
+    }
+
+  template<typename _ForwardIterator, typename _Tp,
+    typename _CompareItTp, typename _CompareTpIt>
+    constexpr
+    pair<_ForwardIterator, _ForwardIterator>
+    __equal_range(_ForwardIterator __first, _ForwardIterator __last,
+    const _Tp& __val,
+    _CompareItTp __comp_it_val, _CompareTpIt __comp_val_it)
+    {
+      typedef typename iterator_traits<_ForwardIterator>::difference_type
+ _DistanceType;
+
+      _DistanceType __len = std::distance(__first, __last);
+
+      while (__len > 0)
+ {
+   _DistanceType __half = __len >> 1;
+   _ForwardIterator __middle = __first;
+   std::advance(__middle, __half);
+   if (__comp_it_val(__middle, __val))
+     {
+       __first = __middle;
+       ++__first;
+       __len = __len - __half - 1;
+     }
+   else if (__comp_val_it(__val, __middle))
+     __len = __half;
+   else
+     {
+       _ForwardIterator __left
+  = std::__lower_bound(__first, __middle, __val, __comp_it_val);
+       std::advance(__first, __len);
+       _ForwardIterator __right
+  = std::__upper_bound(++__middle, __first, __val, __comp_val_it);
+       return pair<_ForwardIterator, _ForwardIterator>(__left, __right);
+     }
+ }
+      return pair<_ForwardIterator, _ForwardIterator>(__first, __first);
+    }
+# 2121 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Tp>
+    [[__nodiscard__]] constexpr
+    inline pair<_ForwardIterator, _ForwardIterator>
+    equal_range(_ForwardIterator __first, _ForwardIterator __last,
+  const _Tp& __val)
+    {
+
+     
+     
+
+     
+
+      ;
+      ;
+
+      return std::__equal_range(__first, __last, __val,
+    __gnu_cxx::__ops::__iter_less_val(),
+    __gnu_cxx::__ops::__val_less_iter());
+    }
+# 2158 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Tp, typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline pair<_ForwardIterator, _ForwardIterator>
+    equal_range(_ForwardIterator __first, _ForwardIterator __last,
+  const _Tp& __val, _Compare __comp)
+    {
+
+     
+     
+
+     
+
+     
+                    ;
+     
+                    ;
+
+      return std::__equal_range(__first, __last, __val,
+    __gnu_cxx::__ops::__iter_comp_val(__comp),
+    __gnu_cxx::__ops::__val_comp_iter(__comp));
+    }
+# 2192 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Tp>
+    [[__nodiscard__]] constexpr
+    bool
+    binary_search(_ForwardIterator __first, _ForwardIterator __last,
+    const _Tp& __val)
+    {
+
+     
+     
+
+      ;
+      ;
+
+      _ForwardIterator __i
+ = std::__lower_bound(__first, __last, __val,
+        __gnu_cxx::__ops::__iter_less_val());
+      return __i != __last && !(__val < *__i);
+    }
+# 2226 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Tp, typename _Compare>
+    [[__nodiscard__]] constexpr
+    bool
+    binary_search(_ForwardIterator __first, _ForwardIterator __last,
+    const _Tp& __val, _Compare __comp)
+    {
+
+     
+     
+
+     
+                    ;
+     
+                    ;
+
+      _ForwardIterator __i
+ = std::__lower_bound(__first, __last, __val,
+        __gnu_cxx::__ops::__iter_comp_val(__comp));
+      return __i != __last && !bool(__comp(__val, *__i));
+    }
+
+
+
+
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator, typename _Compare>
+    void
+    __move_merge_adaptive(_InputIterator1 __first1, _InputIterator1 __last1,
+     _InputIterator2 __first2, _InputIterator2 __last2,
+     _OutputIterator __result, _Compare __comp)
+    {
+      while (__first1 != __last1 && __first2 != __last2)
+ {
+   if (__comp(__first2, __first1))
+     {
+       *__result = std::move(*__first2);
+       ++__first2;
+     }
+   else
+     {
+       *__result = std::move(*__first1);
+       ++__first1;
+     }
+   ++__result;
+ }
+      if (__first1 != __last1)
+ std::move(__first1, __last1, __result);
+    }
+
+
+  template<typename _BidirectionalIterator1, typename _BidirectionalIterator2,
+    typename _BidirectionalIterator3, typename _Compare>
+    void
+    __move_merge_adaptive_backward(_BidirectionalIterator1 __first1,
+       _BidirectionalIterator1 __last1,
+       _BidirectionalIterator2 __first2,
+       _BidirectionalIterator2 __last2,
+       _BidirectionalIterator3 __result,
+       _Compare __comp)
+    {
+      if (__first1 == __last1)
+ {
+   std::move_backward(__first2, __last2, __result);
+   return;
+ }
+      else if (__first2 == __last2)
+ return;
+
+      --__last1;
+      --__last2;
+      while (true)
+ {
+   if (__comp(__last2, __last1))
+     {
+       *--__result = std::move(*__last1);
+       if (__first1 == __last1)
+  {
+    std::move_backward(__first2, ++__last2, __result);
+    return;
+  }
+       --__last1;
+     }
+   else
+     {
+       *--__result = std::move(*__last2);
+       if (__first2 == __last2)
+  return;
+       --__last2;
+     }
+ }
+    }
+
+
+  template<typename _BidirectionalIterator1, typename _BidirectionalIterator2,
+    typename _Distance>
+    _BidirectionalIterator1
+    __rotate_adaptive(_BidirectionalIterator1 __first,
+        _BidirectionalIterator1 __middle,
+        _BidirectionalIterator1 __last,
+        _Distance __len1, _Distance __len2,
+        _BidirectionalIterator2 __buffer,
+        _Distance __buffer_size)
+    {
+      _BidirectionalIterator2 __buffer_end;
+      if (__len1 > __len2 && __len2 <= __buffer_size)
+ {
+   if (__len2)
+     {
+       __buffer_end = std::move(__middle, __last, __buffer);
+       std::move_backward(__first, __middle, __last);
+       return std::move(__buffer, __buffer_end, __first);
+     }
+   else
+     return __first;
+ }
+      else if (__len1 <= __buffer_size)
+ {
+   if (__len1)
+     {
+       __buffer_end = std::move(__first, __middle, __buffer);
+       std::move(__middle, __last, __first);
+       return std::move_backward(__buffer, __buffer_end, __last);
+     }
+   else
+     return __last;
+ }
+      else
+ return std::rotate(__first, __middle, __last);
+    }
+
+
+  template<typename _BidirectionalIterator, typename _Distance,
+    typename _Pointer, typename _Compare>
+    void
+    __merge_adaptive(_BidirectionalIterator __first,
+       _BidirectionalIterator __middle,
+       _BidirectionalIterator __last,
+       _Distance __len1, _Distance __len2,
+       _Pointer __buffer, _Compare __comp)
+    {
+      if (__len1 <= __len2)
+ {
+   _Pointer __buffer_end = std::move(__first, __middle, __buffer);
+   std::__move_merge_adaptive(__buffer, __buffer_end, __middle, __last,
+         __first, __comp);
+ }
+      else
+ {
+   _Pointer __buffer_end = std::move(__middle, __last, __buffer);
+   std::__move_merge_adaptive_backward(__first, __middle, __buffer,
+           __buffer_end, __last, __comp);
+ }
+    }
+
+  template<typename _BidirectionalIterator, typename _Distance,
+    typename _Pointer, typename _Compare>
+    void
+    __merge_adaptive_resize(_BidirectionalIterator __first,
+       _BidirectionalIterator __middle,
+       _BidirectionalIterator __last,
+       _Distance __len1, _Distance __len2,
+       _Pointer __buffer, _Distance __buffer_size,
+       _Compare __comp)
+    {
+      if (__len1 <= __buffer_size || __len2 <= __buffer_size)
+ std::__merge_adaptive(__first, __middle, __last,
+         __len1, __len2, __buffer, __comp);
+      else
+ {
+   _BidirectionalIterator __first_cut = __first;
+   _BidirectionalIterator __second_cut = __middle;
+   _Distance __len11 = 0;
+   _Distance __len22 = 0;
+   if (__len1 > __len2)
+     {
+       __len11 = __len1 / 2;
+       std::advance(__first_cut, __len11);
+       __second_cut
+  = std::__lower_bound(__middle, __last, *__first_cut,
+         __gnu_cxx::__ops::__iter_comp_val(__comp));
+       __len22 = std::distance(__middle, __second_cut);
+     }
+   else
+     {
+       __len22 = __len2 / 2;
+       std::advance(__second_cut, __len22);
+       __first_cut
+  = std::__upper_bound(__first, __middle, *__second_cut,
+         __gnu_cxx::__ops::__val_comp_iter(__comp));
+       __len11 = std::distance(__first, __first_cut);
+     }
+
+   _BidirectionalIterator __new_middle
+     = std::__rotate_adaptive(__first_cut, __middle, __second_cut,
+         _Distance(__len1 - __len11), __len22,
+         __buffer, __buffer_size);
+   std::__merge_adaptive_resize(__first, __first_cut, __new_middle,
+           __len11, __len22,
+           __buffer, __buffer_size, __comp);
+   std::__merge_adaptive_resize(__new_middle, __second_cut, __last,
+           _Distance(__len1 - __len11),
+           _Distance(__len2 - __len22),
+           __buffer, __buffer_size, __comp);
+ }
+    }
+
+
+  template<typename _BidirectionalIterator, typename _Distance,
+    typename _Compare>
+   
+    void
+    __merge_without_buffer(_BidirectionalIterator __first,
+      _BidirectionalIterator __middle,
+      _BidirectionalIterator __last,
+      _Distance __len1, _Distance __len2,
+      _Compare __comp)
+    {
+      if (__len1 == 0 || __len2 == 0)
+ return;
+
+      if (__len1 + __len2 == 2)
+ {
+   if (__comp(__middle, __first))
+     std::iter_swap(__first, __middle);
+   return;
+ }
+
+      _BidirectionalIterator __first_cut = __first;
+      _BidirectionalIterator __second_cut = __middle;
+      _Distance __len11 = 0;
+      _Distance __len22 = 0;
+      if (__len1 > __len2)
+ {
+   __len11 = __len1 / 2;
+   std::advance(__first_cut, __len11);
+   __second_cut
+     = std::__lower_bound(__middle, __last, *__first_cut,
+     __gnu_cxx::__ops::__iter_comp_val(__comp));
+   __len22 = std::distance(__middle, __second_cut);
+ }
+      else
+ {
+   __len22 = __len2 / 2;
+   std::advance(__second_cut, __len22);
+   __first_cut
+     = std::__upper_bound(__first, __middle, *__second_cut,
+     __gnu_cxx::__ops::__val_comp_iter(__comp));
+   __len11 = std::distance(__first, __first_cut);
+ }
+
+      _BidirectionalIterator __new_middle
+ = std::rotate(__first_cut, __middle, __second_cut);
+      std::__merge_without_buffer(__first, __first_cut, __new_middle,
+      __len11, __len22, __comp);
+      std::__merge_without_buffer(__new_middle, __second_cut, __last,
+      __len1 - __len11, __len2 - __len22, __comp);
+    }
+
+  template<typename _BidirectionalIterator, typename _Compare>
+   
+    void
+    __inplace_merge(_BidirectionalIterator __first,
+      _BidirectionalIterator __middle,
+      _BidirectionalIterator __last,
+      _Compare __comp)
+    {
+      typedef typename iterator_traits<_BidirectionalIterator>::value_type
+   _ValueType;
+      typedef typename iterator_traits<_BidirectionalIterator>::difference_type
+   _DistanceType;
+
+      if (__first == __middle || __middle == __last)
+ return;
+
+      const _DistanceType __len1 = std::distance(__first, __middle);
+      const _DistanceType __len2 = std::distance(__middle, __last);
+# 2510 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+      typedef _Temporary_buffer<_BidirectionalIterator, _ValueType> _TmpBuf;
+
+
+      _TmpBuf __buf(__first, std::min(__len1, __len2));
+
+      if (__builtin_expect(__buf.size() == __buf.requested_size(), true))
+ std::__merge_adaptive
+   (__first, __middle, __last, __len1, __len2, __buf.begin(), __comp);
+      else if (__builtin_expect(__buf.begin() == 0, false))
+ std::__merge_without_buffer
+   (__first, __middle, __last, __len1, __len2, __comp);
+      else
+ std::__merge_adaptive_resize
+   (__first, __middle, __last, __len1, __len2, __buf.begin(),
+    _DistanceType(__buf.size()), __comp);
+
+
+
+
+    }
+# 2549 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _BidirectionalIterator>
+   
+    inline void
+    inplace_merge(_BidirectionalIterator __first,
+    _BidirectionalIterator __middle,
+    _BidirectionalIterator __last)
+    {
+
+     
+
+     
+
+      ;
+      ;
+      ;
+
+      std::__inplace_merge(__first, __middle, __last,
+      __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 2591 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _BidirectionalIterator, typename _Compare>
+   
+    inline void
+    inplace_merge(_BidirectionalIterator __first,
+    _BidirectionalIterator __middle,
+    _BidirectionalIterator __last,
+    _Compare __comp)
+    {
+
+     
+
+     
+
+
+      ;
+      ;
+      ;
+
+      std::__inplace_merge(__first, __middle, __last,
+      __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+
+
+  template<typename _InputIterator, typename _OutputIterator,
+    typename _Compare>
+    _OutputIterator
+    __move_merge(_InputIterator __first1, _InputIterator __last1,
+   _InputIterator __first2, _InputIterator __last2,
+   _OutputIterator __result, _Compare __comp)
+    {
+      while (__first1 != __last1 && __first2 != __last2)
+ {
+   if (__comp(__first2, __first1))
+     {
+       *__result = std::move(*__first2);
+       ++__first2;
+     }
+   else
+     {
+       *__result = std::move(*__first1);
+       ++__first1;
+     }
+   ++__result;
+ }
+      return std::move(__first2, __last2, std::move(__first1, __last1, __result))
+
+                  ;
+    }
+
+  template<typename _RandomAccessIterator1, typename _RandomAccessIterator2,
+    typename _Distance, typename _Compare>
+    void
+    __merge_sort_loop(_RandomAccessIterator1 __first,
+        _RandomAccessIterator1 __last,
+        _RandomAccessIterator2 __result, _Distance __step_size,
+        _Compare __comp)
+    {
+      const _Distance __two_step = 2 * __step_size;
+
+      while (__last - __first >= __two_step)
+ {
+   __result = std::__move_merge(__first, __first + __step_size,
+           __first + __step_size,
+           __first + __two_step,
+           __result, __comp);
+   __first += __two_step;
+ }
+      __step_size = std::min(_Distance(__last - __first), __step_size);
+
+      std::__move_merge(__first, __first + __step_size,
+   __first + __step_size, __last, __result, __comp);
+    }
+
+  template<typename _RandomAccessIterator, typename _Distance,
+    typename _Compare>
+    constexpr
+    void
+    __chunk_insertion_sort(_RandomAccessIterator __first,
+      _RandomAccessIterator __last,
+      _Distance __chunk_size, _Compare __comp)
+    {
+      while (__last - __first >= __chunk_size)
+ {
+   std::__insertion_sort(__first, __first + __chunk_size, __comp);
+   __first += __chunk_size;
+ }
+      std::__insertion_sort(__first, __last, __comp);
+    }
+
+  enum { _S_chunk_size = 7 };
+
+  template<typename _RandomAccessIterator, typename _Pointer, typename _Compare>
+    void
+    __merge_sort_with_buffer(_RandomAccessIterator __first,
+        _RandomAccessIterator __last,
+        _Pointer __buffer, _Compare __comp)
+    {
+      typedef typename iterator_traits<_RandomAccessIterator>::difference_type
+ _Distance;
+
+      const _Distance __len = __last - __first;
+      const _Pointer __buffer_last = __buffer + __len;
+
+      _Distance __step_size = _S_chunk_size;
+      std::__chunk_insertion_sort(__first, __last, __step_size, __comp);
+
+      while (__step_size < __len)
+ {
+   std::__merge_sort_loop(__first, __last, __buffer,
+     __step_size, __comp);
+   __step_size *= 2;
+   std::__merge_sort_loop(__buffer, __buffer_last, __first,
+     __step_size, __comp);
+   __step_size *= 2;
+ }
+    }
+
+  template<typename _RandomAccessIterator, typename _Pointer, typename _Compare>
+    void
+    __stable_sort_adaptive(_RandomAccessIterator __first,
+      _RandomAccessIterator __middle,
+      _RandomAccessIterator __last,
+      _Pointer __buffer, _Compare __comp)
+    {
+      std::__merge_sort_with_buffer(__first, __middle, __buffer, __comp);
+      std::__merge_sort_with_buffer(__middle, __last, __buffer, __comp);
+
+      std::__merge_adaptive(__first, __middle, __last,
+       __middle - __first, __last - __middle,
+       __buffer, __comp);
+    }
+
+  template<typename _RandomAccessIterator, typename _Pointer,
+    typename _Distance, typename _Compare>
+    void
+    __stable_sort_adaptive_resize(_RandomAccessIterator __first,
+      _RandomAccessIterator __last,
+      _Pointer __buffer, _Distance __buffer_size,
+      _Compare __comp)
+    {
+      const _Distance __len = (__last - __first + 1) / 2;
+      const _RandomAccessIterator __middle = __first + __len;
+      if (__len > __buffer_size)
+ {
+   std::__stable_sort_adaptive_resize(__first, __middle, __buffer,
+          __buffer_size, __comp);
+   std::__stable_sort_adaptive_resize(__middle, __last, __buffer,
+          __buffer_size, __comp);
+   std::__merge_adaptive_resize(__first, __middle, __last,
+           _Distance(__middle - __first),
+           _Distance(__last - __middle),
+           __buffer, __buffer_size,
+           __comp);
+ }
+      else
+ std::__stable_sort_adaptive(__first, __middle, __last,
+        __buffer, __comp);
+    }
+
+
+  template<typename _RandomAccessIterator, typename _Compare>
+   
+    void
+    __inplace_stable_sort(_RandomAccessIterator __first,
+     _RandomAccessIterator __last, _Compare __comp)
+    {
+      if (__last - __first < 15)
+ {
+   std::__insertion_sort(__first, __last, __comp);
+   return;
+ }
+      _RandomAccessIterator __middle = __first + (__last - __first) / 2;
+      std::__inplace_stable_sort(__first, __middle, __comp);
+      std::__inplace_stable_sort(__middle, __last, __comp);
+      std::__merge_without_buffer(__first, __middle, __last,
+      __middle - __first,
+      __last - __middle,
+      __comp);
+    }
+# 2779 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _Compare>
+    constexpr
+    bool
+    __includes(_InputIterator1 __first1, _InputIterator1 __last1,
+        _InputIterator2 __first2, _InputIterator2 __last2,
+        _Compare __comp)
+    {
+      while (__first1 != __last1 && __first2 != __last2)
+ {
+   if (__comp(__first2, __first1))
+     return false;
+   if (!__comp(__first1, __first2))
+     ++__first2;
+   ++__first1;
+ }
+
+      return __first2 == __last2;
+    }
+# 2817 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2>
+    [[__nodiscard__]] constexpr
+    inline bool
+    includes(_InputIterator1 __first1, _InputIterator1 __last1,
+      _InputIterator2 __first2, _InputIterator2 __last2)
+    {
+
+     
+     
+     
+
+
+     
+
+
+      ;
+      ;
+      ;
+      ;
+
+      return std::__includes(__first1, __last1, __first2, __last2,
+        __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 2862 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline bool
+    includes(_InputIterator1 __first1, _InputIterator1 __last1,
+      _InputIterator2 __first2, _InputIterator2 __last2,
+      _Compare __comp)
+    {
+
+     
+     
+     
+
+
+     
+
+
+      ;
+      ;
+      ;
+      ;
+
+      return std::__includes(__first1, __last1, __first2, __last2,
+        __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+# 2898 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _BidirectionalIterator, typename _Compare>
+    constexpr
+    bool
+    __next_permutation(_BidirectionalIterator __first,
+         _BidirectionalIterator __last, _Compare __comp)
+    {
+      if (__first == __last)
+ return false;
+      _BidirectionalIterator __i = __first;
+      ++__i;
+      if (__i == __last)
+ return false;
+      __i = __last;
+      --__i;
+
+      for(;;)
+ {
+   _BidirectionalIterator __ii = __i;
+   --__i;
+   if (__comp(__i, __ii))
+     {
+       _BidirectionalIterator __j = __last;
+       while (!__comp(__i, --__j))
+  {}
+       std::iter_swap(__i, __j);
+       std::__reverse(__ii, __last,
+        std::__iterator_category(__first));
+       return true;
+     }
+   if (__i == __first)
+     {
+       std::__reverse(__first, __last,
+        std::__iterator_category(__first));
+       return false;
+     }
+ }
+    }
+# 2948 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _BidirectionalIterator>
+    constexpr
+    inline bool
+    next_permutation(_BidirectionalIterator __first,
+       _BidirectionalIterator __last)
+    {
+
+     
+
+     
+
+      ;
+      ;
+
+      return std::__next_permutation
+ (__first, __last, __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 2981 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _BidirectionalIterator, typename _Compare>
+    constexpr
+    inline bool
+    next_permutation(_BidirectionalIterator __first,
+       _BidirectionalIterator __last, _Compare __comp)
+    {
+
+     
+
+     
+
+
+      ;
+      ;
+
+      return std::__next_permutation
+ (__first, __last, __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+  template<typename _BidirectionalIterator, typename _Compare>
+    constexpr
+    bool
+    __prev_permutation(_BidirectionalIterator __first,
+         _BidirectionalIterator __last, _Compare __comp)
+    {
+      if (__first == __last)
+ return false;
+      _BidirectionalIterator __i = __first;
+      ++__i;
+      if (__i == __last)
+ return false;
+      __i = __last;
+      --__i;
+
+      for(;;)
+ {
+   _BidirectionalIterator __ii = __i;
+   --__i;
+   if (__comp(__ii, __i))
+     {
+       _BidirectionalIterator __j = __last;
+       while (!__comp(--__j, __i))
+  {}
+       std::iter_swap(__i, __j);
+       std::__reverse(__ii, __last,
+        std::__iterator_category(__first));
+       return true;
+     }
+   if (__i == __first)
+     {
+       std::__reverse(__first, __last,
+        std::__iterator_category(__first));
+       return false;
+     }
+ }
+    }
+# 3051 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _BidirectionalIterator>
+    constexpr
+    inline bool
+    prev_permutation(_BidirectionalIterator __first,
+       _BidirectionalIterator __last)
+    {
+
+     
+
+     
+
+      ;
+      ;
+
+      return std::__prev_permutation(__first, __last,
+         __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 3084 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _BidirectionalIterator, typename _Compare>
+    constexpr
+    inline bool
+    prev_permutation(_BidirectionalIterator __first,
+       _BidirectionalIterator __last, _Compare __comp)
+    {
+
+     
+
+     
+
+
+      ;
+      ;
+
+      return std::__prev_permutation(__first, __last,
+    __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+
+
+
+  template<typename _InputIterator, typename _OutputIterator,
+    typename _Predicate, typename _Tp>
+    constexpr
+    _OutputIterator
+    __replace_copy_if(_InputIterator __first, _InputIterator __last,
+        _OutputIterator __result,
+        _Predicate __pred, const _Tp& __new_value)
+    {
+      for (; __first != __last; ++__first, (void)++__result)
+ if (__pred(__first))
+   *__result = __new_value;
+ else
+   *__result = *__first;
+      return __result;
+    }
+# 3136 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _OutputIterator, typename _Tp>
+    constexpr
+    inline _OutputIterator
+    replace_copy(_InputIterator __first, _InputIterator __last,
+   _OutputIterator __result,
+   const _Tp& __old_value, const _Tp& __new_value)
+    {
+
+     
+     
+
+     
+
+      ;
+
+      return std::__replace_copy_if(__first, __last, __result,
+   __gnu_cxx::__ops::__iter_equals_val(__old_value),
+           __new_value);
+    }
+# 3171 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _OutputIterator,
+    typename _Predicate, typename _Tp>
+    constexpr
+    inline _OutputIterator
+    replace_copy_if(_InputIterator __first, _InputIterator __last,
+      _OutputIterator __result,
+      _Predicate __pred, const _Tp& __new_value)
+    {
+
+     
+     
+
+     
+
+      ;
+
+      return std::__replace_copy_if(__first, __last, __result,
+    __gnu_cxx::__ops::__pred_iter(__pred),
+           __new_value);
+    }
+# 3200 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator>
+    [[__nodiscard__]] constexpr
+    inline bool
+    is_sorted(_ForwardIterator __first, _ForwardIterator __last)
+    { return std::is_sorted_until(__first, __last) == __last; }
+# 3215 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline bool
+    is_sorted(_ForwardIterator __first, _ForwardIterator __last,
+       _Compare __comp)
+    { return std::is_sorted_until(__first, __last, __comp) == __last; }
+
+  template<typename _ForwardIterator, typename _Compare>
+    constexpr
+    _ForwardIterator
+    __is_sorted_until(_ForwardIterator __first, _ForwardIterator __last,
+        _Compare __comp)
+    {
+      if (__first == __last)
+ return __last;
+
+      _ForwardIterator __next = __first;
+      for (++__next; __next != __last; __first = __next, (void)++__next)
+ if (__comp(__next, __first))
+   return __next;
+      return __next;
+    }
+# 3246 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    is_sorted_until(_ForwardIterator __first, _ForwardIterator __last)
+    {
+
+     
+     
+
+      ;
+      ;
+
+      return std::__is_sorted_until(__first, __last,
+        __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 3271 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    is_sorted_until(_ForwardIterator __first, _ForwardIterator __last,
+      _Compare __comp)
+    {
+
+     
+     
+
+
+      ;
+      ;
+
+      return std::__is_sorted_until(__first, __last,
+        __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+# 3297 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _Tp>
+    [[__nodiscard__]] constexpr
+    inline pair<const _Tp&, const _Tp&>
+    minmax(const _Tp& __a, const _Tp& __b)
+    {
+
+     
+
+      return __b < __a ? pair<const _Tp&, const _Tp&>(__b, __a)
+         : pair<const _Tp&, const _Tp&>(__a, __b);
+    }
+# 3318 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _Tp, typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline pair<const _Tp&, const _Tp&>
+    minmax(const _Tp& __a, const _Tp& __b, _Compare __comp)
+    {
+      return __comp(__b, __a) ? pair<const _Tp&, const _Tp&>(__b, __a)
+         : pair<const _Tp&, const _Tp&>(__a, __b);
+    }
+
+  template<typename _ForwardIterator, typename _Compare>
+    constexpr
+    pair<_ForwardIterator, _ForwardIterator>
+    __minmax_element(_ForwardIterator __first, _ForwardIterator __last,
+       _Compare __comp)
+    {
+      _ForwardIterator __next = __first;
+      if (__first == __last
+   || ++__next == __last)
+ return std::make_pair(__first, __first);
+
+      _ForwardIterator __min{}, __max{};
+      if (__comp(__next, __first))
+ {
+   __min = __next;
+   __max = __first;
+ }
+      else
+ {
+   __min = __first;
+   __max = __next;
+ }
+
+      __first = __next;
+      ++__first;
+
+      while (__first != __last)
+ {
+   __next = __first;
+   if (++__next == __last)
+     {
+       if (__comp(__first, __min))
+  __min = __first;
+       else if (!__comp(__first, __max))
+  __max = __first;
+       break;
+     }
+
+   if (__comp(__next, __first))
+     {
+       if (__comp(__next, __min))
+  __min = __next;
+       if (!__comp(__first, __max))
+  __max = __first;
+     }
+   else
+     {
+       if (__comp(__first, __min))
+  __min = __first;
+       if (!__comp(__next, __max))
+  __max = __next;
+     }
+
+   __first = __next;
+   ++__first;
+ }
+
+      return std::make_pair(__min, __max);
+    }
+# 3398 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator>
+    [[__nodiscard__]] constexpr
+    inline pair<_ForwardIterator, _ForwardIterator>
+    minmax_element(_ForwardIterator __first, _ForwardIterator __last)
+    {
+
+     
+     
+
+      ;
+      ;
+
+      return std::__minmax_element(__first, __last,
+       __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 3426 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline pair<_ForwardIterator, _ForwardIterator>
+    minmax_element(_ForwardIterator __first, _ForwardIterator __last,
+     _Compare __comp)
+    {
+
+     
+     
+
+
+      ;
+      ;
+
+      return std::__minmax_element(__first, __last,
+       __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+  template<typename _Tp>
+    [[__nodiscard__]] constexpr
+    inline pair<_Tp, _Tp>
+    minmax(initializer_list<_Tp> __l)
+    {
+      ;
+      pair<const _Tp*, const _Tp*> __p =
+ std::__minmax_element(__l.begin(), __l.end(),
+         __gnu_cxx::__ops::__iter_less_iter());
+      return std::make_pair(*__p.first, *__p.second);
+    }
+
+  template<typename _Tp, typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline pair<_Tp, _Tp>
+    minmax(initializer_list<_Tp> __l, _Compare __comp)
+    {
+      ;
+      pair<const _Tp*, const _Tp*> __p =
+ std::__minmax_element(__l.begin(), __l.end(),
+         __gnu_cxx::__ops::__iter_comp_iter(__comp));
+      return std::make_pair(*__p.first, *__p.second);
+    }
+# 3482 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator1, typename _ForwardIterator2,
+    typename _BinaryPredicate>
+    [[__nodiscard__]] constexpr
+    inline bool
+    is_permutation(_ForwardIterator1 __first1, _ForwardIterator1 __last1,
+     _ForwardIterator2 __first2, _BinaryPredicate __pred)
+    {
+
+     
+     
+     
+
+
+      ;
+
+      return std::__is_permutation(__first1, __last1, __first2,
+       __gnu_cxx::__ops::__iter_comp_iter(__pred));
+    }
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wc++17-extensions"
+  template<typename _ForwardIterator1, typename _ForwardIterator2,
+    typename _BinaryPredicate>
+    constexpr
+    bool
+    __is_permutation(_ForwardIterator1 __first1, _ForwardIterator1 __last1,
+       _ForwardIterator2 __first2, _ForwardIterator2 __last2,
+       _BinaryPredicate __pred)
+    {
+      using _Cat1
+ = typename iterator_traits<_ForwardIterator1>::iterator_category;
+      using _Cat2
+ = typename iterator_traits<_ForwardIterator2>::iterator_category;
+      using _It1_is_RA = is_same<_Cat1, random_access_iterator_tag>;
+      using _It2_is_RA = is_same<_Cat2, random_access_iterator_tag>;
+      constexpr bool __ra_iters = __and_<_It1_is_RA, _It2_is_RA>::value;
+      if constexpr (__ra_iters)
+ {
+   if ((__last1 - __first1) != (__last2 - __first2))
+     return false;
+ }
+
+
+
+      for (; __first1 != __last1 && __first2 != __last2;
+   ++__first1, (void)++__first2)
+ if (!__pred(__first1, __first2))
+   break;
+
+      if constexpr (__ra_iters)
+ {
+   if (__first1 == __last1)
+     return true;
+ }
+      else
+ {
+   auto __d1 = std::distance(__first1, __last1);
+   auto __d2 = std::distance(__first2, __last2);
+   if (__d1 == 0 && __d2 == 0)
+     return true;
+   if (__d1 != __d2)
+     return false;
+ }
+
+      for (_ForwardIterator1 __scan = __first1; __scan != __last1; ++__scan)
+ {
+   if (__scan != std::__find_if(__first1, __scan,
+   __gnu_cxx::__ops::__iter_comp_iter(__pred, __scan)))
+     continue;
+
+   auto __matches = std::__count_if(__first2, __last2,
+  __gnu_cxx::__ops::__iter_comp_iter(__pred, __scan));
+   if (0 == __matches
+       || std::__count_if(__scan, __last1,
+   __gnu_cxx::__ops::__iter_comp_iter(__pred, __scan))
+       != __matches)
+     return false;
+ }
+      return true;
+    }
+#pragma GCC diagnostic pop
+# 3578 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator1, typename _ForwardIterator2>
+    [[__nodiscard__]] constexpr
+    inline bool
+    is_permutation(_ForwardIterator1 __first1, _ForwardIterator1 __last1,
+     _ForwardIterator2 __first2, _ForwardIterator2 __last2)
+    {
+      ;
+      ;
+
+      return
+ std::__is_permutation(__first1, __last1, __first2, __last2,
+         __gnu_cxx::__ops::__iter_equal_to_iter());
+    }
+# 3606 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator1, typename _ForwardIterator2,
+    typename _BinaryPredicate>
+    [[__nodiscard__]] constexpr
+    inline bool
+    is_permutation(_ForwardIterator1 __first1, _ForwardIterator1 __last1,
+     _ForwardIterator2 __first2, _ForwardIterator2 __last2,
+     _BinaryPredicate __pred)
+    {
+      ;
+      ;
+
+      return std::__is_permutation(__first1, __last1, __first2, __last2,
+       __gnu_cxx::__ops::__iter_comp_iter(__pred));
+    }
+# 3634 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _Tp>
+    [[nodiscard]] constexpr const _Tp&
+    clamp(const _Tp& __val, const _Tp& __lo, const _Tp& __hi)
+    {
+      do { if (std::__is_constant_evaluated() && !bool(!(__hi < __lo))) std::__glibcxx_assert_fail(); } while (false);
+      return std::min(std::max(__val, __lo), __hi);
+    }
+# 3654 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _Tp, typename _Compare>
+    [[nodiscard]] constexpr const _Tp&
+    clamp(const _Tp& __val, const _Tp& __lo, const _Tp& __hi, _Compare __comp)
+    {
+      do { if (std::__is_constant_evaluated() && !bool(!__comp(__hi, __lo))) std::__glibcxx_assert_fail(); } while (false);
+      return std::min(std::max(__val, __lo, __comp), __hi, __comp);
+    }
+# 3684 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _IntType, typename _UniformRandomBitGenerator>
+    pair<_IntType, _IntType>
+    __gen_two_uniform_ints(_IntType __b0, _IntType __b1,
+      _UniformRandomBitGenerator&& __g)
+    {
+      _IntType __x
+ = uniform_int_distribution<_IntType>{0, (__b0 * __b1) - 1}(__g);
+      return std::make_pair(__x / __b1, __x % __b1);
+    }
+# 3706 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _RandomAccessIterator,
+    typename _UniformRandomNumberGenerator>
+    void
+    shuffle(_RandomAccessIterator __first, _RandomAccessIterator __last,
+     _UniformRandomNumberGenerator&& __g)
+    {
+
+     
+
+      ;
+
+      if (__first == __last)
+ return;
+
+      typedef typename iterator_traits<_RandomAccessIterator>::difference_type
+ _DistanceType;
+
+      typedef typename std::make_unsigned<_DistanceType>::type __ud_type;
+      typedef typename std::uniform_int_distribution<__ud_type> __distr_type;
+      typedef typename __distr_type::param_type __p_type;
+
+      typedef typename remove_reference<_UniformRandomNumberGenerator>::type
+ _Gen;
+      typedef typename common_type<typename _Gen::result_type, __ud_type>::type
+ __uc_type;
+
+      const __uc_type __urngrange = __g.max() - __g.min();
+      const __uc_type __urange = __uc_type(__last - __first);
+
+      if (__urngrange / __urange >= __urange)
+
+      {
+ _RandomAccessIterator __i = __first + 1;
+
+
+
+
+
+ if ((__urange % 2) == 0)
+ {
+   __distr_type __d{0, 1};
+   std::iter_swap(__i++, __first + __d(__g));
+ }
+
+
+
+
+
+ while (__i != __last)
+ {
+   const __uc_type __swap_range = __uc_type(__i - __first) + 1;
+
+   const pair<__uc_type, __uc_type> __pospos =
+     __gen_two_uniform_ints(__swap_range, __swap_range + 1, __g);
+
+   std::iter_swap(__i++, __first + __pospos.first);
+   std::iter_swap(__i++, __first + __pospos.second);
+ }
+
+ return;
+      }
+
+      __distr_type __d;
+
+      for (_RandomAccessIterator __i = __first + 1; __i != __last; ++__i)
+ std::iter_swap(__i, __first + __d(__g, __p_type(0, __i - __first)));
+    }
+
+
+
+# 3789 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _Function>
+    constexpr
+    _Function
+    for_each(_InputIterator __first, _InputIterator __last, _Function __f)
+    {
+
+     
+      ;
+      for (; __first != __last; ++__first)
+ __f(*__first);
+      return __f;
+    }
+# 3815 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _Size, typename _Function>
+    constexpr
+    _InputIterator
+    for_each_n(_InputIterator __first, _Size __n, _Function __f)
+    {
+      auto __n2 = std::__size_to_integer(__n);
+      using _Cat = typename iterator_traits<_InputIterator>::iterator_category;
+      if constexpr (is_base_of_v<random_access_iterator_tag, _Cat>)
+ {
+   if (__n2 <= 0)
+     return __first;
+   auto __last = __first + __n2;
+   std::for_each(__first, __last, std::move(__f));
+   return __last;
+ }
+      else
+ {
+   while (__n2-->0)
+     {
+       __f(*__first);
+       ++__first;
+     }
+   return __first;
+ }
+    }
+# 3851 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _Tp>
+    [[__nodiscard__]] constexpr
+    inline _InputIterator
+    find(_InputIterator __first, _InputIterator __last, const _Tp& __val)
+    {
+
+     
+     
+
+      ;
+
+
+      using _ValT = typename iterator_traits<_InputIterator>::value_type;
+      if constexpr (__can_use_memchr_for_find<_ValT, _Tp>)
+ if constexpr (is_pointer_v<decltype(std::__niter_base(__first))>
+
+   || contiguous_iterator<_InputIterator>
+
+       )
+   {
+
+
+
+
+     if (!(static_cast<_ValT>(__val) == __val))
+       return __last;
+     else if (!__is_constant_evaluated())
+       {
+  const int __ival = static_cast<int>(__val);
+  if (auto __n = __last - __first; __n > 0)
+    {
+
+      const void* __p0 = std::to_address(__first);
+
+
+
+      if (auto __p1 = __builtin_memchr(__p0, __ival, __n))
+        return __first + ((const char*)__p1 - (const char*)__p0);
+    }
+  return __last;
+       }
+   }
+
+
+      return std::__find_if(__first, __last,
+       __gnu_cxx::__ops::__iter_equals_val(__val));
+    }
+# 3909 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _Predicate>
+    [[__nodiscard__]] constexpr
+    inline _InputIterator
+    find_if(_InputIterator __first, _InputIterator __last,
+     _Predicate __pred)
+    {
+
+     
+     
+
+      ;
+
+      return std::__find_if(__first, __last,
+       __gnu_cxx::__ops::__pred_iter(__pred));
+    }
+# 3941 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _ForwardIterator>
+    [[__nodiscard__]] constexpr
+    _InputIterator
+    find_first_of(_InputIterator __first1, _InputIterator __last1,
+    _ForwardIterator __first2, _ForwardIterator __last2)
+    {
+
+     
+     
+     
+
+
+      ;
+      ;
+
+      for (; __first1 != __last1; ++__first1)
+ for (_ForwardIterator __iter = __first2; __iter != __last2; ++__iter)
+   if (*__first1 == *__iter)
+     return __first1;
+      return __last1;
+    }
+# 3982 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _ForwardIterator,
+    typename _BinaryPredicate>
+    [[__nodiscard__]] constexpr
+    _InputIterator
+    find_first_of(_InputIterator __first1, _InputIterator __last1,
+    _ForwardIterator __first2, _ForwardIterator __last2,
+    _BinaryPredicate __comp)
+    {
+
+     
+     
+     
+
+
+      ;
+      ;
+
+      for (; __first1 != __last1; ++__first1)
+ for (_ForwardIterator __iter = __first2; __iter != __last2; ++__iter)
+   if (__comp(*__first1, *__iter))
+     return __first1;
+      return __last1;
+    }
+# 4015 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    adjacent_find(_ForwardIterator __first, _ForwardIterator __last)
+    {
+
+     
+     
+
+      ;
+
+      return std::__adjacent_find(__first, __last,
+      __gnu_cxx::__ops::__iter_equal_to_iter());
+    }
+# 4041 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _BinaryPredicate>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    adjacent_find(_ForwardIterator __first, _ForwardIterator __last,
+    _BinaryPredicate __binary_pred)
+    {
+
+     
+     
+
+
+      ;
+
+      return std::__adjacent_find(__first, __last,
+   __gnu_cxx::__ops::__iter_comp_iter(__binary_pred));
+    }
+# 4067 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _Tp>
+    [[__nodiscard__]] constexpr
+    inline typename iterator_traits<_InputIterator>::difference_type
+    count(_InputIterator __first, _InputIterator __last, const _Tp& __value)
+    {
+
+     
+     
+
+      ;
+
+      return std::__count_if(__first, __last,
+        __gnu_cxx::__ops::__iter_equals_val(__value));
+    }
+# 4091 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _Predicate>
+    [[__nodiscard__]] constexpr
+    inline typename iterator_traits<_InputIterator>::difference_type
+    count_if(_InputIterator __first, _InputIterator __last, _Predicate __pred)
+    {
+
+     
+     
+
+      ;
+
+      return std::__count_if(__first, __last,
+        __gnu_cxx::__ops::__pred_iter(__pred));
+    }
+# 4132 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator1, typename _ForwardIterator2>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator1
+    search(_ForwardIterator1 __first1, _ForwardIterator1 __last1,
+    _ForwardIterator2 __first2, _ForwardIterator2 __last2)
+    {
+
+     
+     
+     
+
+
+      ;
+      ;
+
+      return std::__search(__first1, __last1, __first2, __last2,
+      __gnu_cxx::__ops::__iter_equal_to_iter());
+    }
+# 4166 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Integer, typename _Tp>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    search_n(_ForwardIterator __first, _ForwardIterator __last,
+      _Integer __count, const _Tp& __val)
+    {
+
+     
+     
+
+      ;
+
+      return std::__search_n(__first, __last, __count,
+        __gnu_cxx::__ops::__iter_equals_val(__val));
+    }
+# 4200 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Integer, typename _Tp,
+    typename _BinaryPredicate>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    search_n(_ForwardIterator __first, _ForwardIterator __last,
+      _Integer __count, const _Tp& __val,
+      _BinaryPredicate __binary_pred)
+    {
+
+     
+     
+
+      ;
+
+      return std::__search_n(__first, __last, __count,
+  __gnu_cxx::__ops::__iter_comp_val(__binary_pred, __val));
+    }
+# 4226 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Searcher>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    search(_ForwardIterator __first, _ForwardIterator __last,
+    const _Searcher& __searcher)
+    { return __searcher(__first, __last).first; }
+# 4250 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _OutputIterator,
+    typename _UnaryOperation>
+    constexpr
+    _OutputIterator
+    transform(_InputIterator __first, _InputIterator __last,
+       _OutputIterator __result, _UnaryOperation __unary_op)
+    {
+
+     
+     
+
+
+      ;
+
+      for (; __first != __last; ++__first, (void)++__result)
+ *__result = __unary_op(*__first);
+      return __result;
+    }
+# 4288 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator, typename _BinaryOperation>
+    constexpr
+    _OutputIterator
+    transform(_InputIterator1 __first1, _InputIterator1 __last1,
+       _InputIterator2 __first2, _OutputIterator __result,
+       _BinaryOperation __binary_op)
+    {
+
+     
+     
+     
+
+
+      ;
+
+      for (; __first1 != __last1; ++__first1, (void)++__first2, ++__result)
+ *__result = __binary_op(*__first1, *__first2);
+      return __result;
+    }
+# 4322 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Tp>
+    constexpr
+    void
+    replace(_ForwardIterator __first, _ForwardIterator __last,
+     const _Tp& __old_value, const _Tp& __new_value)
+    {
+
+     
+
+     
+
+     
+
+      ;
+
+      for (; __first != __last; ++__first)
+ if (*__first == __old_value)
+   *__first = __new_value;
+    }
+# 4355 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Predicate, typename _Tp>
+    constexpr
+    void
+    replace_if(_ForwardIterator __first, _ForwardIterator __last,
+        _Predicate __pred, const _Tp& __new_value)
+    {
+
+     
+
+     
+
+     
+
+      ;
+
+      for (; __first != __last; ++__first)
+ if (__pred(*__first))
+   *__first = __new_value;
+    }
+# 4387 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Generator>
+    constexpr
+    void
+    generate(_ForwardIterator __first, _ForwardIterator __last,
+      _Generator __gen)
+    {
+
+     
+     
+
+      ;
+
+      for (; __first != __last; ++__first)
+ *__first = __gen();
+    }
+# 4420 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _OutputIterator, typename _Size, typename _Generator>
+    constexpr
+    _OutputIterator
+    generate_n(_OutputIterator __first, _Size __n, _Generator __gen)
+    {
+
+     
+
+
+
+      typedef __decltype(std::__size_to_integer(__n)) _IntSize;
+      for (_IntSize __niter = std::__size_to_integer(__n);
+    __niter > 0; --__niter, (void) ++__first)
+ *__first = __gen();
+      return __first;
+    }
+# 4455 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _OutputIterator>
+    constexpr
+    inline _OutputIterator
+    unique_copy(_InputIterator __first, _InputIterator __last,
+  _OutputIterator __result)
+    {
+
+     
+     
+
+     
+
+      ;
+
+      if (__first == __last)
+ return __result;
+      return std::__unique_copy(__first, __last, __result,
+    __gnu_cxx::__ops::__iter_equal_to_iter(),
+    std::__iterator_category(__first),
+    std::__iterator_category(__result));
+    }
+# 4495 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator, typename _OutputIterator,
+    typename _BinaryPredicate>
+    constexpr
+    inline _OutputIterator
+    unique_copy(_InputIterator __first, _InputIterator __last,
+  _OutputIterator __result,
+  _BinaryPredicate __binary_pred)
+    {
+
+     
+     
+
+      ;
+
+      if (__first == __last)
+ return __result;
+      return std::__unique_copy(__first, __last, __result,
+   __gnu_cxx::__ops::__iter_comp_iter(__binary_pred),
+    std::__iterator_category(__first),
+    std::__iterator_category(__result));
+    }
+# 4534 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _RandomAccessIterator>
+    __attribute__ ((__deprecated__ ("use '" "std::shuffle" "' instead")))
+    inline void
+    random_shuffle(_RandomAccessIterator __first, _RandomAccessIterator __last)
+    {
+
+     
+
+      ;
+
+      if (__first == __last)
+ return;
+
+
+      if (__builtin_expect((__last - __first) >= 0x7fff / 4, 0))
+ {
+
+
+   unsigned __xss
+     = (unsigned)std::rand() ^ ((unsigned)std::rand() << 15);
+   for (_RandomAccessIterator __i = __first + 1; __i != __last; ++__i)
+     {
+       __xss += !__xss;
+       __xss ^= __xss << 13;
+       __xss ^= __xss >> 17;
+       __xss ^= __xss << 5;
+       _RandomAccessIterator __j = __first
+         + (__xss % ((__i - __first) + 1));
+       if (__i != __j)
+  std::iter_swap(__i, __j);
+     }
+   return;
+ }
+
+
+      for (_RandomAccessIterator __i = __first + 1; __i != __last; ++__i)
+ {
+
+   _RandomAccessIterator __j = __first
+     + (std::rand() % ((__i - __first) + 1));
+   if (__i != __j)
+     std::iter_swap(__i, __j);
+ }
+    }
+# 4597 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _RandomAccessIterator, typename _RandomNumberGenerator>
+    __attribute__ ((__deprecated__ ("use '" "std::shuffle" "' instead")))
+    void
+    random_shuffle(_RandomAccessIterator __first, _RandomAccessIterator __last,
+
+     _RandomNumberGenerator&& __rand)
+
+
+
+    {
+
+     
+
+      ;
+
+      if (__first == __last)
+ return;
+      for (_RandomAccessIterator __i = __first + 1; __i != __last; ++__i)
+ {
+   _RandomAccessIterator __j = __first + __rand((__i - __first) + 1);
+   if (__i != __j)
+     std::iter_swap(__i, __j);
+ }
+    }
+# 4639 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Predicate>
+    constexpr
+    inline _ForwardIterator
+    partition(_ForwardIterator __first, _ForwardIterator __last,
+       _Predicate __pred)
+    {
+
+     
+
+     
+
+      ;
+
+      return std::__partition(__first, __last, __pred,
+         std::__iterator_category(__first));
+    }
+# 4674 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _RandomAccessIterator>
+    constexpr
+    inline void
+    partial_sort(_RandomAccessIterator __first,
+   _RandomAccessIterator __middle,
+   _RandomAccessIterator __last)
+    {
+
+     
+
+     
+
+      ;
+      ;
+      ;
+
+      std::__partial_sort(__first, __middle, __last,
+     __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 4713 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline void
+    partial_sort(_RandomAccessIterator __first,
+   _RandomAccessIterator __middle,
+   _RandomAccessIterator __last,
+   _Compare __comp)
+    {
+
+     
+
+     
+
+
+      ;
+      ;
+      ;
+
+      std::__partial_sort(__first, __middle, __last,
+     __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+# 4750 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _RandomAccessIterator>
+    constexpr
+    inline void
+    nth_element(_RandomAccessIterator __first, _RandomAccessIterator __nth,
+  _RandomAccessIterator __last)
+    {
+
+     
+
+     
+
+      ;
+      ;
+      ;
+
+      if (__first == __last || __nth == __last)
+ return;
+
+      std::__introselect(__first, __nth, __last,
+    std::__lg(__last - __first) * 2,
+    __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 4790 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline void
+    nth_element(_RandomAccessIterator __first, _RandomAccessIterator __nth,
+  _RandomAccessIterator __last, _Compare __comp)
+    {
+
+     
+
+     
+
+
+      ;
+      ;
+      ;
+
+      if (__first == __last || __nth == __last)
+ return;
+
+      std::__introselect(__first, __nth, __last,
+    std::__lg(__last - __first) * 2,
+    __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+# 4828 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _RandomAccessIterator>
+    constexpr
+    inline void
+    sort(_RandomAccessIterator __first, _RandomAccessIterator __last)
+    {
+
+     
+
+     
+
+      ;
+      ;
+
+      std::__sort(__first, __last, __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 4859 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _RandomAccessIterator, typename _Compare>
+    constexpr
+    inline void
+    sort(_RandomAccessIterator __first, _RandomAccessIterator __last,
+  _Compare __comp)
+    {
+
+     
+
+     
+
+
+      ;
+      ;
+
+      std::__sort(__first, __last, __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator, typename _Compare>
+    constexpr
+    _OutputIterator
+    __merge(_InputIterator1 __first1, _InputIterator1 __last1,
+     _InputIterator2 __first2, _InputIterator2 __last2,
+     _OutputIterator __result, _Compare __comp)
+    {
+      while (__first1 != __last1 && __first2 != __last2)
+ {
+   if (__comp(__first2, __first1))
+     {
+       *__result = *__first2;
+       ++__first2;
+     }
+   else
+     {
+       *__result = *__first1;
+       ++__first1;
+     }
+   ++__result;
+ }
+      return std::copy(__first2, __last2,
+         std::copy(__first1, __last1, __result));
+    }
+# 4922 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator>
+    constexpr
+    inline _OutputIterator
+    merge(_InputIterator1 __first1, _InputIterator1 __last1,
+   _InputIterator2 __first2, _InputIterator2 __last2,
+   _OutputIterator __result)
+    {
+
+     
+     
+     
+
+     
+
+     
+
+
+      ;
+      ;
+      ;
+      ;
+
+      return std::__merge(__first1, __last1,
+         __first2, __last2, __result,
+         __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 4973 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator, typename _Compare>
+    constexpr
+    inline _OutputIterator
+    merge(_InputIterator1 __first1, _InputIterator1 __last1,
+   _InputIterator2 __first2, _InputIterator2 __last2,
+   _OutputIterator __result, _Compare __comp)
+    {
+
+     
+     
+     
+
+     
+
+     
+
+
+      ;
+      ;
+      ;
+      ;
+
+      return std::__merge(__first1, __last1,
+    __first2, __last2, __result,
+    __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+  template<typename _RandomAccessIterator, typename _Compare>
+   
+    inline void
+    __stable_sort(_RandomAccessIterator __first, _RandomAccessIterator __last,
+    _Compare __comp)
+    {
+      typedef typename iterator_traits<_RandomAccessIterator>::value_type
+ _ValueType;
+      typedef typename iterator_traits<_RandomAccessIterator>::difference_type
+ _DistanceType;
+
+      if (__first == __last)
+ return;
+# 5022 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+      typedef _Temporary_buffer<_RandomAccessIterator, _ValueType> _TmpBuf;
+
+
+      _TmpBuf __buf(__first, (__last - __first + 1) / 2);
+
+      if (__builtin_expect(__buf.requested_size() == __buf.size(), true))
+ std::__stable_sort_adaptive(__first,
+        __first + _DistanceType(__buf.size()),
+        __last, __buf.begin(), __comp);
+      else if (__builtin_expect(__buf.begin() == 0, false))
+ std::__inplace_stable_sort(__first, __last, __comp);
+      else
+ std::__stable_sort_adaptive_resize(__first, __last, __buf.begin(),
+        _DistanceType(__buf.size()), __comp);
+
+
+
+    }
+# 5058 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _RandomAccessIterator>
+   
+    inline void
+    stable_sort(_RandomAccessIterator __first, _RandomAccessIterator __last)
+    {
+
+     
+
+     
+
+      ;
+      ;
+
+      std::__stable_sort(__first, __last,
+        __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 5093 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _RandomAccessIterator, typename _Compare>
+   
+    inline void
+    stable_sort(_RandomAccessIterator __first, _RandomAccessIterator __last,
+  _Compare __comp)
+    {
+
+     
+
+     
+
+
+      ;
+      ;
+
+      std::__stable_sort(__first, __last,
+        __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator,
+    typename _Compare>
+    constexpr
+    _OutputIterator
+    __set_union(_InputIterator1 __first1, _InputIterator1 __last1,
+  _InputIterator2 __first2, _InputIterator2 __last2,
+  _OutputIterator __result, _Compare __comp)
+    {
+      while (__first1 != __last1 && __first2 != __last2)
+ {
+   if (__comp(__first1, __first2))
+     {
+       *__result = *__first1;
+       ++__first1;
+     }
+   else if (__comp(__first2, __first1))
+     {
+       *__result = *__first2;
+       ++__first2;
+     }
+   else
+     {
+       *__result = *__first1;
+       ++__first1;
+       ++__first2;
+     }
+   ++__result;
+ }
+      return std::copy(__first2, __last2,
+         std::copy(__first1, __last1, __result));
+    }
+# 5164 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator>
+    constexpr
+    inline _OutputIterator
+    set_union(_InputIterator1 __first1, _InputIterator1 __last1,
+       _InputIterator2 __first2, _InputIterator2 __last2,
+       _OutputIterator __result)
+    {
+
+     
+     
+     
+
+     
+
+     
+
+
+     
+
+
+      ;
+      ;
+      ;
+      ;
+
+      return std::__set_union(__first1, __last1,
+    __first2, __last2, __result,
+    __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 5215 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator, typename _Compare>
+    constexpr
+    inline _OutputIterator
+    set_union(_InputIterator1 __first1, _InputIterator1 __last1,
+       _InputIterator2 __first2, _InputIterator2 __last2,
+       _OutputIterator __result, _Compare __comp)
+    {
+
+     
+     
+     
+
+     
+
+     
+
+
+     
+
+
+      ;
+      ;
+      ;
+      ;
+
+      return std::__set_union(__first1, __last1,
+    __first2, __last2, __result,
+    __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator,
+    typename _Compare>
+    constexpr
+    _OutputIterator
+    __set_intersection(_InputIterator1 __first1, _InputIterator1 __last1,
+         _InputIterator2 __first2, _InputIterator2 __last2,
+         _OutputIterator __result, _Compare __comp)
+    {
+      while (__first1 != __last1 && __first2 != __last2)
+ if (__comp(__first1, __first2))
+   ++__first1;
+ else if (__comp(__first2, __first1))
+   ++__first2;
+ else
+   {
+     *__result = *__first1;
+     ++__first1;
+     ++__first2;
+     ++__result;
+   }
+      return __result;
+    }
+# 5288 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator>
+    constexpr
+    inline _OutputIterator
+    set_intersection(_InputIterator1 __first1, _InputIterator1 __last1,
+       _InputIterator2 __first2, _InputIterator2 __last2,
+       _OutputIterator __result)
+    {
+
+     
+     
+     
+
+     
+
+
+     
+
+
+      ;
+      ;
+      ;
+      ;
+
+      return std::__set_intersection(__first1, __last1,
+         __first2, __last2, __result,
+         __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 5338 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator, typename _Compare>
+    constexpr
+    inline _OutputIterator
+    set_intersection(_InputIterator1 __first1, _InputIterator1 __last1,
+       _InputIterator2 __first2, _InputIterator2 __last2,
+       _OutputIterator __result, _Compare __comp)
+    {
+
+     
+     
+     
+
+     
+
+
+     
+
+
+      ;
+      ;
+      ;
+      ;
+
+      return std::__set_intersection(__first1, __last1,
+    __first2, __last2, __result,
+    __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator,
+    typename _Compare>
+    constexpr
+    _OutputIterator
+    __set_difference(_InputIterator1 __first1, _InputIterator1 __last1,
+       _InputIterator2 __first2, _InputIterator2 __last2,
+       _OutputIterator __result, _Compare __comp)
+    {
+      while (__first1 != __last1 && __first2 != __last2)
+ if (__comp(__first1, __first2))
+   {
+     *__result = *__first1;
+     ++__first1;
+     ++__result;
+   }
+ else if (__comp(__first2, __first1))
+   ++__first2;
+ else
+   {
+     ++__first1;
+     ++__first2;
+   }
+      return std::copy(__first1, __last1, __result);
+    }
+# 5413 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator>
+    constexpr
+    inline _OutputIterator
+    set_difference(_InputIterator1 __first1, _InputIterator1 __last1,
+     _InputIterator2 __first2, _InputIterator2 __last2,
+     _OutputIterator __result)
+    {
+
+     
+     
+     
+
+     
+
+
+     
+
+
+      ;
+      ;
+      ;
+      ;
+
+      return std::__set_difference(__first1, __last1,
+       __first2, __last2, __result,
+       __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 5465 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator, typename _Compare>
+    constexpr
+    inline _OutputIterator
+    set_difference(_InputIterator1 __first1, _InputIterator1 __last1,
+     _InputIterator2 __first2, _InputIterator2 __last2,
+     _OutputIterator __result, _Compare __comp)
+    {
+
+     
+     
+     
+
+     
+
+
+     
+
+
+      ;
+      ;
+      ;
+      ;
+
+      return std::__set_difference(__first1, __last1,
+       __first2, __last2, __result,
+       __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator,
+    typename _Compare>
+    constexpr
+    _OutputIterator
+    __set_symmetric_difference(_InputIterator1 __first1,
+          _InputIterator1 __last1,
+          _InputIterator2 __first2,
+          _InputIterator2 __last2,
+          _OutputIterator __result,
+          _Compare __comp)
+    {
+      while (__first1 != __last1 && __first2 != __last2)
+ if (__comp(__first1, __first2))
+   {
+     *__result = *__first1;
+     ++__first1;
+     ++__result;
+   }
+ else if (__comp(__first2, __first1))
+   {
+     *__result = *__first2;
+     ++__first2;
+     ++__result;
+   }
+ else
+   {
+     ++__first1;
+     ++__first2;
+   }
+      return std::copy(__first2, __last2,
+         std::copy(__first1, __last1, __result));
+    }
+# 5546 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator>
+    constexpr
+    inline _OutputIterator
+    set_symmetric_difference(_InputIterator1 __first1, _InputIterator1 __last1,
+        _InputIterator2 __first2, _InputIterator2 __last2,
+        _OutputIterator __result)
+    {
+
+     
+     
+     
+
+     
+
+     
+
+
+     
+
+
+      ;
+      ;
+      ;
+      ;
+
+      return std::__set_symmetric_difference(__first1, __last1,
+     __first2, __last2, __result,
+     __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 5598 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _InputIterator1, typename _InputIterator2,
+    typename _OutputIterator, typename _Compare>
+    constexpr
+    inline _OutputIterator
+    set_symmetric_difference(_InputIterator1 __first1, _InputIterator1 __last1,
+        _InputIterator2 __first2, _InputIterator2 __last2,
+        _OutputIterator __result,
+        _Compare __comp)
+    {
+
+     
+     
+     
+
+     
+
+     
+
+
+     
+
+
+      ;
+      ;
+      ;
+      ;
+
+      return std::__set_symmetric_difference(__first1, __last1,
+    __first2, __last2, __result,
+    __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+  template<typename _ForwardIterator, typename _Compare>
+    constexpr
+    _ForwardIterator
+    __min_element(_ForwardIterator __first, _ForwardIterator __last,
+    _Compare __comp)
+    {
+      if (__first == __last)
+ return __first;
+      _ForwardIterator __result = __first;
+      while (++__first != __last)
+ if (__comp(__first, __result))
+   __result = __first;
+      return __result;
+    }
+# 5652 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator>
+    [[__nodiscard__]] constexpr
+    _ForwardIterator
+    inline min_element(_ForwardIterator __first, _ForwardIterator __last)
+    {
+
+     
+     
+
+      ;
+      ;
+
+      return std::__min_element(__first, __last,
+    __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 5677 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    min_element(_ForwardIterator __first, _ForwardIterator __last,
+  _Compare __comp)
+    {
+
+     
+     
+
+
+      ;
+      ;
+
+      return std::__min_element(__first, __last,
+    __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+  template<typename _ForwardIterator, typename _Compare>
+    constexpr
+    _ForwardIterator
+    __max_element(_ForwardIterator __first, _ForwardIterator __last,
+    _Compare __comp)
+    {
+      if (__first == __last) return __first;
+      _ForwardIterator __result = __first;
+      while (++__first != __last)
+ if (__comp(__result, __first))
+   __result = __first;
+      return __result;
+    }
+# 5716 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    max_element(_ForwardIterator __first, _ForwardIterator __last)
+    {
+
+     
+     
+
+      ;
+      ;
+
+      return std::__max_element(__first, __last,
+    __gnu_cxx::__ops::__iter_less_iter());
+    }
+# 5741 "C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h" 3
+  template<typename _ForwardIterator, typename _Compare>
+    [[__nodiscard__]] constexpr
+    inline _ForwardIterator
+    max_element(_ForwardIterator __first, _ForwardIterator __last,
+  _Compare __comp)
+    {
+
+     
+     
+
+
+      ;
+      ;
+
+      return std::__max_element(__first, __last,
+    __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+
+
+  template<typename _Tp>
+    constexpr
+    inline _Tp
+    min(initializer_list<_Tp> __l)
+    {
+      ;
+      return *std::__min_element(__l.begin(), __l.end(),
+   __gnu_cxx::__ops::__iter_less_iter());
+    }
+
+  template<typename _Tp, typename _Compare>
+    constexpr
+    inline _Tp
+    min(initializer_list<_Tp> __l, _Compare __comp)
+    {
+      ;
+      return *std::__min_element(__l.begin(), __l.end(),
+   __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+  template<typename _Tp>
+    constexpr
+    inline _Tp
+    max(initializer_list<_Tp> __l)
+    {
+      ;
+      return *std::__max_element(__l.begin(), __l.end(),
+   __gnu_cxx::__ops::__iter_less_iter());
+    }
+
+  template<typename _Tp, typename _Compare>
+    constexpr
+    inline _Tp
+    max(initializer_list<_Tp> __l, _Compare __comp)
+    {
+      ;
+      return *std::__max_element(__l.begin(), __l.end(),
+   __gnu_cxx::__ops::__iter_comp_iter(__comp));
+    }
+
+
+
+
+  template<typename _InputIterator, typename _RandomAccessIterator,
+           typename _Size, typename _UniformRandomBitGenerator>
+    _RandomAccessIterator
+    __sample(_InputIterator __first, _InputIterator __last, input_iterator_tag,
+      _RandomAccessIterator __out, random_access_iterator_tag,
+      _Size __n, _UniformRandomBitGenerator&& __g)
+    {
+      using __distrib_type = uniform_int_distribution<_Size>;
+      using __param_type = typename __distrib_type::param_type;
+      __distrib_type __d{};
+      _Size __sample_sz = 0;
+      while (__first != __last && __sample_sz != __n)
+ {
+   __out[__sample_sz++] = *__first;
+   ++__first;
+ }
+      for (auto __pop_sz = __sample_sz; __first != __last;
+   ++__first, (void) ++__pop_sz)
+ {
+   const auto __k = __d(__g, __param_type{0, __pop_sz});
+   if (__k < __n)
+     __out[__k] = *__first;
+ }
+      return __out + __sample_sz;
+    }
+
+
+  template<typename _ForwardIterator, typename _OutputIterator, typename _Cat,
+           typename _Size, typename _UniformRandomBitGenerator>
+    _OutputIterator
+    __sample(_ForwardIterator __first, _ForwardIterator __last,
+      forward_iterator_tag,
+      _OutputIterator __out, _Cat,
+      _Size __n, _UniformRandomBitGenerator&& __g)
+    {
+      using __distrib_type = uniform_int_distribution<_Size>;
+      using __param_type = typename __distrib_type::param_type;
+      using _USize = make_unsigned_t<_Size>;
+      using _Gen = remove_reference_t<_UniformRandomBitGenerator>;
+      using __uc_type = common_type_t<typename _Gen::result_type, _USize>;
+
+      if (__first == __last)
+ return __out;
+
+      __distrib_type __d{};
+      _Size __unsampled_sz = std::distance(__first, __last);
+      __n = std::min(__n, __unsampled_sz);
+
+
+
+
+      const __uc_type __urngrange = __g.max() - __g.min();
+      if (__urngrange / __uc_type(__unsampled_sz) >= __uc_type(__unsampled_sz))
+
+
+        {
+   while (__n != 0 && __unsampled_sz >= 2)
+     {
+       const pair<_Size, _Size> __p =
+  __gen_two_uniform_ints(__unsampled_sz, __unsampled_sz - 1, __g);
+
+       --__unsampled_sz;
+       if (__p.first < __n)
+  {
+    *__out++ = *__first;
+    --__n;
+  }
+
+       ++__first;
+
+       if (__n == 0) break;
+
+       --__unsampled_sz;
+       if (__p.second < __n)
+  {
+    *__out++ = *__first;
+    --__n;
+  }
+
+       ++__first;
+     }
+        }
+
+
+
+      for (; __n != 0; ++__first)
+ if (__d(__g, __param_type{0, --__unsampled_sz}) < __n)
+   {
+     *__out++ = *__first;
+     --__n;
+   }
+      return __out;
+    }
+
+
+
+
+  template<typename _PopulationIterator, typename _SampleIterator,
+           typename _Distance, typename _UniformRandomBitGenerator>
+    _SampleIterator
+    sample(_PopulationIterator __first, _PopulationIterator __last,
+    _SampleIterator __out, _Distance __n,
+    _UniformRandomBitGenerator&& __g)
+    {
+      using __pop_cat = typename
+ std::iterator_traits<_PopulationIterator>::iterator_category;
+      using __samp_cat = typename
+ std::iterator_traits<_SampleIterator>::iterator_category;
+
+      static_assert(
+   __or_<is_convertible<__pop_cat, forward_iterator_tag>,
+  is_convertible<__samp_cat, random_access_iterator_tag>>::value,
+   "output range must use a RandomAccessIterator when input range"
+   " does not meet the ForwardIterator requirements");
+
+      static_assert(is_integral<_Distance>::value,
+      "sample size must be an integer type");
+
+      typename iterator_traits<_PopulationIterator>::difference_type __d = __n;
+      return std::
+ __sample(__first, __last, __pop_cat{}, __out, __samp_cat{}, __d,
+   std::forward<_UniformRandomBitGenerator>(__g));
+    }
+
+
+
+
+}
+
+#pragma GCC diagnostic pop
+# 40 "C:/msys64/mingw64/include/c++/15.2.0/bits/unicode.h" 2 3
+
+
+
+
+namespace std
+{
+
+namespace __unicode
+{
+
+  constexpr bool
+  __is_scalar_value(char32_t __c)
+  {
+    if (__c < 0xD800) [[likely]]
+      return true;
+    return 0xDFFF < __c && __c <= 0x10FFFF;
+  }
+
+
+  template<typename _CharT>
+    constexpr bool
+    __is_single_code_unit(char32_t __c)
+    {
+      if constexpr (__gnu_cxx::__int_traits<_CharT>::__max <= 0xFF)
+ return __c < 0x7F;
+      else
+ return __c < __gnu_cxx::__int_traits<_CharT>::__max
+         && __is_scalar_value(__c);
+    }
+
+
+
+  struct _Repl
+  {
+    constexpr char32_t
+    operator()() const noexcept
+    { return 0xFFFD; }
+  };
+
+  struct _Null_sentinel_t
+  {
+    template<input_iterator _It>
+      requires default_initializable<iter_value_t<_It>>
+ && equality_comparable_with<iter_reference_t<_It>, iter_value_t<_It>>
+      friend constexpr auto
+      operator==(_It __it, _Null_sentinel_t)
+      { return *__it == iter_value_t<_It>{}; }
+  };
+
+  template<typename _FromFmt, typename _ToFmt,
+    input_iterator _Iter, sentinel_for<_Iter> _Sent = _Iter,
+    typename _ErrorHandler = _Repl>
+    requires convertible_to<iter_value_t<_Iter>, _FromFmt>
+    class _Utf_iterator
+    {
+      static_assert(forward_iterator<_Iter> || noexcept(_ErrorHandler()()));
+
+    public:
+      using value_type = _ToFmt;
+      using difference_type = iter_difference_t<_Iter>;
+      using reference = value_type;
+      using iterator_concept
+ = std::__detail::__clamp_iter_cat<__iter_category_t<_Iter>,
+       bidirectional_iterator_tag>;
+
+      constexpr _Utf_iterator() = default;
+
+      constexpr
+      _Utf_iterator(_Iter __first, _Iter __it, _Sent __last)
+      requires bidirectional_iterator<_Iter>
+      : _M_first_and_curr{__first, __it}, _M_last(__last)
+      {
+ if (_M_curr() != _M_last)
+   _M_read();
+ else
+   _M_buf = {};
+      }
+
+      constexpr
+      _Utf_iterator(_Iter __it, _Sent __last)
+      requires (!bidirectional_iterator<_Iter>)
+      : _M_first_and_curr{__it}, _M_last(__last)
+      {
+ if (_M_curr() != _M_last)
+   _M_read();
+ else
+   _M_buf = {};
+      }
+
+      template<class _Iter2, class _Sent2>
+ requires convertible_to<_Iter2, _Iter> && convertible_to<_Sent2, _Sent>
+ constexpr
+ _Utf_iterator(const _Utf_iterator<_FromFmt, _ToFmt, _Iter2, _Sent2,
+       _ErrorHandler>& __other)
+ : _M_buf(__other._M_buf), _M_first_and_curr(__other._M_first_and_curr),
+   _M_buf_index(__other._M_buf_index), _M_buf_last(__other._M_buf_last),
+   _M_last(__other._M_last)
+ { }
+
+      [[nodiscard]]
+      constexpr _Iter
+      begin() const requires bidirectional_iterator<_Iter>
+      { return _M_first(); }
+
+      [[nodiscard]]
+      constexpr _Sent
+      end() const { return _M_last; }
+
+      [[nodiscard]]
+      constexpr _Iter
+      base() const requires forward_iterator<_Iter>
+      { return _M_curr(); }
+
+      [[nodiscard]]
+      constexpr iter_difference_t<_Iter>
+      _M_units() const requires forward_iterator<_Iter>
+      { return _M_to_increment; }
+
+      [[nodiscard]]
+      constexpr value_type
+      operator*() const { return _M_buf[_M_buf_index]; }
+
+      constexpr _Utf_iterator&
+      operator++()
+      {
+ if (_M_buf_index + 1 == _M_buf_last && _M_curr() != _M_last)
+   {
+     if constexpr (forward_iterator<_Iter>)
+       std::advance(_M_curr(), _M_to_increment);
+     if (_M_curr() == _M_last)
+       _M_buf_index = 0;
+     else
+       _M_read();
+   }
+ else if (_M_buf_index + 1 < _M_buf_last)
+   ++_M_buf_index;
+ return *this;
+      }
+
+      constexpr _Utf_iterator
+      operator++(int)
+      {
+ auto __tmp = *this;
+ ++*this;
+ return __tmp;
+      }
+
+      constexpr _Utf_iterator&
+      operator--() requires bidirectional_iterator<_Iter>
+      {
+ if (!_M_buf_index && _M_curr() != _M_first())
+   _M_read_reverse();
+ else if (_M_buf_index)
+   --_M_buf_index;
+ return *this;
+      }
+
+      constexpr _Utf_iterator
+      operator--(int)
+      {
+ auto __tmp = *this;
+ --*this;
+ return __tmp;
+      }
+
+      [[nodiscard]]
+      friend constexpr bool
+      operator==(_Utf_iterator __lhs, _Utf_iterator __rhs)
+      requires forward_iterator<_Iter> || requires (_Iter __i) { __i != __i; }
+      {
+ if constexpr (forward_iterator<_Iter>)
+   return __lhs._M_curr() == __rhs._M_curr()
+     && __lhs._M_buf_index == __rhs._M_buf_index;
+ else if (__lhs._M_curr() != __rhs._M_curr())
+   return false;
+ else if (__lhs._M_buf_index == __rhs._M_buf_index
+     && __lhs._M_buf_last == __rhs._M_buf_last)
+   return true;
+ else
+   return __lhs._M_buf_index == __lhs._M_buf_last
+     && __rhs._M_buf_index == __rhs._M_buf_last;
+      }
+
+      [[nodiscard]]
+      friend constexpr bool
+      operator==(_Utf_iterator __lhs, _Sent __rhs)
+      {
+ if constexpr (forward_iterator<_Iter>)
+   return __lhs._M_curr() == __rhs;
+ else
+   return __lhs._M_curr() == __rhs
+     && __lhs._M_buf_index == __lhs._M_buf_last;
+      }
+
+    private:
+      constexpr void
+      _M_read()
+      {
+ if constexpr (sizeof(_FromFmt) == sizeof(uint8_t))
+   _M_read_utf8();
+ else if constexpr (sizeof(_FromFmt) == sizeof(uint16_t))
+   _M_read_utf16();
+ else
+   {
+     static_assert(sizeof(_FromFmt) == sizeof(uint32_t));
+     _M_read_utf32();
+   }
+      }
+
+      constexpr void
+      _M_read_reverse();
+
+      template<typename>
+ struct _Guard
+ {
+   _Guard(void*, _Iter&) { }
+ };
+
+      template<typename _It> requires forward_iterator<_It>
+ struct _Guard<_It>
+ {
+   constexpr ~_Guard() { _M_this->_M_curr() = std::move(_M_orig); }
+   _Utf_iterator* _M_this;
+   _It _M_orig;
+ };
+
+      constexpr void
+      _M_read_utf8()
+      {
+ _Guard<_Iter> __g{this, _M_curr()};
+ char32_t __c{};
+ const uint8_t __lo_bound = 0x80, __hi_bound = 0xBF;
+ uint8_t __u = *_M_curr()++;
+ uint8_t __to_incr = 1;
+ auto __incr = [&, this] {
+   ++__to_incr;
+   return ++_M_curr();
+ };
+
+ if (__u <= 0x7F) [[likely]]
+   __c = __u;
+ else if (__u < 0xC2) [[unlikely]]
+   __c = _S_error();
+ else if (_M_curr() == _M_last) [[unlikely]]
+   __c = _S_error();
+ else if (__u <= 0xDF)
+   {
+     __c = __u & 0x1F;
+     __u = *_M_curr();
+
+     if (__u < __lo_bound || __u > __hi_bound) [[unlikely]]
+       __c = _S_error();
+     else
+       {
+  __c = (__c << 6) | (__u & 0x3F);
+  __incr();
+       }
+   }
+ else if (__u <= 0xEF)
+   {
+     const uint8_t __lo_bound_2 = __u == 0xE0 ? 0xA0 : __lo_bound;
+     const uint8_t __hi_bound_2 = __u == 0xED ? 0x9F : __hi_bound;
+
+     __c = __u & 0x0F;
+     __u = *_M_curr();
+
+     if (__u < __lo_bound_2 || __u > __hi_bound_2) [[unlikely]]
+       __c = _S_error();
+     else if (__incr() == _M_last) [[unlikely]]
+       __c = _S_error();
+     else
+       {
+  __c = (__c << 6) | (__u & 0x3F);
+  __u = *_M_curr();
+
+  if (__u < __lo_bound || __u > __hi_bound) [[unlikely]]
+    __c = _S_error();
+  else
+    {
+      __c = (__c << 6) | (__u & 0x3F);
+      __incr();
+    }
+       }
+   }
+ else if (__u <= 0xF4)
+   {
+     const uint8_t __lo_bound_2 = __u == 0xF0 ? 0x90 : __lo_bound;
+     const uint8_t __hi_bound_2 = __u == 0xF4 ? 0x8F : __hi_bound;
+
+     __c = __u & 0x07;
+     __u = *_M_curr();
+
+     if (__u < __lo_bound_2 || __u > __hi_bound_2) [[unlikely]]
+       __c = _S_error();
+     else if (__incr() == _M_last) [[unlikely]]
+       __c = _S_error();
+     else
+       {
+  __c = (__c << 6) | (__u & 0x3F);
+  __u = *_M_curr();
+
+  if (__u < __lo_bound || __u > __hi_bound) [[unlikely]]
+    __c = _S_error();
+  else if (__incr() == _M_last) [[unlikely]]
+    __c = _S_error();
+  else
+    {
+      __c = (__c << 6) | (__u & 0x3F);
+      __u = *_M_curr();
+
+      if (__u < __lo_bound || __u > __hi_bound) [[unlikely]]
+        __c = _S_error();
+      else
+        {
+   __c = (__c << 6) | (__u & 0x3F);
+   __incr();
+        }
+    }
+       }
+   }
+ else [[unlikely]]
+   __c = _S_error();
+
+ _M_update(__c, __to_incr);
+      }
+
+      constexpr void
+      _M_read_utf16()
+      {
+ _Guard<_Iter> __g{this, _M_curr()};
+ char32_t __c{};
+ uint16_t __u = *_M_curr()++;
+ uint8_t __to_incr = 1;
+
+ if (__u < 0xD800 || __u > 0xDFFF) [[likely]]
+   __c = __u;
+ else if (__u < 0xDC00 && _M_curr() != _M_last)
+   {
+     uint16_t __u2 = *_M_curr();
+     if (__u2 < 0xDC00 || __u2 > 0xDFFF) [[unlikely]]
+       __c = _S_error();
+     else
+       {
+  ++_M_curr();
+  __to_incr = 2;
+  uint32_t __x = (__u & 0x3F) << 10 | (__u2 & 0x3FF);
+  uint32_t __w = (__u >> 6) & 0x1F;
+  __c = (__w + 1) << 16 | __x;
+       }
+   }
+ else
+   __c = _S_error();
+
+ _M_update(__c, __to_incr);
+      }
+
+      constexpr void
+      _M_read_utf32()
+      {
+ _Guard<_Iter> __g{this, _M_curr()};
+ char32_t __c = *_M_curr()++;
+ if (!__is_scalar_value(__c)) [[unlikely]]
+   __c = _S_error();
+ _M_update(__c, 1);
+      }
+
+
+      constexpr void
+      _M_update(char32_t __c, uint8_t __to_incr)
+      {
+ _M_to_increment = __to_incr;
+ _M_buf_index = 0;
+ if constexpr (sizeof(_ToFmt) == sizeof(uint32_t))
+   {
+     _M_buf[0] = __c;
+     _M_buf_last = 1;
+   }
+ else if constexpr (sizeof(_ToFmt) == sizeof(uint16_t))
+   {
+     if (__is_single_code_unit<_ToFmt>(__c))
+       {
+  _M_buf[0] = __c;
+  _M_buf[1] = 0;
+  _M_buf_last = 1;
+       }
+     else
+       {
+
+  const char32_t __lead_offset = 0xD800 - (0x10000 >> 10);
+  char16_t __lead = __lead_offset + (__c >> 10);
+  char16_t __trail = 0xDC00 + (__c & 0x3FF);
+  _M_buf[0] = __lead;
+  _M_buf[1] = __trail;
+  _M_buf_last = 2;
+       }
+   }
+ else
+   {
+     static_assert(sizeof(_ToFmt) == 1);
+     int __bits = std::bit_width((uint32_t)__c);
+     if (__bits <= 7) [[likely]]
+       {
+  _M_buf[0] = __c;
+  _M_buf[1] = _M_buf[2] = _M_buf[3] = 0;
+  _M_buf_last = 1;
+       }
+     else if (__bits <= 11)
+       {
+  _M_buf[0] = 0xC0 | (__c >> 6);
+  _M_buf[1] = 0x80 | (__c & 0x3F);
+  _M_buf[2] = _M_buf[3] = 0;
+  _M_buf_last = 2;
+       }
+     else if (__bits <= 16)
+       {
+  _M_buf[0] = 0xE0 | (__c >> 12);
+  _M_buf[1] = 0x80 | ((__c >> 6) & 0x3F);
+  _M_buf[2] = 0x80 | (__c & 0x3F);
+  _M_buf[3] = 0;
+  _M_buf_last = 3;
+       }
+     else
+       {
+  _M_buf[0] = 0xF0 | ((__c >> 18) & 0x07);
+  _M_buf[1] = 0x80 | ((__c >> 12) & 0x3F);
+  _M_buf[2] = 0x80 | ((__c >> 6) & 0x3F);
+  _M_buf[3] = 0x80 | (__c & 0x3F);
+  _M_buf_last = 4;
+       }
+   }
+      }
+
+      constexpr char32_t
+      _S_error()
+      {
+ char32_t __c = _ErrorHandler()();
+ do { if (std::__is_constant_evaluated() && !bool(__is_scalar_value(__c))) std::__glibcxx_assert_fail(); } while (false);
+ return __c;
+      }
+
+      constexpr _Iter
+      _M_first() const requires bidirectional_iterator<_Iter>
+      { return _M_first_and_curr._M_first; }
+
+      constexpr _Iter&
+      _M_curr() { return _M_first_and_curr._M_curr; }
+
+      constexpr _Iter
+      _M_curr() const { return _M_first_and_curr._M_curr; }
+
+      array<value_type, 4 / sizeof(_ToFmt)> _M_buf;
+
+      template<typename _It>
+ struct _First_and_curr
+ {
+   _First_and_curr() = default;
+
+   constexpr
+   _First_and_curr(_It __curr) : _M_curr(__curr) { }
+
+   template<convertible_to<_It> _It2>
+     constexpr
+     _First_and_curr(const _First_and_curr<_It2>& __other)
+     : _M_curr(__other._M_curr) { }
+
+   _It _M_curr;
+ };
+
+      template<typename _It> requires bidirectional_iterator<_It>
+ struct _First_and_curr<_It>
+ {
+   _First_and_curr() = default;
+
+   constexpr
+   _First_and_curr(_It __first, _It __curr)
+   : _M_first(__first), _M_curr(__curr) { }
+
+   template<convertible_to<_It> _It2>
+     constexpr
+     _First_and_curr(const _First_and_curr<_It2>& __other)
+     : _M_first(__other._M_first), _M_curr(__other._M_curr) { }
+
+   _It _M_first;
+   _It _M_curr;
+ };
+
+      _First_and_curr<_Iter> _M_first_and_curr;
+
+      uint8_t _M_buf_index = 0;
+      uint8_t _M_buf_last = 0;
+      uint8_t _M_to_increment = 0;
+
+      [[no_unique_address]] _Sent _M_last;
+
+      template<typename _FromFmt2, typename _ToFmt2,
+        input_iterator _Iter2, sentinel_for<_Iter2> _Sent2,
+        typename _ErrHandler>
+ requires convertible_to<iter_value_t<_Iter2>, _FromFmt2>
+ friend class _Utf_iterator;
+    };
+
+  template<typename _ToFormat, ranges::input_range _Range>
+    class _Utf_view
+    : public ranges::view_interface<_Utf_view<_ToFormat, _Range>>
+    {
+      using _Iterator = _Utf_iterator<ranges::range_value_t<_Range>,
+          _ToFormat, ranges::iterator_t<_Range>,
+          ranges::sentinel_t<_Range>>;
+
+      template<typename _Iter, typename _Sent>
+ constexpr auto
+ _M_begin(_Iter __first, _Sent __last)
+ {
+   if constexpr (bidirectional_iterator<_Iter>)
+     return _Iterator(__first, __first, __last);
+   else
+     return _Iterator(__first, __last);
+ }
+
+      template<typename _Iter, typename _Sent>
+ constexpr auto
+ _M_end(_Iter __first, _Sent __last)
+ {
+   if constexpr (!is_same_v<_Iter, _Sent>)
+     return __last;
+   else if constexpr (bidirectional_iterator<_Iter>)
+     return _Iterator(__first, __last, __last);
+   else
+     return _Iterator(__last, __last);
+ }
+
+      _Range _M_base;
+
+    public:
+      constexpr explicit
+      _Utf_view(_Range&& __r) : _M_base(std::forward<_Range>(__r)) { }
+
+      constexpr auto begin()
+      { return _M_begin(ranges::begin(_M_base), ranges::end(_M_base)); }
+
+      constexpr auto end()
+      { return _M_end(ranges::begin(_M_base), ranges::end(_M_base)); }
+
+      constexpr bool empty() const { return ranges::empty(_M_base); }
+    };
+
+
+  template<typename _View>
+    using _Utf8_view = _Utf_view<char8_t, _View>;
+
+
+
+
+  template<typename _View>
+    using _Utf16_view = _Utf_view<char16_t, _View>;
+  template<typename _View>
+    using _Utf32_view = _Utf_view<char32_t, _View>;
+
+inline namespace __v16_0_0
+{
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/unicode-data.h" 1 3
+# 38 "C:/msys64/mingw64/include/c++/15.2.0/bits/unicode-data.h" 3
+  inline constexpr char32_t __width_edges[] = {
+    0x1100, 0x1160, 0x231a, 0x231c, 0x2329, 0x232b, 0x23e9, 0x23ed,
+    0x23f0, 0x23f1, 0x23f3, 0x23f4, 0x25fd, 0x25ff, 0x2614, 0x2616,
+    0x2630, 0x2638, 0x2648, 0x2654, 0x267f, 0x2680, 0x268a, 0x2690,
+    0x2693, 0x2694, 0x26a1, 0x26a2, 0x26aa, 0x26ac, 0x26bd, 0x26bf,
+    0x26c4, 0x26c6, 0x26ce, 0x26cf, 0x26d4, 0x26d5, 0x26ea, 0x26eb,
+    0x26f2, 0x26f4, 0x26f5, 0x26f6, 0x26fa, 0x26fb, 0x26fd, 0x26fe,
+    0x2705, 0x2706, 0x270a, 0x270c, 0x2728, 0x2729, 0x274c, 0x274d,
+    0x274e, 0x274f, 0x2753, 0x2756, 0x2757, 0x2758, 0x2795, 0x2798,
+    0x27b0, 0x27b1, 0x27bf, 0x27c0, 0x2b1b, 0x2b1d, 0x2b50, 0x2b51,
+    0x2b55, 0x2b56, 0x2e80, 0x2e9a, 0x2e9b, 0x2ef4, 0x2f00, 0x2fd6,
+    0x2ff0, 0x303f, 0x3041, 0x3097, 0x3099, 0x3100, 0x3105, 0x3130,
+    0x3131, 0x318f, 0x3190, 0x31e6, 0x31ef, 0x321f, 0x3220, 0x3248,
+    0x3250, 0xa48d, 0xa490, 0xa4c7, 0xa960, 0xa97d, 0xac00, 0xd7a4,
+    0xf900, 0xfb00, 0xfe10, 0xfe1a, 0xfe30, 0xfe53, 0xfe54, 0xfe67,
+    0xfe68, 0xfe6c, 0xff01, 0xff61, 0xffe0, 0xffe7, 0x16fe0, 0x16fe5,
+    0x16ff0, 0x16ff2, 0x17000, 0x187f8, 0x18800, 0x18cd6, 0x18cff, 0x18d09,
+    0x1aff0, 0x1aff4, 0x1aff5, 0x1affc, 0x1affd, 0x1afff, 0x1b000, 0x1b123,
+    0x1b132, 0x1b133, 0x1b150, 0x1b153, 0x1b155, 0x1b156, 0x1b164, 0x1b168,
+    0x1b170, 0x1b2fc, 0x1d300, 0x1d357, 0x1d360, 0x1d377, 0x1f004, 0x1f005,
+    0x1f0cf, 0x1f0d0, 0x1f18e, 0x1f18f, 0x1f191, 0x1f19b, 0x1f200, 0x1f203,
+    0x1f210, 0x1f23c, 0x1f240, 0x1f249, 0x1f250, 0x1f252, 0x1f260, 0x1f266,
+    0x1f300, 0x1f650, 0x1f680, 0x1f6c6, 0x1f6cc, 0x1f6cd, 0x1f6d0, 0x1f6d3,
+    0x1f6d5, 0x1f6d8, 0x1f6dc, 0x1f6e0, 0x1f6eb, 0x1f6ed, 0x1f6f4, 0x1f6fd,
+    0x1f7e0, 0x1f7ec, 0x1f7f0, 0x1f7f1, 0x1f900, 0x1fa00, 0x1fa70, 0x1fa7d,
+    0x1fa80, 0x1fa8a, 0x1fa8f, 0x1fac7, 0x1face, 0x1fadd, 0x1fadf, 0x1faea,
+    0x1faf0, 0x1faf9, 0x20000, 0x2fffe, 0x30000, 0x3fffe,
+  };
+
+
+
+
+  inline constexpr uint32_t __escape_edges[] = {
+    0x1, 0x42, 0xff, 0x142, 0x15b, 0x15c,
+    0x6f1, 0x6f4, 0x701, 0x708, 0x717, 0x718,
+    0x71b, 0x71c, 0x745, 0x746, 0xa61, 0xa62,
+    0xaaf, 0xab2, 0xb17, 0xb1a, 0xb21, 0xb22,
+    0xb91, 0xba0, 0xbd7, 0xbde, 0xbeb, 0xc0c,
+    0xc39, 0xc3a, 0xdbb, 0xdbc, 0xe1d, 0xe20,
+    0xe97, 0xe9a, 0xf65, 0xf80, 0xff7, 0xffa,
+    0x105d, 0x1060, 0x107f, 0x1080, 0x10b9, 0x10bc,
+    0x10bf, 0x10c0, 0x10d7, 0x10e0, 0x111f, 0x112e,
+    0x11c5, 0x11c6, 0x1309, 0x130a, 0x131b, 0x131e,
+    0x1323, 0x1326, 0x1353, 0x1354, 0x1363, 0x1364,
+    0x1367, 0x136c, 0x1375, 0x1378, 0x138b, 0x138e,
+    0x1393, 0x1396, 0x139f, 0x13ae, 0x13b1, 0x13b8,
+    0x13bd, 0x13be, 0x13c9, 0x13cc, 0x13ff, 0x1402,
+    0x1409, 0x140a, 0x1417, 0x141e, 0x1423, 0x1426,
+    0x1453, 0x1454, 0x1463, 0x1464, 0x1469, 0x146a,
+    0x146f, 0x1470, 0x1475, 0x1478, 0x147b, 0x147c,
+    0x1487, 0x148e, 0x1493, 0x1496, 0x149d, 0x14a2,
+    0x14a5, 0x14b2, 0x14bb, 0x14bc, 0x14bf, 0x14cc,
+    0x14ef, 0x1502, 0x1509, 0x150a, 0x151d, 0x151e,
+    0x1525, 0x1526, 0x1553, 0x1554, 0x1563, 0x1564,
+    0x1569, 0x156a, 0x1575, 0x1578, 0x158d, 0x158e,
+    0x1595, 0x1596, 0x159d, 0x15a0, 0x15a3, 0x15c0,
+    0x15c9, 0x15cc, 0x15e5, 0x15f2, 0x1601, 0x1602,
+    0x1609, 0x160a, 0x161b, 0x161e, 0x1623, 0x1626,
+    0x1653, 0x1654, 0x1663, 0x1664, 0x1669, 0x166a,
+    0x1675, 0x1678, 0x168b, 0x168e, 0x1693, 0x1696,
+    0x169d, 0x16aa, 0x16b1, 0x16b8, 0x16bd, 0x16be,
+    0x16c9, 0x16cc, 0x16f1, 0x1704, 0x1709, 0x170a,
+    0x1717, 0x171c, 0x1723, 0x1724, 0x172d, 0x1732,
+    0x1737, 0x1738, 0x173b, 0x173c, 0x1741, 0x1746,
+    0x174b, 0x1750, 0x1757, 0x175c, 0x1775, 0x177c,
+    0x1787, 0x178c, 0x1793, 0x1794, 0x179d, 0x17a0,
+    0x17a3, 0x17ae, 0x17b1, 0x17cc, 0x17f7, 0x1800,
+    0x181b, 0x181c, 0x1823, 0x1824, 0x1853, 0x1854,
+    0x1875, 0x1878, 0x188b, 0x188c, 0x1893, 0x1894,
+    0x189d, 0x18aa, 0x18af, 0x18b0, 0x18b7, 0x18ba,
+    0x18bd, 0x18c0, 0x18c9, 0x18cc, 0x18e1, 0x18ee,
+    0x191b, 0x191c, 0x1923, 0x1924, 0x1953, 0x1954,
+    0x1969, 0x196a, 0x1975, 0x1978, 0x198b, 0x198c,
+    0x1993, 0x1994, 0x199d, 0x19aa, 0x19af, 0x19ba,
+    0x19bf, 0x19c0, 0x19c9, 0x19cc, 0x19e1, 0x19e2,
+    0x19e9, 0x1a00, 0x1a1b, 0x1a1c, 0x1a23, 0x1a24,
+    0x1a8b, 0x1a8c, 0x1a93, 0x1a94, 0x1aa1, 0x1aa8,
+    0x1ac9, 0x1acc, 0x1b01, 0x1b02, 0x1b09, 0x1b0a,
+    0x1b2f, 0x1b34, 0x1b65, 0x1b66, 0x1b79, 0x1b7a,
+    0x1b7d, 0x1b80, 0x1b8f, 0x1b94, 0x1b97, 0x1b9e,
+    0x1bab, 0x1bac, 0x1baf, 0x1bb0, 0x1bc1, 0x1bcc,
+    0x1be1, 0x1be4, 0x1beb, 0x1c02, 0x1c77, 0x1c7e,
+    0x1cb9, 0x1d02, 0x1d07, 0x1d08, 0x1d0b, 0x1d0c,
+    0x1d17, 0x1d18, 0x1d49, 0x1d4a, 0x1d4d, 0x1d4e,
+    0x1d7d, 0x1d80, 0x1d8b, 0x1d8c, 0x1d8f, 0x1d90,
+    0x1d9f, 0x1da0, 0x1db5, 0x1db8, 0x1dc1, 0x1e00,
+    0x1e91, 0x1e92, 0x1edb, 0x1ee2, 0x1f31, 0x1f32,
+    0x1f7b, 0x1f7c, 0x1f9b, 0x1f9c, 0x1fb7, 0x2000,
+    0x218d, 0x218e, 0x2191, 0x219a, 0x219d, 0x21a0,
+    0x2493, 0x2494, 0x249d, 0x24a0, 0x24af, 0x24b0,
+    0x24b3, 0x24b4, 0x24bd, 0x24c0, 0x2513, 0x2514,
+    0x251d, 0x2520, 0x2563, 0x2564, 0x256d, 0x2570,
+    0x257f, 0x2580, 0x2583, 0x2584, 0x258d, 0x2590,
+    0x25af, 0x25b0, 0x2623, 0x2624, 0x262d, 0x2630,
+    0x26b7, 0x26ba, 0x26fb, 0x2700, 0x2735, 0x2740,
+    0x27ed, 0x27f0, 0x27fd, 0x2800, 0x2d01, 0x2d02,
+    0x2d3b, 0x2d40, 0x2df3, 0x2e00, 0x2e2d, 0x2e3e,
+    0x2e6f, 0x2e80, 0x2ea9, 0x2ec0, 0x2edb, 0x2edc,
+    0x2ee3, 0x2ee4, 0x2ee9, 0x2f00, 0x2fbd, 0x2fc0,
+    0x2fd5, 0x2fe0, 0x2ff5, 0x3000, 0x301d, 0x301e,
+    0x3035, 0x3040, 0x30f3, 0x3100, 0x3157, 0x3160,
+    0x31ed, 0x3200, 0x323f, 0x3240, 0x3259, 0x3260,
+    0x3279, 0x3280, 0x3283, 0x3288, 0x32dd, 0x32e0,
+    0x32eb, 0x3300, 0x3359, 0x3360, 0x3395, 0x33a0,
+    0x33b7, 0x33bc, 0x3439, 0x343c, 0x34bf, 0x34c0,
+    0x34fb, 0x34fe, 0x3515, 0x3520, 0x3535, 0x3540,
+    0x355d, 0x3560, 0x359f, 0x3600, 0x369b, 0x369c,
+    0x37e9, 0x37f8, 0x3871, 0x3876, 0x3895, 0x389a,
+    0x3917, 0x3920, 0x3977, 0x397a, 0x3991, 0x39a0,
+    0x39f7, 0x3a00, 0x3e2d, 0x3e30, 0x3e3d, 0x3e40,
+    0x3e8d, 0x3e90, 0x3e9d, 0x3ea0, 0x3eb1, 0x3eb2,
+    0x3eb5, 0x3eb6, 0x3eb9, 0x3eba, 0x3ebd, 0x3ebe,
+    0x3efd, 0x3f00, 0x3f6b, 0x3f6c, 0x3f8b, 0x3f8c,
+    0x3fa9, 0x3fac, 0x3fb9, 0x3fba, 0x3fe1, 0x3fe4,
+    0x3feb, 0x3fec, 0x3fff, 0x4020, 0x4051, 0x4060,
+    0x40bf, 0x40e0, 0x40e5, 0x40e8, 0x411f, 0x4120,
+    0x413b, 0x4140, 0x4183, 0x41a0, 0x41e3, 0x4200,
+    0x4319, 0x4320, 0x4855, 0x4880, 0x4897, 0x48c0,
+    0x56e9, 0x56ec, 0x572d, 0x572e, 0x59e9, 0x59f2,
+    0x5a4d, 0x5a4e, 0x5a51, 0x5a5a, 0x5a5d, 0x5a60,
+    0x5ad1, 0x5ade, 0x5ae3, 0x5afe, 0x5b2f, 0x5b40,
+    0x5b4f, 0x5b50, 0x5b5f, 0x5b60, 0x5b6f, 0x5b70,
+    0x5b7f, 0x5b80, 0x5b8f, 0x5b90, 0x5b9f, 0x5ba0,
+    0x5baf, 0x5bb0, 0x5bbf, 0x5bc0, 0x5cbd, 0x5d00,
+    0x5d35, 0x5d36, 0x5de9, 0x5e00, 0x5fad, 0x5fe0,
+    0x6001, 0x6002, 0x6081, 0x6082, 0x612f, 0x6132,
+    0x6201, 0x620a, 0x6261, 0x6262, 0x631f, 0x6320,
+    0x63cd, 0x63de, 0x643f, 0x6440, 0x1491b, 0x14920,
+    0x1498f, 0x149a0, 0x14c59, 0x14c80, 0x14df1, 0x14e00,
+    0x14f9d, 0x14fa0, 0x14fa5, 0x14fa6, 0x14fa9, 0x14faa,
+    0x14fbb, 0x14fe4, 0x1505b, 0x15060, 0x15075, 0x15080,
+    0x150f1, 0x15100, 0x1518d, 0x1519c, 0x151b5, 0x151c0,
+    0x152a9, 0x152be, 0x152fb, 0x15300, 0x1539d, 0x1539e,
+    0x153b5, 0x153bc, 0x153ff, 0x15400, 0x1546f, 0x15480,
+    0x1549d, 0x154a0, 0x154b5, 0x154b8, 0x15587, 0x155b6,
+    0x155ef, 0x15602, 0x1560f, 0x15612, 0x1561f, 0x15622,
+    0x1562f, 0x15640, 0x1564f, 0x15650, 0x1565f, 0x15660,
+    0x156d9, 0x156e0, 0x157dd, 0x157e0, 0x157f5, 0x15800,
+    0x1af49, 0x1af60, 0x1af8f, 0x1af96, 0x1aff9, 0x1f200,
+    0x1f4dd, 0x1f4e0, 0x1f5b5, 0x1f600, 0x1f60f, 0x1f626,
+    0x1f631, 0x1f63a, 0x1f66f, 0x1f670, 0x1f67b, 0x1f67c,
+    0x1f67f, 0x1f680, 0x1f685, 0x1f686, 0x1f68b, 0x1f68c,
+    0x1f787, 0x1f7a6, 0x1fb21, 0x1fb24, 0x1fb91, 0x1fb9e,
+    0x1fba1, 0x1fbe0, 0x1fc35, 0x1fc40, 0x1fca7, 0x1fca8,
+    0x1fccf, 0x1fcd0, 0x1fcd9, 0x1fce0, 0x1fceb, 0x1fcec,
+    0x1fdfb, 0x1fe02, 0x1ff7f, 0x1ff84, 0x1ff91, 0x1ff94,
+    0x1ffa1, 0x1ffa4, 0x1ffb1, 0x1ffb4, 0x1ffbb, 0x1ffc0,
+    0x1ffcf, 0x1ffd0, 0x1ffdf, 0x1fff8, 0x1fffd, 0x20000,
+    0x20019, 0x2001a, 0x2004f, 0x20050, 0x20077, 0x20078,
+    0x2007d, 0x2007e, 0x2009d, 0x200a0, 0x200bd, 0x20100,
+    0x201f7, 0x20200, 0x20207, 0x2020e, 0x20269, 0x2026e,
+    0x2031f, 0x20320, 0x2033b, 0x20340, 0x20343, 0x203a0,
+    0x203fd, 0x20500, 0x2053b, 0x20540, 0x205a3, 0x205c0,
+    0x205f9, 0x20600, 0x20649, 0x2065a, 0x20697, 0x206a0,
+    0x206f7, 0x20700, 0x2073d, 0x2073e, 0x20789, 0x20790,
+    0x207ad, 0x20800, 0x2093d, 0x20940, 0x20955, 0x20960,
+    0x209a9, 0x209b0, 0x209f9, 0x20a00, 0x20a51, 0x20a60,
+    0x20ac9, 0x20ade, 0x20af7, 0x20af8, 0x20b17, 0x20b18,
+    0x20b27, 0x20b28, 0x20b2d, 0x20b2e, 0x20b45, 0x20b46,
+    0x20b65, 0x20b66, 0x20b75, 0x20b76, 0x20b7b, 0x20b80,
+    0x20be9, 0x20c00, 0x20e6f, 0x20e80, 0x20ead, 0x20ec0,
+    0x20ed1, 0x20f00, 0x20f0d, 0x20f0e, 0x20f63, 0x20f64,
+    0x20f77, 0x21000, 0x2100d, 0x21010, 0x21013, 0x21014,
+    0x2106d, 0x2106e, 0x21073, 0x21078, 0x2107b, 0x2107e,
+    0x210ad, 0x210ae, 0x2113f, 0x2114e, 0x21161, 0x211c0,
+    0x211e7, 0x211e8, 0x211ed, 0x211f6, 0x21239, 0x2123e,
+    0x21275, 0x2127e, 0x21281, 0x21300, 0x21371, 0x21378,
+    0x213a1, 0x213a4, 0x21409, 0x2140a, 0x2140f, 0x21418,
+    0x21429, 0x2142a, 0x21431, 0x21432, 0x2146d, 0x21470,
+    0x21477, 0x2147e, 0x21493, 0x214a0, 0x214b3, 0x214c0,
+    0x21541, 0x21580, 0x215cf, 0x215d6, 0x215ef, 0x21600,
+    0x2166d, 0x21672, 0x216ad, 0x216b0, 0x216e7, 0x216f0,
+    0x21725, 0x21732, 0x2173b, 0x21752, 0x21761, 0x21800,
+    0x21893, 0x21900, 0x21967, 0x21980, 0x219e7, 0x219f4,
+    0x21a51, 0x21a60, 0x21a75, 0x21a80, 0x21acd, 0x21ad2,
+    0x21b0d, 0x21b1c, 0x21b21, 0x21cc0, 0x21cff, 0x21d00,
+    0x21d55, 0x21d56, 0x21d5d, 0x21d60, 0x21d65, 0x21d84,
+    0x21d8b, 0x21df8, 0x21e51, 0x21e60, 0x21eb5, 0x21ee0,
+    0x21f15, 0x21f60, 0x21f99, 0x21fc0, 0x21fef, 0x22000,
+    0x2209d, 0x220a4, 0x220ed, 0x220fe, 0x2217b, 0x2217c,
+    0x22187, 0x221a0, 0x221d3, 0x221e0, 0x221f5, 0x22200,
+    0x2226b, 0x2226c, 0x22291, 0x222a0, 0x222ef, 0x22300,
+    0x223c1, 0x223c2, 0x223eb, 0x22400, 0x22425, 0x22426,
+    0x22485, 0x22500, 0x2250f, 0x22510, 0x22513, 0x22514,
+    0x2251d, 0x2251e, 0x2253d, 0x2253e, 0x22555, 0x22560,
+    0x225d7, 0x225e0, 0x225f5, 0x22600, 0x22609, 0x2260a,
+    0x2261b, 0x2261e, 0x22623, 0x22626, 0x22653, 0x22654,
+    0x22663, 0x22664, 0x22669, 0x2266a, 0x22675, 0x22676,
+    0x2268b, 0x2268e, 0x22693, 0x22696, 0x2269d, 0x226a0,
+    0x226a3, 0x226ae, 0x226b1, 0x226ba, 0x226c9, 0x226cc,
+    0x226db, 0x226e0, 0x226eb, 0x22700, 0x22715, 0x22716,
+    0x22719, 0x2271c, 0x2271f, 0x22720, 0x2276d, 0x2276e,
+    0x22783, 0x22784, 0x22787, 0x2278a, 0x2278d, 0x2278e,
+    0x22797, 0x22798, 0x227ad, 0x227ae, 0x227b3, 0x227c2,
+    0x227c7, 0x22800, 0x228b9, 0x228ba, 0x228c5, 0x22900,
+    0x22991, 0x229a0, 0x229b5, 0x22b00, 0x22b6d, 0x22b70,
+    0x22bbd, 0x22c00, 0x22c8b, 0x22ca0, 0x22cb5, 0x22cc0,
+    0x22cdb, 0x22d00, 0x22d75, 0x22d80, 0x22d95, 0x22da0,
+    0x22dc9, 0x22e00, 0x22e37, 0x22e3a, 0x22e59, 0x22e60,
+    0x22e8f, 0x23000, 0x23079, 0x23140, 0x231e7, 0x231fe,
+    0x2320f, 0x23212, 0x23215, 0x23218, 0x23229, 0x2322a,
+    0x2322f, 0x23230, 0x2326d, 0x2326e, 0x23273, 0x23276,
+    0x2328f, 0x232a0, 0x232b5, 0x23340, 0x23351, 0x23354,
+    0x233b1, 0x233b4, 0x233cb, 0x23400, 0x23491, 0x234a0,
+    0x23547, 0x23560, 0x235f3, 0x23600, 0x23615, 0x23780,
+    0x237c5, 0x237e0, 0x237f5, 0x23800, 0x23813, 0x23814,
+    0x2386f, 0x23870, 0x2388d, 0x238a0, 0x238db, 0x238e0,
+    0x23921, 0x23924, 0x23951, 0x23952, 0x2396f, 0x23a00,
+    0x23a0f, 0x23a10, 0x23a15, 0x23a16, 0x23a6f, 0x23a74,
+    0x23a77, 0x23a78, 0x23a7d, 0x23a7e, 0x23a91, 0x23aa0,
+    0x23ab5, 0x23ac0, 0x23acd, 0x23ace, 0x23ad3, 0x23ad4,
+    0x23b1f, 0x23b20, 0x23b25, 0x23b26, 0x23b33, 0x23b40,
+    0x23b55, 0x23dc0, 0x23df3, 0x23e00, 0x23e23, 0x23e24,
+    0x23e77, 0x23e7c, 0x23eb7, 0x23f60, 0x23f63, 0x23f80,
+    0x23fe5, 0x23ffe, 0x24735, 0x24800, 0x248df, 0x248e0,
+    0x248eb, 0x24900, 0x24a89, 0x25f20, 0x25fe7, 0x26000,
+    0x26861, 0x26880, 0x268ad, 0x268c0, 0x287f7, 0x28800,
+    0x28c8f, 0x2c200, 0x2c275, 0x2d000, 0x2d473, 0x2d480,
+    0x2d4bf, 0x2d4c0, 0x2d4d5, 0x2d4dc, 0x2d57f, 0x2d580,
+    0x2d595, 0x2d5a0, 0x2d5dd, 0x2d5e0, 0x2d5ed, 0x2d600,
+    0x2d68d, 0x2d6a0, 0x2d6b5, 0x2d6b6, 0x2d6c5, 0x2d6c6,
+    0x2d6f1, 0x2d6fa, 0x2d721, 0x2da80, 0x2daf5, 0x2dc80,
+    0x2dd37, 0x2de00, 0x2de97, 0x2de9e, 0x2df11, 0x2df1e,
+    0x2df41, 0x2dfc0, 0x2dfcb, 0x2dfe0, 0x2dfe5, 0x2e000,
+    0x30ff1, 0x31000, 0x319ad, 0x319fe, 0x31a13, 0x35fe0,
+    0x35fe9, 0x35fea, 0x35ff9, 0x35ffa, 0x35fff, 0x36000,
+    0x36247, 0x36264, 0x36267, 0x362a0, 0x362a7, 0x362aa,
+    0x362ad, 0x362c8, 0x362d1, 0x362e0, 0x365f9, 0x37800,
+    0x378d7, 0x378e0, 0x378fb, 0x37900, 0x37913, 0x37920,
+    0x37935, 0x37938, 0x37941, 0x39800, 0x399f5, 0x39a00,
+    0x39d69, 0x39e00, 0x39e5d, 0x39e60, 0x39e8f, 0x39ea0,
+    0x39f89, 0x3a000, 0x3a1ed, 0x3a200, 0x3a24f, 0x3a252,
+    0x3a2e7, 0x3a2f6, 0x3a3d7, 0x3a400, 0x3a48d, 0x3a580,
+    0x3a5a9, 0x3a5c0, 0x3a5e9, 0x3a600, 0x3a6af, 0x3a6c0,
+    0x3a6f3, 0x3a800, 0x3a8ab, 0x3a8ac, 0x3a93b, 0x3a93c,
+    0x3a941, 0x3a944, 0x3a947, 0x3a94a, 0x3a94f, 0x3a952,
+    0x3a95b, 0x3a95c, 0x3a975, 0x3a976, 0x3a979, 0x3a97a,
+    0x3a989, 0x3a98a, 0x3aa0d, 0x3aa0e, 0x3aa17, 0x3aa1a,
+    0x3aa2b, 0x3aa2c, 0x3aa3b, 0x3aa3c, 0x3aa75, 0x3aa76,
+    0x3aa7f, 0x3aa80, 0x3aa8b, 0x3aa8c, 0x3aa8f, 0x3aa94,
+    0x3aaa3, 0x3aaa4, 0x3ad4d, 0x3ad50, 0x3af99, 0x3af9c,
+    0x3b519, 0x3b536, 0x3b541, 0x3b542, 0x3b561, 0x3be00,
+    0x3be3f, 0x3be4a, 0x3be57, 0x3c000, 0x3c00f, 0x3c010,
+    0x3c033, 0x3c036, 0x3c045, 0x3c046, 0x3c04b, 0x3c04c,
+    0x3c057, 0x3c060, 0x3c0dd, 0x3c11e, 0x3c121, 0x3c200,
+    0x3c25b, 0x3c260, 0x3c27d, 0x3c280, 0x3c295, 0x3c29c,
+    0x3c2a1, 0x3c520, 0x3c55f, 0x3c580, 0x3c5f5, 0x3c5fe,
+    0x3c601, 0x3c9a0, 0x3c9f5, 0x3cba0, 0x3cbf7, 0x3cbfe,
+    0x3cc01, 0x3cfc0, 0x3cfcf, 0x3cfd0, 0x3cfd9, 0x3cfda,
+    0x3cfdf, 0x3cfe0, 0x3cfff, 0x3d000, 0x3d18b, 0x3d18e,
+    0x3d1af, 0x3d200, 0x3d299, 0x3d2a0, 0x3d2b5, 0x3d2bc,
+    0x3d2c1, 0x3d8e2, 0x3d96b, 0x3da02, 0x3da7d, 0x3dc00,
+    0x3dc09, 0x3dc0a, 0x3dc41, 0x3dc42, 0x3dc47, 0x3dc48,
+    0x3dc4b, 0x3dc4e, 0x3dc51, 0x3dc52, 0x3dc67, 0x3dc68,
+    0x3dc71, 0x3dc72, 0x3dc75, 0x3dc76, 0x3dc79, 0x3dc84,
+    0x3dc87, 0x3dc8e, 0x3dc91, 0x3dc92, 0x3dc95, 0x3dc96,
+    0x3dc99, 0x3dc9a, 0x3dca1, 0x3dca2, 0x3dca7, 0x3dca8,
+    0x3dcab, 0x3dcae, 0x3dcb1, 0x3dcb2, 0x3dcb5, 0x3dcb6,
+    0x3dcb9, 0x3dcba, 0x3dcbd, 0x3dcbe, 0x3dcc1, 0x3dcc2,
+    0x3dcc7, 0x3dcc8, 0x3dccb, 0x3dcce, 0x3dcd7, 0x3dcd8,
+    0x3dce7, 0x3dce8, 0x3dcf1, 0x3dcf2, 0x3dcfb, 0x3dcfc,
+    0x3dcff, 0x3dd00, 0x3dd15, 0x3dd16, 0x3dd39, 0x3dd42,
+    0x3dd49, 0x3dd4a, 0x3dd55, 0x3dd56, 0x3dd79, 0x3dde0,
+    0x3dde5, 0x3e000, 0x3e059, 0x3e060, 0x3e129, 0x3e140,
+    0x3e15f, 0x3e162, 0x3e181, 0x3e182, 0x3e1a1, 0x3e1a2,
+    0x3e1ed, 0x3e200, 0x3e35d, 0x3e3cc, 0x3e407, 0x3e420,
+    0x3e479, 0x3e480, 0x3e493, 0x3e4a0, 0x3e4a5, 0x3e4c0,
+    0x3e4cd, 0x3e600, 0x3edb1, 0x3edb8, 0x3eddb, 0x3ede0,
+    0x3edfb, 0x3ee00, 0x3eeef, 0x3eef6, 0x3efb5, 0x3efc0,
+    0x3efd9, 0x3efe0, 0x3efe3, 0x3f000, 0x3f019, 0x3f020,
+    0x3f091, 0x3f0a0, 0x3f0b5, 0x3f0c0, 0x3f111, 0x3f120,
+    0x3f15d, 0x3f160, 0x3f179, 0x3f180, 0x3f185, 0x3f200,
+    0x3f4a9, 0x3f4c0, 0x3f4dd, 0x3f4e0, 0x3f4fb, 0x3f500,
+    0x3f515, 0x3f51e, 0x3f58f, 0x3f59c, 0x3f5bb, 0x3f5be,
+    0x3f5d5, 0x3f5e0, 0x3f5f3, 0x3f600, 0x3f727, 0x3f728,
+    0x3f7f5, 0x40000, 0x54dc1, 0x54e00, 0x56e75, 0x56e80,
+    0x5703d, 0x57040, 0x59d45, 0x59d60, 0x5d7c3, 0x5d7e0,
+    0x5dcbd, 0x5f000, 0x5f43d, 0x60000, 0x62697, 0x626a0,
+    0x64761, 0x1c0200, 0x1c03e1,
+  };
+
+  enum class _Gcb_property {
+    _Gcb_Other = 0,
+    _Gcb_Control = 1,
+    _Gcb_LF = 2,
+    _Gcb_CR = 3,
+    _Gcb_Extend = 4,
+    _Gcb_Prepend = 5,
+    _Gcb_SpacingMark = 6,
+    _Gcb_L = 7,
+    _Gcb_V = 8,
+    _Gcb_T = 9,
+    _Gcb_ZWJ = 10,
+    _Gcb_LV = 11,
+    _Gcb_LVT = 12,
+    _Gcb_Regional_Indicator = 13,
+  };
+
+
+
+
+  inline constexpr int __gcb_shift_bits = 0x4;
+  inline constexpr uint32_t __gcb_edges[] = {
+    0x1, 0xa2, 0xb1, 0xd3, 0xe1, 0x200,
+    0x7f1, 0xa00, 0xad1, 0xae0, 0x3004, 0x3700,
+    0x4834, 0x48a0, 0x5914, 0x5be0, 0x5bf4, 0x5c00,
+    0x5c14, 0x5c30, 0x5c44, 0x5c60, 0x5c74, 0x5c80,
+    0x6005, 0x6060, 0x6104, 0x61b0, 0x61c1, 0x61d0,
+    0x64b4, 0x6600, 0x6704, 0x6710, 0x6d64, 0x6dd5,
+    0x6de0, 0x6df4, 0x6e50, 0x6e74, 0x6e90, 0x6ea4,
+    0x6ee0, 0x70f5, 0x7100, 0x7114, 0x7120, 0x7304,
+    0x74b0, 0x7a64, 0x7b10, 0x7eb4, 0x7f40, 0x7fd4,
+    0x7fe0, 0x8164, 0x81a0, 0x81b4, 0x8240, 0x8254,
+    0x8280, 0x8294, 0x82e0, 0x8594, 0x85c0, 0x8905,
+    0x8920, 0x8974, 0x8a00, 0x8ca4, 0x8e25, 0x8e34,
+    0x9036, 0x9040, 0x93a4, 0x93b6, 0x93c4, 0x93d0,
+    0x93e6, 0x9414, 0x9496, 0x94d4, 0x94e6, 0x9500,
+    0x9514, 0x9580, 0x9624, 0x9640, 0x9814, 0x9826,
+    0x9840, 0x9bc4, 0x9bd0, 0x9be4, 0x9bf6, 0x9c14,
+    0x9c50, 0x9c76, 0x9c90, 0x9cb6, 0x9cd4, 0x9ce0,
+    0x9d74, 0x9d80, 0x9e24, 0x9e40, 0x9fe4, 0x9ff0,
+    0xa014, 0xa036, 0xa040, 0xa3c4, 0xa3d0, 0xa3e6,
+    0xa414, 0xa430, 0xa474, 0xa490, 0xa4b4, 0xa4e0,
+    0xa514, 0xa520, 0xa704, 0xa720, 0xa754, 0xa760,
+    0xa814, 0xa836, 0xa840, 0xabc4, 0xabd0, 0xabe6,
+    0xac14, 0xac60, 0xac74, 0xac96, 0xaca0, 0xacb6,
+    0xacd4, 0xace0, 0xae24, 0xae40, 0xafa4, 0xb000,
+    0xb014, 0xb026, 0xb040, 0xb3c4, 0xb3d0, 0xb3e4,
+    0xb406, 0xb414, 0xb450, 0xb476, 0xb490, 0xb4b6,
+    0xb4d4, 0xb4e0, 0xb554, 0xb580, 0xb624, 0xb640,
+    0xb824, 0xb830, 0xbbe4, 0xbbf6, 0xbc04, 0xbc16,
+    0xbc30, 0xbc66, 0xbc90, 0xbca6, 0xbcd4, 0xbce0,
+    0xbd74, 0xbd80, 0xc004, 0xc016, 0xc044, 0xc050,
+    0xc3c4, 0xc3d0, 0xc3e4, 0xc416, 0xc450, 0xc464,
+    0xc490, 0xc4a4, 0xc4e0, 0xc554, 0xc570, 0xc624,
+    0xc640, 0xc814, 0xc826, 0xc840, 0xcbc4, 0xcbd0,
+    0xcbe6, 0xcbf4, 0xcc16, 0xcc24, 0xcc36, 0xcc50,
+    0xcc64, 0xcc90, 0xcca4, 0xcce0, 0xcd54, 0xcd70,
+    0xce24, 0xce40, 0xcf36, 0xcf40, 0xd004, 0xd026,
+    0xd040, 0xd3b4, 0xd3d0, 0xd3e4, 0xd3f6, 0xd414,
+    0xd450, 0xd466, 0xd490, 0xd4a6, 0xd4d4, 0xd4e5,
+    0xd4f0, 0xd574, 0xd580, 0xd624, 0xd640, 0xd814,
+    0xd826, 0xd840, 0xdca4, 0xdcb0, 0xdcf4, 0xdd06,
+    0xdd24, 0xdd50, 0xdd64, 0xdd70, 0xdd86, 0xddf4,
+    0xde00, 0xdf26, 0xdf40, 0xe314, 0xe320, 0xe336,
+    0xe344, 0xe3b0, 0xe474, 0xe4f0, 0xeb14, 0xeb20,
+    0xeb36, 0xeb44, 0xebd0, 0xec84, 0xecf0, 0xf184,
+    0xf1a0, 0xf354, 0xf360, 0xf374, 0xf380, 0xf394,
+    0xf3a0, 0xf3e6, 0xf400, 0xf714, 0xf7f6, 0xf804,
+    0xf850, 0xf864, 0xf880, 0xf8d4, 0xf980, 0xf994,
+    0xfbd0, 0xfc64, 0xfc70, 0x102d4, 0x10316, 0x10324,
+    0x10380, 0x10394, 0x103b6, 0x103d4, 0x103f0, 0x10566,
+    0x10584, 0x105a0, 0x105e4, 0x10610, 0x10714, 0x10750,
+    0x10824, 0x10830, 0x10846, 0x10854, 0x10870, 0x108d4,
+    0x108e0, 0x109d4, 0x109e0, 0x11007, 0x11608, 0x11a89,
+    0x12000, 0x135d4, 0x13600, 0x17124, 0x17160, 0x17324,
+    0x17350, 0x17524, 0x17540, 0x17724, 0x17740, 0x17b44,
+    0x17b66, 0x17b74, 0x17be6, 0x17c64, 0x17c76, 0x17c94,
+    0x17d40, 0x17dd4, 0x17de0, 0x180b4, 0x180e1, 0x180f4,
+    0x18100, 0x18854, 0x18870, 0x18a94, 0x18aa0, 0x19204,
+    0x19236, 0x19274, 0x19296, 0x192c0, 0x19306, 0x19324,
+    0x19336, 0x19394, 0x193c0, 0x1a174, 0x1a196, 0x1a1b4,
+    0x1a1c0, 0x1a556, 0x1a564, 0x1a576, 0x1a584, 0x1a5f0,
+    0x1a604, 0x1a610, 0x1a624, 0x1a630, 0x1a654, 0x1a6d6,
+    0x1a734, 0x1a7d0, 0x1a7f4, 0x1a800, 0x1ab04, 0x1acf0,
+    0x1b004, 0x1b046, 0x1b050, 0x1b344, 0x1b3e6, 0x1b424,
+    0x1b450, 0x1b6b4, 0x1b740, 0x1b804, 0x1b826, 0x1b830,
+    0x1ba16, 0x1ba24, 0x1ba66, 0x1ba84, 0x1bae0, 0x1be64,
+    0x1be76, 0x1be84, 0x1bea6, 0x1bed4, 0x1bee6, 0x1bef4,
+    0x1bf40, 0x1c246, 0x1c2c4, 0x1c346, 0x1c364, 0x1c380,
+    0x1cd04, 0x1cd30, 0x1cd44, 0x1ce16, 0x1ce24, 0x1ce90,
+    0x1ced4, 0x1cee0, 0x1cf44, 0x1cf50, 0x1cf76, 0x1cf84,
+    0x1cfa0, 0x1dc04, 0x1e000, 0x200b1, 0x200c4, 0x200da,
+    0x200e1, 0x20100, 0x20281, 0x202f0, 0x20601, 0x20700,
+    0x20d04, 0x20f10, 0x2cef4, 0x2cf20, 0x2d7f4, 0x2d800,
+    0x2de04, 0x2e000, 0x302a4, 0x30300, 0x30994, 0x309b0,
+    0xa66f4, 0xa6730, 0xa6744, 0xa67e0, 0xa69e4, 0xa6a00,
+    0xa6f04, 0xa6f20, 0xa8024, 0xa8030, 0xa8064, 0xa8070,
+    0xa80b4, 0xa80c0, 0xa8236, 0xa8254, 0xa8276, 0xa8280,
+    0xa82c4, 0xa82d0, 0xa8806, 0xa8820, 0xa8b46, 0xa8c44,
+    0xa8c60, 0xa8e04, 0xa8f20, 0xa8ff4, 0xa9000, 0xa9264,
+    0xa92e0, 0xa9474, 0xa9526, 0xa9534, 0xa9540, 0xa9607,
+    0xa97d0, 0xa9804, 0xa9836, 0xa9840, 0xa9b34, 0xa9b46,
+    0xa9b64, 0xa9ba6, 0xa9bc4, 0xa9be6, 0xa9c04, 0xa9c10,
+    0xa9e54, 0xa9e60, 0xaa294, 0xaa2f6, 0xaa314, 0xaa336,
+    0xaa354, 0xaa370, 0xaa434, 0xaa440, 0xaa4c4, 0xaa4d6,
+    0xaa4e0, 0xaa7c4, 0xaa7d0, 0xaab04, 0xaab10, 0xaab24,
+    0xaab50, 0xaab74, 0xaab90, 0xaabe4, 0xaac00, 0xaac14,
+    0xaac20, 0xaaeb6, 0xaaec4, 0xaaee6, 0xaaf00, 0xaaf56,
+    0xaaf64, 0xaaf70, 0xabe36, 0xabe54, 0xabe66, 0xabe84,
+    0xabe96, 0xabeb0, 0xabec6, 0xabed4, 0xabee0, 0xac00b,
+    0xac01c, 0xac1cb, 0xac1dc, 0xac38b, 0xac39c, 0xac54b,
+    0xac55c, 0xac70b, 0xac71c, 0xac8cb, 0xac8dc, 0xaca8b,
+    0xaca9c, 0xacc4b, 0xacc5c, 0xace0b, 0xace1c, 0xacfcb,
+    0xacfdc, 0xad18b, 0xad19c, 0xad34b, 0xad35c, 0xad50b,
+    0xad51c, 0xad6cb, 0xad6dc, 0xad88b, 0xad89c, 0xada4b,
+    0xada5c, 0xadc0b, 0xadc1c, 0xaddcb, 0xadddc, 0xadf8b,
+    0xadf9c, 0xae14b, 0xae15c, 0xae30b, 0xae31c, 0xae4cb,
+    0xae4dc, 0xae68b, 0xae69c, 0xae84b, 0xae85c, 0xaea0b,
+    0xaea1c, 0xaebcb, 0xaebdc, 0xaed8b, 0xaed9c, 0xaef4b,
+    0xaef5c, 0xaf10b, 0xaf11c, 0xaf2cb, 0xaf2dc, 0xaf48b,
+    0xaf49c, 0xaf64b, 0xaf65c, 0xaf80b, 0xaf81c, 0xaf9cb,
+    0xaf9dc, 0xafb8b, 0xafb9c, 0xafd4b, 0xafd5c, 0xaff0b,
+    0xaff1c, 0xb00cb, 0xb00dc, 0xb028b, 0xb029c, 0xb044b,
+    0xb045c, 0xb060b, 0xb061c, 0xb07cb, 0xb07dc, 0xb098b,
+    0xb099c, 0xb0b4b, 0xb0b5c, 0xb0d0b, 0xb0d1c, 0xb0ecb,
+    0xb0edc, 0xb108b, 0xb109c, 0xb124b, 0xb125c, 0xb140b,
+    0xb141c, 0xb15cb, 0xb15dc, 0xb178b, 0xb179c, 0xb194b,
+    0xb195c, 0xb1b0b, 0xb1b1c, 0xb1ccb, 0xb1cdc, 0xb1e8b,
+    0xb1e9c, 0xb204b, 0xb205c, 0xb220b, 0xb221c, 0xb23cb,
+    0xb23dc, 0xb258b, 0xb259c, 0xb274b, 0xb275c, 0xb290b,
+    0xb291c, 0xb2acb, 0xb2adc, 0xb2c8b, 0xb2c9c, 0xb2e4b,
+    0xb2e5c, 0xb300b, 0xb301c, 0xb31cb, 0xb31dc, 0xb338b,
+    0xb339c, 0xb354b, 0xb355c, 0xb370b, 0xb371c, 0xb38cb,
+    0xb38dc, 0xb3a8b, 0xb3a9c, 0xb3c4b, 0xb3c5c, 0xb3e0b,
+    0xb3e1c, 0xb3fcb, 0xb3fdc, 0xb418b, 0xb419c, 0xb434b,
+    0xb435c, 0xb450b, 0xb451c, 0xb46cb, 0xb46dc, 0xb488b,
+    0xb489c, 0xb4a4b, 0xb4a5c, 0xb4c0b, 0xb4c1c, 0xb4dcb,
+    0xb4ddc, 0xb4f8b, 0xb4f9c, 0xb514b, 0xb515c, 0xb530b,
+    0xb531c, 0xb54cb, 0xb54dc, 0xb568b, 0xb569c, 0xb584b,
+    0xb585c, 0xb5a0b, 0xb5a1c, 0xb5bcb, 0xb5bdc, 0xb5d8b,
+    0xb5d9c, 0xb5f4b, 0xb5f5c, 0xb610b, 0xb611c, 0xb62cb,
+    0xb62dc, 0xb648b, 0xb649c, 0xb664b, 0xb665c, 0xb680b,
+    0xb681c, 0xb69cb, 0xb69dc, 0xb6b8b, 0xb6b9c, 0xb6d4b,
+    0xb6d5c, 0xb6f0b, 0xb6f1c, 0xb70cb, 0xb70dc, 0xb728b,
+    0xb729c, 0xb744b, 0xb745c, 0xb760b, 0xb761c, 0xb77cb,
+    0xb77dc, 0xb798b, 0xb799c, 0xb7b4b, 0xb7b5c, 0xb7d0b,
+    0xb7d1c, 0xb7ecb, 0xb7edc, 0xb808b, 0xb809c, 0xb824b,
+    0xb825c, 0xb840b, 0xb841c, 0xb85cb, 0xb85dc, 0xb878b,
+    0xb879c, 0xb894b, 0xb895c, 0xb8b0b, 0xb8b1c, 0xb8ccb,
+    0xb8cdc, 0xb8e8b, 0xb8e9c, 0xb904b, 0xb905c, 0xb920b,
+    0xb921c, 0xb93cb, 0xb93dc, 0xb958b, 0xb959c, 0xb974b,
+    0xb975c, 0xb990b, 0xb991c, 0xb9acb, 0xb9adc, 0xb9c8b,
+    0xb9c9c, 0xb9e4b, 0xb9e5c, 0xba00b, 0xba01c, 0xba1cb,
+    0xba1dc, 0xba38b, 0xba39c, 0xba54b, 0xba55c, 0xba70b,
+    0xba71c, 0xba8cb, 0xba8dc, 0xbaa8b, 0xbaa9c, 0xbac4b,
+    0xbac5c, 0xbae0b, 0xbae1c, 0xbafcb, 0xbafdc, 0xbb18b,
+    0xbb19c, 0xbb34b, 0xbb35c, 0xbb50b, 0xbb51c, 0xbb6cb,
+    0xbb6dc, 0xbb88b, 0xbb89c, 0xbba4b, 0xbba5c, 0xbbc0b,
+    0xbbc1c, 0xbbdcb, 0xbbddc, 0xbbf8b, 0xbbf9c, 0xbc14b,
+    0xbc15c, 0xbc30b, 0xbc31c, 0xbc4cb, 0xbc4dc, 0xbc68b,
+    0xbc69c, 0xbc84b, 0xbc85c, 0xbca0b, 0xbca1c, 0xbcbcb,
+    0xbcbdc, 0xbcd8b, 0xbcd9c, 0xbcf4b, 0xbcf5c, 0xbd10b,
+    0xbd11c, 0xbd2cb, 0xbd2dc, 0xbd48b, 0xbd49c, 0xbd64b,
+    0xbd65c, 0xbd80b, 0xbd81c, 0xbd9cb, 0xbd9dc, 0xbdb8b,
+    0xbdb9c, 0xbdd4b, 0xbdd5c, 0xbdf0b, 0xbdf1c, 0xbe0cb,
+    0xbe0dc, 0xbe28b, 0xbe29c, 0xbe44b, 0xbe45c, 0xbe60b,
+    0xbe61c, 0xbe7cb, 0xbe7dc, 0xbe98b, 0xbe99c, 0xbeb4b,
+    0xbeb5c, 0xbed0b, 0xbed1c, 0xbeecb, 0xbeedc, 0xbf08b,
+    0xbf09c, 0xbf24b, 0xbf25c, 0xbf40b, 0xbf41c, 0xbf5cb,
+    0xbf5dc, 0xbf78b, 0xbf79c, 0xbf94b, 0xbf95c, 0xbfb0b,
+    0xbfb1c, 0xbfccb, 0xbfcdc, 0xbfe8b, 0xbfe9c, 0xc004b,
+    0xc005c, 0xc020b, 0xc021c, 0xc03cb, 0xc03dc, 0xc058b,
+    0xc059c, 0xc074b, 0xc075c, 0xc090b, 0xc091c, 0xc0acb,
+    0xc0adc, 0xc0c8b, 0xc0c9c, 0xc0e4b, 0xc0e5c, 0xc100b,
+    0xc101c, 0xc11cb, 0xc11dc, 0xc138b, 0xc139c, 0xc154b,
+    0xc155c, 0xc170b, 0xc171c, 0xc18cb, 0xc18dc, 0xc1a8b,
+    0xc1a9c, 0xc1c4b, 0xc1c5c, 0xc1e0b, 0xc1e1c, 0xc1fcb,
+    0xc1fdc, 0xc218b, 0xc219c, 0xc234b, 0xc235c, 0xc250b,
+    0xc251c, 0xc26cb, 0xc26dc, 0xc288b, 0xc289c, 0xc2a4b,
+    0xc2a5c, 0xc2c0b, 0xc2c1c, 0xc2dcb, 0xc2ddc, 0xc2f8b,
+    0xc2f9c, 0xc314b, 0xc315c, 0xc330b, 0xc331c, 0xc34cb,
+    0xc34dc, 0xc368b, 0xc369c, 0xc384b, 0xc385c, 0xc3a0b,
+    0xc3a1c, 0xc3bcb, 0xc3bdc, 0xc3d8b, 0xc3d9c, 0xc3f4b,
+    0xc3f5c, 0xc410b, 0xc411c, 0xc42cb, 0xc42dc, 0xc448b,
+    0xc449c, 0xc464b, 0xc465c, 0xc480b, 0xc481c, 0xc49cb,
+    0xc49dc, 0xc4b8b, 0xc4b9c, 0xc4d4b, 0xc4d5c, 0xc4f0b,
+    0xc4f1c, 0xc50cb, 0xc50dc, 0xc528b, 0xc529c, 0xc544b,
+    0xc545c, 0xc560b, 0xc561c, 0xc57cb, 0xc57dc, 0xc598b,
+    0xc599c, 0xc5b4b, 0xc5b5c, 0xc5d0b, 0xc5d1c, 0xc5ecb,
+    0xc5edc, 0xc608b, 0xc609c, 0xc624b, 0xc625c, 0xc640b,
+    0xc641c, 0xc65cb, 0xc65dc, 0xc678b, 0xc679c, 0xc694b,
+    0xc695c, 0xc6b0b, 0xc6b1c, 0xc6ccb, 0xc6cdc, 0xc6e8b,
+    0xc6e9c, 0xc704b, 0xc705c, 0xc720b, 0xc721c, 0xc73cb,
+    0xc73dc, 0xc758b, 0xc759c, 0xc774b, 0xc775c, 0xc790b,
+    0xc791c, 0xc7acb, 0xc7adc, 0xc7c8b, 0xc7c9c, 0xc7e4b,
+    0xc7e5c, 0xc800b, 0xc801c, 0xc81cb, 0xc81dc, 0xc838b,
+    0xc839c, 0xc854b, 0xc855c, 0xc870b, 0xc871c, 0xc88cb,
+    0xc88dc, 0xc8a8b, 0xc8a9c, 0xc8c4b, 0xc8c5c, 0xc8e0b,
+    0xc8e1c, 0xc8fcb, 0xc8fdc, 0xc918b, 0xc919c, 0xc934b,
+    0xc935c, 0xc950b, 0xc951c, 0xc96cb, 0xc96dc, 0xc988b,
+    0xc989c, 0xc9a4b, 0xc9a5c, 0xc9c0b, 0xc9c1c, 0xc9dcb,
+    0xc9ddc, 0xc9f8b, 0xc9f9c, 0xca14b, 0xca15c, 0xca30b,
+    0xca31c, 0xca4cb, 0xca4dc, 0xca68b, 0xca69c, 0xca84b,
+    0xca85c, 0xcaa0b, 0xcaa1c, 0xcabcb, 0xcabdc, 0xcad8b,
+    0xcad9c, 0xcaf4b, 0xcaf5c, 0xcb10b, 0xcb11c, 0xcb2cb,
+    0xcb2dc, 0xcb48b, 0xcb49c, 0xcb64b, 0xcb65c, 0xcb80b,
+    0xcb81c, 0xcb9cb, 0xcb9dc, 0xcbb8b, 0xcbb9c, 0xcbd4b,
+    0xcbd5c, 0xcbf0b, 0xcbf1c, 0xcc0cb, 0xcc0dc, 0xcc28b,
+    0xcc29c, 0xcc44b, 0xcc45c, 0xcc60b, 0xcc61c, 0xcc7cb,
+    0xcc7dc, 0xcc98b, 0xcc99c, 0xccb4b, 0xccb5c, 0xccd0b,
+    0xccd1c, 0xccecb, 0xccedc, 0xcd08b, 0xcd09c, 0xcd24b,
+    0xcd25c, 0xcd40b, 0xcd41c, 0xcd5cb, 0xcd5dc, 0xcd78b,
+    0xcd79c, 0xcd94b, 0xcd95c, 0xcdb0b, 0xcdb1c, 0xcdccb,
+    0xcdcdc, 0xcde8b, 0xcde9c, 0xce04b, 0xce05c, 0xce20b,
+    0xce21c, 0xce3cb, 0xce3dc, 0xce58b, 0xce59c, 0xce74b,
+    0xce75c, 0xce90b, 0xce91c, 0xceacb, 0xceadc, 0xcec8b,
+    0xcec9c, 0xcee4b, 0xcee5c, 0xcf00b, 0xcf01c, 0xcf1cb,
+    0xcf1dc, 0xcf38b, 0xcf39c, 0xcf54b, 0xcf55c, 0xcf70b,
+    0xcf71c, 0xcf8cb, 0xcf8dc, 0xcfa8b, 0xcfa9c, 0xcfc4b,
+    0xcfc5c, 0xcfe0b, 0xcfe1c, 0xcffcb, 0xcffdc, 0xd018b,
+    0xd019c, 0xd034b, 0xd035c, 0xd050b, 0xd051c, 0xd06cb,
+    0xd06dc, 0xd088b, 0xd089c, 0xd0a4b, 0xd0a5c, 0xd0c0b,
+    0xd0c1c, 0xd0dcb, 0xd0ddc, 0xd0f8b, 0xd0f9c, 0xd114b,
+    0xd115c, 0xd130b, 0xd131c, 0xd14cb, 0xd14dc, 0xd168b,
+    0xd169c, 0xd184b, 0xd185c, 0xd1a0b, 0xd1a1c, 0xd1bcb,
+    0xd1bdc, 0xd1d8b, 0xd1d9c, 0xd1f4b, 0xd1f5c, 0xd210b,
+    0xd211c, 0xd22cb, 0xd22dc, 0xd248b, 0xd249c, 0xd264b,
+    0xd265c, 0xd280b, 0xd281c, 0xd29cb, 0xd29dc, 0xd2b8b,
+    0xd2b9c, 0xd2d4b, 0xd2d5c, 0xd2f0b, 0xd2f1c, 0xd30cb,
+    0xd30dc, 0xd328b, 0xd329c, 0xd344b, 0xd345c, 0xd360b,
+    0xd361c, 0xd37cb, 0xd37dc, 0xd398b, 0xd399c, 0xd3b4b,
+    0xd3b5c, 0xd3d0b, 0xd3d1c, 0xd3ecb, 0xd3edc, 0xd408b,
+    0xd409c, 0xd424b, 0xd425c, 0xd440b, 0xd441c, 0xd45cb,
+    0xd45dc, 0xd478b, 0xd479c, 0xd494b, 0xd495c, 0xd4b0b,
+    0xd4b1c, 0xd4ccb, 0xd4cdc, 0xd4e8b, 0xd4e9c, 0xd504b,
+    0xd505c, 0xd520b, 0xd521c, 0xd53cb, 0xd53dc, 0xd558b,
+    0xd559c, 0xd574b, 0xd575c, 0xd590b, 0xd591c, 0xd5acb,
+    0xd5adc, 0xd5c8b, 0xd5c9c, 0xd5e4b, 0xd5e5c, 0xd600b,
+    0xd601c, 0xd61cb, 0xd61dc, 0xd638b, 0xd639c, 0xd654b,
+    0xd655c, 0xd670b, 0xd671c, 0xd68cb, 0xd68dc, 0xd6a8b,
+    0xd6a9c, 0xd6c4b, 0xd6c5c, 0xd6e0b, 0xd6e1c, 0xd6fcb,
+    0xd6fdc, 0xd718b, 0xd719c, 0xd734b, 0xd735c, 0xd750b,
+    0xd751c, 0xd76cb, 0xd76dc, 0xd788b, 0xd789c, 0xd7a40,
+    0xd7b08, 0xd7c70, 0xd7cb9, 0xd7fc0, 0xfb1e4, 0xfb1f0,
+    0xfe004, 0xfe100, 0xfe204, 0xfe300, 0xfeff1, 0xff000,
+    0xff9e4, 0xffa00, 0xfff01, 0xfffc0, 0x101fd4, 0x101fe0,
+    0x102e04, 0x102e10, 0x103764, 0x1037b0, 0x10a014, 0x10a040,
+    0x10a054, 0x10a070, 0x10a0c4, 0x10a100, 0x10a384, 0x10a3b0,
+    0x10a3f4, 0x10a400, 0x10ae54, 0x10ae70, 0x10d244, 0x10d280,
+    0x10d694, 0x10d6e0, 0x10eab4, 0x10ead0, 0x10efc4, 0x10f000,
+    0x10f464, 0x10f510, 0x10f824, 0x10f860, 0x110006, 0x110014,
+    0x110026, 0x110030, 0x110384, 0x110470, 0x110704, 0x110710,
+    0x110734, 0x110750, 0x1107f4, 0x110826, 0x110830, 0x110b06,
+    0x110b34, 0x110b76, 0x110b94, 0x110bb0, 0x110bd5, 0x110be0,
+    0x110c24, 0x110c30, 0x110cd5, 0x110ce0, 0x111004, 0x111030,
+    0x111274, 0x1112c6, 0x1112d4, 0x111350, 0x111456, 0x111470,
+    0x111734, 0x111740, 0x111804, 0x111826, 0x111830, 0x111b36,
+    0x111b64, 0x111bf6, 0x111c04, 0x111c10, 0x111c25, 0x111c40,
+    0x111c94, 0x111cd0, 0x111ce6, 0x111cf4, 0x111d00, 0x1122c6,
+    0x1122f4, 0x112326, 0x112344, 0x112380, 0x1123e4, 0x1123f0,
+    0x112414, 0x112420, 0x112df4, 0x112e06, 0x112e34, 0x112eb0,
+    0x113004, 0x113026, 0x113040, 0x1133b4, 0x1133d0, 0x1133e4,
+    0x1133f6, 0x113404, 0x113416, 0x113450, 0x113476, 0x113490,
+    0x1134b6, 0x1134d4, 0x1134e0, 0x113574, 0x113580, 0x113626,
+    0x113640, 0x113664, 0x1136d0, 0x113704, 0x113750, 0x113b84,
+    0x113b96, 0x113bb4, 0x113c10, 0x113c24, 0x113c30, 0x113c54,
+    0x113c60, 0x113c74, 0x113ca6, 0x113cb0, 0x113cc6, 0x113ce4,
+    0x113d15, 0x113d24, 0x113d30, 0x113e14, 0x113e30, 0x114356,
+    0x114384, 0x114406, 0x114424, 0x114456, 0x114464, 0x114470,
+    0x1145e4, 0x1145f0, 0x114b04, 0x114b16, 0x114b34, 0x114b96,
+    0x114ba4, 0x114bb6, 0x114bd4, 0x114be6, 0x114bf4, 0x114c16,
+    0x114c24, 0x114c40, 0x115af4, 0x115b06, 0x115b24, 0x115b60,
+    0x115b86, 0x115bc4, 0x115be6, 0x115bf4, 0x115c10, 0x115dc4,
+    0x115de0, 0x116306, 0x116334, 0x1163b6, 0x1163d4, 0x1163e6,
+    0x1163f4, 0x116410, 0x116ab4, 0x116ac6, 0x116ad4, 0x116ae6,
+    0x116b04, 0x116b80, 0x1171d4, 0x1171e6, 0x1171f4, 0x117200,
+    0x117224, 0x117266, 0x117274, 0x1172c0, 0x1182c6, 0x1182f4,
+    0x118386, 0x118394, 0x1183b0, 0x119304, 0x119316, 0x119360,
+    0x119376, 0x119390, 0x1193b4, 0x1193f5, 0x119406, 0x119415,
+    0x119426, 0x119434, 0x119440, 0x119d16, 0x119d44, 0x119d80,
+    0x119da4, 0x119dc6, 0x119e04, 0x119e10, 0x119e46, 0x119e50,
+    0x11a014, 0x11a0b0, 0x11a334, 0x11a396, 0x11a3a5, 0x11a3b4,
+    0x11a3f0, 0x11a474, 0x11a480, 0x11a514, 0x11a576, 0x11a594,
+    0x11a5c0, 0x11a845, 0x11a8a4, 0x11a976, 0x11a984, 0x11a9a0,
+    0x11c2f6, 0x11c304, 0x11c370, 0x11c384, 0x11c3e6, 0x11c3f4,
+    0x11c400, 0x11c924, 0x11ca80, 0x11ca96, 0x11caa4, 0x11cb16,
+    0x11cb24, 0x11cb46, 0x11cb54, 0x11cb70, 0x11d314, 0x11d370,
+    0x11d3a4, 0x11d3b0, 0x11d3c4, 0x11d3e0, 0x11d3f4, 0x11d465,
+    0x11d474, 0x11d480, 0x11d8a6, 0x11d8f0, 0x11d904, 0x11d920,
+    0x11d936, 0x11d954, 0x11d966, 0x11d974, 0x11d980, 0x11ef34,
+    0x11ef56, 0x11ef70, 0x11f004, 0x11f025, 0x11f036, 0x11f040,
+    0x11f346, 0x11f364, 0x11f3b0, 0x11f3e6, 0x11f404, 0x11f430,
+    0x11f5a4, 0x11f5b0, 0x134301, 0x134404, 0x134410, 0x134474,
+    0x134560, 0x1611e4, 0x1612a6, 0x1612d4, 0x161300, 0x16af04,
+    0x16af50, 0x16b304, 0x16b370, 0x16d638, 0x16d640, 0x16d678,
+    0x16d6b0, 0x16f4f4, 0x16f500, 0x16f516, 0x16f880, 0x16f8f4,
+    0x16f930, 0x16fe44, 0x16fe50, 0x16ff04, 0x16ff20, 0x1bc9d4,
+    0x1bc9f0, 0x1bca01, 0x1bca40, 0x1cf004, 0x1cf2e0, 0x1cf304,
+    0x1cf470, 0x1d1654, 0x1d16a0, 0x1d16d4, 0x1d1731, 0x1d17b4,
+    0x1d1830, 0x1d1854, 0x1d18c0, 0x1d1aa4, 0x1d1ae0, 0x1d2424,
+    0x1d2450, 0x1da004, 0x1da370, 0x1da3b4, 0x1da6d0, 0x1da754,
+    0x1da760, 0x1da844, 0x1da850, 0x1da9b4, 0x1daa00, 0x1daa14,
+    0x1dab00, 0x1e0004, 0x1e0070, 0x1e0084, 0x1e0190, 0x1e01b4,
+    0x1e0220, 0x1e0234, 0x1e0250, 0x1e0264, 0x1e02b0, 0x1e08f4,
+    0x1e0900, 0x1e1304, 0x1e1370, 0x1e2ae4, 0x1e2af0, 0x1e2ec4,
+    0x1e2f00, 0x1e4ec4, 0x1e4f00, 0x1e5ee4, 0x1e5f00, 0x1e8d04,
+    0x1e8d70, 0x1e9444, 0x1e94b0, 0x1f1e6d, 0x1f2000, 0x1f3fb4,
+    0x1f4000, 0xe00001, 0xe00204, 0xe00801, 0xe01004, 0xe01f01,
+    0xe10000,
+  };
+
+  inline constexpr char32_t __incb_linkers[] = {
+    0x094d, 0x09cd, 0x0acd, 0x0b4d, 0x0c4d, 0x0d4d,
+  };
+
+  enum class _InCB { _Consonant = 1, _Extend = 2 };
+
+
+
+
+  inline constexpr uint32_t __incb_edges[] = {
+    0xc02, 0xdc0, 0x120e, 0x1228, 0x1646, 0x16f8,
+    0x16fe, 0x1700, 0x1706, 0x170c, 0x1712, 0x1718,
+    0x171e, 0x1720, 0x1842, 0x186c, 0x192e, 0x1980,
+    0x19c2, 0x19c4, 0x1b5a, 0x1b74, 0x1b7e, 0x1b94,
+    0x1b9e, 0x1ba4, 0x1baa, 0x1bb8, 0x1c46, 0x1c48,
+    0x1cc2, 0x1d2c, 0x1e9a, 0x1ec4, 0x1fae, 0x1fd0,
+    0x1ff6, 0x1ff8, 0x205a, 0x2068, 0x206e, 0x2090,
+    0x2096, 0x20a0, 0x20a6, 0x20b8, 0x2166, 0x2170,
+    0x225e, 0x2280, 0x232a, 0x2388, 0x238e, 0x240c,
+    0x2455, 0x24ea, 0x24ec, 0x24f2, 0x24f4, 0x2506,
+    0x2524, 0x2546, 0x2561, 0x2580, 0x258a, 0x2590,
+    0x25e1, 0x2600, 0x2606, 0x2608, 0x2655, 0x26a4,
+    0x26a9, 0x26c4, 0x26c9, 0x26cc, 0x26d9, 0x26e8,
+    0x26f2, 0x26f4, 0x26fa, 0x26fc, 0x2706, 0x2714,
+    0x275e, 0x2760, 0x2771, 0x2778, 0x277d, 0x2780,
+    0x278a, 0x2790, 0x27c1, 0x27c8, 0x27fa, 0x27fc,
+    0x2806, 0x280c, 0x28f2, 0x28f4, 0x2906, 0x290c,
+    0x291e, 0x2924, 0x292e, 0x2938, 0x2946, 0x2948,
+    0x29c2, 0x29c8, 0x29d6, 0x29d8, 0x2a06, 0x2a0c,
+    0x2a55, 0x2aa4, 0x2aa9, 0x2ac4, 0x2ac9, 0x2ad0,
+    0x2ad5, 0x2ae8, 0x2af2, 0x2af4, 0x2b06, 0x2b18,
+    0x2b1e, 0x2b24, 0x2b8a, 0x2b90, 0x2be5, 0x2bea,
+    0x2c00, 0x2c06, 0x2c08, 0x2c55, 0x2ca4, 0x2ca9,
+    0x2cc4, 0x2cc9, 0x2cd0, 0x2cd5, 0x2ce8, 0x2cf2,
+    0x2cf4, 0x2cfa, 0x2d00, 0x2d06, 0x2d14, 0x2d56,
+    0x2d60, 0x2d71, 0x2d78, 0x2d7d, 0x2d80, 0x2d8a,
+    0x2d90, 0x2dc5, 0x2dc8, 0x2e0a, 0x2e0c, 0x2efa,
+    0x2efc, 0x2f02, 0x2f04, 0x2f36, 0x2f38, 0x2f5e,
+    0x2f60, 0x3002, 0x3004, 0x3012, 0x3014, 0x3055,
+    0x30a4, 0x30a9, 0x30e8, 0x30f2, 0x30f4, 0x30fa,
+    0x3104, 0x311a, 0x3124, 0x312a, 0x3134, 0x3156,
+    0x315c, 0x3161, 0x316c, 0x318a, 0x3190, 0x3206,
+    0x3208, 0x32f2, 0x32f4, 0x32fe, 0x3304, 0x330a,
+    0x330c, 0x331a, 0x3324, 0x332a, 0x3338, 0x3356,
+    0x335c, 0x338a, 0x3390, 0x3402, 0x3408, 0x3455,
+    0x34ee, 0x34f4, 0x34fa, 0x34fc, 0x3506, 0x3514,
+    0x355e, 0x3560, 0x358a, 0x3590, 0x3606, 0x3608,
+    0x372a, 0x372c, 0x373e, 0x3740, 0x374a, 0x3754,
+    0x375a, 0x375c, 0x377e, 0x3780, 0x38c6, 0x38c8,
+    0x38d2, 0x38ec, 0x391e, 0x393c, 0x3ac6, 0x3ac8,
+    0x3ad2, 0x3af4, 0x3b22, 0x3b3c, 0x3c62, 0x3c68,
+    0x3cd6, 0x3cd8, 0x3cde, 0x3ce0, 0x3ce6, 0x3ce8,
+    0x3dc6, 0x3dfc, 0x3e02, 0x3e14, 0x3e1a, 0x3e20,
+    0x3e36, 0x3e60, 0x3e66, 0x3ef4, 0x3f1a, 0x3f1c,
+    0x40b6, 0x40c4, 0x40ca, 0x40e0, 0x40e6, 0x40ec,
+    0x40f6, 0x40fc, 0x4162, 0x4168, 0x417a, 0x4184,
+    0x41c6, 0x41d4, 0x420a, 0x420c, 0x4216, 0x421c,
+    0x4236, 0x4238, 0x4276, 0x4278, 0x4d76, 0x4d80,
+    0x5c4a, 0x5c58, 0x5cca, 0x5cd4, 0x5d4a, 0x5d50,
+    0x5dca, 0x5dd0, 0x5ed2, 0x5ed8, 0x5ede, 0x5ef8,
+    0x5f1a, 0x5f1c, 0x5f26, 0x5f50, 0x5f76, 0x5f78,
+    0x602e, 0x6038, 0x603e, 0x6040, 0x6216, 0x621c,
+    0x62a6, 0x62a8, 0x6482, 0x648c, 0x649e, 0x64a4,
+    0x64ca, 0x64cc, 0x64e6, 0x64f0, 0x685e, 0x6864,
+    0x686e, 0x6870, 0x695a, 0x695c, 0x6962, 0x697c,
+    0x6982, 0x6984, 0x698a, 0x698c, 0x6996, 0x69b4,
+    0x69ce, 0x69f4, 0x69fe, 0x6a00, 0x6ac2, 0x6b3c,
+    0x6c02, 0x6c10, 0x6cd2, 0x6cf8, 0x6d0a, 0x6d14,
+    0x6dae, 0x6dd0, 0x6e02, 0x6e08, 0x6e8a, 0x6e98,
+    0x6ea2, 0x6eb8, 0x6f9a, 0x6f9c, 0x6fa2, 0x6fa8,
+    0x6fb6, 0x6fb8, 0x6fbe, 0x6fd0, 0x70b2, 0x70d0,
+    0x70da, 0x70e0, 0x7342, 0x734c, 0x7352, 0x7384,
+    0x738a, 0x73a4, 0x73b6, 0x73b8, 0x73d2, 0x73d4,
+    0x73e2, 0x73e8, 0x7702, 0x7800, 0x8036, 0x8038,
+    0x8342, 0x83c4, 0xb3be, 0xb3c8, 0xb5fe, 0xb600,
+    0xb782, 0xb800, 0xc0aa, 0xc0c0, 0xc266, 0xc26c,
+    0x299be, 0x299cc, 0x299d2, 0x299f8, 0x29a7a, 0x29a80,
+    0x29bc2, 0x29bc8, 0x2a00a, 0x2a00c, 0x2a01a, 0x2a01c,
+    0x2a02e, 0x2a030, 0x2a096, 0x2a09c, 0x2a0b2, 0x2a0b4,
+    0x2a312, 0x2a318, 0x2a382, 0x2a3c8, 0x2a3fe, 0x2a400,
+    0x2a49a, 0x2a4b8, 0x2a51e, 0x2a548, 0x2a54e, 0x2a550,
+    0x2a602, 0x2a60c, 0x2a6ce, 0x2a6d0, 0x2a6da, 0x2a6e8,
+    0x2a6f2, 0x2a6f8, 0x2a702, 0x2a704, 0x2a796, 0x2a798,
+    0x2a8a6, 0x2a8bc, 0x2a8c6, 0x2a8cc, 0x2a8d6, 0x2a8dc,
+    0x2a90e, 0x2a910, 0x2a932, 0x2a934, 0x2a9f2, 0x2a9f4,
+    0x2aac2, 0x2aac4, 0x2aaca, 0x2aad4, 0x2aade, 0x2aae4,
+    0x2aafa, 0x2ab00, 0x2ab06, 0x2ab08, 0x2abb2, 0x2abb8,
+    0x2abda, 0x2abdc, 0x2af96, 0x2af98, 0x2afa2, 0x2afa4,
+    0x2afb6, 0x2afb8, 0x3ec7a, 0x3ec7c, 0x3f802, 0x3f840,
+    0x3f882, 0x3f8c0, 0x3fe7a, 0x3fe80, 0x407f6, 0x407f8,
+    0x40b82, 0x40b84, 0x40dda, 0x40dec, 0x42806, 0x42810,
+    0x42816, 0x4281c, 0x42832, 0x42840, 0x428e2, 0x428ec,
+    0x428fe, 0x42900, 0x42b96, 0x42b9c, 0x43492, 0x434a0,
+    0x435a6, 0x435b8, 0x43aae, 0x43ab4, 0x43bf2, 0x43c00,
+    0x43d1a, 0x43d44, 0x43e0a, 0x43e18, 0x44006, 0x44008,
+    0x440e2, 0x4411c, 0x441c2, 0x441c4, 0x441ce, 0x441d4,
+    0x441fe, 0x44208, 0x442ce, 0x442dc, 0x442e6, 0x442ec,
+    0x4430a, 0x4430c, 0x44402, 0x4440c, 0x4449e, 0x444b0,
+    0x444b6, 0x444d4, 0x445ce, 0x445d0, 0x44602, 0x44608,
+    0x446da, 0x446fc, 0x44702, 0x44704, 0x44726, 0x44734,
+    0x4473e, 0x44740, 0x448be, 0x448c8, 0x448d2, 0x448e0,
+    0x448fa, 0x448fc, 0x44906, 0x44908, 0x44b7e, 0x44b80,
+    0x44b8e, 0x44bac, 0x44c02, 0x44c08, 0x44cee, 0x44cf4,
+    0x44cfa, 0x44cfc, 0x44d02, 0x44d04, 0x44d36, 0x44d38,
+    0x44d5e, 0x44d60, 0x44d9a, 0x44db4, 0x44dc2, 0x44dd4,
+    0x44ee2, 0x44ee4, 0x44eee, 0x44f04, 0x44f0a, 0x44f0c,
+    0x44f16, 0x44f18, 0x44f1e, 0x44f28, 0x44f3a, 0x44f44,
+    0x44f4a, 0x44f4c, 0x44f86, 0x44f8c, 0x450e2, 0x45100,
+    0x4510a, 0x45114, 0x4511a, 0x4511c, 0x4517a, 0x4517c,
+    0x452c2, 0x452c4, 0x452ce, 0x452e4, 0x452ea, 0x452ec,
+    0x452f6, 0x452f8, 0x452fe, 0x45304, 0x4530a, 0x45310,
+    0x456be, 0x456c0, 0x456ca, 0x456d8, 0x456f2, 0x456f8,
+    0x456fe, 0x45704, 0x45772, 0x45778, 0x458ce, 0x458ec,
+    0x458f6, 0x458f8, 0x458fe, 0x45904, 0x45aae, 0x45ab0,
+    0x45ab6, 0x45ab8, 0x45ac2, 0x45ae0, 0x45c76, 0x45c78,
+    0x45c7e, 0x45c80, 0x45c8a, 0x45c98, 0x45c9e, 0x45cb0,
+    0x460be, 0x460e0, 0x460e6, 0x460ec, 0x464c2, 0x464c4,
+    0x464ee, 0x464fc, 0x4650e, 0x46510, 0x46752, 0x46760,
+    0x4676a, 0x46770, 0x46782, 0x46784, 0x46806, 0x4682c,
+    0x468ce, 0x468e4, 0x468ee, 0x468fc, 0x4691e, 0x46920,
+    0x46946, 0x4695c, 0x46966, 0x46970, 0x46a2a, 0x46a5c,
+    0x46a62, 0x46a68, 0x470c2, 0x470dc, 0x470e2, 0x470f8,
+    0x470fe, 0x47100, 0x4724a, 0x472a0, 0x472aa, 0x472c4,
+    0x472ca, 0x472d0, 0x472d6, 0x472dc, 0x474c6, 0x474dc,
+    0x474ea, 0x474ec, 0x474f2, 0x474f8, 0x474fe, 0x47518,
+    0x4751e, 0x47520, 0x47642, 0x47648, 0x47656, 0x47658,
+    0x4765e, 0x47660, 0x47bce, 0x47bd4, 0x47c02, 0x47c08,
+    0x47cda, 0x47cec, 0x47d02, 0x47d0c, 0x47d6a, 0x47d6c,
+    0x4d102, 0x4d104, 0x4d11e, 0x4d158, 0x5847a, 0x584a8,
+    0x584b6, 0x584c0, 0x5abc2, 0x5abd4, 0x5acc2, 0x5acdc,
+    0x5bd3e, 0x5bd40, 0x5be3e, 0x5be4c, 0x5bf92, 0x5bf94,
+    0x5bfc2, 0x5bfc8, 0x6f276, 0x6f27c, 0x73c02, 0x73cb8,
+    0x73cc2, 0x73d1c, 0x74596, 0x745a8, 0x745b6, 0x745cc,
+    0x745ee, 0x7460c, 0x74616, 0x74630, 0x746aa, 0x746b8,
+    0x7490a, 0x74914, 0x76802, 0x768dc, 0x768ee, 0x769b4,
+    0x769d6, 0x769d8, 0x76a12, 0x76a14, 0x76a6e, 0x76a80,
+    0x76a86, 0x76ac0, 0x78002, 0x7801c, 0x78022, 0x78064,
+    0x7806e, 0x78088, 0x7808e, 0x78094, 0x7809a, 0x780ac,
+    0x7823e, 0x78240, 0x784c2, 0x784dc, 0x78aba, 0x78abc,
+    0x78bb2, 0x78bc0, 0x793b2, 0x793c0, 0x797ba, 0x797c0,
+    0x7a342, 0x7a35c, 0x7a512, 0x7a52c, 0x7cfee, 0x7d000,
+    0x380082, 0x380200, 0x380402, 0x3807c0,
+  };
+
+
+
+  inline constexpr char32_t __xpicto_edges[] = {
+    0xa9, 0xaa, 0xae, 0xaf, 0x203c, 0x203d, 0x2049, 0x204a,
+    0x2122, 0x2123, 0x2139, 0x213a, 0x2194, 0x219a, 0x21a9, 0x21ab,
+    0x231a, 0x231c, 0x2328, 0x2329, 0x2388, 0x2389, 0x23cf, 0x23d0,
+    0x23e9, 0x23f4, 0x23f8, 0x23fb, 0x24c2, 0x24c3, 0x25aa, 0x25ac,
+    0x25b6, 0x25b7, 0x25c0, 0x25c1, 0x25fb, 0x25ff, 0x2600, 0x2606,
+    0x2607, 0x2613, 0x2614, 0x2686, 0x2690, 0x2706, 0x2708, 0x2713,
+    0x2714, 0x2715, 0x2716, 0x2717, 0x271d, 0x271e, 0x2721, 0x2722,
+    0x2728, 0x2729, 0x2733, 0x2735, 0x2744, 0x2745, 0x2747, 0x2748,
+    0x274c, 0x274d, 0x274e, 0x274f, 0x2753, 0x2756, 0x2757, 0x2758,
+    0x2763, 0x2768, 0x2795, 0x2798, 0x27a1, 0x27a2, 0x27b0, 0x27b1,
+    0x27bf, 0x27c0, 0x2934, 0x2936, 0x2b05, 0x2b08, 0x2b1b, 0x2b1d,
+    0x2b50, 0x2b51, 0x2b55, 0x2b56, 0x3030, 0x3031, 0x303d, 0x303e,
+    0x3297, 0x3298, 0x3299, 0x329a, 0x1f000, 0x1f100, 0x1f10d, 0x1f110,
+    0x1f12f, 0x1f130, 0x1f16c, 0x1f172, 0x1f17e, 0x1f180, 0x1f18e, 0x1f18f,
+    0x1f191, 0x1f19b, 0x1f1ad, 0x1f1e6, 0x1f201, 0x1f210, 0x1f21a, 0x1f21b,
+    0x1f22f, 0x1f230, 0x1f232, 0x1f23b, 0x1f23c, 0x1f240, 0x1f249, 0x1f3fb,
+    0x1f400, 0x1f53e, 0x1f546, 0x1f650, 0x1f680, 0x1f700, 0x1f774, 0x1f780,
+    0x1f7d5, 0x1f800, 0x1f80c, 0x1f810, 0x1f848, 0x1f850, 0x1f85a, 0x1f860,
+    0x1f888, 0x1f890, 0x1f8ae, 0x1f900, 0x1f90c, 0x1f93b, 0x1f93c, 0x1f946,
+    0x1f947, 0x1fb00, 0x1fc00, 0x1fffe,
+  };
+# 602 "C:/msys64/mingw64/include/c++/15.2.0/bits/unicode.h" 2 3
+
+
+
+
+
+  constexpr int
+  __field_width(char32_t __c) noexcept
+  {
+    if (__c < __width_edges[0]) [[likely]]
+      return 1;
+
+    auto* __p = std::upper_bound(__width_edges, std::end(__width_edges), __c);
+    return (__p - __width_edges) % 2 + 1;
+  }
+
+
+  constexpr bool
+  __should_escape_category(char32_t __c) noexcept
+  {
+    constexpr uint32_t __mask = 0x01;
+    auto* __end = std::end(__escape_edges);
+    auto* __p = std::lower_bound(__escape_edges, __end,
+     (__c << 1u) + 2);
+    return __p[-1] & __mask;
+  }
+
+
+
+  constexpr _Gcb_property
+  __grapheme_cluster_break_property(char32_t __c) noexcept
+  {
+    constexpr uint32_t __mask = (1 << __gcb_shift_bits) - 1;
+    auto* __end = std::end(__gcb_edges);
+    auto* __p = std::lower_bound(__gcb_edges, __end,
+     (__c << __gcb_shift_bits) | __mask);
+    return _Gcb_property(__p[-1] & __mask);
+  }
+
+  constexpr bool
+  __is_incb_linker(char32_t __c) noexcept
+  {
+    const auto __end = std::end(__incb_linkers);
+
+    return std::find(__incb_linkers, __end, __c) != __end;
+  }
+
+
+  constexpr _InCB
+  __incb_property(char32_t __c) noexcept
+  {
+    if ((__c << 2) < __incb_edges[0]) [[likely]]
+      return _InCB(0);
+
+    constexpr uint32_t __mask = 0x3;
+    auto* __end = std::end(__incb_edges);
+    auto* __p = std::lower_bound(__incb_edges, __end, (__c << 2) | __mask);
+    return _InCB(__p[-1] & __mask);
+  }
+
+  constexpr bool
+  __is_extended_pictographic(char32_t __c)
+  {
+    if (__c < __xpicto_edges[0]) [[likely]]
+      return 0;
+
+    auto* __p = std::upper_bound(__xpicto_edges, std::end(__xpicto_edges), __c);
+    return (__p - __xpicto_edges) % 2;
+  }
+
+  struct _Grapheme_cluster_iterator_base
+  {
+    char32_t _M_c;
+    _Gcb_property _M_prop;
+    enum class _XPicto : unsigned char { _Init, _Zwj, _Matched, _Failed };
+    _XPicto _M_xpicto_seq_state = _XPicto::_Init;
+    unsigned char _M_RI_count = 0;
+    bool _M_incb_linker_seen = false;
+
+    constexpr void
+    _M_reset(char32_t __c, _Gcb_property __p)
+    {
+      _M_c = __c;
+      _M_prop = __p;
+      _M_xpicto_seq_state = _XPicto::_Init;
+      _M_RI_count = 0;
+      _M_incb_linker_seen = false;
+    }
+
+    constexpr void
+    _M_update_xpicto_seq_state(char32_t __c, _Gcb_property __p)
+    {
+      if (_M_xpicto_seq_state == _XPicto::_Failed)
+ return;
+
+      auto __next_state = _XPicto::_Failed;
+      if (_M_xpicto_seq_state != _XPicto::_Zwj)
+ {
+   if (__p == _Gcb_property::_Gcb_ZWJ)
+     {
+       if (_M_xpicto_seq_state == _XPicto::_Matched)
+  __next_state = _XPicto::_Zwj;
+
+
+       else if (__is_extended_pictographic(_M_c))
+  __next_state = _XPicto::_Zwj;
+     }
+   else if (__p == _Gcb_property::_Gcb_Extend)
+     __next_state = _M_xpicto_seq_state;
+ }
+      else
+ {
+
+
+   if (__p == _Gcb_property::_Gcb_Other
+  && __is_extended_pictographic(__c))
+     __next_state = _XPicto::_Matched;
+ }
+      _M_xpicto_seq_state = __next_state;
+    }
+
+    constexpr void
+    _M_update_ri_count(_Gcb_property __p)
+    {
+      if (__p == _Gcb_property::_Gcb_Regional_Indicator)
+ ++_M_RI_count;
+      else
+ _M_RI_count = 0;
+    }
+
+    constexpr void
+    _M_update_incb_state(char32_t __c, _Gcb_property)
+    {
+      if (__is_incb_linker(__c))
+ _M_incb_linker_seen = true;
+    }
+  };
+
+
+  template<ranges::forward_range _View> requires ranges::view<_View>
+    class _Grapheme_cluster_view
+    : public ranges::view_interface<_Grapheme_cluster_view<_View>>
+    {
+    public:
+
+      constexpr
+      _Grapheme_cluster_view(_View __v)
+      : _M_begin(_Utf32_view<_View>(std::move(__v)).begin())
+      { }
+
+      constexpr auto begin() const { return _M_begin; }
+      constexpr auto end() const { return _M_begin.end(); }
+
+    private:
+      struct _Iterator : private _Grapheme_cluster_iterator_base
+      {
+      private:
+
+ using _U32_iterator = ranges::iterator_t<_Utf32_view<_View>>;
+
+      public:
+
+
+
+
+
+ using value_type = char32_t;
+ using iterator_concept = forward_iterator_tag;
+ using difference_type = ptrdiff_t;
+
+ constexpr
+ _Iterator(_U32_iterator __i)
+ : _M_base(__i)
+ {
+   if (__i != __i.end())
+     {
+       _M_c = *__i;
+       _M_prop = __grapheme_cluster_break_property(_M_c);
+     }
+ }
+
+
+ constexpr value_type
+ operator*() const
+ { return _M_c; }
+
+ constexpr auto
+ operator->() const
+ { return &_M_c; }
+
+
+ constexpr _Iterator&
+ operator++()
+ {
+   const auto __end = _M_base.end();
+   if (_M_base != __end)
+     {
+       auto __p_prev = _M_prop;
+       auto __it = _M_base;
+       while (++__it != __end)
+  {
+    char32_t __c = *__it;
+    auto __p = __grapheme_cluster_break_property(*__it);
+    _M_update_xpicto_seq_state(__c, __p);
+    _M_update_ri_count(__p);
+    _M_update_incb_state(__c, __p);
+    if (_M_is_break(__p_prev, __p, __it))
+      {
+
+        _M_reset(__c, __p);
+        break;
+      }
+    __p_prev = __p;
+  }
+       _M_base = __it;
+     }
+   return *this;
+ }
+
+ constexpr _Iterator
+ operator++(int)
+ {
+   auto __tmp = *this;
+   ++*this;
+   return __tmp;
+ }
+
+ constexpr bool
+ operator==(const _Iterator& __i) const
+ { return _M_base == __i._M_base; }
+
+
+ constexpr bool
+ operator==(const ranges::sentinel_t<_View>& __i) const
+ { return _M_base == __i; }
+
+
+ constexpr auto base() const { return _M_base.base(); }
+
+
+ constexpr auto end() const { return _M_base.end(); }
+
+
+ constexpr int
+ width() const noexcept
+ { return __field_width(_M_c); }
+
+      private:
+ _U32_iterator _M_base;
+
+
+
+
+
+
+ constexpr bool
+ _M_is_break(_Gcb_property __p1, _Gcb_property __p2,
+      _U32_iterator __curr) const
+ {
+   using enum _Gcb_property;
+
+   if (__p1 == _Gcb_Control || __p1 == _Gcb_LF)
+     return true;
+
+   if (__p1 == _Gcb_CR)
+     return __p2 != _Gcb_LF;
+
+
+   if (__p2 == _Gcb_Control || __p2 == _Gcb_CR || __p2 == _Gcb_LF)
+     return true;
+
+
+   if (__p1 == _Gcb_L)
+     switch (__p2)
+     {
+       case _Gcb_L:
+       case _Gcb_V:
+       case _Gcb_LV:
+       case _Gcb_LVT:
+  return false;
+       default:
+  return true;
+       }
+
+
+   if (__p1 == _Gcb_LV || __p1 == _Gcb_V)
+     switch (__p2)
+     {
+       case _Gcb_V:
+       case _Gcb_T:
+  return false;
+       default:
+  return true;
+       }
+
+
+   if (__p1 == _Gcb_LVT || __p1 == _Gcb_T)
+     return __p2 != _Gcb_T;
+
+
+   if (__p2 == _Gcb_Extend || __p2 == _Gcb_ZWJ)
+     return false;
+
+
+
+
+
+   if (__p2 == _Gcb_SpacingMark)
+     return false;
+
+   if (__p1 == _Gcb_Prepend)
+     return false;
+
+
+
+
+   if (_M_incb_linker_seen
+  && __incb_property(_M_c) == _InCB::_Consonant
+  && __incb_property(*__curr) == _InCB::_Consonant)
+     {
+
+
+       bool __have_linker = false;
+       auto __it = _M_base;
+       while (++__it != __curr)
+  {
+    if (__is_incb_linker(*__it))
+      __have_linker = true;
+    else
+      {
+        auto __incb = __incb_property(*__it);
+        if (__incb == _InCB::_Consonant)
+   __have_linker = false;
+        else if (__incb != _InCB::_Extend)
+   break;
+      }
+  }
+       if (__it == __curr && __have_linker)
+  return false;
+     }
+
+
+
+
+   if (__p1 == _Gcb_ZWJ && _M_xpicto_seq_state == _XPicto::_Matched)
+     return false;
+
+
+
+
+
+   if (__p1 == _Gcb_property::_Gcb_Regional_Indicator && __p1 == __p2)
+     return (_M_RI_count & 1) == 0;
+
+
+   return true;
+ }
+      };
+
+      _Iterator _M_begin;
+    };
+
+}
+
+
+  template<typename _CharT>
+    constexpr size_t
+    __field_width(basic_string_view<_CharT> __s)
+    {
+      if (__s.empty()) [[unlikely]]
+ return 0;
+      _Grapheme_cluster_view<basic_string_view<_CharT>> __gc(__s);
+      auto __it = __gc.begin();
+      const auto __end = __gc.end();
+      size_t __n = __it.width();
+      while (++__it != __end)
+ __n += __it.width();
+      return __n;
+    }
+
+
+
+  template<typename _CharT>
+    constexpr size_t
+    __truncate(basic_string_view<_CharT>& __s, size_t __max)
+    {
+      if (__s.empty()) [[unlikely]]
+ return 0;
+
+      _Grapheme_cluster_view<basic_string_view<_CharT>> __gc(__s);
+      auto __it = __gc.begin();
+      const auto __end = __gc.end();
+      size_t __n = __it.width();
+      if (__n > __max)
+ {
+   __s = {};
+   return 0;
+ }
+      while (++__it != __end)
+ {
+   size_t __n2 = __n + __it.width();
+   if (__n2 > __max)
+     {
+       __s = basic_string_view<_CharT>(__s.begin(), __it.base());
+       return __n;
+     }
+   __n = __n2;
+ }
+      return __n;
+    }
+
+  template<typename _CharT>
+    consteval bool
+    __literal_encoding_is_unicode()
+    {
+      if constexpr (is_same_v<_CharT, char16_t>)
+ return true;
+      else if constexpr (is_same_v<_CharT, char32_t>)
+   return true;
+
+      else if constexpr (is_same_v<_CharT, char8_t>)
+ return true;
+
+
+      const char* __enc = "";
+
+
+      auto __remove_iso10646_prefix = [](const char* __s) {
+
+ if (__s[0] == 'I' || __s[0] == 'i')
+   if (__s[1] == 'S' || __s[1] == 's')
+     if (__s[2] == 'O' || __s[2] == 'o')
+       if (string_view(__s + 3).starts_with("-10646/"))
+  return __s + 10;
+ return __s;
+      };
+
+      if constexpr (is_same_v<_CharT, char>)
+ __enc = __remove_iso10646_prefix("UTF-8");
+
+      else
+ __enc = __remove_iso10646_prefix("UTF-16LE");
+
+
+      if ((__enc[0] == 'U' || __enc[0] == 'u')
+     && (__enc[1] == 'T' || __enc[1] == 't')
+     && (__enc[2] == 'F' || __enc[2] == 'f'))
+ {
+   __enc += 3;
+   if (__enc[0] == '-')
+     ++__enc;
+   if (__enc[0] == '8')
+     return __enc[1] == '\0' || string_view(__enc + 1) == "//";
+   else if constexpr (!is_same_v<_CharT, char>)
+     {
+       string_view __s(__enc);
+       if (__s.ends_with("//"))
+  __s.remove_suffix(2);
+       if (__s.ends_with("LE") || __s.ends_with("BE"))
+  __s.remove_suffix(2);
+       return __s == "16" || __s == "32";
+     }
+ }
+# 1079 "C:/msys64/mingw64/include/c++/15.2.0/bits/unicode.h" 3
+      return false;
+    }
+
+  consteval bool
+  __literal_encoding_is_utf8()
+  { return __literal_encoding_is_unicode<char>(); }
+
+  consteval bool
+  __literal_encoding_is_extended_ascii()
+  {
+    return '0' == 0x30 && 'A' == 0x41 && 'Z' == 0x5a
+      && 'a' == 0x61 && 'z' == 0x7a;
+  }
+
+
+  constexpr bool
+  __charset_alias_match(string_view __a, string_view __b)
+  {
+
+    auto __map = [](char __c, bool& __num) -> unsigned char {
+      if (__c == '0') [[unlikely]]
+ return __num ? 0 : 127;
+      const auto __v = __detail::__from_chars_alnum_to_val(__c);
+      __num = __v < 10;
+      return __v;
+    };
+
+    auto __ptr_a = __a.begin(), __end_a = __a.end();
+    auto __ptr_b = __b.begin(), __end_b = __b.end();
+    bool __num_a = false, __num_b = false;
+
+    while (true)
+      {
+
+ unsigned char __val_a{}, __val_b{};
+ while (__ptr_a != __end_a
+   && (__val_a = __map(*__ptr_a, __num_a)) == 127)
+   ++__ptr_a;
+ while (__ptr_b != __end_b
+   && (__val_b = __map(*__ptr_b, __num_b)) == 127)
+   ++__ptr_b;
+
+ if (__ptr_a == __end_a)
+   return __ptr_b == __end_b;
+ else if (__ptr_b == __end_b)
+   return false;
+ else if (__val_a != __val_b)
+   return false;
+ ++__ptr_a;
+ ++__ptr_b;
+      }
+    return true;
+  }
+
+}
+
+namespace ranges
+{
+  template<typename _To, typename _Range>
+    inline constexpr bool
+    enable_borrowed_range<std::__unicode::_Utf_view<_To, _Range>>
+      = enable_borrowed_range<_Range>;
+
+  template<typename _Range>
+    inline constexpr bool
+    enable_borrowed_range<std::__unicode::_Grapheme_cluster_view<_Range>>
+      = enable_borrowed_range<_Range>;
+}
+
+
+}
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/format" 2 3
+
+
+
+
+
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wc++23-extensions"
+
+namespace std
+{
+
+
+
+  template<typename _CharT, typename... _Args> struct basic_format_string;
+
+
+namespace __format
+{
+
+
+
+
+
+  template<typename _CharT>
+    consteval auto
+    _Widen(const char* __narrow, const wchar_t* __wide)
+    {
+      if constexpr (is_same_v<_CharT, wchar_t>)
+ return __wide;
+      else
+ return __narrow;
+    }
+
+
+
+
+  template<typename _CharT>
+  constexpr size_t __stackbuf_size = 32 * sizeof(void*) / sizeof(_CharT);
+
+
+  template<typename _CharT> class _Sink;
+  template<typename _CharT> class _Fixedbuf_sink;
+  template<typename _Seq> class _Seq_sink;
+
+  template<typename _CharT, typename _Alloc = allocator<_CharT>>
+    using _Str_sink
+      = _Seq_sink<basic_string<_CharT, char_traits<_CharT>, _Alloc>>;
+
+
+
+
+
+  template<typename _CharT>
+    class _Sink_iter;
+
+
+  template<typename _CharT>
+    struct _Iter_for
+    { using type = back_insert_iterator<basic_string<_CharT>>; };
+
+  template<typename _CharT>
+    using __format_context = basic_format_context<_Sink_iter<_CharT>, _CharT>;
+
+  template<typename _CharT>
+    struct _Runtime_format_string
+    {
+      [[__gnu__::__always_inline__]]
+      _Runtime_format_string(basic_string_view<_CharT> __s) noexcept
+      : _M_str(__s) { }
+
+      _Runtime_format_string(const _Runtime_format_string&) = delete;
+      void operator=(const _Runtime_format_string&) = delete;
+
+    private:
+      basic_string_view<_CharT> _M_str;
+
+      template<typename, typename...> friend struct std::basic_format_string;
+    };
+
+}
+
+
+  using format_context = __format::__format_context<char>;
+
+  using wformat_context = __format::__format_context<wchar_t>;
+
+
+
+  template<typename _Context> class basic_format_args;
+  using format_args = basic_format_args<format_context>;
+
+  using wformat_args = basic_format_args<wformat_context>;
+
+
+
+
+  template<typename _Context>
+    class basic_format_arg;
+
+
+
+
+
+  template<typename _CharT, typename... _Args>
+    struct basic_format_string
+    {
+      template<typename _Tp>
+ requires convertible_to<const _Tp&, basic_string_view<_CharT>>
+ consteval
+ basic_format_string(const _Tp& __s);
+
+      [[__gnu__::__always_inline__]]
+      basic_format_string(__format::_Runtime_format_string<_CharT> __s) noexcept
+      : _M_str(__s._M_str)
+      { }
+
+      [[__gnu__::__always_inline__]]
+      constexpr basic_string_view<_CharT>
+      get() const noexcept
+      { return _M_str; }
+
+    private:
+      basic_string_view<_CharT> _M_str;
+    };
+
+  template<typename... _Args>
+    using format_string = basic_format_string<char, type_identity_t<_Args>...>;
+
+
+  template<typename... _Args>
+    using wformat_string
+      = basic_format_string<wchar_t, type_identity_t<_Args>...>;
+# 216 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+  template<typename _Tp, typename _CharT>
+    struct formatter
+    {
+      formatter() = delete;
+      formatter(const formatter&) = delete;
+      formatter& operator=(const formatter&) = delete;
+    };
+
+
+  class format_error : public runtime_error
+  {
+  public:
+    explicit format_error(const string& __what) : runtime_error(__what) { }
+    explicit format_error(const char* __what) : runtime_error(__what) { }
+  };
+
+
+  [[noreturn]]
+  inline void
+  __throw_format_error(const char* __what)
+  { (throw (format_error(__what))); }
+
+namespace __format
+{
+
+
+  [[noreturn]]
+  inline void
+  __unmatched_left_brace_in_format_string()
+  { __throw_format_error("format error: unmatched '{' in format string"); }
+
+  [[noreturn]]
+  inline void
+  __unmatched_right_brace_in_format_string()
+  { __throw_format_error("format error: unmatched '}' in format string"); }
+
+  [[noreturn]]
+  inline void
+  __conflicting_indexing_in_format_string()
+  { __throw_format_error("format error: conflicting indexing style in format string"); }
+
+  [[noreturn]]
+  inline void
+  __invalid_arg_id_in_format_string()
+  { __throw_format_error("format error: invalid arg-id in format string"); }
+
+  [[noreturn]]
+  inline void
+  __failed_to_parse_format_spec()
+  { __throw_format_error("format error: failed to parse format-spec"); }
+
+  template<typename _CharT> class _Scanner;
+
+}
+
+
+
+  template<typename _CharT> class basic_format_parse_context;
+  using format_parse_context = basic_format_parse_context<char>;
+
+  using wformat_parse_context = basic_format_parse_context<wchar_t>;
+
+
+  template<typename _CharT>
+    class basic_format_parse_context
+    {
+    public:
+      using char_type = _CharT;
+      using const_iterator = typename basic_string_view<_CharT>::const_iterator;
+      using iterator = const_iterator;
+
+      constexpr explicit
+      basic_format_parse_context(basic_string_view<_CharT> __fmt) noexcept
+      : _M_begin(__fmt.begin()), _M_end(__fmt.end())
+      { }
+
+      basic_format_parse_context(const basic_format_parse_context&) = delete;
+      void operator=(const basic_format_parse_context&) = delete;
+
+      constexpr const_iterator begin() const noexcept { return _M_begin; }
+      constexpr const_iterator end() const noexcept { return _M_end; }
+
+      constexpr void
+      advance_to(const_iterator __it) noexcept
+      { _M_begin = __it; }
+
+      constexpr size_t
+      next_arg_id()
+      {
+ if (_M_indexing == _Manual)
+   __format::__conflicting_indexing_in_format_string();
+ _M_indexing = _Auto;
+
+
+
+ if (std::is_constant_evaluated())
+   if (_M_next_arg_id == _M_num_args)
+     __format::__invalid_arg_id_in_format_string();
+ return _M_next_arg_id++;
+      }
+
+      constexpr void
+      check_arg_id(size_t __id)
+      {
+ if (_M_indexing == _Auto)
+   __format::__conflicting_indexing_in_format_string();
+ _M_indexing = _Manual;
+
+ if (std::is_constant_evaluated())
+   if (__id >= _M_num_args)
+     __format::__invalid_arg_id_in_format_string();
+      }
+# 406 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+      constexpr explicit
+      basic_format_parse_context(basic_string_view<_CharT> __fmt,
+     size_t __num_args) noexcept
+      : _M_begin(__fmt.begin()), _M_end(__fmt.end()), _M_num_args(__num_args)
+      { }
+
+    private:
+      iterator _M_begin;
+      iterator _M_end;
+      enum _Indexing { _Unknown, _Manual, _Auto };
+      _Indexing _M_indexing = _Unknown;
+      size_t _M_next_arg_id = 0;
+      size_t _M_num_args = 0;
+    };
+
+
+  template<typename _Tp, template<typename...> class _Class>
+    constexpr bool __is_specialization_of = false;
+  template<template<typename...> class _Class, typename... _Args>
+    constexpr bool __is_specialization_of<_Class<_Args...>, _Class> = true;
+
+namespace __format
+{
+
+  template<typename _CharT>
+    constexpr pair<unsigned short, const _CharT*>
+    __parse_integer(const _CharT* __first, const _CharT* __last)
+    {
+      if (__first == __last)
+ __builtin_unreachable();
+
+      if constexpr (is_same_v<_CharT, char>)
+ {
+   const auto __start = __first;
+   unsigned short __val = 0;
+
+   if (__detail::__from_chars_alnum<true>(__first, __last, __val, 10)
+  && __first != __start) [[likely]]
+     return {__val, __first};
+ }
+      else
+ {
+   constexpr int __n = 32;
+   char __buf[__n]{};
+   for (int __i = 0; __i < __n && (__first + __i) != __last; ++__i)
+     __buf[__i] = __first[__i];
+   auto [__v, __ptr] = __format::__parse_integer(__buf, __buf + __n);
+   if (__ptr) [[likely]]
+     return {__v, __first + (__ptr - __buf)};
+ }
+      return {0, nullptr};
+    }
+
+  template<typename _CharT>
+    constexpr pair<unsigned short, const _CharT*>
+    __parse_arg_id(const _CharT* __first, const _CharT* __last)
+    {
+      if (__first == __last)
+ __builtin_unreachable();
+
+      if (*__first == '0')
+ return {0, __first + 1};
+
+      if ('1' <= *__first && *__first <= '9')
+ {
+   const unsigned short __id = *__first - '0';
+   const auto __next = __first + 1;
+
+   if (__next == __last || !('0' <= *__next && *__next <= '9'))
+     return {__id, __next};
+   else
+     return __format::__parse_integer(__first, __last);
+ }
+      return {0, nullptr};
+    }
+
+  enum _Pres_type {
+    _Pres_none = 0,
+
+    _Pres_d = 1, _Pres_b, _Pres_B, _Pres_o, _Pres_x, _Pres_X, _Pres_c,
+
+    _Pres_a = 1, _Pres_A, _Pres_e, _Pres_E, _Pres_f, _Pres_F, _Pres_g, _Pres_G,
+    _Pres_p = 0, _Pres_P,
+    _Pres_s = 0,
+    _Pres_seq = 0, _Pres_str,
+    _Pres_esc = 0xf,
+  };
+
+  enum _Align {
+    _Align_default,
+    _Align_left,
+    _Align_right,
+    _Align_centre,
+  };
+
+  enum _Sign {
+    _Sign_default,
+    _Sign_plus,
+    _Sign_minus,
+    _Sign_space,
+  };
+
+  enum _WidthPrec {
+    _WP_none,
+    _WP_value,
+    _WP_from_arg
+  };
+
+  template<typename _Context>
+    size_t
+    __int_from_arg(const basic_format_arg<_Context>& __arg);
+
+  constexpr bool __is_digit(char __c)
+  { return std::__detail::__from_chars_alnum_to_val(__c) < 10; }
+
+  constexpr bool __is_xdigit(char __c)
+  { return std::__detail::__from_chars_alnum_to_val(__c) < 16; }
+
+  template<typename _CharT>
+    struct _Spec
+    {
+      _Align _M_align : 2;
+      _Sign _M_sign : 2;
+      unsigned _M_alt : 1;
+      unsigned _M_localized : 1;
+      unsigned _M_zero_fill : 1;
+      _WidthPrec _M_width_kind : 2;
+      _WidthPrec _M_prec_kind : 2;
+      _Pres_type _M_type : 4;
+      unsigned _M_reserved : 1;
+      unsigned _M_reserved2 : 16;
+      unsigned short _M_width;
+      unsigned short _M_prec;
+      char32_t _M_fill = ' ';
+
+      using iterator = typename basic_string_view<_CharT>::iterator;
+
+      static constexpr _Align
+      _S_align(_CharT __c) noexcept
+      {
+ switch (__c)
+ {
+   case '<': return _Align_left;
+   case '>': return _Align_right;
+   case '^': return _Align_centre;
+   default: return _Align_default;
+ }
+      }
+
+
+      constexpr iterator
+      _M_parse_fill_and_align(iterator __first, iterator __last) noexcept
+      { return _M_parse_fill_and_align(__first, __last, "{"); }
+
+
+      constexpr iterator
+      _M_parse_fill_and_align(iterator __first, iterator __last, string_view __not_fill) noexcept
+      {
+ for (char __c : __not_fill)
+   if (*__first == static_cast<_CharT>(__c))
+     return __first;
+
+ using namespace __unicode;
+ if constexpr (__literal_encoding_is_unicode<_CharT>())
+   {
+
+     _Utf32_view<ranges::subrange<iterator>> __uv({__first, __last});
+     if (!__uv.empty())
+     {
+       auto __beg = __uv.begin();
+       char32_t __c = *__beg++;
+       if (__is_scalar_value(__c))
+  if (auto __next = __beg.base(); __next != __last)
+    if (_Align __align = _S_align(*__next))
+      {
+        _M_fill = __c;
+        _M_align = __align;
+        return ++__next;
+      }
+      }
+   }
+ else if (__last - __first >= 2)
+   if (_Align __align = _S_align(__first[1]))
+     {
+       _M_fill = *__first;
+       _M_align = __align;
+       return __first + 2;
+     }
+
+ if (_Align __align = _S_align(__first[0]))
+   {
+     _M_fill = ' ';
+     _M_align = __align;
+     return __first + 1;
+   }
+ return __first;
+      }
+
+      static constexpr _Sign
+      _S_sign(_CharT __c) noexcept
+      {
+ switch (__c)
+ {
+   case '+': return _Sign_plus;
+   case '-': return _Sign_minus;
+   case ' ': return _Sign_space;
+   default: return _Sign_default;
+ }
+      }
+
+
+      constexpr iterator
+      _M_parse_sign(iterator __first, iterator) noexcept
+      {
+ if (_Sign __sign = _S_sign(*__first))
+   {
+     _M_sign = __sign;
+     return __first + 1;
+   }
+ return __first;
+      }
+
+
+      constexpr iterator
+      _M_parse_alternate_form(iterator __first, iterator) noexcept
+      {
+ if (*__first == '#')
+   {
+     _M_alt = true;
+     ++__first;
+   }
+ return __first;
+      }
+
+
+      constexpr iterator
+      _M_parse_zero_fill(iterator __first, iterator ) noexcept
+      {
+ if (*__first == '0')
+   {
+     _M_zero_fill = true;
+     ++__first;
+   }
+ return __first;
+      }
+
+
+      static constexpr iterator
+      _S_parse_width_or_precision(iterator __first, iterator __last,
+      unsigned short& __val, bool& __arg_id,
+      basic_format_parse_context<_CharT>& __pc)
+      {
+ if (__format::__is_digit(*__first))
+   {
+     auto [__v, __ptr] = __format::__parse_integer(__first, __last);
+     if (!__ptr)
+       __throw_format_error("format error: invalid width or precision "
+       "in format-spec");
+     __first = __ptr;
+     __val = __v;
+   }
+ else if (*__first == '{')
+   {
+     __arg_id = true;
+     ++__first;
+     if (__first == __last)
+       __format::__unmatched_left_brace_in_format_string();
+     if (*__first == '}')
+       __val = __pc.next_arg_id();
+     else
+       {
+  auto [__v, __ptr] = __format::__parse_arg_id(__first, __last);
+  if (__ptr == nullptr || __ptr == __last || *__ptr != '}')
+    __format::__invalid_arg_id_in_format_string();
+  __first = __ptr;
+  __pc.check_arg_id(__v);
+  __val = __v;
+       }
+
+
+
+     ++__first;
+   }
+ return __first;
+      }
+
+
+      constexpr iterator
+      _M_parse_width(iterator __first, iterator __last,
+       basic_format_parse_context<_CharT>& __pc)
+      {
+ bool __arg_id = false;
+ if (*__first == '0')
+   __throw_format_error("format error: width must be non-zero in "
+          "format string");
+ auto __next = _S_parse_width_or_precision(__first, __last, _M_width,
+        __arg_id, __pc);
+ if (__next != __first)
+   _M_width_kind = __arg_id ? _WP_from_arg : _WP_value;
+ return __next;
+      }
+
+
+      constexpr iterator
+      _M_parse_precision(iterator __first, iterator __last,
+    basic_format_parse_context<_CharT>& __pc)
+      {
+ if (__first[0] != '.')
+   return __first;
+
+ iterator __next = ++__first;
+ bool __arg_id = false;
+ if (__next != __last)
+   __next = _S_parse_width_or_precision(__first, __last, _M_prec,
+            __arg_id, __pc);
+ if (__next == __first)
+   __throw_format_error("format error: missing precision after '.' in "
+          "format string");
+ _M_prec_kind = __arg_id ? _WP_from_arg : _WP_value;
+ return __next;
+      }
+
+
+      constexpr iterator
+      _M_parse_locale(iterator __first, iterator ) noexcept
+      {
+ if (*__first == 'L')
+   {
+     _M_localized = true;
+     ++__first;
+   }
+ return __first;
+      }
+
+      template<typename _Context>
+ size_t
+ _M_get_width(_Context& __ctx) const
+ {
+   size_t __width = 0;
+   if (_M_width_kind == _WP_value)
+     __width = _M_width;
+   else if (_M_width_kind == _WP_from_arg)
+     __width = __format::__int_from_arg(__ctx.arg(_M_width));
+   return __width;
+ }
+
+      template<typename _Context>
+ size_t
+ _M_get_precision(_Context& __ctx) const
+ {
+   size_t __prec = -1;
+   if (_M_prec_kind == _WP_value)
+     __prec = _M_prec;
+   else if (_M_prec_kind == _WP_from_arg)
+     __prec = __format::__int_from_arg(__ctx.arg(_M_prec));
+   return __prec;
+ }
+    };
+
+  template<typename _Int>
+    inline char*
+    __put_sign(_Int __i, _Sign __sign, char* __dest) noexcept
+    {
+      if (__i < 0)
+ *__dest = '-';
+      else if (__sign == _Sign_plus)
+ *__dest = '+';
+      else if (__sign == _Sign_space)
+ *__dest = ' ';
+      else
+ ++__dest;
+      return __dest;
+    }
+
+
+  template<typename _Out, typename _CharT>
+    requires output_iterator<_Out, const _CharT&>
+    inline _Out
+    __write(_Out __out, basic_string_view<_CharT> __str)
+    {
+      if constexpr (is_same_v<_Out, _Sink_iter<_CharT>>)
+ {
+   if (__str.size())
+     __out = __str;
+ }
+      else
+ for (_CharT __c : __str)
+   *__out++ = __c;
+      return __out;
+    }
+
+
+
+  template<typename _Out, typename _CharT>
+    _Out
+    __write_padded(_Out __out, basic_string_view<_CharT> __str,
+     _Align __align, size_t __nfill, char32_t __fill_char)
+    {
+      const size_t __buflen = 0x20;
+      _CharT __padding_chars[__buflen];
+      __padding_chars[0] = _CharT();
+      basic_string_view<_CharT> __padding{__padding_chars, __buflen};
+
+      auto __pad = [&__padding] (size_t __n, _Out& __o) {
+ if (__n == 0)
+   return;
+ while (__n > __padding.size())
+   {
+     __o = __format::__write(std::move(__o), __padding);
+     __n -= __padding.size();
+   }
+ if (__n != 0)
+   __o = __format::__write(std::move(__o), __padding.substr(0, __n));
+      };
+
+      size_t __l, __r, __max;
+      if (__align == _Align_centre)
+ {
+   __l = __nfill / 2;
+   __r = __l + (__nfill & 1);
+   __max = __r;
+ }
+      else if (__align == _Align_right)
+ {
+   __l = __nfill;
+   __r = 0;
+   __max = __l;
+ }
+      else
+ {
+   __l = 0;
+   __r = __nfill;
+   __max = __r;
+ }
+
+      using namespace __unicode;
+      if constexpr (__literal_encoding_is_unicode<_CharT>())
+ if (!__is_single_code_unit<_CharT>(__fill_char)) [[unlikely]]
+   {
+
+     const char32_t __arr[1]{ __fill_char };
+     _Utf_view<_CharT, const char32_t(&)[1]> __v(__arr);
+     basic_string<_CharT> __padstr(__v.begin(), __v.end());
+     __padding = __padstr;
+     while (__l-- > 0)
+       __out = __format::__write(std::move(__out), __padding);
+     __out = __format::__write(std::move(__out), __str);
+     while (__r-- > 0)
+       __out = __format::__write(std::move(__out), __padding);
+     return __out;
+   }
+
+      if (__max < __buflen)
+ __padding.remove_suffix(__buflen - __max);
+      else
+ __max = __buflen;
+
+      char_traits<_CharT>::assign(__padding_chars, __max, __fill_char);
+      __pad(__l, __out);
+      __out = __format::__write(std::move(__out), __str);
+      __pad(__r, __out);
+
+      return __out;
+    }
+
+
+
+  template<typename _CharT, typename _Out>
+    _Out
+    __write_padded_as_spec(basic_string_view<type_identity_t<_CharT>> __str,
+      size_t __estimated_width,
+      basic_format_context<_Out, _CharT>& __fc,
+      const _Spec<_CharT>& __spec,
+      _Align __align = _Align_left)
+    {
+      size_t __width = __spec._M_get_width(__fc);
+
+      if (__width <= __estimated_width)
+ return __format::__write(__fc.out(), __str);
+
+      const size_t __nfill = __width - __estimated_width;
+
+      if (__spec._M_align)
+ __align = __spec._M_align;
+
+      return __format::__write_padded(__fc.out(), __str, __align, __nfill,
+          __spec._M_fill);
+    }
+
+
+  enum class _Term_char : unsigned char {
+    _Tc_quote = 12,
+    _Tc_apos = 15
+  };
+
+  template<typename _CharT>
+    struct _Escapes
+    {
+      using _Str_view = basic_string_view<_CharT>;
+
+      static consteval
+      _Str_view _S_all()
+      { return ::std::__format::_Widen<_CharT>("\t\\t\n\\n\r\\r\\\\\\\"\\\"'\\'\\u\\x", L"\t\\t\n\\n\r\\r\\\\\\\"\\\"'\\'\\u\\x"); }
+
+      static constexpr
+      _CharT _S_term(_Term_char __term)
+      { return _S_all()[static_cast<unsigned char>(__term)]; }
+
+      static consteval
+      _Str_view _S_tab()
+      { return _S_all().substr(0, 3); }
+
+      static consteval
+      _Str_view _S_newline()
+      { return _S_all().substr(3, 3); }
+
+      static consteval
+      _Str_view _S_return()
+      { return _S_all().substr(6, 3); }
+
+      static consteval
+      _Str_view _S_bslash()
+      { return _S_all().substr(9, 3); }
+
+      static consteval
+      _Str_view _S_quote()
+      { return _S_all().substr(12, 3); }
+
+      static consteval
+      _Str_view _S_apos()
+      { return _S_all().substr(15, 3); }
+
+      static consteval
+      _Str_view _S_u()
+      { return _S_all().substr(18, 2); }
+
+      static consteval
+      _Str_view _S_x()
+      { return _S_all().substr(20, 2); }
+    };
+
+  template<typename _CharT>
+    struct _Separators
+    {
+      using _Str_view = basic_string_view<_CharT>;
+
+      static consteval
+      _Str_view _S_all()
+      { return ::std::__format::_Widen<_CharT>("[]{}(), : ", L"[]{}(), : "); }
+
+      static consteval
+      _Str_view _S_squares()
+      { return _S_all().substr(0, 2); }
+
+      static consteval
+      _Str_view _S_braces()
+      { return _S_all().substr(2, 2); }
+
+      static consteval
+      _Str_view _S_parens()
+      { return _S_all().substr(4, 2); }
+
+      static consteval
+      _Str_view _S_comma()
+      { return _S_all().substr(6, 2); }
+
+      static consteval
+      _Str_view _S_colon()
+      { return _S_all().substr(8, 2); }
+    };
+
+  template<typename _CharT>
+    constexpr bool __should_escape_ascii(_CharT __c, _Term_char __term)
+    {
+      using _Esc = _Escapes<_CharT>;
+      switch (__c)
+ {
+   case _Esc::_S_tab()[0]:
+   case _Esc::_S_newline()[0]:
+   case _Esc::_S_return()[0]:
+   case _Esc::_S_bslash()[0]:
+     return true;
+   case _Esc::_S_quote()[0]:
+     return __term == _Term_char::_Tc_quote;
+   case _Esc::_S_apos()[0]:
+     return __term == _Term_char::_Tc_apos;
+   default:
+     return (__c >= 0 && __c < 0x20) || __c == 0x7f;
+ };
+  }
+
+
+  constexpr bool __should_escape_unicode(char32_t __c, bool __prev_esc)
+  {
+    if (__unicode::__should_escape_category(__c))
+      return __c != U' ';
+    if (!__prev_esc)
+      return false;
+    return __unicode::__grapheme_cluster_break_property(__c)
+      == __unicode::_Gcb_property::_Gcb_Extend;
+  }
+
+  using uint_least32_t = unsigned int;
+  template<typename _Out, typename _CharT>
+    _Out
+    __write_escape_seq(_Out __out, uint_least32_t __val,
+         basic_string_view<_CharT> __prefix)
+    {
+      using _Str_view = basic_string_view<_CharT>;
+      constexpr size_t __max = 8;
+      char __buf[__max];
+      const string_view __narrow(
+ __buf,
+ std::__to_chars_i<uint_least32_t>(__buf, __buf + __max, __val, 16).ptr);
+
+      __out = __format::__write(__out, __prefix);
+      *__out = _Separators<_CharT>::_S_braces()[0];
+      ++__out;
+      if constexpr (is_same_v<char, _CharT>)
+ __out = __format::__write(__out, __narrow);
+
+      else
+ {
+   _CharT __wbuf[__max];
+   const size_t __n = __narrow.size();
+   std::__to_wstring_numeric(__narrow.data(), __n, __wbuf);
+   __out = __format::__write(__out, _Str_view(__wbuf, __n));
+ }
+
+      *__out = _Separators<_CharT>::_S_braces()[1];
+      return ++__out;
+    }
+
+  template<typename _Out, typename _CharT>
+    _Out
+    __write_escaped_char(_Out __out, _CharT __c)
+    {
+      using _UChar = make_unsigned_t<_CharT>;
+      using _Esc = _Escapes<_CharT>;
+      switch (__c)
+ {
+   case _Esc::_S_tab()[0]:
+     return __format::__write(__out, _Esc::_S_tab().substr(1, 2));
+   case _Esc::_S_newline()[0]:
+     return __format::__write(__out, _Esc::_S_newline().substr(1, 2));
+   case _Esc::_S_return()[0]:
+     return __format::__write(__out, _Esc::_S_return().substr(1, 2));
+   case _Esc::_S_bslash()[0]:
+     return __format::__write(__out, _Esc::_S_bslash().substr(1, 2));
+   case _Esc::_S_quote()[0]:
+     return __format::__write(__out, _Esc::_S_quote().substr(1, 2));
+   case _Esc::_S_apos()[0]:
+     return __format::__write(__out, _Esc::_S_apos().substr(1, 2));
+   default:
+     return __format::__write_escape_seq(__out,
+    static_cast<_UChar>(__c),
+      _Esc::_S_u());
+ }
+    }
+
+  template<typename _CharT, typename _Out>
+    _Out
+    __write_escaped_ascii(_Out __out,
+     basic_string_view<_CharT> __str,
+     _Term_char __term)
+    {
+      using _Str_view = basic_string_view<_CharT>;
+      auto __first = __str.begin();
+      auto const __last = __str.end();
+      while (__first != __last)
+      {
+ auto __print = __first;
+
+ while (__print != __last
+   && !__format::__should_escape_ascii(*__print, __term))
+   ++__print;
+
+ if (__print != __first)
+   __out = __format::__write(__out, _Str_view(__first, __print));
+
+ if (__print == __last)
+   return __out;
+
+ __first = __print;
+ __out = __format::__write_escaped_char(__out, *__first);
+ ++__first;
+      }
+      return __out;
+    }
+
+  template<typename _CharT, typename _Out>
+    _Out
+    __write_escaped_unicode(_Out __out,
+       basic_string_view<_CharT> __str,
+       _Term_char __term)
+    {
+      using _Str_view = basic_string_view<_CharT>;
+      using _UChar = make_unsigned_t<_CharT>;
+      using _Esc = _Escapes<_CharT>;
+
+      static constexpr char32_t __replace = U'\uFFFD';
+      static constexpr _Str_view __replace_rep = []
+ {
+
+   if constexpr (is_same_v<char, _CharT>)
+     return "\xEF\xBF\xBD";
+   else
+     return L"\xFFFD";
+ }();
+
+      __unicode::_Utf_view<char32_t, _Str_view> __v(std::move(__str));
+      auto __first = __v.begin();
+      auto const __last = __v.end();
+
+      bool __prev_esc = true;
+      while (__first != __last)
+ {
+   bool __esc_ascii = false;
+   bool __esc_unicode = false;
+   bool __esc_replace = false;
+   auto __should_escape = [&](auto const& __it)
+     {
+       if (*__it <= 0x7f)
+  return __esc_ascii
+    = __format::__should_escape_ascii(*__it.base(), __term);
+       if (__format::__should_escape_unicode(*__it, __prev_esc))
+  return __esc_unicode = true;
+       if (*__it == __replace)
+  {
+    _Str_view __units(__it.base(), __it._M_units());
+    return __esc_replace = (__units != __replace_rep);
+  }
+       return false;
+     };
+
+   auto __print = __first;
+   while (__print != __last && !__should_escape(__print))
+     {
+       __prev_esc = false;
+       ++__print;
+     }
+
+   if (__print != __first)
+     __out = __format::__write(__out, _Str_view(__first.base(), __print.base()));
+
+   if (__print == __last)
+     return __out;
+
+   __first = __print;
+   if (__esc_ascii)
+     __out = __format::__write_escaped_char(__out, *__first.base());
+   else if (__esc_unicode)
+     __out = __format::__write_escape_seq(__out, *__first, _Esc::_S_u());
+   else
+     for (_CharT __c : _Str_view(__first.base(), __first._M_units()))
+       __out = __format::__write_escape_seq(__out,
+         static_cast<_UChar>(__c),
+         _Esc::_S_x());
+   __prev_esc = true;
+   ++__first;
+
+ }
+      return __out;
+    }
+
+  template<typename _CharT, typename _Out>
+    _Out
+    __write_escaped(_Out __out, basic_string_view<_CharT> __str, _Term_char __term)
+    {
+      *__out = _Escapes<_CharT>::_S_term(__term);
+      ++__out;
+
+      if constexpr (__unicode::__literal_encoding_is_unicode<_CharT>())
+ __out = __format::__write_escaped_unicode(__out, __str, __term);
+      else if constexpr (is_same_v<char, _CharT>
+     && __unicode::__literal_encoding_is_extended_ascii())
+ __out = __format::__write_escaped_ascii(__out, __str, __term);
+      else
+
+ __out = __format::__write_escaped_ascii(__out, __str, __term);
+
+      *__out = _Escapes<_CharT>::_S_term(__term);
+      return ++__out;
+    }
+
+
+  struct _Optional_locale
+  {
+    [[__gnu__::__always_inline__]]
+    _Optional_locale() : _M_dummy(), _M_hasval(false) { }
+
+    _Optional_locale(const locale& __loc) noexcept
+    : _M_loc(__loc), _M_hasval(true)
+    { }
+
+    _Optional_locale(const _Optional_locale& __l) noexcept
+    : _M_dummy(), _M_hasval(__l._M_hasval)
+    {
+      if (_M_hasval)
+ std::construct_at(&_M_loc, __l._M_loc);
+    }
+
+    _Optional_locale&
+    operator=(const _Optional_locale& __l) noexcept
+    {
+      if (_M_hasval)
+ {
+   if (__l._M_hasval)
+     _M_loc = __l._M_loc;
+   else
+     {
+       _M_loc.~locale();
+       _M_hasval = false;
+     }
+ }
+      else if (__l._M_hasval)
+ {
+   std::construct_at(&_M_loc, __l._M_loc);
+   _M_hasval = true;
+ }
+      return *this;
+    }
+
+    ~_Optional_locale() { if (_M_hasval) _M_loc.~locale(); }
+
+    _Optional_locale&
+    operator=(locale&& __loc) noexcept
+    {
+      if (_M_hasval)
+ _M_loc = std::move(__loc);
+      else
+ {
+   std::construct_at(&_M_loc, std::move(__loc));
+   _M_hasval = true;
+ }
+      return *this;
+    }
+
+    const locale&
+    value() noexcept
+    {
+      if (!_M_hasval)
+ {
+   std::construct_at(&_M_loc);
+   _M_hasval = true;
+ }
+      return _M_loc;
+    }
+
+    bool has_value() const noexcept { return _M_hasval; }
+
+    union {
+      char _M_dummy = '\0';
+      std::locale _M_loc;
+    };
+    bool _M_hasval = false;
+  };
+
+  template<__char _CharT>
+    struct __formatter_str
+    {
+      __formatter_str() = default;
+
+      constexpr
+      __formatter_str(_Spec<_CharT> __spec) noexcept
+       : _M_spec(__spec)
+      { }
+
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      {
+ auto __first = __pc.begin();
+ const auto __last = __pc.end();
+ _Spec<_CharT> __spec{};
+
+ auto __finalize = [this, &__spec] {
+   _M_spec = __spec;
+ };
+
+ auto __finished = [&] {
+   if (__first == __last || *__first == '}')
+     {
+       __finalize();
+       return true;
+     }
+   return false;
+ };
+
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_fill_and_align(__first, __last);
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_width(__first, __last, __pc);
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_precision(__first, __last, __pc);
+ if (__finished())
+   return __first;
+
+ if (*__first == 's')
+   ++__first;
+
+ else if (*__first == '?')
+   {
+     __spec._M_type = _Pres_esc;
+     ++__first;
+   }
+
+
+ if (__finished())
+   return __first;
+
+ __format::__failed_to_parse_format_spec();
+      }
+
+      template<typename _Out>
+ _Out
+ format(basic_string_view<_CharT> __s,
+        basic_format_context<_Out, _CharT>& __fc) const
+ {
+   constexpr auto __term = __format::_Term_char::_Tc_quote;
+   const auto __write_direct = [&]
+     {
+       if (_M_spec._M_type == _Pres_esc)
+  return __format::__write_escaped(__fc.out(), __s, __term);
+       else
+  return __format::__write(__fc.out(), __s);
+     };
+
+   if (_M_spec._M_width_kind == _WP_none
+  && _M_spec._M_prec_kind == _WP_none)
+     return __write_direct();
+
+   const size_t __prec =
+     _M_spec._M_prec_kind != _WP_none
+       ? _M_spec._M_get_precision(__fc)
+       : basic_string_view<_CharT>::npos;
+
+   const size_t __estimated_width = _S_trunc(__s, __prec);
+
+   if (_M_spec._M_get_width(__fc) <= __estimated_width
+  && _M_spec._M_prec_kind == _WP_none)
+      return __write_direct();
+
+   if (_M_spec._M_type != _Pres_esc)
+     return __format::__write_padded_as_spec(__s, __estimated_width,
+          __fc, _M_spec);
+
+   __format::_Str_sink<_CharT> __sink;
+   __format::__write_escaped(__sink.out(), __s, __term);
+   basic_string_view<_CharT> __escaped(__sink.view().data(),
+           __sink.view().size());
+   const size_t __escaped_width = _S_trunc(__escaped, __prec);
+
+
+
+   return __format::__write_padded_as_spec(__escaped, __escaped_width,
+        __fc, _M_spec);
+ }
+
+
+      template<ranges::input_range _Rg, typename _Out>
+ requires same_as<remove_cvref_t<ranges::range_reference_t<_Rg>>, _CharT>
+ typename basic_format_context<_Out, _CharT>::iterator
+ _M_format_range(_Rg&& __rg, basic_format_context<_Out, _CharT>& __fc) const
+ {
+   using _String = basic_string<_CharT>;
+   using _String_view = basic_string_view<_CharT>;
+   if constexpr (ranges::forward_range<_Rg> || ranges::sized_range<_Rg>)
+     {
+       const size_t __n(ranges::distance(__rg));
+       if constexpr (ranges::contiguous_range<_Rg>)
+  return format(_String_view(ranges::data(__rg), __n), __fc);
+       else if (__n <= __format::__stackbuf_size<_CharT>)
+  {
+    _CharT __buf[__format::__stackbuf_size<_CharT>];
+    ranges::copy(__rg, __buf);
+    return format(_String_view(__buf, __n), __fc);
+  }
+       else if constexpr (ranges::sized_range<_Rg>)
+  return format(_String(from_range, __rg), __fc);
+       else if constexpr (ranges::random_access_range<_Rg>)
+  {
+    ranges::iterator_t<_Rg> __first = ranges::begin(__rg);
+    ranges::subrange __sub(__first, __first + __n);
+           return format(_String(from_range, __sub), __fc);
+  }
+       else
+  {
+
+    ranges::subrange __sub(__rg, __n);
+           return format(_String(from_range, __sub), __fc);
+  }
+     }
+   else
+     return format(_String(from_range, __rg), __fc);
+ }
+
+      constexpr void
+      set_debug_format() noexcept
+      { _M_spec._M_type = _Pres_esc; }
+
+
+    private:
+      static size_t
+      _S_trunc(basic_string_view<_CharT>& __s, size_t __prec)
+      {
+ if constexpr (__unicode::__literal_encoding_is_unicode<_CharT>())
+  {
+    if (__prec != basic_string_view<_CharT>::npos)
+      return __unicode::__truncate(__s, __prec);
+    else
+      return __unicode::__field_width(__s);
+  }
+       else
+ {
+   __s = __s.substr(0, __prec);
+   return __s.size();
+ }
+      }
+
+      _Spec<_CharT> _M_spec{};
+    };
+
+  template<__char _CharT>
+    struct __formatter_int
+    {
+
+
+      static constexpr _Pres_type _AsInteger = _Pres_d;
+      static constexpr _Pres_type _AsBool = _Pres_s;
+      static constexpr _Pres_type _AsChar = _Pres_c;
+
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      _M_do_parse(basic_format_parse_context<_CharT>& __pc, _Pres_type __type)
+      {
+ _Spec<_CharT> __spec{};
+ __spec._M_type = __type;
+
+ const auto __last = __pc.end();
+ auto __first = __pc.begin();
+
+ auto __finalize = [this, &__spec] {
+   _M_spec = __spec;
+ };
+
+ auto __finished = [&] {
+   if (__first == __last || *__first == '}')
+     {
+       __finalize();
+       return true;
+     }
+   return false;
+ };
+
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_fill_and_align(__first, __last);
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_sign(__first, __last);
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_alternate_form(__first, __last);
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_zero_fill(__first, __last);
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_width(__first, __last, __pc);
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_locale(__first, __last);
+ if (__finished())
+   return __first;
+
+ switch (*__first)
+ {
+   case 'b':
+     __spec._M_type = _Pres_b;
+     ++__first;
+     break;
+   case 'B':
+     __spec._M_type = _Pres_B;
+     ++__first;
+     break;
+   case 'c':
+
+
+     if (__type != _AsBool)
+       {
+  __spec._M_type = _Pres_c;
+  ++__first;
+       }
+     break;
+   case 'd':
+     __spec._M_type = _Pres_d;
+     ++__first;
+     break;
+   case 'o':
+     __spec._M_type = _Pres_o;
+     ++__first;
+     break;
+   case 'x':
+     __spec._M_type = _Pres_x;
+     ++__first;
+     break;
+   case 'X':
+     __spec._M_type = _Pres_X;
+     ++__first;
+     break;
+   case 's':
+     if (__type == _AsBool)
+       {
+  __spec._M_type = _Pres_s;
+  ++__first;
+       }
+     break;
+
+   case '?':
+     if (__type == _AsChar)
+       {
+  __spec._M_type = _Pres_esc;
+  ++__first;
+       }
+
+     break;
+   }
+
+ if (__finished())
+   return __first;
+
+ __format::__failed_to_parse_format_spec();
+      }
+
+      template<typename _Tp>
+ constexpr typename basic_format_parse_context<_CharT>::iterator
+ _M_parse(basic_format_parse_context<_CharT>& __pc)
+ {
+   if constexpr (is_same_v<_Tp, bool>)
+     {
+       auto __end = _M_do_parse(__pc, _AsBool);
+       if (_M_spec._M_type == _Pres_s)
+  if (_M_spec._M_sign || _M_spec._M_alt || _M_spec._M_zero_fill)
+    __throw_format_error("format error: format-spec contains "
+           "invalid formatting options for "
+           "'bool'");
+       return __end;
+     }
+   else if constexpr (__char<_Tp>)
+     {
+       auto __end = _M_do_parse(__pc, _AsChar);
+       if (_M_spec._M_type == _Pres_c || _M_spec._M_type == _Pres_esc)
+  if (_M_spec._M_sign || _M_spec._M_alt || _M_spec._M_zero_fill
+                                                            )
+    __throw_format_error("format error: format-spec contains "
+           "invalid formatting options for "
+           "'charT'");
+       return __end;
+     }
+   else
+     return _M_do_parse(__pc, _AsInteger);
+ }
+
+      template<typename _Int, typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(_Int __i, basic_format_context<_Out, _CharT>& __fc) const
+ {
+   if (_M_spec._M_type == _Pres_c)
+     return _M_format_character(_S_to_character(__i), __fc);
+
+   char __buf[sizeof(_Int) * 8 + 3];
+   to_chars_result __res{};
+
+   string_view __base_prefix;
+   make_unsigned_t<_Int> __u;
+   if (__i < 0)
+     __u = -static_cast<make_unsigned_t<_Int>>(__i);
+   else
+     __u = __i;
+
+   char* __start = __buf + 3;
+   char* const __end = __buf + sizeof(__buf);
+   char* const __start_digits = __start;
+
+   switch (_M_spec._M_type)
+   {
+     case _Pres_b:
+     case _Pres_B:
+       __base_prefix = _M_spec._M_type == _Pres_b ? "0b" : "0B";
+       __res = to_chars(__start, __end, __u, 2);
+       break;
+
+
+
+
+     case _Pres_none:
+
+       [[fallthrough]];
+     case _Pres_d:
+       __res = to_chars(__start, __end, __u, 10);
+       break;
+     case _Pres_o:
+       if (__i != 0)
+  __base_prefix = "0";
+       __res = to_chars(__start, __end, __u, 8);
+       break;
+     case _Pres_x:
+     case _Pres_X:
+       __base_prefix = _M_spec._M_type == _Pres_x ? "0x" : "0X";
+       __res = to_chars(__start, __end, __u, 16);
+       if (_M_spec._M_type == _Pres_X)
+  for (auto __p = __start; __p != __res.ptr; ++__p)
+
+    *__p = __builtin_toupper(*__p);
+
+
+
+       break;
+     default:
+       __builtin_unreachable();
+   }
+
+   if (_M_spec._M_alt && __base_prefix.size())
+     {
+       __start -= __base_prefix.size();
+       __builtin_memcpy(__start, __base_prefix.data(),
+          __base_prefix.size());
+     }
+   __start = __format::__put_sign(__i, _M_spec._M_sign, __start - 1);
+
+   return _M_format_int(string_view(__start, __res.ptr - __start),
+          __start_digits - __start, __fc);
+ }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(bool __i, basic_format_context<_Out, _CharT>& __fc) const
+ {
+   if (_M_spec._M_type == _Pres_c)
+     return _M_format_character(static_cast<unsigned char>(__i), __fc);
+   if (_M_spec._M_type != _Pres_s)
+     return format(static_cast<unsigned char>(__i), __fc);
+
+   basic_string<_CharT> __s;
+   size_t __est_width;
+   if (_M_spec._M_localized) [[unlikely]]
+     {
+       auto& __np = std::use_facet<numpunct<_CharT>>(__fc.locale());
+       __s = __i ? __np.truename() : __np.falsename();
+       __est_width = __s.size();
+     }
+   else
+     {
+       if constexpr (is_same_v<char, _CharT>)
+  __s = __i ? "true" : "false";
+       else
+  __s = __i ? L"true" : L"false";
+       __est_width = __s.size();
+     }
+
+   return __format::__write_padded_as_spec(__s, __est_width, __fc,
+        _M_spec);
+ }
+
+      [[__gnu__::__always_inline__]]
+      static size_t
+      _S_character_width(_CharT __c)
+      {
+
+ if constexpr (sizeof(_CharT) > 1u &&
+   __unicode::__literal_encoding_is_unicode<_CharT>())
+   return __unicode::__field_width(__c);
+ else
+   return 1u;
+      }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ _M_format_character(_CharT __c,
+        basic_format_context<_Out, _CharT>& __fc) const
+ {
+   return __format::__write_padded_as_spec({&__c, 1u},
+        _S_character_width(__c),
+        __fc, _M_spec);
+ }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ _M_format_character_escaped(_CharT __c,
+        basic_format_context<_Out, _CharT>& __fc) const
+ {
+   using _Esc = _Escapes<_CharT>;
+   constexpr auto __term = __format::_Term_char::_Tc_apos;
+   const basic_string_view<_CharT> __in(&__c, 1u);
+   if (_M_spec._M_get_width(__fc) <= 3u)
+     return __format::__write_escaped(__fc.out(), __in, __term);
+
+   _CharT __buf[12];
+   __format::_Fixedbuf_sink<_CharT> __sink(__buf);
+   __format::__write_escaped(__sink.out(), __in, __term);
+
+   const basic_string_view<_CharT> __escaped = __sink.view();
+   size_t __estimated_width;
+   if (__escaped[1] == _Esc::_S_bslash()[0])
+     __estimated_width = __escaped.size();
+   else
+     __estimated_width = 2 + _S_character_width(__c);
+   return __format::__write_padded_as_spec(__escaped,
+        __estimated_width,
+        __fc, _M_spec);
+ }
+
+      template<typename _Int>
+ static _CharT
+ _S_to_character(_Int __i)
+ {
+   using _Traits = __gnu_cxx::__int_traits<_CharT>;
+   if constexpr (is_signed_v<_Int> == is_signed_v<_CharT>)
+     {
+       if (_Traits::__min <= __i && __i <= _Traits::__max)
+  return static_cast<_CharT>(__i);
+     }
+   else if constexpr (is_signed_v<_Int>)
+     {
+       if (__i >= 0 && make_unsigned_t<_Int>(__i) <= _Traits::__max)
+  return static_cast<_CharT>(__i);
+     }
+   else if (__i <= make_unsigned_t<_CharT>(_Traits::__max))
+     return static_cast<_CharT>(__i);
+   __throw_format_error("format error: integer not representable as "
+          "character");
+ }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ _M_format_int(string_view __narrow_str, size_t __prefix_len,
+        basic_format_context<_Out, _CharT>& __fc) const
+ {
+   size_t __width = _M_spec._M_get_width(__fc);
+
+   basic_string_view<_CharT> __str;
+   if constexpr (is_same_v<char, _CharT>)
+     __str = __narrow_str;
+
+   else
+     {
+       size_t __n = __narrow_str.size();
+       auto __p = (_CharT*)__builtin_alloca(__n * sizeof(_CharT));
+       std::__to_wstring_numeric(__narrow_str.data(), __n, __p);
+       __str = {__p, __n};
+     }
+
+
+   if (_M_spec._M_localized)
+     {
+       const auto& __l = __fc.locale();
+       if (__l.name() != "C")
+  {
+    auto& __np = use_facet<numpunct<_CharT>>(__l);
+    string __grp = __np.grouping();
+    if (!__grp.empty())
+      {
+        size_t __n = __str.size() - __prefix_len;
+        auto __p = (_CharT*)__builtin_alloca(2 * __n
+            * sizeof(_CharT)
+            + __prefix_len);
+        auto __s = __str.data();
+        char_traits<_CharT>::copy(__p, __s, __prefix_len);
+        __s += __prefix_len;
+        auto __end = std::__add_grouping(__p + __prefix_len,
+             __np.thousands_sep(),
+             __grp.data(),
+             __grp.size(),
+             __s, __s + __n);
+        __str = {__p, size_t(__end - __p)};
+      }
+  }
+     }
+
+   if (__width <= __str.size())
+     return __format::__write(__fc.out(), __str);
+
+   char32_t __fill_char = _M_spec._M_fill;
+   _Align __align = _M_spec._M_align;
+
+   size_t __nfill = __width - __str.size();
+   auto __out = __fc.out();
+   if (__align == _Align_default)
+     {
+       __align = _Align_right;
+       if (_M_spec._M_zero_fill)
+  {
+    __fill_char = _CharT('0');
+
+    if (__prefix_len != 0)
+      {
+        __out = __format::__write(std::move(__out),
+      __str.substr(0, __prefix_len));
+        __str.remove_prefix(__prefix_len);
+      }
+  }
+       else
+  __fill_char = _CharT(' ');
+     }
+   return __format::__write_padded(std::move(__out), __str,
+       __align, __nfill, __fill_char);
+ }
+# 1839 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+      _Spec<_CharT> _M_spec{};
+    };
+# 1927 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+  using std::to_chars;
+
+
+  template<typename _Tp>
+    concept __formattable_float
+      = is_same_v<remove_cv_t<_Tp>, _Tp> && requires (_Tp __t, char* __p)
+      { __format::to_chars(__p, __p, __t, chars_format::scientific, 6); };
+
+  template<__char _CharT>
+    struct __formatter_fp
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      {
+ _Spec<_CharT> __spec{};
+ const auto __last = __pc.end();
+ auto __first = __pc.begin();
+
+ auto __finalize = [this, &__spec] {
+   _M_spec = __spec;
+ };
+
+ auto __finished = [&] {
+   if (__first == __last || *__first == '}')
+     {
+       __finalize();
+       return true;
+     }
+   return false;
+ };
+
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_fill_and_align(__first, __last);
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_sign(__first, __last);
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_alternate_form(__first, __last);
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_zero_fill(__first, __last);
+ if (__finished())
+   return __first;
+
+ if (__first[0] != '.')
+   {
+     __first = __spec._M_parse_width(__first, __last, __pc);
+     if (__finished())
+       return __first;
+   }
+
+ __first = __spec._M_parse_precision(__first, __last, __pc);
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_locale(__first, __last);
+ if (__finished())
+   return __first;
+
+ switch (*__first)
+ {
+   case 'a':
+     __spec._M_type = _Pres_a;
+     ++__first;
+     break;
+   case 'A':
+     __spec._M_type = _Pres_A;
+     ++__first;
+     break;
+   case 'e':
+     __spec._M_type = _Pres_e;
+     ++__first;
+     break;
+   case 'E':
+     __spec._M_type = _Pres_E;
+     ++__first;
+     break;
+   case 'f':
+     __spec._M_type = _Pres_f;
+     ++__first;
+     break;
+   case 'F':
+     __spec._M_type = _Pres_F;
+     ++__first;
+     break;
+   case 'g':
+     __spec._M_type = _Pres_g;
+     ++__first;
+     break;
+   case 'G':
+     __spec._M_type = _Pres_G;
+     ++__first;
+     break;
+   }
+
+ if (__finished())
+   return __first;
+
+ __format::__failed_to_parse_format_spec();
+      }
+
+      template<typename _Fp, typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(_Fp __v, basic_format_context<_Out, _CharT>& __fc) const
+ {
+   std::string __dynbuf;
+   char __buf[128];
+   to_chars_result __res{};
+
+   size_t __prec = 6;
+   bool __use_prec = _M_spec._M_prec_kind != _WP_none;
+   if (__use_prec)
+     __prec = _M_spec._M_get_precision(__fc);
+
+   char* __start = __buf + 1;
+   char* __end = __buf + sizeof(__buf);
+
+   chars_format __fmt{};
+   bool __upper = false;
+   bool __trailing_zeros = false;
+   char __expc = 'e';
+
+   switch (_M_spec._M_type)
+   {
+     case _Pres_A:
+       __upper = true;
+       __expc = 'P';
+       [[fallthrough]];
+     case _Pres_a:
+       if (_M_spec._M_type != _Pres_A)
+  __expc = 'p';
+       __fmt = chars_format::hex;
+       break;
+     case _Pres_E:
+       __upper = true;
+       __expc = 'E';
+       [[fallthrough]];
+     case _Pres_e:
+       __use_prec = true;
+       __fmt = chars_format::scientific;
+       break;
+     case _Pres_F:
+       __upper = true;
+       [[fallthrough]];
+     case _Pres_f:
+       __use_prec = true;
+       __fmt = chars_format::fixed;
+       break;
+     case _Pres_G:
+       __upper = true;
+       __expc = 'E';
+       [[fallthrough]];
+     case _Pres_g:
+       __trailing_zeros = true;
+       __use_prec = true;
+       __fmt = chars_format::general;
+       break;
+     case _Pres_none:
+       if (__use_prec)
+  __fmt = chars_format::general;
+       break;
+     default:
+       __builtin_unreachable();
+   }
+
+
+   auto __to_chars = [&](char* __b, char* __e) {
+     if (__use_prec)
+       return __format::to_chars(__b, __e, __v, __fmt, __prec);
+     else if (__fmt != chars_format{})
+       return __format::to_chars(__b, __e, __v, __fmt);
+     else
+       return __format::to_chars(__b, __e, __v);
+   };
+
+
+   __res = __to_chars(__start, __end);
+
+   if (__builtin_expect(__res.ec == errc::value_too_large, 0))
+     {
+
+
+       size_t __guess = 8 + __prec;
+       if (__fmt == chars_format::fixed)
+  {
+    if constexpr (is_same_v<_Fp, float> || is_same_v<_Fp, double>
+      || is_same_v<_Fp, long double>)
+      {
+
+
+        int __exp{};
+        if constexpr (is_same_v<_Fp, float>)
+   __builtin_frexpf(__v, &__exp);
+        else if constexpr (is_same_v<_Fp, double>)
+   __builtin_frexp(__v, &__exp);
+        else if constexpr (is_same_v<_Fp, long double>)
+   __builtin_frexpl(__v, &__exp);
+        if (__exp > 0)
+   __guess += 1U + __exp * 4004U / 13301U;
+      }
+    else
+      __guess += numeric_limits<_Fp>::max_exponent10;
+  }
+       if (__guess <= sizeof(__buf)) [[unlikely]]
+  __guess = sizeof(__buf) * 2;
+       __dynbuf.reserve(__guess);
+
+       do
+  {
+
+
+
+
+    auto __overwrite = [&__to_chars, &__res] (char* __p, size_t __n)
+    {
+      __res = __to_chars(__p + 1, __p + __n - 1);
+      return __res.ec == errc{} ? __res.ptr - __p : 0;
+    };
+
+    __dynbuf.__resize_and_overwrite(__dynbuf.capacity() * 2,
+        __overwrite);
+    __start = __dynbuf.data() + 1;
+    __end = __dynbuf.data() + __dynbuf.size();
+  }
+       while (__builtin_expect(__res.ec == errc::value_too_large, 0));
+   }
+
+
+   if (__upper)
+     {
+       for (char* __p = __start; __p != __res.ptr; ++__p)
+  *__p = std::toupper(*__p);
+     }
+
+   bool __have_sign = true;
+
+   if (!__builtin_signbit(__v))
+     {
+       if (_M_spec._M_sign == _Sign_plus)
+  *--__start = '+';
+       else if (_M_spec._M_sign == _Sign_space)
+  *--__start = ' ';
+       else
+  __have_sign = false;
+     }
+
+   string_view __narrow_str(__start, __res.ptr - __start);
+
+
+
+   if (_M_spec._M_alt && __builtin_isfinite(__v))
+     {
+       string_view __s = __narrow_str;
+       size_t __sigfigs;
+       size_t __z = 0;
+       size_t __p;
+       size_t __d = __s.find('.');
+       if (__d != __s.npos)
+  {
+    __p = __s.find(__expc, __d + 1);
+    if (__p == __s.npos)
+      __p = __s.size();
+
+
+    if (__trailing_zeros)
+      {
+
+        if (__s[__have_sign] != '0')
+
+   __sigfigs = __p - __have_sign - 1;
+        else
+
+
+
+   __sigfigs = __p - __s.find_first_not_of('0', __d + 1);
+      }
+  }
+       else
+  {
+    __p = __s.find(__expc);
+    if (__p == __s.npos)
+      __p = __s.size();
+    __d = __p;
+    __sigfigs = __d - __have_sign;
+  }
+
+       if (__trailing_zeros && __prec != 0)
+  {
+
+
+
+    __z = __prec - __sigfigs;
+  }
+
+       if (size_t __extras = int(__d == __p) + __z)
+  {
+    if (__dynbuf.empty() && __extras <= size_t(__end - __res.ptr))
+      {
+
+
+        __builtin_memmove(__start + __p + __extras,
+     __start + __p,
+     __s.size() - __p);
+        if (__d == __p)
+   __start[__p++] = '.';
+        __builtin_memset(__start + __p, '0', __z);
+        __narrow_str = {__s.data(), __s.size() + __extras};
+      }
+    else
+      {
+        __dynbuf.reserve(__s.size() + __extras);
+        if (__dynbuf.empty())
+   {
+     __dynbuf = __s.substr(0, __p);
+     if (__d == __p)
+       __dynbuf += '.';
+     if (__z)
+       __dynbuf.append(__z, '0');
+     __dynbuf.append(__s.substr(__p));
+   }
+        else
+   {
+     __dynbuf.insert(__p, __extras, '0');
+     if (__d == __p)
+       __dynbuf[__p] = '.';
+   }
+        __narrow_str = __dynbuf;
+      }
+  }
+     }
+
+   basic_string<_CharT> __wstr;
+   basic_string_view<_CharT> __str;
+   if constexpr (is_same_v<_CharT, char>)
+     __str = __narrow_str;
+
+   else
+     {
+       __wstr = std::__to_wstring_numeric(__narrow_str);
+       __str = __wstr;
+     }
+
+
+   if (_M_spec._M_localized && __builtin_isfinite(__v))
+     {
+       auto __s = _M_localize(__str, __expc, __fc.locale());
+       if (!__s.empty())
+  __str = __wstr = std::move(__s);
+     }
+
+   size_t __width = _M_spec._M_get_width(__fc);
+
+   if (__width <= __str.size())
+     return __format::__write(__fc.out(), __str);
+
+   char32_t __fill_char = _M_spec._M_fill;
+   _Align __align = _M_spec._M_align;
+
+   size_t __nfill = __width - __str.size();
+   auto __out = __fc.out();
+   if (__align == _Align_default)
+     {
+       __align = _Align_right;
+       if (_M_spec._M_zero_fill && __builtin_isfinite(__v))
+  {
+    __fill_char = _CharT('0');
+
+    if (!__format::__is_xdigit(__narrow_str[0]))
+      {
+        *__out++ = __str[0];
+        __str.remove_prefix(1);
+      }
+  }
+       else
+  __fill_char = _CharT(' ');
+     }
+   return __format::__write_padded(std::move(__out), __str,
+       __align, __nfill, __fill_char);
+ }
+
+
+      basic_string<_CharT>
+      _M_localize(basic_string_view<_CharT> __str, char __expc,
+    const locale& __loc) const
+      {
+ basic_string<_CharT> __lstr;
+
+ if (__loc == locale::classic())
+   return __lstr;
+
+ const auto& __np = use_facet<numpunct<_CharT>>(__loc);
+ const _CharT __point = __np.decimal_point();
+ const string __grp = __np.grouping();
+
+ _CharT __dot, __exp;
+ if constexpr (is_same_v<_CharT, char>)
+   {
+     __dot = '.';
+     __exp = __expc;
+   }
+ else
+   {
+     __dot = L'.';
+     switch (__expc)
+     {
+       case 'e':
+  __exp = L'e';
+  break;
+       case 'E':
+  __exp = L'E';
+  break;
+       case 'p':
+  __exp = L'p';
+  break;
+       case 'P':
+  __exp = L'P';
+  break;
+       default:
+  __builtin_unreachable();
+     }
+   }
+
+ if (__grp.empty() && __point == __dot)
+   return __lstr;
+
+ size_t __d = __str.find(__dot);
+ size_t __e = min(__d, __str.find(__exp));
+ if (__e == __str.npos)
+   __e = __str.size();
+ const size_t __r = __str.size() - __e;
+ auto __overwrite = [&](_CharT* __p, size_t) {
+
+   int __off = 0;
+   if (auto __c = __str.front(); __c == '-' || __c == '+' || __c == ' ')
+     {
+       *__p = __c;
+       __off = 1;
+     }
+   auto __end = std::__add_grouping(__p + __off, __np.thousands_sep(),
+        __grp.data(), __grp.size(),
+        __str.data() + __off,
+        __str.data() + __e);
+   if (__r)
+     {
+       if (__d != __str.npos)
+  {
+    *__end = __point;
+    ++__end;
+    ++__e;
+  }
+       const size_t __rlen = __str.size() - __e;
+
+       char_traits<_CharT>::copy(__end, __str.data() + __e, __rlen);
+       __end += __rlen;
+     }
+   return (__end - __p);
+ };
+ __lstr.__resize_and_overwrite(__e * 2 + __r, __overwrite);
+ return __lstr;
+      }
+
+      _Spec<_CharT> _M_spec{};
+    };
+
+}
+
+
+
+  template<__format::__char _CharT>
+    struct formatter<_CharT, _CharT>
+    {
+      formatter() = default;
+
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      {
+ return _M_f.template _M_parse<_CharT>(__pc);
+      }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(_CharT __u, basic_format_context<_Out, _CharT>& __fc) const
+ {
+   if (_M_f._M_spec._M_type == __format::_Pres_none
+       || _M_f._M_spec._M_type == __format::_Pres_c)
+     return _M_f._M_format_character(__u, __fc);
+   else if (_M_f._M_spec._M_type == __format::_Pres_esc)
+     return _M_f._M_format_character_escaped(__u, __fc);
+   else
+     return _M_f.format(static_cast<make_unsigned_t<_CharT>>(__u), __fc);
+ }
+
+
+      constexpr void
+      set_debug_format() noexcept
+      { _M_f._M_spec._M_type = __format::_Pres_esc; }
+
+
+    private:
+      __format::__formatter_int<_CharT> _M_f;
+    };
+
+
+
+  template<>
+    struct formatter<char, wchar_t>
+    {
+      formatter() = default;
+
+      constexpr typename basic_format_parse_context<wchar_t>::iterator
+      parse(basic_format_parse_context<wchar_t>& __pc)
+      {
+ return _M_f._M_parse<char>(__pc);
+      }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, wchar_t>::iterator
+ format(char __u, basic_format_context<_Out, wchar_t>& __fc) const
+ {
+   if (_M_f._M_spec._M_type == __format::_Pres_none
+       || _M_f._M_spec._M_type == __format::_Pres_c)
+     return _M_f._M_format_character(__u, __fc);
+   else if (_M_f._M_spec._M_type == __format::_Pres_esc)
+     return _M_f._M_format_character_escaped(__u, __fc);
+   else
+     return _M_f.format(static_cast<unsigned char>(__u), __fc);
+ }
+
+
+      constexpr void
+      set_debug_format() noexcept
+      { _M_f._M_spec._M_type = __format::_Pres_esc; }
+
+
+    private:
+      __format::__formatter_int<wchar_t> _M_f;
+    };
+
+
+
+
+
+  template<__format::__char _CharT>
+    struct formatter<_CharT*, _CharT>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ [[__gnu__::__nonnull__]]
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(_CharT* __u, basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f.format(__u, __fc); }
+
+
+      constexpr void set_debug_format() noexcept { _M_f.set_debug_format(); }
+
+
+    private:
+      __format::__formatter_str<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<const _CharT*, _CharT>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ [[__gnu__::__nonnull__]]
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const _CharT* __u,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f.format(__u, __fc); }
+
+
+      constexpr void set_debug_format() noexcept { _M_f.set_debug_format(); }
+
+
+    private:
+      __format::__formatter_str<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT, size_t _Nm>
+    struct formatter<_CharT[_Nm], _CharT>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const _CharT (&__u)[_Nm],
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f.format({__u, _Nm}, __fc); }
+
+
+      constexpr void set_debug_format() noexcept { _M_f.set_debug_format(); }
+
+
+    private:
+      __format::__formatter_str<_CharT> _M_f;
+    };
+
+  template<typename _Traits, typename _Alloc>
+    struct formatter<basic_string<char, _Traits, _Alloc>, char>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<char>::iterator
+      parse(basic_format_parse_context<char>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, char>::iterator
+ format(const basic_string<char, _Traits, _Alloc>& __u,
+        basic_format_context<_Out, char>& __fc) const
+ { return _M_f.format(__u, __fc); }
+
+
+      constexpr void set_debug_format() noexcept { _M_f.set_debug_format(); }
+
+
+    private:
+      __format::__formatter_str<char> _M_f;
+    };
+
+
+  template<typename _Traits, typename _Alloc>
+    struct formatter<basic_string<wchar_t, _Traits, _Alloc>, wchar_t>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<wchar_t>::iterator
+      parse(basic_format_parse_context<wchar_t>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, wchar_t>::iterator
+ format(const basic_string<wchar_t, _Traits, _Alloc>& __u,
+        basic_format_context<_Out, wchar_t>& __fc) const
+ { return _M_f.format(__u, __fc); }
+
+
+      constexpr void set_debug_format() noexcept { _M_f.set_debug_format(); }
+
+
+    private:
+      __format::__formatter_str<wchar_t> _M_f;
+    };
+
+
+  template<typename _Traits>
+    struct formatter<basic_string_view<char, _Traits>, char>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<char>::iterator
+      parse(basic_format_parse_context<char>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, char>::iterator
+ format(basic_string_view<char, _Traits> __u,
+        basic_format_context<_Out, char>& __fc) const
+ { return _M_f.format(__u, __fc); }
+
+
+      constexpr void set_debug_format() noexcept { _M_f.set_debug_format(); }
+
+
+    private:
+      __format::__formatter_str<char> _M_f;
+    };
+
+
+  template<typename _Traits>
+    struct formatter<basic_string_view<wchar_t, _Traits>, wchar_t>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<wchar_t>::iterator
+      parse(basic_format_parse_context<wchar_t>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, wchar_t>::iterator
+ format(basic_string_view<wchar_t, _Traits> __u,
+        basic_format_context<_Out, wchar_t>& __fc) const
+ { return _M_f.format(__u, __fc); }
+
+
+      constexpr void set_debug_format() noexcept { _M_f.set_debug_format(); }
+
+
+    private:
+      __format::__formatter_str<wchar_t> _M_f;
+    };
+
+
+
+
+namespace __format
+{
+
+
+  template<typename _Tp>
+    constexpr bool __is_formattable_integer = __is_integer<_Tp>::__value;
+
+
+  template<> inline constexpr bool __is_formattable_integer<__int128> = true;
+  template<> inline constexpr bool __is_formattable_integer<unsigned __int128>
+      = true;
+
+
+  template<> inline constexpr bool __is_formattable_integer<char> = false;
+  template<> inline constexpr bool __is_formattable_integer<wchar_t> = false;
+
+  template<> inline constexpr bool __is_formattable_integer<char8_t> = false;
+
+  template<> inline constexpr bool __is_formattable_integer<char16_t> = false;
+  template<> inline constexpr bool __is_formattable_integer<char32_t> = false;
+}
+
+
+
+  template<typename _Tp, __format::__char _CharT>
+    requires __format::__is_formattable_integer<_Tp>
+    struct formatter<_Tp, _CharT>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      {
+ return _M_f.template _M_parse<_Tp>(__pc);
+      }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(_Tp __u, basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f.format(__u, __fc); }
+
+    private:
+      __format::__formatter_int<_CharT> _M_f;
+    };
+
+
+
+  template<__format::__formattable_float _Tp, __format::__char _CharT>
+    struct formatter<_Tp, _CharT>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(_Tp __u, basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f.format(__u, __fc); }
+
+    private:
+      __format::__formatter_fp<_CharT> _M_f;
+    };
+# 2741 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+  template<__format::__char _CharT>
+    struct formatter<_Float16, _CharT>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(_Float16 __u, basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f.format((float)__u, __fc); }
+
+    private:
+      __format::__formatter_fp<_CharT> _M_f;
+    };
+
+
+
+
+  template<__format::__char _CharT>
+    struct formatter<_Float32, _CharT>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(_Float32 __u, basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f.format((float)__u, __fc); }
+
+    private:
+      __format::__formatter_fp<_CharT> _M_f;
+    };
+
+
+
+
+  template<__format::__char _CharT>
+    struct formatter<_Float64, _CharT>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(_Float64 __u, basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f.format((double)__u, __fc); }
+
+    private:
+      __format::__formatter_fp<_CharT> _M_f;
+    };
+# 2829 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+  template<__format::__char _CharT>
+    struct formatter<__gnu_cxx::__bfloat16_t, _CharT>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(__gnu_cxx::__bfloat16_t __u,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f.format((float)__u, __fc); }
+
+    private:
+      __format::__formatter_fp<_CharT> _M_f;
+    };
+
+
+
+
+
+
+  template<__format::__char _CharT>
+    struct formatter<const void*, _CharT>
+    {
+      formatter() = default;
+
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      {
+ __format::_Spec<_CharT> __spec{};
+ const auto __last = __pc.end();
+ auto __first = __pc.begin();
+
+ auto __finalize = [this, &__spec] {
+   _M_spec = __spec;
+ };
+
+ auto __finished = [&] {
+   if (__first == __last || *__first == '}')
+     {
+       __finalize();
+       return true;
+     }
+   return false;
+ };
+
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_fill_and_align(__first, __last);
+ if (__finished())
+   return __first;
+
+
+
+
+ __first = __spec._M_parse_zero_fill(__first, __last);
+ if (__finished())
+   return __first;
+
+
+ __first = __spec._M_parse_width(__first, __last, __pc);
+
+ if (__first != __last)
+   {
+     if (*__first == 'p')
+       ++__first;
+
+     else if (*__first == 'P')
+     {
+       __spec._M_type = __format::_Pres_P;
+       ++__first;
+     }
+
+   }
+
+ if (__finished())
+   return __first;
+
+ __format::__failed_to_parse_format_spec();
+      }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const void* __v, basic_format_context<_Out, _CharT>& __fc) const
+ {
+   auto __u = reinterpret_cast<long long unsigned int>(__v);
+   char __buf[2 + sizeof(__v) * 2];
+   auto [__ptr, __ec] = std::to_chars(__buf + 2, std::end(__buf),
+          __u, 16);
+   int __n = __ptr - __buf;
+   __buf[0] = '0';
+   __buf[1] = 'x';
+
+   if (_M_spec._M_type == __format::_Pres_P)
+     {
+       __buf[1] = 'X';
+       for (auto __p = __buf + 2; __p != __ptr; ++__p)
+
+  *__p = __builtin_toupper(*__p);
+
+
+
+     }
+
+
+   basic_string_view<_CharT> __str;
+   if constexpr (is_same_v<_CharT, char>)
+     __str = string_view(__buf, __n);
+
+   else
+     {
+       auto __p = (_CharT*)__builtin_alloca(__n * sizeof(_CharT));
+       std::__to_wstring_numeric(__buf, __n, __p);
+       __str = wstring_view(__p, __n);
+     }
+
+
+
+   if (_M_spec._M_zero_fill)
+     {
+       size_t __width = _M_spec._M_get_width(__fc);
+       if (__width <= __str.size())
+  return __format::__write(__fc.out(), __str);
+
+       auto __out = __fc.out();
+
+       __out = __format::__write(std::move(__out), __str.substr(0, 2));
+       __str.remove_prefix(2);
+       size_t __nfill = __width - __n;
+       return __format::__write_padded(std::move(__out), __str,
+           __format::_Align_right,
+           __nfill, _CharT('0'));
+     }
+
+
+   return __format::__write_padded_as_spec(__str, __n, __fc, _M_spec,
+        __format::_Align_right);
+ }
+
+    private:
+      __format::_Spec<_CharT> _M_spec{};
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<void*, _CharT>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(void* __v, basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f.format(__v, __fc); }
+
+    private:
+      formatter<const void*, _CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<nullptr_t, _CharT>
+    {
+      formatter() = default;
+
+      [[__gnu__::__always_inline__]]
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f.parse(__pc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(nullptr_t, basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f.format(nullptr, __fc); }
+
+    private:
+      formatter<const void*, _CharT> _M_f;
+    };
+
+
+
+
+
+
+  struct __formatter_disabled
+  {
+    __formatter_disabled() = delete;
+    __formatter_disabled(const __formatter_disabled&) = delete;
+    __formatter_disabled& operator=(const __formatter_disabled&) = delete;
+  };
+
+  template<>
+    struct formatter<char*, wchar_t>
+    : private __formatter_disabled { };
+  template<>
+    struct formatter<const char*, wchar_t>
+    : private __formatter_disabled { };
+  template<size_t _Nm>
+    struct formatter<char[_Nm], wchar_t>
+    : private __formatter_disabled { };
+  template<class _Traits, class _Allocator>
+    struct formatter<basic_string<char, _Traits, _Allocator>, wchar_t>
+    : private __formatter_disabled { };
+  template<class _Traits>
+    struct formatter<basic_string_view<char, _Traits>, wchar_t>
+    : private __formatter_disabled { };
+
+
+
+
+  template<typename _Out>
+    struct format_to_n_result
+    {
+      _Out out;
+      iter_difference_t<_Out> size;
+    };
+
+
+template<typename, typename> class vector;
+
+
+
+namespace __format
+{
+  template<typename _CharT>
+    class _Sink_iter
+    {
+      _Sink<_CharT>* _M_sink = nullptr;
+
+    public:
+      using iterator_category = output_iterator_tag;
+      using value_type = void;
+      using difference_type = ptrdiff_t;
+      using pointer = void;
+      using reference = void;
+
+      _Sink_iter() = default;
+      _Sink_iter(const _Sink_iter&) = default;
+      _Sink_iter& operator=(const _Sink_iter&) = default;
+
+      [[__gnu__::__always_inline__]]
+      explicit constexpr
+      _Sink_iter(_Sink<_CharT>& __sink) : _M_sink(std::addressof(__sink)) { }
+
+      [[__gnu__::__always_inline__]]
+      constexpr _Sink_iter&
+      operator=(_CharT __c)
+      {
+ _M_sink->_M_write(__c);
+ return *this;
+      }
+
+      [[__gnu__::__always_inline__]]
+      constexpr _Sink_iter&
+      operator=(basic_string_view<_CharT> __s)
+      {
+ _M_sink->_M_write(__s);
+ return *this;
+      }
+
+      [[__gnu__::__always_inline__]]
+      constexpr _Sink_iter&
+      operator*() { return *this; }
+
+      [[__gnu__::__always_inline__]]
+      constexpr _Sink_iter&
+      operator++() { return *this; }
+
+      [[__gnu__::__always_inline__]]
+      constexpr _Sink_iter
+      operator++(int) { return *this; }
+
+      auto
+      _M_reserve(size_t __n) const
+      { return _M_sink->_M_reserve(__n); }
+    };
+
+
+
+
+  template<typename _CharT>
+    class _Sink
+    {
+      friend class _Sink_iter<_CharT>;
+
+      span<_CharT> _M_span;
+      typename span<_CharT>::iterator _M_next;
+
+
+
+
+
+      virtual void _M_overflow() = 0;
+
+    protected:
+
+      [[__gnu__::__always_inline__]]
+      explicit constexpr
+      _Sink(span<_CharT> __span) noexcept
+      : _M_span(__span), _M_next(__span.begin())
+      { }
+
+
+      [[__gnu__::__always_inline__]]
+      span<_CharT>
+      _M_used() const noexcept
+      { return _M_span.first(_M_next - _M_span.begin()); }
+
+
+      [[__gnu__::__always_inline__]]
+      constexpr span<_CharT>
+      _M_unused() const noexcept
+      { return _M_span.subspan(_M_next - _M_span.begin()); }
+
+
+      [[__gnu__::__always_inline__]]
+      constexpr void
+      _M_rewind() noexcept
+      { _M_next = _M_span.begin(); }
+
+
+      void
+      _M_reset(span<_CharT> __s, size_t __pos = 0) noexcept
+      {
+ _M_span = __s;
+ _M_next = __s.begin() + __pos;
+      }
+
+
+      constexpr void
+      _M_write(_CharT __c)
+      {
+ *_M_next++ = __c;
+ if (_M_next - _M_span.begin() == std::ssize(_M_span)) [[unlikely]]
+   _M_overflow();
+      }
+
+      constexpr void
+      _M_write(basic_string_view<_CharT> __s)
+      {
+ span __to = _M_unused();
+ while (__to.size() <= __s.size())
+   {
+     __s.copy(__to.data(), __to.size());
+     _M_next += __to.size();
+     __s.remove_prefix(__to.size());
+     _M_overflow();
+     __to = _M_unused();
+   }
+ if (__s.size())
+   {
+     __s.copy(__to.data(), __s.size());
+     _M_next += __s.size();
+   }
+      }
+
+
+
+      struct _Reservation
+      {
+
+ explicit operator bool() const noexcept { return _M_sink; }
+
+ _CharT* get() const noexcept { return _M_sink->_M_next.operator->(); }
+
+ void _M_bump(size_t __n) { _M_sink->_M_bump(__n); }
+ _Sink* _M_sink;
+      };
+
+
+
+
+
+      virtual _Reservation
+      _M_reserve(size_t __n)
+      {
+ if (__n <= _M_unused().size())
+   return { this };
+
+ if (__n <= _M_span.size())
+   {
+     _M_overflow();
+     if (__n <= _M_unused().size())
+       return { this };
+   }
+ return { nullptr };
+      }
+
+
+
+      virtual void
+      _M_bump(size_t __n)
+      { _M_next += __n; }
+
+    public:
+      _Sink(const _Sink&) = delete;
+      _Sink& operator=(const _Sink&) = delete;
+
+      [[__gnu__::__always_inline__]]
+      constexpr _Sink_iter<_CharT>
+      out() noexcept
+      { return _Sink_iter<_CharT>(*this); }
+    };
+
+
+  template<typename _CharT>
+    class _Fixedbuf_sink final : public _Sink<_CharT>
+    {
+      void
+      _M_overflow() override
+      {
+ do { if (std::__is_constant_evaluated() && !bool(false)) std::__glibcxx_assert_fail(); } while (false);
+ this->_M_rewind();
+      }
+
+    public:
+      [[__gnu__::__always_inline__]]
+      constexpr explicit
+      _Fixedbuf_sink(span<_CharT> __buf)
+ : _Sink<_CharT>(__buf)
+      { }
+
+      constexpr basic_string_view<_CharT>
+      view() const
+      {
+ auto __s = this->_M_used();
+ return basic_string_view<_CharT>(__s.data(), __s.size());
+      }
+    };
+
+
+  template<typename _CharT>
+    class _Buf_sink : public _Sink<_CharT>
+    {
+    protected:
+      _CharT _M_buf[__stackbuf_size<_CharT>];
+
+      [[__gnu__::__always_inline__]]
+      constexpr
+      _Buf_sink() noexcept
+      : _Sink<_CharT>(_M_buf)
+      { }
+    };
+
+  using std::vector;
+
+
+
+  template<typename _Seq>
+    class _Seq_sink final : public _Buf_sink<typename _Seq::value_type>
+    {
+      using _CharT = typename _Seq::value_type;
+
+      _Seq _M_seq;
+
+
+      void
+      _M_overflow() override
+      {
+ auto __s = this->_M_used();
+ if (__s.empty()) [[unlikely]]
+   return;
+
+
+ ;
+
+ if constexpr (__is_specialization_of<_Seq, basic_string>)
+   _M_seq.append(__s.data(), __s.size());
+ else
+   _M_seq.insert(_M_seq.end(), __s.begin(), __s.end());
+
+
+ this->_M_rewind();
+      }
+
+      typename _Sink<_CharT>::_Reservation
+      _M_reserve(size_t __n) override
+      {
+
+
+
+
+
+
+
+ if constexpr (__is_specialization_of<_Seq, basic_string>
+   || __is_specialization_of<_Seq, vector>)
+   {
+
+     if (this->_M_used().size()) [[unlikely]]
+       _Seq_sink::_M_overflow();
+
+
+     const auto __sz = _M_seq.size();
+     if constexpr (is_same_v<string, _Seq> || is_same_v<wstring, _Seq>)
+       _M_seq.__resize_and_overwrite(__sz + __n,
+         [](auto, auto __n2) {
+           return __n2;
+         });
+     else
+       _M_seq.resize(__sz + __n);
+
+
+
+     this->_M_reset(_M_seq, __sz);
+     return { this };
+   }
+ else
+   return _Sink<_CharT>::_M_reserve(__n);
+      }
+
+      void
+      _M_bump(size_t __n) override
+      {
+ if constexpr (__is_specialization_of<_Seq, basic_string>
+   || __is_specialization_of<_Seq, vector>)
+   {
+     auto __s = this->_M_used();
+     ;
+
+     _M_seq.resize(__s.size() + __n);
+
+     this->_M_reset(this->_M_buf);
+   }
+      }
+
+    public:
+
+
+
+      [[__gnu__::__always_inline__]]
+      _Seq_sink() noexcept(is_nothrow_default_constructible_v<_Seq>)
+      { }
+
+      _Seq_sink(_Seq&& __s) noexcept(is_nothrow_move_constructible_v<_Seq>)
+      : _M_seq(std::move(__s))
+      { }
+
+      using _Sink<_CharT>::out;
+
+      _Seq
+      get() &&
+      {
+ if (this->_M_used().size() != 0)
+   _Seq_sink::_M_overflow();
+ return std::move(_M_seq);
+      }
+
+
+
+      span<_CharT>
+      view()
+      {
+ auto __s = this->_M_used();
+ if (_M_seq.size())
+   {
+     if (__s.size() != 0)
+       _Seq_sink::_M_overflow();
+     return _M_seq;
+   }
+ return __s;
+      }
+    };
+
+
+
+
+  template<typename _CharT, typename _OutIter>
+    class _Iter_sink : public _Buf_sink<_CharT>
+    {
+      _OutIter _M_out;
+      iter_difference_t<_OutIter> _M_max;
+
+    protected:
+      size_t _M_count = 0;
+
+      void
+      _M_overflow() override
+      {
+ auto __s = this->_M_used();
+ if (_M_max < 0)
+   _M_out = ranges::copy(__s, std::move(_M_out)).out;
+ else if (_M_count < static_cast<size_t>(_M_max))
+   {
+     auto __max = _M_max - _M_count;
+     span<_CharT> __first;
+     if (__max < __s.size())
+       __first = __s.first(static_cast<size_t>(__max));
+     else
+       __first = __s;
+     _M_out = ranges::copy(__first, std::move(_M_out)).out;
+   }
+ this->_M_rewind();
+ _M_count += __s.size();
+      }
+
+    public:
+      [[__gnu__::__always_inline__]]
+      explicit
+      _Iter_sink(_OutIter __out, iter_difference_t<_OutIter> __max = -1)
+      : _M_out(std::move(__out)), _M_max(__max)
+      { }
+
+      using _Sink<_CharT>::out;
+
+      format_to_n_result<_OutIter>
+      _M_finish() &&
+      {
+ if (this->_M_used().size() != 0)
+   _Iter_sink::_M_overflow();
+ iter_difference_t<_OutIter> __count(_M_count);
+ return { std::move(_M_out), __count };
+      }
+    };
+# 3458 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+  template<typename _CharT, contiguous_iterator _OutIter>
+    requires same_as<iter_value_t<_OutIter>, _CharT>
+    class _Iter_sink<_CharT, _OutIter> : public _Sink<_CharT>
+    {
+      _OutIter _M_first;
+      iter_difference_t<_OutIter> _M_max = -1;
+    protected:
+      size_t _M_count = 0;
+    private:
+      _CharT _M_buf[64];
+
+    protected:
+      void
+      _M_overflow() override
+      {
+ if (this->_M_unused().size() != 0)
+   return;
+
+ auto __s = this->_M_used();
+
+ if (_M_max >= 0)
+   {
+     _M_count += __s.size();
+
+
+
+     this->_M_reset(this->_M_buf);
+   }
+ else
+   {
+
+
+     this->_M_reset({__s.data(), __s.size() + 1024}, __s.size());
+   }
+      }
+
+      typename _Sink<_CharT>::_Reservation
+      _M_reserve(size_t __n) final
+      {
+ auto __avail = this->_M_unused();
+ if (__n > __avail.size())
+   {
+     if (_M_max >= 0)
+       return {};
+
+     auto __s = this->_M_used();
+     this->_M_reset({__s.data(), __s.size() + __n}, __s.size());
+   }
+ return { this };
+      }
+
+    private:
+      static span<_CharT>
+      _S_make_span(_CharT* __ptr, iter_difference_t<_OutIter> __n,
+     span<_CharT> __buf) noexcept
+      {
+ if (__n == 0)
+   return __buf;
+
+ if (__n > 0)
+   {
+     if constexpr (!is_integral_v<iter_difference_t<_OutIter>>
+       || sizeof(__n) > sizeof(size_t))
+       {
+
+  auto __m = iter_difference_t<_OutIter>((size_t)-1);
+  if (__n > __m)
+    __n = __m;
+       }
+     return {__ptr, (size_t)__n};
+   }
+
+
+ if (size_t __bytes = __builtin_dynamic_object_size(__ptr, 2))
+   return {__ptr, __bytes / sizeof(_CharT)};
+
+
+ const auto __off = reinterpret_cast<long long unsigned int>(__ptr) % 1024;
+ __n = (1024 - __off) / sizeof(_CharT);
+ if (__n > 0) [[likely]]
+   return {__ptr, static_cast<size_t>(__n)};
+ else
+   return {__ptr, 1};
+      }
+
+    public:
+      explicit
+      _Iter_sink(_OutIter __out, iter_difference_t<_OutIter> __n = -1) noexcept
+      : _Sink<_CharT>(_S_make_span(std::to_address(__out), __n, _M_buf)),
+ _M_first(__out), _M_max(__n)
+      { }
+
+      format_to_n_result<_OutIter>
+      _M_finish() &&
+      {
+ auto __s = this->_M_used();
+ if (__s.data() == _M_buf)
+   {
+
+     iter_difference_t<_OutIter> __count(_M_count + __s.size());
+     return { _M_first + _M_max, __count };
+   }
+ else
+   {
+     iter_difference_t<_OutIter> __count(__s.size());
+     return { _M_first + __count, __count };
+   }
+      }
+    };
+
+  enum _Arg_t : unsigned char {
+    _Arg_none, _Arg_bool, _Arg_c, _Arg_i, _Arg_u, _Arg_ll, _Arg_ull,
+    _Arg_flt, _Arg_dbl, _Arg_ldbl, _Arg_str, _Arg_sv, _Arg_ptr, _Arg_handle,
+    _Arg_i128, _Arg_u128,
+    _Arg_bf16, _Arg_f16, _Arg_f32, _Arg_f64,
+
+
+
+
+
+    _Arg_f128,
+
+    _Arg_max_
+  };
+
+  template<typename _Context>
+    struct _Arg_value
+    {
+      using _CharT = typename _Context::char_type;
+
+      struct _HandleBase
+      {
+ const void* _M_ptr;
+ void (*_M_func)();
+      };
+
+      union
+      {
+ monostate _M_none;
+ bool _M_bool;
+ _CharT _M_c;
+ int _M_i;
+ unsigned _M_u;
+ long long _M_ll;
+ unsigned long long _M_ull;
+ float _M_flt;
+ double _M_dbl;
+
+ long double _M_ldbl;
+
+ const _CharT* _M_str;
+ basic_string_view<_CharT> _M_sv;
+ const void* _M_ptr;
+ _HandleBase _M_handle;
+
+ __int128 _M_i128;
+ unsigned __int128 _M_u128;
+
+
+
+
+
+
+
+      };
+
+      [[__gnu__::__always_inline__]]
+      _Arg_value() : _M_none() { }
+
+
+
+
+
+
+
+      template<typename _Tp, typename _Self>
+ [[__gnu__::__always_inline__]]
+ static auto&
+ _S_get(_Self& __u) noexcept
+ {
+   if constexpr (is_same_v<_Tp, bool>)
+     return __u._M_bool;
+   else if constexpr (is_same_v<_Tp, _CharT>)
+     return __u._M_c;
+   else if constexpr (is_same_v<_Tp, int>)
+     return __u._M_i;
+   else if constexpr (is_same_v<_Tp, unsigned>)
+     return __u._M_u;
+   else if constexpr (is_same_v<_Tp, long long>)
+     return __u._M_ll;
+   else if constexpr (is_same_v<_Tp, unsigned long long>)
+     return __u._M_ull;
+   else if constexpr (is_same_v<_Tp, float>)
+     return __u._M_flt;
+   else if constexpr (is_same_v<_Tp, double>)
+     return __u._M_dbl;
+
+   else if constexpr (is_same_v<_Tp, long double>)
+     return __u._M_ldbl;
+
+
+
+
+
+
+   else if constexpr (is_same_v<_Tp, const _CharT*>)
+     return __u._M_str;
+   else if constexpr (is_same_v<_Tp, basic_string_view<_CharT>>)
+     return __u._M_sv;
+   else if constexpr (is_same_v<_Tp, const void*>)
+     return __u._M_ptr;
+
+   else if constexpr (is_same_v<_Tp, __int128>)
+     return __u._M_i128;
+   else if constexpr (is_same_v<_Tp, unsigned __int128>)
+     return __u._M_u128;
+
+
+
+
+
+   else if constexpr (derived_from<_Tp, _HandleBase>)
+     return static_cast<_Tp&>(__u._M_handle);
+
+ }
+
+      template<typename _Tp>
+ [[__gnu__::__always_inline__]]
+ auto&
+ _M_get() noexcept
+ { return _S_get<_Tp>(*this); }
+
+      template<typename _Tp>
+ [[__gnu__::__always_inline__]]
+ const auto&
+ _M_get() const noexcept
+ { return _S_get<_Tp>(*this); }
+
+      template<typename _Tp>
+ [[__gnu__::__always_inline__]]
+ void
+ _M_set(_Tp __v) noexcept
+ {
+   if constexpr (derived_from<_Tp, _HandleBase>)
+     std::construct_at(&_M_handle, __v);
+   else
+     _S_get<_Tp>(*this) = __v;
+ }
+      };
+
+
+  template<typename _Context, typename... _Args>
+    class _Arg_store;
+
+  template<typename _Visitor, typename _Ctx>
+    decltype(auto) __visit_format_arg(_Visitor&&, basic_format_arg<_Ctx>);
+
+  template<typename _Ch, typename _Tp>
+    consteval _Arg_t
+    __to_arg_t_enum() noexcept;
+}
+
+
+  template<typename _Context>
+    class basic_format_arg
+    {
+      using _CharT = typename _Context::char_type;
+
+      template<typename _Tp>
+ static constexpr bool __formattable
+   = __format::__formattable_with<_Tp, _Context>;
+
+    public:
+      class handle : public __format::_Arg_value<_Context>::_HandleBase
+      {
+ using _Base = typename __format::_Arg_value<_Context>::_HandleBase;
+
+
+ template<typename _Tp>
+   using __maybe_const_t
+     = __conditional_t<__formattable<const _Tp>, const _Tp, _Tp>;
+
+ template<typename _Tq>
+   static void
+   _S_format(basic_format_parse_context<_CharT>& __parse_ctx,
+      _Context& __format_ctx, const void* __ptr)
+   {
+     using _Td = remove_const_t<_Tq>;
+     typename _Context::template formatter_type<_Td> __f;
+     __parse_ctx.advance_to(__f.parse(__parse_ctx));
+     _Tq& __val = *const_cast<_Tq*>(static_cast<const _Td*>(__ptr));
+     __format_ctx.advance_to(__f.format(__val, __format_ctx));
+   }
+
+ template<typename _Tp>
+   explicit
+   handle(_Tp& __val) noexcept
+   {
+     this->_M_ptr = __builtin_addressof(__val);
+     auto __func = _S_format<__maybe_const_t<_Tp>>;
+     this->_M_func = reinterpret_cast<void(*)()>(__func);
+   }
+
+ friend class basic_format_arg<_Context>;
+
+      public:
+ handle(const handle&) = default;
+ handle& operator=(const handle&) = default;
+
+ [[__gnu__::__always_inline__]]
+ void
+ format(basic_format_parse_context<_CharT>& __pc, _Context& __fc) const
+ {
+   using _Func = void(*)(basic_format_parse_context<_CharT>&,
+    _Context&, const void*);
+   auto __f = reinterpret_cast<_Func>(this->_M_func);
+   __f(__pc, __fc, this->_M_ptr);
+ }
+      };
+
+      [[__gnu__::__always_inline__]]
+      basic_format_arg() noexcept : _M_type(__format::_Arg_none) { }
+
+      [[nodiscard,__gnu__::__always_inline__]]
+      explicit operator bool() const noexcept
+      { return _M_type != __format::_Arg_none; }
+# 3797 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+    private:
+      template<typename _Ctx>
+ friend class basic_format_args;
+
+      template<typename _Ctx, typename... _Args>
+ friend class __format::_Arg_store;
+
+      static_assert(is_trivially_copyable_v<__format::_Arg_value<_Context>>);
+
+      __format::_Arg_value<_Context> _M_val;
+      __format::_Arg_t _M_type;
+
+
+
+
+      template<typename _Tp>
+ static consteval auto
+ _S_to_arg_type()
+ {
+   using _Td = remove_const_t<_Tp>;
+   if constexpr (is_same_v<_Td, bool>)
+     return type_identity<bool>();
+   else if constexpr (is_same_v<_Td, _CharT>)
+     return type_identity<_CharT>();
+   else if constexpr (is_same_v<_Td, char> && is_same_v<_CharT, wchar_t>)
+     return type_identity<_CharT>();
+
+   else if constexpr (is_same_v<_Td, __int128>)
+     return type_identity<__int128>();
+   else if constexpr (is_same_v<_Td, unsigned __int128>)
+     return type_identity<unsigned __int128>();
+
+   else if constexpr (__is_signed_integer<_Td>::value)
+     {
+       if constexpr (sizeof(_Td) <= sizeof(int))
+  return type_identity<int>();
+       else if constexpr (sizeof(_Td) <= sizeof(long long))
+  return type_identity<long long>();
+     }
+   else if constexpr (__is_unsigned_integer<_Td>::value)
+     {
+       if constexpr (sizeof(_Td) <= sizeof(unsigned))
+  return type_identity<unsigned>();
+       else if constexpr (sizeof(_Td) <= sizeof(unsigned long long))
+  return type_identity<unsigned long long>();
+     }
+   else if constexpr (is_same_v<_Td, float>)
+     return type_identity<float>();
+   else if constexpr (is_same_v<_Td, double>)
+     return type_identity<double>();
+
+   else if constexpr (is_same_v<_Td, long double>)
+     return type_identity<long double>();
+# 3858 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+   else if constexpr (is_same_v<_Td, _Float16>)
+     return type_identity<float>();
+
+
+
+   else if constexpr (is_same_v<_Td, decltype(0.0bf16)>)
+     return type_identity<float>();
+
+
+
+   else if constexpr (is_same_v<_Td, _Float32>)
+     return type_identity<float>();
+
+
+
+   else if constexpr (is_same_v<_Td, _Float64>)
+     return type_identity<double>();
+# 3887 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+   else if constexpr (__is_specialization_of<_Td, basic_string_view>
+       || __is_specialization_of<_Td, basic_string>)
+     {
+       if constexpr (is_same_v<typename _Td::value_type, _CharT>)
+  return type_identity<basic_string_view<_CharT>>();
+       else
+  return type_identity<handle>();
+     }
+   else if constexpr (is_same_v<decay_t<_Td>, const _CharT*>)
+     return type_identity<const _CharT*>();
+   else if constexpr (is_same_v<decay_t<_Td>, _CharT*>)
+     return type_identity<const _CharT*>();
+   else if constexpr (is_void_v<remove_pointer_t<_Td>>)
+     return type_identity<const void*>();
+   else if constexpr (is_same_v<_Td, nullptr_t>)
+     return type_identity<const void*>();
+   else
+     return type_identity<handle>();
+ }
+
+
+      template<typename _Tp>
+ using _Normalize = typename decltype(_S_to_arg_type<_Tp>())::type;
+
+
+      template<typename _Tp>
+ static consteval __format::_Arg_t
+ _S_to_enum()
+ {
+   using namespace __format;
+   if constexpr (is_same_v<_Tp, bool>)
+     return _Arg_bool;
+   else if constexpr (is_same_v<_Tp, _CharT>)
+     return _Arg_c;
+   else if constexpr (is_same_v<_Tp, int>)
+     return _Arg_i;
+   else if constexpr (is_same_v<_Tp, unsigned>)
+     return _Arg_u;
+   else if constexpr (is_same_v<_Tp, long long>)
+     return _Arg_ll;
+   else if constexpr (is_same_v<_Tp, unsigned long long>)
+     return _Arg_ull;
+   else if constexpr (is_same_v<_Tp, float>)
+     return _Arg_flt;
+   else if constexpr (is_same_v<_Tp, double>)
+     return _Arg_dbl;
+
+   else if constexpr (is_same_v<_Tp, long double>)
+     return _Arg_ldbl;
+
+
+
+
+
+
+
+   else if constexpr (is_same_v<_Tp, const _CharT*>)
+     return _Arg_str;
+   else if constexpr (is_same_v<_Tp, basic_string_view<_CharT>>)
+     return _Arg_sv;
+   else if constexpr (is_same_v<_Tp, const void*>)
+     return _Arg_ptr;
+
+   else if constexpr (is_same_v<_Tp, __int128>)
+     return _Arg_i128;
+   else if constexpr (is_same_v<_Tp, unsigned __int128>)
+     return _Arg_u128;
+
+
+
+
+
+
+   else if constexpr (is_same_v<_Tp, handle>)
+     return _Arg_handle;
+ }
+
+      template<typename _Tp>
+ void
+ _M_set(_Tp __v) noexcept
+ {
+   _M_type = _S_to_enum<_Tp>();
+   _M_val._M_set(__v);
+ }
+
+      template<typename _Tp>
+ requires __format::__formattable_with<_Tp, _Context>
+ explicit
+ basic_format_arg(_Tp& __v) noexcept
+ {
+   using _Td = _Normalize<_Tp>;
+   if constexpr (is_same_v<_Td, basic_string_view<_CharT>>)
+     _M_set(_Td{__v.data(), __v.size()});
+   else if constexpr (is_same_v<remove_const_t<_Tp>, char>
+          && is_same_v<_CharT, wchar_t>)
+     _M_set(static_cast<_Td>(static_cast<unsigned char>(__v)));
+   else
+     _M_set(static_cast<_Td>(__v));
+ }
+
+      template<typename _Ctx, typename... _Argz>
+ friend auto
+ make_format_args(_Argz&...) noexcept;
+
+      template<typename _Visitor, typename _Ctx>
+ friend decltype(auto)
+ visit_format_arg(_Visitor&& __vis, basic_format_arg<_Ctx>);
+
+      template<typename _Visitor, typename _Ctx>
+ friend decltype(auto)
+ __format::__visit_format_arg(_Visitor&&, basic_format_arg<_Ctx>);
+
+      template<typename _Ch, typename _Tp>
+ friend consteval __format::_Arg_t
+ __format::__to_arg_t_enum() noexcept;
+
+      template<typename _Visitor>
+ decltype(auto)
+ _M_visit(_Visitor&& __vis, __format::_Arg_t __type)
+ {
+   using namespace __format;
+   switch (__type)
+   {
+     case _Arg_none:
+       return std::forward<_Visitor>(__vis)(_M_val._M_none);
+     case _Arg_bool:
+       return std::forward<_Visitor>(__vis)(_M_val._M_bool);
+     case _Arg_c:
+       return std::forward<_Visitor>(__vis)(_M_val._M_c);
+     case _Arg_i:
+       return std::forward<_Visitor>(__vis)(_M_val._M_i);
+     case _Arg_u:
+       return std::forward<_Visitor>(__vis)(_M_val._M_u);
+     case _Arg_ll:
+       return std::forward<_Visitor>(__vis)(_M_val._M_ll);
+     case _Arg_ull:
+       return std::forward<_Visitor>(__vis)(_M_val._M_ull);
+
+     case _Arg_flt:
+       return std::forward<_Visitor>(__vis)(_M_val._M_flt);
+     case _Arg_dbl:
+       return std::forward<_Visitor>(__vis)(_M_val._M_dbl);
+
+     case _Arg_ldbl:
+       return std::forward<_Visitor>(__vis)(_M_val._M_ldbl);
+
+
+
+
+
+
+
+     case _Arg_str:
+       return std::forward<_Visitor>(__vis)(_M_val._M_str);
+     case _Arg_sv:
+       return std::forward<_Visitor>(__vis)(_M_val._M_sv);
+     case _Arg_ptr:
+       return std::forward<_Visitor>(__vis)(_M_val._M_ptr);
+     case _Arg_handle:
+     {
+       auto& __h = static_cast<handle&>(_M_val._M_handle);
+       return std::forward<_Visitor>(__vis)(__h);
+     }
+
+     case _Arg_i128:
+       return std::forward<_Visitor>(__vis)(_M_val._M_i128);
+     case _Arg_u128:
+       return std::forward<_Visitor>(__vis)(_M_val._M_u128);
+
+
+
+
+
+
+
+     default:
+
+       __builtin_unreachable();
+   }
+ }
+
+      template<typename _Visitor>
+ decltype(auto)
+ _M_visit_user(_Visitor&& __vis, __format::_Arg_t __type)
+ {
+   return _M_visit([&__vis]<typename _Tp>(_Tp& __val) -> decltype(auto)
+     {
+       constexpr bool __user_facing = __is_one_of<_Tp,
+  monostate, bool, _CharT,
+  int, unsigned int, long long int, unsigned long long int,
+  float, double, long double,
+  const _CharT*, basic_string_view<_CharT>,
+  const void*, handle>::value;
+      if constexpr (__user_facing)
+        return std::forward<_Visitor>(__vis)(__val);
+      else
+        {
+   handle __h(__val);
+   return std::forward<_Visitor>(__vis)(__h);
+        }
+    }, __type);
+ }
+    };
+
+  template<typename _Visitor, typename _Context>
+   
+    inline decltype(auto)
+    visit_format_arg(_Visitor&& __vis, basic_format_arg<_Context> __arg)
+    {
+      return __arg._M_visit_user(std::forward<_Visitor>(__vis), __arg._M_type);
+    }
+
+
+namespace __format
+{
+  template<typename _Visitor, typename _Ctx>
+    inline decltype(auto)
+    __visit_format_arg(_Visitor&& __vis, basic_format_arg<_Ctx> __arg)
+    {
+      return __arg._M_visit(std::forward<_Visitor>(__vis), __arg._M_type);
+    }
+
+  struct _WidthPrecVisitor
+  {
+    template<typename _Tp>
+      size_t
+      operator()(_Tp& __arg) const
+      {
+ if constexpr (is_same_v<_Tp, monostate>)
+   __format::__invalid_arg_id_in_format_string();
+
+
+
+ else if constexpr (sizeof(_Tp) <= sizeof(long long))
+   {
+
+
+     if constexpr (__is_unsigned_integer<_Tp>::value)
+       return __arg;
+     else if constexpr (__is_signed_integer<_Tp>::value)
+       if (__arg >= 0)
+  return __arg;
+   }
+ __throw_format_error("format error: argument used for width or "
+        "precision must be a non-negative integer");
+      }
+  };
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  template<typename _Context>
+    inline size_t
+    __int_from_arg(const basic_format_arg<_Context>& __arg)
+    { return __format::__visit_format_arg(_WidthPrecVisitor(), __arg); }
+
+
+  template<int _Bits, size_t _Nm>
+    constexpr auto
+    __pack_arg_types(const array<_Arg_t, _Nm>& __types)
+    {
+      long long unsigned int __packed_types = 0;
+      for (auto __i = __types.rbegin(); __i != __types.rend(); ++__i)
+ __packed_types = (__packed_types << _Bits) | *__i;
+      return __packed_types;
+    }
+}
+
+
+  template<typename _Context>
+    class basic_format_args
+    {
+      static constexpr int _S_packed_type_bits = 5;
+      static constexpr int _S_packed_type_mask = 0b11111;
+      static constexpr int _S_max_packed_args = 12;
+
+      static_assert( __format::_Arg_max_ <= (1 << _S_packed_type_bits) );
+
+      template<typename... _Args>
+ using _Store = __format::_Arg_store<_Context, _Args...>;
+
+      template<typename _Ctx, typename... _Args>
+ friend class __format::_Arg_store;
+
+      using uint64_t = long long unsigned int;
+      using _Format_arg = basic_format_arg<_Context>;
+      using _Format_arg_val = __format::_Arg_value<_Context>;
+
+
+
+
+
+      uint64_t _M_packed_size : 4;
+      uint64_t _M_unpacked_size : 60;
+
+      union {
+ const _Format_arg_val* _M_values;
+ const _Format_arg* _M_args;
+      };
+
+      size_t
+      _M_size() const noexcept
+      { return _M_packed_size ? _M_packed_size : _M_unpacked_size; }
+
+      typename __format::_Arg_t
+      _M_type(size_t __i) const noexcept
+      {
+ uint64_t __t = _M_unpacked_size >> (__i * _S_packed_type_bits);
+ return static_cast<__format::_Arg_t>(__t & _S_packed_type_mask);
+      }
+
+      template<typename _Ctx, typename... _Args>
+ friend auto
+ make_format_args(_Args&...) noexcept;
+
+
+      template<typename... _Args>
+ static consteval array<__format::_Arg_t, sizeof...(_Args)>
+ _S_types_to_pack()
+ { return {_Format_arg::template _S_to_enum<_Args>()...}; }
+
+    public:
+      template<typename... _Args>
+ basic_format_args(const _Store<_Args...>& __store) noexcept;
+
+      [[nodiscard,__gnu__::__always_inline__]]
+      basic_format_arg<_Context>
+      get(size_t __i) const noexcept
+      {
+ basic_format_arg<_Context> __arg;
+ if (__i < _M_packed_size)
+   {
+     __arg._M_type = _M_type(__i);
+     __arg._M_val = _M_values[__i];
+   }
+ else if (_M_packed_size == 0 && __i < _M_unpacked_size)
+   __arg = _M_args[__i];
+ return __arg;
+      }
+    };
+
+
+
+  template<typename _Context, typename... _Args>
+    basic_format_args(__format::_Arg_store<_Context, _Args...>)
+      -> basic_format_args<_Context>;
+
+  template<typename _Context, typename... _Args>
+    auto
+    make_format_args(_Args&... __fmt_args) noexcept;
+
+
+  template<typename _Context, typename... _Args>
+    class __format::_Arg_store
+    {
+      friend std::basic_format_args<_Context>;
+
+      template<typename _Ctx, typename... _Argz>
+ friend auto std::
+
+
+
+ make_format_args(_Argz&...) noexcept;
+
+
+
+      static constexpr bool _S_values_only
+ = sizeof...(_Args) <= basic_format_args<_Context>::_S_max_packed_args;
+
+      using _Element_t
+ = __conditional_t<_S_values_only,
+     __format::_Arg_value<_Context>,
+     basic_format_arg<_Context>>;
+
+      _Element_t _M_args[sizeof...(_Args)];
+
+      template<typename _Tp>
+ static _Element_t
+ _S_make_elt(_Tp& __v)
+ {
+   using _Tq = remove_const_t<_Tp>;
+   using _CharT = typename _Context::char_type;
+   static_assert(is_default_constructible_v<formatter<_Tq, _CharT>>,
+   "std::formatter must be specialized for the type "
+   "of each format arg");
+   using __format::__formattable_with;
+   if constexpr (is_const_v<_Tp>)
+     if constexpr (!__formattable_with<_Tp, _Context>)
+       if constexpr (__formattable_with<_Tq, _Context>)
+  static_assert(__formattable_with<_Tp, _Context>,
+         "format arg must be non-const because its "
+         "std::formatter specialization has a "
+         "non-const reference parameter");
+   basic_format_arg<_Context> __arg(__v);
+   if constexpr (_S_values_only)
+     return __arg._M_val;
+   else
+     return __arg;
+ }
+
+      template<typename... _Tp>
+ requires (sizeof...(_Tp) == sizeof...(_Args))
+ [[__gnu__::__always_inline__]]
+ _Arg_store(_Tp&... __a) noexcept
+ : _M_args{_S_make_elt(__a)...}
+ { }
+    };
+
+  template<typename _Context>
+    class __format::_Arg_store<_Context>
+    { };
+
+  template<typename _Context>
+    template<typename... _Args>
+      inline
+      basic_format_args<_Context>::
+      basic_format_args(const _Store<_Args...>& __store) noexcept
+      {
+ if constexpr (sizeof...(_Args) == 0)
+   {
+     _M_packed_size = 0;
+     _M_unpacked_size = 0;
+     _M_args = nullptr;
+   }
+ else if constexpr (sizeof...(_Args) <= _S_max_packed_args)
+   {
+
+     _M_packed_size = sizeof...(_Args);
+
+     _M_unpacked_size
+       = __format::__pack_arg_types<_S_packed_type_bits>(_S_types_to_pack<_Args...>());
+
+     _M_values = __store._M_args;
+   }
+ else
+   {
+
+     _M_packed_size = 0;
+
+     _M_unpacked_size = sizeof...(_Args);
+
+     _M_args = __store._M_args;
+   }
+      }
+
+
+  template<typename _Context = format_context, typename... _Args>
+    [[nodiscard,__gnu__::__always_inline__]]
+    inline auto
+    make_format_args(_Args&... __fmt_args) noexcept
+    {
+      using _Fmt_arg = basic_format_arg<_Context>;
+      using _Store = __format::_Arg_store<_Context, typename _Fmt_arg::template
+       _Normalize<_Args>...>;
+      return _Store(__fmt_args...);
+    }
+
+
+
+  template<typename... _Args>
+    [[nodiscard,__gnu__::__always_inline__]]
+    inline auto
+    make_wformat_args(_Args&... __args) noexcept
+    { return std::make_format_args<wformat_context>(__args...); }
+
+
+
+namespace __format
+{
+  template<typename _Out, typename _CharT, typename _Context>
+    _Out
+    __do_vformat_to(_Out, basic_string_view<_CharT>,
+      const basic_format_args<_Context>&,
+      const locale* = nullptr);
+
+  template<typename _CharT> struct __formatter_chrono;
+
+}
+# 4379 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+  template<typename _Out, typename _CharT>
+    class basic_format_context
+    {
+      static_assert( output_iterator<_Out, const _CharT&> );
+
+      basic_format_args<basic_format_context> _M_args;
+      _Out _M_out;
+      __format::_Optional_locale _M_loc;
+
+      basic_format_context(basic_format_args<basic_format_context> __args,
+      _Out __out)
+      : _M_args(__args), _M_out(std::move(__out))
+      { }
+
+      basic_format_context(basic_format_args<basic_format_context> __args,
+      _Out __out, const std::locale& __loc)
+      : _M_args(__args), _M_out(std::move(__out)), _M_loc(__loc)
+      { }
+
+
+
+
+      basic_format_context(const basic_format_context&) = delete;
+      basic_format_context& operator=(const basic_format_context&) = delete;
+
+      template<typename _Out2, typename _CharT2, typename _Context2>
+ friend _Out2
+ __format::__do_vformat_to(_Out2, basic_string_view<_CharT2>,
+      const basic_format_args<_Context2>&,
+      const locale*);
+
+      friend __format::__formatter_chrono<_CharT>;
+
+    public:
+      ~basic_format_context() = default;
+
+      using iterator = _Out;
+      using char_type = _CharT;
+      template<typename _Tp>
+ using formatter_type = formatter<_Tp, _CharT>;
+
+      [[nodiscard]]
+      basic_format_arg<basic_format_context>
+      arg(size_t __id) const noexcept
+      { return _M_args.get(__id); }
+
+      [[nodiscard]]
+      std::locale locale() { return _M_loc.value(); }
+
+      [[nodiscard]]
+      iterator out() { return std::move(_M_out); }
+
+      void advance_to(iterator __it) { _M_out = std::move(__it); }
+    };
+
+
+
+namespace __format
+{
+
+
+
+
+
+  template<typename _CharT>
+    struct _Scanner
+    {
+      using iterator = typename basic_format_parse_context<_CharT>::iterator;
+
+      struct _Parse_context : basic_format_parse_context<_CharT>
+      {
+ using basic_format_parse_context<_CharT>::basic_format_parse_context;
+ const _Arg_t* _M_types = nullptr;
+      } _M_pc;
+
+      constexpr explicit
+      _Scanner(basic_string_view<_CharT> __str, size_t __nargs = (size_t)-1)
+      : _M_pc(__str, __nargs)
+      { }
+
+      constexpr iterator begin() const noexcept { return _M_pc.begin(); }
+      constexpr iterator end() const noexcept { return _M_pc.end(); }
+
+      constexpr void
+      _M_scan()
+      {
+ basic_string_view<_CharT> __fmt = _M_fmt_str();
+
+ if (__fmt.size() == 2 && __fmt[0] == '{' && __fmt[1] == '}')
+   {
+     _M_pc.advance_to(begin() + 1);
+     _M_format_arg(_M_pc.next_arg_id());
+     return;
+   }
+
+ size_t __lbr = __fmt.find('{');
+ size_t __rbr = __fmt.find('}');
+
+ while (__fmt.size())
+   {
+     auto __cmp = __lbr <=> __rbr;
+     if (__cmp == 0)
+       {
+  _M_on_chars(end());
+  _M_pc.advance_to(end());
+  return;
+       }
+     else if (__cmp < 0)
+       {
+  if (__lbr + 1 == __fmt.size()
+        || (__rbr == __fmt.npos && __fmt[__lbr + 1] != '{'))
+    __format::__unmatched_left_brace_in_format_string();
+  const bool __is_escape = __fmt[__lbr + 1] == '{';
+  iterator __last = begin() + __lbr + int(__is_escape);
+  _M_on_chars(__last);
+  _M_pc.advance_to(__last + 1);
+  __fmt = _M_fmt_str();
+  if (__is_escape)
+    {
+      if (__rbr != __fmt.npos)
+        __rbr -= __lbr + 2;
+      __lbr = __fmt.find('{');
+    }
+  else
+    {
+      _M_on_replacement_field();
+      __fmt = _M_fmt_str();
+      __lbr = __fmt.find('{');
+      __rbr = __fmt.find('}');
+    }
+       }
+     else
+       {
+  if (++__rbr == __fmt.size() || __fmt[__rbr] != '}')
+    __format::__unmatched_right_brace_in_format_string();
+  iterator __last = begin() + __rbr;
+  _M_on_chars(__last);
+  _M_pc.advance_to(__last + 1);
+  __fmt = _M_fmt_str();
+  if (__lbr != __fmt.npos)
+    __lbr -= __rbr + 1;
+  __rbr = __fmt.find('}');
+       }
+   }
+      }
+
+      constexpr basic_string_view<_CharT>
+      _M_fmt_str() const noexcept
+      { return {begin(), end()}; }
+
+      constexpr virtual void _M_on_chars(iterator) { }
+
+      constexpr void _M_on_replacement_field()
+      {
+ auto __next = begin();
+
+ size_t __id;
+ if (*__next == '}')
+   __id = _M_pc.next_arg_id();
+ else if (*__next == ':')
+   {
+     __id = _M_pc.next_arg_id();
+     _M_pc.advance_to(++__next);
+   }
+ else
+   {
+     auto [__i, __ptr] = __format::__parse_arg_id(begin(), end());
+     if (!__ptr || !(*__ptr == '}' || *__ptr == ':'))
+       __format::__invalid_arg_id_in_format_string();
+     _M_pc.check_arg_id(__id = __i);
+     if (*__ptr == ':')
+       {
+  _M_pc.advance_to(++__ptr);
+       }
+     else
+       _M_pc.advance_to(__ptr);
+   }
+ _M_format_arg(__id);
+ if (begin() == end() || *begin() != '}')
+   __format::__unmatched_left_brace_in_format_string();
+ _M_pc.advance_to(begin() + 1);
+      }
+
+      constexpr virtual void _M_format_arg(size_t __id) = 0;
+    };
+
+
+  template<typename _Out, typename _CharT>
+    class _Formatting_scanner : public _Scanner<_CharT>
+    {
+    public:
+      _Formatting_scanner(basic_format_context<_Out, _CharT>& __fc,
+     basic_string_view<_CharT> __str)
+      : _Scanner<_CharT>(__str), _M_fc(__fc)
+      { }
+
+    private:
+      basic_format_context<_Out, _CharT>& _M_fc;
+
+      using iterator = typename _Scanner<_CharT>::iterator;
+
+      constexpr void
+      _M_on_chars(iterator __last) override
+      {
+ basic_string_view<_CharT> __str(this->begin(), __last);
+ _M_fc.advance_to(__format::__write(_M_fc.out(), __str));
+      }
+
+      constexpr void
+      _M_format_arg(size_t __id) override
+      {
+ using _Context = basic_format_context<_Out, _CharT>;
+ using handle = typename basic_format_arg<_Context>::handle;
+
+ __format::__visit_format_arg([this](auto& __arg) {
+   using _Type = remove_reference_t<decltype(__arg)>;
+   using _Formatter = typename _Context::template formatter_type<_Type>;
+   if constexpr (is_same_v<_Type, monostate>)
+     __format::__invalid_arg_id_in_format_string();
+   else if constexpr (is_same_v<_Type, handle>)
+     __arg.format(this->_M_pc, this->_M_fc);
+   else if constexpr (is_default_constructible_v<_Formatter>)
+     {
+       _Formatter __f;
+       this->_M_pc.advance_to(__f.parse(this->_M_pc));
+       this->_M_fc.advance_to(__f.format(__arg, this->_M_fc));
+     }
+   else
+     static_assert(__format::__formattable_with<_Type, _Context>);
+ }, _M_fc.arg(__id));
+      }
+    };
+
+  template<typename _CharT, typename _Tp>
+    consteval _Arg_t
+    __to_arg_t_enum() noexcept
+    {
+      using _Context = __format::__format_context<_CharT>;
+      using _Fmt_arg = basic_format_arg<_Context>;
+      using _NormalizedTp = typename _Fmt_arg::template _Normalize<_Tp>;
+      return _Fmt_arg::template _S_to_enum<_NormalizedTp>();
+    }
+
+
+  template<typename _CharT, typename... _Args>
+    class _Checking_scanner : public _Scanner<_CharT>
+    {
+      static_assert(
+ (is_default_constructible_v<formatter<_Args, _CharT>> && ...),
+ "std::formatter must be specialized for each type being formatted");
+
+    public:
+      consteval
+      _Checking_scanner(basic_string_view<_CharT> __str)
+      : _Scanner<_CharT>(__str, sizeof...(_Args))
+      {
+
+
+
+      }
+
+    private:
+      constexpr void
+      _M_format_arg(size_t __id) override
+      {
+ if constexpr (sizeof...(_Args) != 0)
+   {
+     if (__id < sizeof...(_Args))
+       {
+  _M_parse_format_spec<_Args...>(__id);
+  return;
+       }
+   }
+ __builtin_unreachable();
+      }
+
+      template<typename _Tp, typename... _OtherArgs>
+ constexpr void
+ _M_parse_format_spec(size_t __id)
+ {
+   if (__id == 0)
+     {
+       formatter<_Tp, _CharT> __f;
+       this->_M_pc.advance_to(__f.parse(this->_M_pc));
+     }
+   else if constexpr (sizeof...(_OtherArgs) != 0)
+     _M_parse_format_spec<_OtherArgs...>(__id - 1);
+   else
+     __builtin_unreachable();
+ }
+
+
+
+
+
+    };
+
+  template<typename _Out, typename _CharT, typename _Context>
+    inline _Out
+    __do_vformat_to(_Out __out, basic_string_view<_CharT> __fmt,
+      const basic_format_args<_Context>& __args,
+      const locale* __loc)
+    {
+      _Iter_sink<_CharT, _Out> __sink(std::move(__out));
+      _Sink_iter<_CharT> __sink_out;
+
+      if constexpr (is_same_v<_Out, _Sink_iter<_CharT>>)
+ __sink_out = __out;
+      else
+ __sink_out = __sink.out();
+
+      if constexpr (is_same_v<_CharT, char>)
+
+ if (__fmt.size() == 2 && __fmt[0] == '{' && __fmt[1] == '}')
+   {
+     bool __done = false;
+     __format::__visit_format_arg([&](auto& __arg) {
+       using _Tp = remove_cvref_t<decltype(__arg)>;
+       if constexpr (is_same_v<_Tp, bool>)
+  {
+    size_t __len = 4 + !__arg;
+    const char* __chars[] = { "false", "true" };
+    if (auto __res = __sink_out._M_reserve(__len))
+      {
+        __builtin_memcpy(__res.get(), __chars[__arg], __len);
+        __res._M_bump(__len);
+        __done = true;
+      }
+  }
+       else if constexpr (is_same_v<_Tp, char>)
+  {
+    if (auto __res = __sink_out._M_reserve(1))
+      {
+        *__res.get() = __arg;
+        __res._M_bump(1);
+        __done = true;
+      }
+  }
+       else if constexpr (is_integral_v<_Tp>)
+  {
+    make_unsigned_t<_Tp> __uval;
+    const bool __neg = __arg < 0;
+    if (__neg)
+      __uval = make_unsigned_t<_Tp>(~__arg) + 1u;
+    else
+      __uval = __arg;
+    const auto __n = __detail::__to_chars_len(__uval);
+    if (auto __res = __sink_out._M_reserve(__n + __neg))
+      {
+        auto __ptr = __res.get();
+        *__ptr = '-';
+        __detail::__to_chars_10_impl(__ptr + (int)__neg, __n,
+         __uval);
+        __res._M_bump(__n + __neg);
+        __done = true;
+      }
+  }
+       else if constexpr (is_convertible_v<_Tp, string_view>)
+  {
+    string_view __sv = __arg;
+    if (auto __res = __sink_out._M_reserve(__sv.size()))
+      {
+        __builtin_memcpy(__res.get(), __sv.data(), __sv.size());
+        __res._M_bump(__sv.size());
+        __done = true;
+      }
+  }
+     }, __args.get(0));
+
+     if (__done)
+       {
+  if constexpr (is_same_v<_Out, _Sink_iter<_CharT>>)
+    return __sink_out;
+  else
+    return std::move(__sink)._M_finish().out;
+       }
+   }
+
+      auto __ctx = __loc == nullptr
+       ? _Context(__args, __sink_out)
+       : _Context(__args, __sink_out, *__loc);
+      _Formatting_scanner<_Sink_iter<_CharT>, _CharT> __scanner(__ctx, __fmt);
+      __scanner._M_scan();
+
+      if constexpr (is_same_v<_Out, _Sink_iter<_CharT>>)
+ return __ctx.out();
+      else
+ return std::move(__sink)._M_finish().out;
+    }
+#pragma GCC diagnostic pop
+
+}
+# 4800 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+  template<typename _CharT, typename... _Args>
+    template<typename _Tp>
+      requires convertible_to<const _Tp&, basic_string_view<_CharT>>
+      consteval
+      basic_format_string<_CharT, _Args...>::
+      basic_format_string(const _Tp& __s)
+      : _M_str(__s)
+      {
+ __format::_Checking_scanner<_CharT, remove_cvref_t<_Args>...>
+   __scanner(_M_str);
+ __scanner._M_scan();
+      }
+
+
+
+  template<typename _Out> requires output_iterator<_Out, const char&>
+    [[__gnu__::__always_inline__]]
+    inline _Out
+    vformat_to(_Out __out, string_view __fmt, format_args __args)
+    { return __format::__do_vformat_to(std::move(__out), __fmt, __args); }
+
+
+  template<typename _Out> requires output_iterator<_Out, const wchar_t&>
+    [[__gnu__::__always_inline__]]
+    inline _Out
+    vformat_to(_Out __out, wstring_view __fmt, wformat_args __args)
+    { return __format::__do_vformat_to(std::move(__out), __fmt, __args); }
+
+
+  template<typename _Out> requires output_iterator<_Out, const char&>
+    [[__gnu__::__always_inline__]]
+    inline _Out
+    vformat_to(_Out __out, const locale& __loc, string_view __fmt,
+        format_args __args)
+    {
+      return __format::__do_vformat_to(std::move(__out), __fmt, __args, &__loc);
+    }
+
+
+  template<typename _Out> requires output_iterator<_Out, const wchar_t&>
+    [[__gnu__::__always_inline__]]
+    inline _Out
+    vformat_to(_Out __out, const locale& __loc, wstring_view __fmt,
+        wformat_args __args)
+    {
+      return __format::__do_vformat_to(std::move(__out), __fmt, __args, &__loc);
+    }
+
+
+  [[nodiscard]]
+  inline string
+  vformat(string_view __fmt, format_args __args)
+  {
+    __format::_Str_sink<char> __buf;
+    std::vformat_to(__buf.out(), __fmt, __args);
+    return std::move(__buf).get();
+  }
+
+
+  [[nodiscard]]
+  inline wstring
+  vformat(wstring_view __fmt, wformat_args __args)
+  {
+    __format::_Str_sink<wchar_t> __buf;
+    std::vformat_to(__buf.out(), __fmt, __args);
+    return std::move(__buf).get();
+  }
+
+
+  [[nodiscard]]
+  inline string
+  vformat(const locale& __loc, string_view __fmt, format_args __args)
+  {
+    __format::_Str_sink<char> __buf;
+    std::vformat_to(__buf.out(), __loc, __fmt, __args);
+    return std::move(__buf).get();
+  }
+
+
+  [[nodiscard]]
+  inline wstring
+  vformat(const locale& __loc, wstring_view __fmt, wformat_args __args)
+  {
+    __format::_Str_sink<wchar_t> __buf;
+    std::vformat_to(__buf.out(), __loc, __fmt, __args);
+    return std::move(__buf).get();
+  }
+
+
+  template<typename... _Args>
+    [[nodiscard]]
+    inline string
+    format(format_string<_Args...> __fmt, _Args&&... __args)
+    { return std::vformat(__fmt.get(), std::make_format_args(__args...)); }
+
+
+  template<typename... _Args>
+    [[nodiscard]]
+    inline wstring
+    format(wformat_string<_Args...> __fmt, _Args&&... __args)
+    { return std::vformat(__fmt.get(), std::make_wformat_args(__args...)); }
+
+
+  template<typename... _Args>
+    [[nodiscard]]
+    inline string
+    format(const locale& __loc, format_string<_Args...> __fmt,
+    _Args&&... __args)
+    {
+      return std::vformat(__loc, __fmt.get(),
+     std::make_format_args(__args...));
+    }
+
+
+  template<typename... _Args>
+    [[nodiscard]]
+    inline wstring
+    format(const locale& __loc, wformat_string<_Args...> __fmt,
+    _Args&&... __args)
+    {
+      return std::vformat(__loc, __fmt.get(),
+     std::make_wformat_args(__args...));
+    }
+
+
+  template<typename _Out, typename... _Args>
+    requires output_iterator<_Out, const char&>
+    inline _Out
+    format_to(_Out __out, format_string<_Args...> __fmt, _Args&&... __args)
+    {
+      return std::vformat_to(std::move(__out), __fmt.get(),
+        std::make_format_args(__args...));
+    }
+
+
+  template<typename _Out, typename... _Args>
+    requires output_iterator<_Out, const wchar_t&>
+    inline _Out
+    format_to(_Out __out, wformat_string<_Args...> __fmt, _Args&&... __args)
+    {
+      return std::vformat_to(std::move(__out), __fmt.get(),
+        std::make_wformat_args(__args...));
+    }
+
+
+  template<typename _Out, typename... _Args>
+    requires output_iterator<_Out, const char&>
+    inline _Out
+    format_to(_Out __out, const locale& __loc, format_string<_Args...> __fmt,
+       _Args&&... __args)
+    {
+      return std::vformat_to(std::move(__out), __loc, __fmt.get(),
+        std::make_format_args(__args...));
+    }
+
+
+  template<typename _Out, typename... _Args>
+    requires output_iterator<_Out, const wchar_t&>
+    inline _Out
+    format_to(_Out __out, const locale& __loc, wformat_string<_Args...> __fmt,
+       _Args&&... __args)
+    {
+      return std::vformat_to(std::move(__out), __loc, __fmt.get(),
+        std::make_wformat_args(__args...));
+    }
+
+
+  template<typename _Out, typename... _Args>
+    requires output_iterator<_Out, const char&>
+    inline format_to_n_result<_Out>
+    format_to_n(_Out __out, iter_difference_t<_Out> __n,
+  format_string<_Args...> __fmt, _Args&&... __args)
+    {
+      __format::_Iter_sink<char, _Out> __sink(std::move(__out), __n);
+      std::vformat_to(__sink.out(), __fmt.get(),
+        std::make_format_args(__args...));
+      return std::move(__sink)._M_finish();
+    }
+
+
+  template<typename _Out, typename... _Args>
+    requires output_iterator<_Out, const wchar_t&>
+    inline format_to_n_result<_Out>
+    format_to_n(_Out __out, iter_difference_t<_Out> __n,
+  wformat_string<_Args...> __fmt, _Args&&... __args)
+    {
+      __format::_Iter_sink<wchar_t, _Out> __sink(std::move(__out), __n);
+      std::vformat_to(__sink.out(), __fmt.get(),
+        std::make_wformat_args(__args...));
+      return std::move(__sink)._M_finish();
+    }
+
+
+  template<typename _Out, typename... _Args>
+    requires output_iterator<_Out, const char&>
+    inline format_to_n_result<_Out>
+    format_to_n(_Out __out, iter_difference_t<_Out> __n, const locale& __loc,
+  format_string<_Args...> __fmt, _Args&&... __args)
+    {
+      __format::_Iter_sink<char, _Out> __sink(std::move(__out), __n);
+      std::vformat_to(__sink.out(), __loc, __fmt.get(),
+        std::make_format_args(__args...));
+      return std::move(__sink)._M_finish();
+    }
+
+
+  template<typename _Out, typename... _Args>
+    requires output_iterator<_Out, const wchar_t&>
+    inline format_to_n_result<_Out>
+    format_to_n(_Out __out, iter_difference_t<_Out> __n, const locale& __loc,
+  wformat_string<_Args...> __fmt, _Args&&... __args)
+    {
+      __format::_Iter_sink<wchar_t, _Out> __sink(std::move(__out), __n);
+      std::vformat_to(__sink.out(), __loc, __fmt.get(),
+        std::make_wformat_args(__args...));
+      return std::move(__sink)._M_finish();
+    }
+
+
+
+namespace __format
+{
+
+  template<typename _CharT>
+    class _Counting_sink final : public _Iter_sink<_CharT, _CharT*>
+    {
+    public:
+      _Counting_sink() : _Iter_sink<_CharT, _CharT*>(nullptr, 0) { }
+
+      [[__gnu__::__always_inline__]]
+      size_t
+      count() const
+      { return this->_M_count + this->_M_used().size(); }
+    };
+# 5060 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+}
+
+
+  template<typename... _Args>
+    [[nodiscard]]
+    inline size_t
+    formatted_size(format_string<_Args...> __fmt, _Args&&... __args)
+    {
+      __format::_Counting_sink<char> __buf;
+      std::vformat_to(__buf.out(), __fmt.get(),
+        std::make_format_args(__args...));
+      return __buf.count();
+    }
+
+
+  template<typename... _Args>
+    [[nodiscard]]
+    inline size_t
+    formatted_size(wformat_string<_Args...> __fmt, _Args&&... __args)
+    {
+      __format::_Counting_sink<wchar_t> __buf;
+      std::vformat_to(__buf.out(), __fmt.get(),
+        std::make_wformat_args(__args...));
+      return __buf.count();
+    }
+
+
+  template<typename... _Args>
+    [[nodiscard]]
+    inline size_t
+    formatted_size(const locale& __loc, format_string<_Args...> __fmt,
+     _Args&&... __args)
+    {
+      __format::_Counting_sink<char> __buf;
+      std::vformat_to(__buf.out(), __loc, __fmt.get(),
+        std::make_format_args(__args...));
+      return __buf.count();
+    }
+
+
+  template<typename... _Args>
+    [[nodiscard]]
+    inline size_t
+    formatted_size(const locale& __loc, wformat_string<_Args...> __fmt,
+     _Args&&... __args)
+    {
+      __format::_Counting_sink<wchar_t> __buf;
+      std::vformat_to(__buf.out(), __loc, __fmt.get(),
+        std::make_wformat_args(__args...));
+      return __buf.count();
+    }
+
+
+
+
+
+  enum class range_format {
+    disabled,
+    map,
+    set,
+    sequence,
+    string,
+    debug_string
+  };
+# 5134 "C:/msys64/mingw64/include/c++/15.2.0/format" 3
+  template<typename _Rg>
+    constexpr auto format_kind = []{
+      static_assert(false, "cannot use primary template of 'std::format_kind'");
+      return type_identity<_Rg>{};
+    }();
+
+
+  template<typename _Tp>
+    consteval range_format
+    __fmt_kind()
+    {
+      using _Ref = ranges::range_reference_t<_Tp>;
+      if constexpr (is_same_v<remove_cvref_t<_Ref>, _Tp>)
+ return range_format::disabled;
+      else if constexpr (requires { typename _Tp::key_type; })
+ {
+   if constexpr (requires { typename _Tp::mapped_type; })
+     {
+       using _Up = remove_cvref_t<_Ref>;
+       if constexpr (__is_pair<_Up>)
+  return range_format::map;
+       else if constexpr (__is_specialization_of<_Up, tuple>)
+  if constexpr (tuple_size_v<_Up> == 2)
+    return range_format::map;
+     }
+   return range_format::set;
+ }
+      else
+ return range_format::sequence;
+    }
+
+
+
+  template<ranges::input_range _Rg> requires same_as<_Rg, remove_cvref_t<_Rg>>
+    constexpr range_format format_kind<_Rg> = __fmt_kind<_Rg>();
+
+
+namespace __format
+{
+  template<typename _CharT, typename _Out, typename _Callback>
+    typename basic_format_context<_Out, _CharT>::iterator
+    __format_padded(basic_format_context<_Out, _CharT>& __fc,
+      const _Spec<_CharT>& __spec,
+      _Callback&& __call)
+    {
+
+
+      static_assert(is_same_v<_Out, __format::_Sink_iter<_CharT>>);
+
+      if (__spec._M_get_width(__fc) == 0)
+ return __call(__fc);
+
+      struct _Restore_out
+      {
+ _Restore_out(basic_format_context<_Sink_iter<_CharT>, _CharT>& __fc)
+ : _M_ctx(std::addressof(__fc)), _M_out(__fc.out())
+ { }
+
+ void _M_trigger()
+ {
+   if (_M_ctx)
+     _M_ctx->advance_to(_M_out);
+   _M_ctx = nullptr;
+ }
+
+ ~_Restore_out()
+ { _M_trigger(); }
+
+      private:
+ basic_format_context<_Sink_iter<_CharT>, _CharT>* _M_ctx;
+ _Sink_iter<_CharT> _M_out;
+      };
+
+      _Restore_out __restore(__fc);
+
+
+
+      _Str_sink<_CharT> __buf;
+      __fc.advance_to(__buf.out());
+      __call(__fc);
+      __restore._M_trigger();
+
+      basic_string_view<_CharT> __str(__buf.view());
+      size_t __width;
+      if constexpr (__unicode::__literal_encoding_is_unicode<_CharT>())
+ __width = __unicode::__field_width(__str);
+      else
+ __width = __str.size();
+
+      return __format::__write_padded_as_spec(__str, __width, __fc, __spec);
+    }
+
+
+
+  template<typename _Rg, typename _CharT>
+    concept __simply_formattable_range
+      = __const_formattable_range<_Rg, _CharT>
+   && same_as<remove_cvref_t<ranges::range_reference_t<_Rg>>,
+       remove_cvref_t<ranges::range_reference_t<const _Rg>>>;
+
+  template<size_t _Pos, typename _Tp, typename _CharT>
+    struct __indexed_formatter_storage
+    {
+      constexpr void
+      _M_parse()
+      {
+ basic_format_parse_context<_CharT> __pc({});
+ if (_M_formatter.parse(__pc) != __pc.end())
+   __format::__failed_to_parse_format_spec();
+      }
+
+      template<typename _Out>
+ void
+ _M_format(__maybe_const<_Tp, _CharT>& __elem,
+    basic_format_context<_Out, _CharT>& __fc,
+    basic_string_view<_CharT> __sep) const
+ {
+   if constexpr (_Pos != 0)
+     __fc.advance_to(__format::__write(__fc.out(), __sep));
+   __fc.advance_to(_M_formatter.format(__elem, __fc));
+ }
+
+      [[__gnu__::__always_inline__]]
+      constexpr void
+      set_debug_format()
+      {
+ if constexpr (__has_debug_format<formatter<_Tp, _CharT>>)
+   _M_formatter.set_debug_format();
+      }
+
+    private:
+      formatter<_Tp, _CharT> _M_formatter;
+    };
+
+  template<typename _CharT, typename... _Tps>
+    class __tuple_formatter
+    {
+      using _String_view = basic_string_view<_CharT>;
+      using _Seps = __format::_Separators<_CharT>;
+
+    public:
+      constexpr void
+      set_separator(basic_string_view<_CharT> __sep) noexcept
+      { _M_sep = __sep; }
+
+      constexpr void
+      set_brackets(basic_string_view<_CharT> __open,
+     basic_string_view<_CharT> __close) noexcept
+      {
+ _M_open = __open;
+ _M_close = __close;
+      }
+
+
+
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      {
+ auto __first = __pc.begin();
+ const auto __last = __pc.end();
+ __format::_Spec<_CharT> __spec{};
+
+ auto __finished = [&]
+   {
+     if (__first != __last && *__first != '}')
+       return false;
+
+     _M_spec = __spec;
+     _M_felems._M_parse();
+     _M_felems.set_debug_format();
+     return true;
+   };
+
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_fill_and_align(__first, __last, "{:");
+ if (__finished())
+   return __first;
+
+ __first = __spec._M_parse_width(__first, __last, __pc);
+ if (__finished())
+   return __first;
+
+ if (*__first == 'n')
+   {
+     ++__first;
+     _M_open = _M_close = _String_view();
+   }
+ else if (*__first == 'm')
+   {
+     ++__first;
+     if constexpr (sizeof...(_Tps) == 2)
+       {
+  _M_sep = _Seps::_S_colon();
+  _M_open = _M_close = _String_view();
+       }
+     else
+       __throw_format_error("format error: 'm' specifier requires range"
+       " of pair or tuple of two elements");
+   }
+
+ if (__finished())
+   return __first;
+
+ __format::__failed_to_parse_format_spec();
+      }
+
+    protected:
+      template<typename _Tuple, typename _Out, size_t... _Ids>
+ typename basic_format_context<_Out, _CharT>::iterator
+ _M_format(_Tuple& __tuple, index_sequence<_Ids...>,
+    basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_format_elems(std::get<_Ids>(__tuple)..., __fc); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ _M_format_elems(__maybe_const<_Tps, _CharT>&... __elems,
+   basic_format_context<_Out, _CharT>& __fc) const
+ {
+   return __format::__format_padded(
+     __fc, _M_spec,
+     [this, &__elems...](basic_format_context<_Out, _CharT>& __nfc)
+       {
+         __nfc.advance_to(__format::__write(__nfc.out(), _M_open));
+         _M_felems._M_format(__elems..., __nfc, _M_sep);
+         return __format::__write(__nfc.out(), _M_close);
+       });
+ }
+
+    private:
+      template<size_t... _Ids>
+ struct __formatters_storage
+   : __indexed_formatter_storage<_Ids, _Tps, _CharT>...
+ {
+   template<size_t _Id, typename _Up>
+     using _Base = __indexed_formatter_storage<_Id, _Up, _CharT>;
+
+   constexpr void
+   _M_parse()
+   {
+     (_Base<_Ids, _Tps>::_M_parse(), ...);
+   }
+
+   template<typename _Out>
+     void
+     _M_format(__maybe_const<_Tps, _CharT>&... __elems,
+        basic_format_context<_Out, _CharT>& __fc,
+        _String_view __sep) const
+     {
+       (_Base<_Ids, _Tps>::_M_format(__elems, __fc, __sep), ...);
+     }
+
+   constexpr void
+   set_debug_format()
+   {
+     (_Base<_Ids, _Tps>::set_debug_format(), ...);
+   }
+ };
+
+      template<size_t... _Ids>
+ static auto
+ _S_create_storage(index_sequence<_Ids...>)
+   -> __formatters_storage<_Ids...>;
+      using _Formatters
+ = decltype(_S_create_storage(index_sequence_for<_Tps...>()));
+
+      _Spec<_CharT> _M_spec{};
+      _String_view _M_open = _Seps::_S_parens().substr(0, 1);
+      _String_view _M_close = _Seps::_S_parens().substr(1, 1);
+      _String_view _M_sep = _Seps::_S_comma();
+      _Formatters _M_felems;
+    };
+
+  template<typename _Tp>
+    concept __is_map_formattable
+      = __is_pair<_Tp> || (__is_tuple_v<_Tp> && tuple_size_v<_Tp> == 2);
+
+}
+
+
+
+  template<__format::__char _CharT, formattable<_CharT> _Fp,
+    formattable<_CharT> _Sp>
+    struct formatter<pair<_Fp, _Sp>, _CharT>
+      : __format::__tuple_formatter<_CharT, remove_cvref_t<_Fp>,
+        remove_cvref_t<_Sp>>
+    {
+    private:
+      using __maybe_const_pair
+ = __conditional_t<formattable<const _Fp, _CharT>
+     && formattable<const _Sp, _CharT>,
+     const pair<_Fp, _Sp>, pair<_Fp, _Sp>>;
+    public:
+
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(__maybe_const_pair& __p,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return this->_M_format_elems(__p.first, __p.second, __fc); }
+    };
+
+  template<__format::__char _CharT, formattable<_CharT>... _Tps>
+    struct formatter<tuple<_Tps...>, _CharT>
+      : __format::__tuple_formatter<_CharT, remove_cvref_t<_Tps>...>
+    {
+    private:
+      using __maybe_const_tuple
+ = __conditional_t<(formattable<const _Tps, _CharT> && ...),
+     const tuple<_Tps...>, tuple<_Tps...>>;
+    public:
+
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(__maybe_const_tuple& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return this->_M_format(__t, index_sequence_for<_Tps...>(), __fc); }
+    };
+
+
+  template<typename _Tp, __format::__char _CharT>
+    requires same_as<remove_cvref_t<_Tp>, _Tp> && formattable<_Tp, _CharT>
+    class range_formatter
+    {
+       using _String_view = basic_string_view<_CharT>;
+       using _Seps = __format::_Separators<_CharT>;
+
+    public:
+       constexpr void
+       set_separator(basic_string_view<_CharT> __sep) noexcept
+       { _M_sep = __sep; }
+
+       constexpr void
+       set_brackets(basic_string_view<_CharT> __open,
+      basic_string_view<_CharT> __close) noexcept
+       {
+  _M_open = __open;
+  _M_close = __close;
+       }
+
+       constexpr formatter<_Tp, _CharT>&
+       underlying() noexcept
+       { return _M_fval; }
+
+       constexpr const formatter<_Tp, _CharT>&
+       underlying() const noexcept
+       { return _M_fval; }
+
+
+
+       constexpr typename basic_format_parse_context<_CharT>::iterator
+       parse(basic_format_parse_context<_CharT>& __pc)
+       {
+  auto __first = __pc.begin();
+  const auto __last = __pc.end();
+  __format::_Spec<_CharT> __spec{};
+  bool __no_brace = false;
+
+  auto __finished = [&]
+    { return __first == __last || *__first == '}'; };
+
+  auto __finalize = [&]
+    {
+      _M_spec = __spec;
+      return __first;
+    };
+
+  auto __parse_val = [&](_String_view __nfs = _String_view())
+    {
+      basic_format_parse_context<_CharT> __npc(__nfs);
+      if (_M_fval.parse(__npc) != __npc.end())
+        __format::__failed_to_parse_format_spec();
+      if constexpr (__format::__has_debug_format<formatter<_Tp, _CharT>>)
+        _M_fval.set_debug_format();
+      return __finalize();
+    };
+
+  if (__finished())
+    return __parse_val();
+
+  __first = __spec._M_parse_fill_and_align(__first, __last, "{:");
+  if (__finished())
+    return __parse_val();
+
+  __first = __spec._M_parse_width(__first, __last, __pc);
+  if (__finished())
+    return __parse_val();
+
+  if (*__first == '?')
+    {
+      ++__first;
+      __spec._M_type = __format::_Pres_esc;
+      if (__finished() || *__first != 's')
+        __throw_format_error("format error: '?' is allowed only in"
+        " combination with 's'");
+    }
+
+  if (*__first == 's')
+    {
+      ++__first;
+      if constexpr (same_as<_Tp, _CharT>)
+        {
+   if (__spec._M_type != __format::_Pres_esc)
+     __spec._M_type = __format::_Pres_str;
+   if (__finished())
+     return __finalize();
+   __throw_format_error("format error: element format specifier"
+          " cannot be provided when 's' specifier is used");
+        }
+      else
+        __throw_format_error("format error: 's' specifier requires"
+        " range of character types");
+    }
+
+  if (__finished())
+    return __parse_val();
+
+  if (*__first == 'n')
+    {
+      ++__first;
+      _M_open = _M_close = _String_view();
+      __no_brace = true;
+    }
+
+  if (__finished())
+    return __parse_val();
+
+  if (*__first == 'm')
+    {
+      _String_view __m(__first, 1);
+      ++__first;
+      if constexpr (__format::__is_map_formattable<_Tp>)
+        {
+   _M_sep = _Seps::_S_comma();
+   if (!__no_brace)
+     {
+       _M_open = _Seps::_S_braces().substr(0, 1);
+       _M_close = _Seps::_S_braces().substr(1, 1);
+     }
+   if (__finished())
+     return __parse_val(__m);
+   __throw_format_error("format error: element format specifier"
+          " cannot be provided when 'm' specifier is used");
+        }
+      else
+        __throw_format_error("format error: 'm' specifier requires"
+        " range of pairs or tuples of two elements");
+    }
+
+ if (__finished())
+   return __parse_val();
+
+ if (*__first == ':')
+   {
+     __pc.advance_to(++__first);
+     __first = _M_fval.parse(__pc);
+   }
+
+ if (__finished())
+   return __finalize();
+
+ __format::__failed_to_parse_format_spec();
+      }
+
+
+
+      template<ranges::input_range _Rg, typename _Out>
+ requires formattable<ranges::range_reference_t<_Rg>, _CharT> &&
+   same_as<remove_cvref_t<ranges::range_reference_t<_Rg>>, _Tp>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(_Rg&& __rg, basic_format_context<_Out, _CharT>& __fc) const
+ {
+   using _Range = remove_reference_t<_Rg>;
+   if constexpr (__format::__simply_formattable_range<_Range, _CharT>)
+     return _M_format<const _Range>(__rg, __fc);
+   else
+     return _M_format(__rg, __fc);
+ }
+
+    private:
+      template<ranges::input_range _Rg, typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ _M_format(_Rg& __rg, basic_format_context<_Out, _CharT>& __fc) const
+ {
+   if constexpr (same_as<_Tp, _CharT>)
+     if (_M_spec._M_type == __format::_Pres_str
+    || _M_spec._M_type == __format::_Pres_esc)
+       {
+  __format::__formatter_str __fstr(_M_spec);
+  return __fstr._M_format_range(__rg, __fc);
+       }
+   return __format::__format_padded(
+     __fc, _M_spec,
+     [this, &__rg](basic_format_context<_Out, _CharT>& __nfc)
+       { return _M_format_elems(__rg, __nfc); });
+ }
+
+
+      template<ranges::input_range _Rg, typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ _M_format_elems(_Rg& __rg,
+   basic_format_context<_Out, _CharT>& __fc) const
+ {
+   auto __out = __format::__write(__fc.out(), _M_open);
+
+   auto __first = ranges::begin(__rg);
+   auto const __last = ranges::end(__rg);
+   if (__first == __last)
+     return __format::__write(__out, _M_close);
+
+   __fc.advance_to(__out);
+   __out = _M_fval.format(*__first, __fc);
+   for (++__first; __first != __last; ++__first)
+     {
+       __out = __format::__write(__out, _M_sep);
+       __fc.advance_to(__out);
+       __out = _M_fval.format(*__first, __fc);
+     }
+
+   return __format::__write(__out, _M_close);
+ }
+
+      __format::_Spec<_CharT> _M_spec{};
+      _String_view _M_open = _Seps::_S_squares().substr(0, 1);
+      _String_view _M_close = _Seps::_S_squares().substr(1, 1);
+      _String_view _M_sep = _Seps::_S_comma();
+      formatter<_Tp, _CharT> _M_fval;
+    };
+
+
+
+
+
+
+  template<ranges::input_range _Rg, __format::__char _CharT>
+    requires (format_kind<_Rg> != range_format::disabled)
+      && formattable<ranges::range_reference_t<_Rg>, _CharT>
+    struct formatter<_Rg, _CharT>
+    {
+    private:
+      static const bool _S_range_format_is_string =
+ (format_kind<_Rg> == range_format::string)
+  || (format_kind<_Rg> == range_format::debug_string);
+      using _Vt = remove_cvref_t<
+      ranges::range_reference_t<
+        __format::__maybe_const_range<_Rg, _CharT>>>;
+
+      static consteval bool _S_is_correct()
+ {
+   if constexpr (_S_range_format_is_string)
+     static_assert(same_as<_Vt, _CharT>);
+   return true;
+ }
+
+      static_assert(_S_is_correct());
+
+    public:
+      constexpr formatter() noexcept
+      {
+ using _Seps = __format::_Separators<_CharT>;
+ if constexpr (format_kind<_Rg> == range_format::map)
+   {
+     static_assert(__format::__is_map_formattable<_Vt>);
+     _M_under.set_brackets(_Seps::_S_braces().substr(0, 1),
+      _Seps::_S_braces().substr(1, 1));
+     _M_under.underlying().set_brackets({}, {});
+     _M_under.underlying().set_separator(_Seps::_S_colon());
+   }
+ else if constexpr (format_kind<_Rg> == range_format::set)
+   _M_under.set_brackets(_Seps::_S_braces().substr(0, 1),
+    _Seps::_S_braces().substr(1, 1));
+      }
+
+      constexpr void
+      set_separator(basic_string_view<_CharT> __sep) noexcept
+ requires (!_S_range_format_is_string)
+      { _M_under.set_separator(__sep); }
+
+      constexpr void
+      set_brackets(basic_string_view<_CharT> __open,
+     basic_string_view<_CharT> __close) noexcept
+ requires (!_S_range_format_is_string)
+      { _M_under.set_brackets(__open, __close); }
+
+
+
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      {
+ auto __res = _M_under.parse(__pc);
+ if constexpr (format_kind<_Rg> == range_format::debug_string)
+   _M_under.set_debug_format();
+ return __res;
+      }
+
+
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(__format::__maybe_const_range<_Rg, _CharT>& __rg,
+        basic_format_context<_Out, _CharT>& __fc) const
+ {
+   if constexpr (_S_range_format_is_string)
+     return _M_under._M_format_range(__rg, __fc);
+   else
+     return _M_under.format(__rg, __fc);
+ }
+
+    private:
+      using _Formatter_under
+ = __conditional_t<_S_range_format_is_string,
+     __format::__formatter_str<_CharT>,
+     range_formatter<_Vt, _CharT>>;
+      _Formatter_under _M_under;
+    };
+
+
+
+
+}
+
+#pragma GCC diagnostic pop
+# 45 "C:/msys64/mingw64/include/c++/15.2.0/ostream" 2 3
+
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 49 "C:/msys64/mingw64/include/c++/15.2.0/ostream" 2 3
+
+namespace std
+{
+
+# 64 "C:/msys64/mingw64/include/c++/15.2.0/ostream" 3
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    endl(basic_ostream<_CharT, _Traits>& __os)
+    { return flush(__os.put(__os.widen('\n'))); }
+# 76 "C:/msys64/mingw64/include/c++/15.2.0/ostream" 3
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    ends(basic_ostream<_CharT, _Traits>& __os)
+    { return __os.put(_CharT()); }
+
+
+
+
+
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    flush(basic_ostream<_CharT, _Traits>& __os)
+    { return __os.flush(); }
+
+
+  template<typename _CharT, typename _Traits>
+    class __syncbuf_base : public basic_streambuf<_CharT, _Traits>
+    {
+    public:
+      static bool*
+      _S_get(basic_streambuf<_CharT, _Traits>* __buf [[maybe_unused]]) noexcept
+      {
+
+ if (auto __p = dynamic_cast<__syncbuf_base*>(__buf))
+   return &__p->_M_emit_on_sync;
+
+ return nullptr;
+      }
+
+    protected:
+      __syncbuf_base(basic_streambuf<_CharT, _Traits>* __w = nullptr)
+      : _M_wrapped(__w)
+      { }
+
+      basic_streambuf<_CharT, _Traits>* _M_wrapped = nullptr;
+      bool _M_emit_on_sync = false;
+      bool _M_needs_sync = false;
+    };
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    emit_on_flush(basic_ostream<_CharT, _Traits>& __os)
+    {
+      if (bool* __flag = __syncbuf_base<_CharT, _Traits>::_S_get(__os.rdbuf()))
+ *__flag = true;
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    noemit_on_flush(basic_ostream<_CharT, _Traits>& __os)
+    {
+      if (bool* __flag = __syncbuf_base<_CharT, _Traits>::_S_get(__os.rdbuf()))
+ *__flag = false;
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    flush_emit(basic_ostream<_CharT, _Traits>& __os)
+    {
+      struct _Restore
+      {
+ ~_Restore() { *_M_flag = _M_prev; }
+
+ bool _M_prev = false;
+ bool* _M_flag = &_M_prev;
+      } __restore;
+
+      if (bool* __flag = __syncbuf_base<_CharT, _Traits>::_S_get(__os.rdbuf()))
+ {
+   __restore._M_prev = *__flag;
+   __restore._M_flag = __flag;
+   *__flag = true;
+ }
+
+      __os.flush();
+      return __os;
+    }
+
+
+
+  inline void
+  vprint_nonunicode(ostream& __os, string_view __fmt, format_args __args)
+  {
+    ostream::sentry __cerb(__os);
+    if (__cerb)
+      {
+ __format::_Str_sink<char> __buf;
+ std::vformat_to(__buf.out(), __os.getloc(), __fmt, __args);
+ auto __out = __buf.view();
+
+ try
+   {
+     std::__ostream_write(__os, __out.data(), __out.size());
+   }
+ catch(const __cxxabiv1::__forced_unwind&)
+   {
+     __os._M_setstate(ios_base::badbit);
+     throw;
+   }
+ catch(...)
+   { __os._M_setstate(ios_base::badbit); }
+      }
+  }
+
+  inline void
+  vprint_unicode(ostream& __os, string_view __fmt, format_args __args)
+  {
+
+
+
+
+
+    ostream::sentry __cerb(__os);
+    if (__cerb)
+      {
+ __format::_Str_sink<char> __buf;
+ std::vformat_to(__buf.out(), __os.getloc(), __fmt, __args);
+ auto __out = __buf.view();
+
+ void* __open_terminal(streambuf*);
+ error_code __write_to_terminal(void*, span<char>);
+
+ if (auto __term = __open_terminal(__os.rdbuf()))
+   {
+# 219 "C:/msys64/mingw64/include/c++/15.2.0/ostream" 3
+     ios_base::iostate __err = ios_base::goodbit;
+     try
+       {
+  if (__os.rdbuf()->pubsync() == -1)
+    __err = ios::badbit;
+  else if (auto __e = __write_to_terminal(__term, __out))
+    if (__e != std::make_error_code(errc::illegal_byte_sequence))
+      __err = ios::badbit;
+       }
+     catch(const __cxxabiv1::__forced_unwind&)
+       {
+  __os._M_setstate(ios_base::badbit);
+  throw;
+       }
+     catch(...)
+       { __os._M_setstate(ios_base::badbit); }
+
+     if (__err)
+       __os.setstate(__err);
+     return;
+   }
+
+
+ try
+   {
+     std::__ostream_write(__os, __out.data(), __out.size());
+   }
+ catch(const __cxxabiv1::__forced_unwind&)
+   {
+     __os._M_setstate(ios_base::badbit);
+     throw;
+   }
+ catch(...)
+   { __os._M_setstate(ios_base::badbit); }
+      }
+
+  }
+
+  template<typename... _Args>
+    inline void
+    print(ostream& __os, format_string<_Args...> __fmt, _Args&&... __args)
+    {
+      auto __fmtargs = std::make_format_args(__args...);
+      if constexpr (__unicode::__literal_encoding_is_utf8())
+ std::vprint_unicode(__os, __fmt.get(), __fmtargs);
+      else
+ std::vprint_nonunicode(__os, __fmt.get(), __fmtargs);
+    }
+
+  template<typename... _Args>
+    inline void
+    println(ostream& __os, format_string<_Args...> __fmt, _Args&&... __args)
+    {
+
+
+      std::print(__os, "{}\n", std::format(__os.getloc(), __fmt,
+        std::forward<_Args>(__args)...));
+    }
+
+
+  inline void println(ostream& __os)
+  {
+
+    if constexpr (__unicode::__literal_encoding_is_utf8())
+      std::vprint_unicode(__os, "\n", std::make_format_args());
+    else
+
+      __os.put('\n');
+  }
+
+
+
+
+}
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/ostream.tcc" 1 3
+# 40 "C:/msys64/mingw64/include/c++/15.2.0/bits/ostream.tcc" 3
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wc++11-extensions"
+
+
+
+namespace std
+{
+
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>::sentry::
+    sentry(basic_ostream<_CharT, _Traits>& __os)
+    : _M_ok(false), _M_os(__os)
+    {
+
+      if (__os.tie() && __os.good())
+ __os.tie()->flush();
+
+      if (__os.good())
+ _M_ok = true;
+      else if (__os.bad())
+ __os.setstate(ios_base::failbit);
+    }
+
+  template<typename _CharT, typename _Traits>
+    template<typename _ValueT>
+      basic_ostream<_CharT, _Traits>&
+      basic_ostream<_CharT, _Traits>::
+      _M_insert(_ValueT __v)
+      {
+ sentry __cerb(*this);
+ if (__cerb)
+   {
+     ios_base::iostate __err = ios_base::goodbit;
+     try
+       {
+
+  const __num_put_type& __np = __check_facet(this->_M_num_put);
+
+
+
+
+  if (__np.put(*this, *this, this->fill(), __v).failed())
+    __err |= ios_base::badbit;
+       }
+     catch(__cxxabiv1::__forced_unwind&)
+       {
+  this->_M_setstate(ios_base::badbit);
+  throw;
+       }
+     catch(...)
+       { this->_M_setstate(ios_base::badbit); }
+     if (__err)
+       this->setstate(__err);
+   }
+ return *this;
+      }
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>&
+    basic_ostream<_CharT, _Traits>::
+    operator<<(short __n)
+    {
+
+
+      const ios_base::fmtflags __fmt = this->flags() & ios_base::basefield;
+      if (__fmt == ios_base::oct || __fmt == ios_base::hex)
+ return _M_insert(static_cast<long>(static_cast<unsigned short>(__n)));
+      else
+ return _M_insert(static_cast<long>(__n));
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>&
+    basic_ostream<_CharT, _Traits>::
+    operator<<(int __n)
+    {
+
+
+      const ios_base::fmtflags __fmt = this->flags() & ios_base::basefield;
+      if (__fmt == ios_base::oct || __fmt == ios_base::hex)
+ return _M_insert(static_cast<long>(static_cast<unsigned int>(__n)));
+      else
+ return _M_insert(static_cast<long>(__n));
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>&
+    basic_ostream<_CharT, _Traits>::
+    operator<<(__streambuf_type* __sbin)
+    {
+      ios_base::iostate __err = ios_base::goodbit;
+      sentry __cerb(*this);
+      if (__cerb && __sbin)
+ {
+   try
+     {
+       if (!__copy_streambufs(__sbin, this->rdbuf()))
+  __err |= ios_base::failbit;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::failbit); }
+ }
+      else if (!__sbin)
+ __err |= ios_base::badbit;
+      if (__err)
+ this->setstate(__err);
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>&
+    basic_ostream<_CharT, _Traits>::
+    put(char_type __c)
+    {
+
+
+
+
+
+
+      sentry __cerb(*this);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       const int_type __put = this->rdbuf()->sputc(__c);
+       if (traits_type::eq_int_type(__put, traits_type::eof()))
+  __err |= ios_base::badbit;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(__err);
+ }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>&
+    basic_ostream<_CharT, _Traits>::
+    write(const _CharT* __s, streamsize __n)
+    {
+
+
+
+
+
+
+
+      sentry __cerb(*this);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       if (this->rdbuf()->sputn(__s, __n) != __n)
+  __err = ios_base::badbit;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(ios_base::badbit);
+ }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>&
+    basic_ostream<_CharT, _Traits>::
+    flush()
+    {
+
+
+
+
+
+      if (__streambuf_type* __buf = this->rdbuf())
+ {
+   sentry __cerb(*this);
+   if (__cerb)
+     {
+       ios_base::iostate __err = ios_base::goodbit;
+       try
+  {
+    if (this->rdbuf()->pubsync() == -1)
+      __err |= ios_base::badbit;
+  }
+       catch(__cxxabiv1::__forced_unwind&)
+  {
+    this->_M_setstate(ios_base::badbit);
+    throw;
+  }
+       catch(...)
+  { this->_M_setstate(ios_base::badbit); }
+       if (__err)
+  this->setstate(__err);
+     }
+ }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    typename basic_ostream<_CharT, _Traits>::pos_type
+    basic_ostream<_CharT, _Traits>::
+    tellp()
+    {
+      sentry __cerb(*this);
+      pos_type __ret = pos_type(-1);
+      if (!this->fail())
+ __ret = this->rdbuf()->pubseekoff(0, ios_base::cur, ios_base::out);
+      return __ret;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>&
+    basic_ostream<_CharT, _Traits>::
+    seekp(pos_type __pos)
+    {
+      sentry __cerb(*this);
+      if (!this->fail())
+ {
+
+
+   const pos_type __p = this->rdbuf()->pubseekpos(__pos, ios_base::out);
+
+
+   if (__p == pos_type(off_type(-1)))
+     this->setstate(ios_base::failbit);
+ }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>&
+    basic_ostream<_CharT, _Traits>::
+    seekp(off_type __off, ios_base::seekdir __dir)
+    {
+      sentry __cerb(*this);
+      if (!this->fail())
+ {
+
+
+   const pos_type __p = this->rdbuf()->pubseekoff(__off, __dir,
+        ios_base::out);
+
+
+   if (__p == pos_type(off_type(-1)))
+     this->setstate(ios_base::failbit);
+ }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __out, const char* __s)
+    {
+      if (!__s)
+ __out.setstate(ios_base::badbit);
+      else
+ {
+
+
+   const size_t __clen = char_traits<char>::length(__s);
+   try
+     {
+       struct __ptr_guard
+       {
+  _CharT *__p;
+  __ptr_guard (_CharT *__ip): __p(__ip) { }
+  ~__ptr_guard() { delete[] __p; }
+  _CharT* __get() { return __p; }
+       } __pg (new _CharT[__clen]);
+
+       _CharT *__ws = __pg.__get();
+       for (size_t __i = 0; __i < __clen; ++__i)
+  __ws[__i] = __out.widen(__s[__i]);
+       __ostream_insert(__out, __ws, __clen);
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       __out._M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { __out._M_setstate(ios_base::badbit); }
+ }
+      return __out;
+    }
+
+
+
+
+  extern template class basic_ostream<char>;
+  extern template ostream& endl(ostream&);
+  extern template ostream& ends(ostream&);
+  extern template ostream& flush(ostream&);
+  extern template ostream& operator<<(ostream&, char);
+  extern template ostream& operator<<(ostream&, unsigned char);
+  extern template ostream& operator<<(ostream&, signed char);
+  extern template ostream& operator<<(ostream&, const char*);
+  extern template ostream& operator<<(ostream&, const unsigned char*);
+  extern template ostream& operator<<(ostream&, const signed char*);
+
+  extern template ostream& ostream::_M_insert(long);
+  extern template ostream& ostream::_M_insert(unsigned long);
+  extern template ostream& ostream::_M_insert(bool);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wlong-long"
+  extern template ostream& ostream::_M_insert(long long);
+  extern template ostream& ostream::_M_insert(unsigned long long);
+#pragma GCC diagnostic pop
+
+  extern template ostream& ostream::_M_insert(double);
+  extern template ostream& ostream::_M_insert(long double);
+  extern template ostream& ostream::_M_insert(const void*);
+
+
+  extern template class basic_ostream<wchar_t>;
+  extern template wostream& endl(wostream&);
+  extern template wostream& ends(wostream&);
+  extern template wostream& flush(wostream&);
+  extern template wostream& operator<<(wostream&, wchar_t);
+  extern template wostream& operator<<(wostream&, char);
+  extern template wostream& operator<<(wostream&, const wchar_t*);
+  extern template wostream& operator<<(wostream&, const char*);
+
+  extern template wostream& wostream::_M_insert(long);
+  extern template wostream& wostream::_M_insert(unsigned long);
+  extern template wostream& wostream::_M_insert(bool);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wlong-long"
+  extern template wostream& wostream::_M_insert(long long);
+  extern template wostream& wostream::_M_insert(unsigned long long);
+#pragma GCC diagnostic pop
+
+  extern template wostream& wostream::_M_insert(double);
+  extern template wostream& wostream::_M_insert(long double);
+  extern template wostream& wostream::_M_insert(const void*);
+
+
+
+
+}
+
+#pragma GCC diagnostic pop
+# 295 "C:/msys64/mingw64/include/c++/15.2.0/ostream" 2 3
+# 44 "C:/msys64/mingw64/include/c++/15.2.0/istream" 2 3
+
+namespace std
+{
+
+# 61 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+  template<typename _CharT, typename _Traits>
+    class basic_istream : virtual public basic_ios<_CharT, _Traits>
+    {
+    public:
+
+      typedef _CharT char_type;
+      typedef typename _Traits::int_type int_type;
+      typedef typename _Traits::pos_type pos_type;
+      typedef typename _Traits::off_type off_type;
+      typedef _Traits traits_type;
+
+
+      typedef basic_streambuf<_CharT, _Traits> __streambuf_type;
+      typedef basic_ios<_CharT, _Traits> __ios_type;
+      typedef basic_istream<_CharT, _Traits> __istream_type;
+      typedef num_get<_CharT, istreambuf_iterator<_CharT, _Traits> >
+        __num_get_type;
+      typedef ctype<_CharT> __ctype_type;
+
+    protected:
+
+
+
+
+
+      streamsize _M_gcount;
+
+    public:
+
+
+
+
+
+
+
+      explicit
+      basic_istream(__streambuf_type* __sb)
+      : _M_gcount(streamsize(0))
+      { this->init(__sb); }
+
+
+
+
+
+
+      virtual
+      ~basic_istream()
+      { _M_gcount = streamsize(0); }
+
+
+      class sentry;
+      friend class sentry;
+# 123 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      operator>>(__istream_type& (*__pf)(__istream_type&))
+      { return __pf(*this); }
+
+      __istream_type&
+      operator>>(__ios_type& (*__pf)(__ios_type&))
+      {
+ __pf(*this);
+ return *this;
+      }
+
+      __istream_type&
+      operator>>(ios_base& (*__pf)(ios_base&))
+      {
+ __pf(*this);
+ return *this;
+      }
+# 171 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      operator>>(bool& __n)
+      { return _M_extract(__n); }
+
+      __istream_type&
+      operator>>(short& __n);
+
+      __istream_type&
+      operator>>(unsigned short& __n)
+      { return _M_extract(__n); }
+
+      __istream_type&
+      operator>>(int& __n);
+
+      __istream_type&
+      operator>>(unsigned int& __n)
+      { return _M_extract(__n); }
+
+      __istream_type&
+      operator>>(long& __n)
+      { return _M_extract(__n); }
+
+      __istream_type&
+      operator>>(unsigned long& __n)
+      { return _M_extract(__n); }
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wlong-long"
+      __istream_type&
+      operator>>(long long& __n)
+      { return _M_extract(__n); }
+
+      __istream_type&
+      operator>>(unsigned long long& __n)
+      { return _M_extract(__n); }
+#pragma GCC diagnostic pop
+# 220 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      operator>>(float& __f)
+      { return _M_extract(__f); }
+
+      __istream_type&
+      operator>>(double& __f)
+      { return _M_extract(__f); }
+
+      __istream_type&
+      operator>>(long double& __f)
+      { return _M_extract(__f); }
+
+
+
+      __attribute__((__always_inline__))
+      __istream_type&
+      operator>>(_Float16& __f)
+      {
+ float __flt;
+ __istream_type& __ret = _M_extract(__flt);
+ ios_base::iostate __err = ios_base::goodbit;
+ if (__flt < -6.55040000000000000000000000000000000e+4F16)
+   {
+     __f = -6.55040000000000000000000000000000000e+4F16;
+     __err = ios_base::failbit;
+   }
+ else if (__flt > 6.55040000000000000000000000000000000e+4F16)
+   {
+     __f = 6.55040000000000000000000000000000000e+4F16;
+     __err = ios_base::failbit;
+   }
+ else
+   __f = static_cast<_Float16>(__flt);
+ if (__err)
+   this->setstate(__err);
+ return __ret;
+      }
+
+
+
+      __attribute__((__always_inline__))
+      __istream_type&
+      operator>>(_Float32& __f)
+      {
+ float __flt;
+ __istream_type& __ret = _M_extract(__flt);
+ __f = static_cast<_Float32> (__flt);
+ return __ret;
+      }
+
+
+
+      __attribute__((__always_inline__))
+      __istream_type&
+      operator>>(_Float64& __f)
+      {
+ double __dbl;
+ __istream_type& __ret = _M_extract(__dbl);
+ __f = static_cast<_Float64> (__dbl);
+ return __ret;
+      }
+# 296 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __attribute__((__always_inline__))
+      __istream_type&
+      operator>>(__gnu_cxx::__bfloat16_t & __f)
+      {
+ float __flt;
+ __istream_type& __ret = _M_extract(__flt);
+ ios_base::iostate __err = ios_base::goodbit;
+ if (__flt < -3.38953138925153547590470800371487867e+38BF16)
+   {
+     __f = -3.38953138925153547590470800371487867e+38BF16;
+     __err = ios_base::failbit;
+   }
+ else if (__flt > 3.38953138925153547590470800371487867e+38BF16)
+   {
+     __f = 3.38953138925153547590470800371487867e+38BF16;
+     __err = ios_base::failbit;
+   }
+ else
+   __f = static_cast<__gnu_cxx::__bfloat16_t>(__flt);
+ if (__err)
+   this->setstate(__err);
+ return __ret;
+      }
+# 329 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      operator>>(void*& __p)
+      { return _M_extract(__p); }
+# 353 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      operator>>(__streambuf_type* __sb);
+# 363 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      streamsize
+      gcount() const
+      { return _M_gcount; }
+# 396 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      int_type
+      get();
+# 410 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      get(char_type& __c);
+# 437 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      get(char_type* __s, streamsize __n, char_type __delim);
+# 448 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      get(char_type* __s, streamsize __n)
+      { return this->get(__s, __n, this->widen('\n')); }
+# 471 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      get(__streambuf_type& __sb, char_type __delim);
+# 481 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      get(__streambuf_type& __sb)
+      { return this->get(__sb, this->widen('\n')); }
+# 510 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      getline(char_type* __s, streamsize __n, char_type __delim);
+# 521 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      getline(char_type* __s, streamsize __n)
+      { return this->getline(__s, __n, this->widen('\n')); }
+# 545 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      ignore(streamsize __n, int_type __delim);
+
+      __istream_type&
+      ignore(streamsize __n);
+
+      __istream_type&
+      ignore();
+# 562 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      int_type
+      peek();
+# 580 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      read(char_type* __s, streamsize __n);
+# 599 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      streamsize
+      readsome(char_type* __s, streamsize __n);
+# 616 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      putback(char_type __c);
+# 632 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      unget();
+# 650 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      int
+      sync();
+# 665 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      pos_type
+      tellg();
+# 680 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      seekg(pos_type);
+# 696 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      __istream_type&
+      seekg(off_type, ios_base::seekdir);
+
+
+    protected:
+      basic_istream()
+      : _M_gcount(streamsize(0))
+      { this->init(0); }
+
+
+      basic_istream(const basic_istream&) = delete;
+
+      basic_istream(basic_istream&& __rhs)
+      : __ios_type(), _M_gcount(__rhs._M_gcount)
+      {
+ __ios_type::move(__rhs);
+ __rhs._M_gcount = 0;
+      }
+
+
+
+      basic_istream& operator=(const basic_istream&) = delete;
+
+      basic_istream&
+      operator=(basic_istream&& __rhs)
+      {
+ swap(__rhs);
+ return *this;
+      }
+
+      void
+      swap(basic_istream& __rhs)
+      {
+ __ios_type::swap(__rhs);
+ std::swap(_M_gcount, __rhs._M_gcount);
+      }
+
+
+      template<typename _ValueT>
+ __istream_type&
+ _M_extract(_ValueT& __v);
+    };
+
+
+  template<>
+    basic_istream<char>&
+    basic_istream<char>::
+    getline(char_type* __s, streamsize __n, char_type __delim);
+
+  template<>
+    basic_istream<char>&
+    basic_istream<char>::
+    ignore(streamsize __n);
+
+  template<>
+    basic_istream<char>&
+    basic_istream<char>::
+    ignore(streamsize __n, int_type __delim);
+
+
+  template<>
+    basic_istream<wchar_t>&
+    basic_istream<wchar_t>::
+    getline(char_type* __s, streamsize __n, char_type __delim);
+
+  template<>
+    basic_istream<wchar_t>&
+    basic_istream<wchar_t>::
+    ignore(streamsize __n);
+
+  template<>
+    basic_istream<wchar_t>&
+    basic_istream<wchar_t>::
+    ignore(streamsize __n, int_type __delim);
+# 780 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+  template<typename _CharT, typename _Traits>
+    class basic_istream<_CharT, _Traits>::sentry
+    {
+
+      bool _M_ok;
+
+    public:
+
+      typedef _Traits traits_type;
+      typedef basic_streambuf<_CharT, _Traits> __streambuf_type;
+      typedef basic_istream<_CharT, _Traits> __istream_type;
+      typedef typename __istream_type::__ctype_type __ctype_type;
+      typedef typename _Traits::int_type __int_type;
+# 816 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      explicit
+      sentry(basic_istream<_CharT, _Traits>& __is, bool __noskipws = false);
+# 827 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+      explicit
+
+      operator bool() const
+      { return _M_ok; }
+    };
+# 845 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    operator>>(basic_istream<_CharT, _Traits>& __in, _CharT& __c);
+
+  template<class _Traits>
+    inline basic_istream<char, _Traits>&
+    operator>>(basic_istream<char, _Traits>& __in, unsigned char& __c)
+    { return (__in >> reinterpret_cast<char&>(__c)); }
+
+  template<class _Traits>
+    inline basic_istream<char, _Traits>&
+    operator>>(basic_istream<char, _Traits>& __in, signed char& __c)
+    { return (__in >> reinterpret_cast<char&>(__c)); }
+
+
+
+  template<typename _CharT, typename _Traits>
+    void
+    __istream_extract(basic_istream<_CharT, _Traits>&, _CharT*, streamsize);
+
+  void __istream_extract(istream&, char*, streamsize);
+# 952 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+  template<typename _CharT, typename _Traits, size_t _Num>
+    inline basic_istream<_CharT, _Traits>&
+    operator>>(basic_istream<_CharT, _Traits>& __in, _CharT (&__s)[_Num])
+    {
+      static_assert(_Num <= __gnu_cxx::__numeric_traits<streamsize>::__max);
+      std::__istream_extract(__in, __s, _Num);
+      return __in;
+    }
+
+  template<class _Traits, size_t _Num>
+    inline basic_istream<char, _Traits>&
+    operator>>(basic_istream<char, _Traits>& __in, unsigned char (&__s)[_Num])
+    { return __in >> reinterpret_cast<char(&)[_Num]>(__s); }
+
+  template<class _Traits, size_t _Num>
+    inline basic_istream<char, _Traits>&
+    operator>>(basic_istream<char, _Traits>& __in, signed char (&__s)[_Num])
+    { return __in >> reinterpret_cast<char(&)[_Num]>(__s); }
+# 984 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+  template<typename _CharT, typename _Traits>
+    class basic_iostream
+    : public basic_istream<_CharT, _Traits>,
+      public basic_ostream<_CharT, _Traits>
+    {
+    public:
+
+
+
+      typedef _CharT char_type;
+      typedef typename _Traits::int_type int_type;
+      typedef typename _Traits::pos_type pos_type;
+      typedef typename _Traits::off_type off_type;
+      typedef _Traits traits_type;
+
+
+      typedef basic_istream<_CharT, _Traits> __istream_type;
+      typedef basic_ostream<_CharT, _Traits> __ostream_type;
+
+
+
+
+
+
+
+      explicit
+      basic_iostream(basic_streambuf<_CharT, _Traits>* __sb)
+      : __istream_type(__sb), __ostream_type(__sb) { }
+
+
+
+
+      virtual
+      ~basic_iostream() { }
+
+    protected:
+      basic_iostream()
+      : __istream_type(), __ostream_type() { }
+
+
+      basic_iostream(const basic_iostream&) = delete;
+
+      basic_iostream(basic_iostream&& __rhs)
+      : __istream_type(std::move(__rhs)), __ostream_type(*this)
+      { }
+
+
+
+      basic_iostream& operator=(const basic_iostream&) = delete;
+
+      basic_iostream&
+      operator=(basic_iostream&& __rhs)
+      {
+ swap(__rhs);
+ return *this;
+      }
+
+      void
+      swap(basic_iostream& __rhs)
+      { __istream_type::swap(__rhs); }
+
+    };
+# 1067 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    ws(basic_istream<_CharT, _Traits>& __is);
+# 1078 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+  template<typename _Is, typename _Tp>
+    requires __derived_from_ios_base<_Is>
+      && requires (_Is& __is, _Tp&& __t) { __is >> std::forward<_Tp>(__t); }
+    using __rvalue_stream_extraction_t = _Is&&;
+# 1099 "C:/msys64/mingw64/include/c++/15.2.0/istream" 3
+  template<typename _Istream, typename _Tp>
+    inline __rvalue_stream_extraction_t<_Istream, _Tp>
+    operator>>(_Istream&& __is, _Tp&& __x)
+    {
+      __is >> std::forward<_Tp>(__x);
+      return std::move(__is);
+    }
+
+
+
+}
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/istream.tcc" 1 3
+# 41 "C:/msys64/mingw64/include/c++/15.2.0/bits/istream.tcc" 3
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wc++11-extensions"
+
+
+
+namespace std
+{
+
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>::sentry::
+    sentry(basic_istream<_CharT, _Traits>& __in, bool __noskip) : _M_ok(false)
+    {
+      ios_base::iostate __err = ios_base::goodbit;
+      if (__in.good())
+ {
+   try
+     {
+       if (__in.tie())
+  __in.tie()->flush();
+       if (!__noskip && bool(__in.flags() & ios_base::skipws))
+  {
+    const __int_type __eof = traits_type::eof();
+    __streambuf_type* __sb = __in.rdbuf();
+    __int_type __c = __sb->sgetc();
+
+    const __ctype_type& __ct = __check_facet(__in._M_ctype);
+    while (!traits_type::eq_int_type(__c, __eof)
+    && __ct.is(ctype_base::space,
+        traits_type::to_char_type(__c)))
+      __c = __sb->snextc();
+
+
+
+
+    if (traits_type::eq_int_type(__c, __eof))
+      __err |= ios_base::eofbit;
+  }
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       __in._M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { __in._M_setstate(ios_base::badbit); }
+ }
+
+      if (__in.good() && __err == ios_base::goodbit)
+ _M_ok = true;
+      else
+ {
+   __err |= ios_base::failbit;
+   __in.setstate(__err);
+ }
+    }
+
+  template<typename _CharT, typename _Traits>
+    template<typename _ValueT>
+      basic_istream<_CharT, _Traits>&
+      basic_istream<_CharT, _Traits>::
+      _M_extract(_ValueT& __v)
+      {
+ sentry __cerb(*this, false);
+ if (__cerb)
+   {
+     ios_base::iostate __err = ios_base::goodbit;
+     try
+       {
+
+  const __num_get_type& __ng = __check_facet(this->_M_num_get);
+
+
+
+
+  __ng.get(*this, 0, *this, __err, __v);
+       }
+     catch(__cxxabiv1::__forced_unwind&)
+       {
+  this->_M_setstate(ios_base::badbit);
+  throw;
+       }
+     catch(...)
+       { this->_M_setstate(ios_base::badbit); }
+     if (__err)
+       this->setstate(__err);
+   }
+ return *this;
+      }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    operator>>(short& __n)
+    {
+
+
+      sentry __cerb(*this, false);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       long __l;
+
+       const __num_get_type& __ng = __check_facet(this->_M_num_get);
+
+
+
+
+       __ng.get(*this, 0, *this, __err, __l);
+
+
+
+       if (__l < __gnu_cxx::__numeric_traits<short>::__min)
+  {
+    __err |= ios_base::failbit;
+    __n = __gnu_cxx::__numeric_traits<short>::__min;
+  }
+       else if (__l > __gnu_cxx::__numeric_traits<short>::__max)
+  {
+    __err |= ios_base::failbit;
+    __n = __gnu_cxx::__numeric_traits<short>::__max;
+  }
+       else
+  __n = short(__l);
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(__err);
+ }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    operator>>(int& __n)
+    {
+
+
+      sentry __cerb(*this, false);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       long __l;
+
+       const __num_get_type& __ng = __check_facet(this->_M_num_get);
+
+
+
+
+       __ng.get(*this, 0, *this, __err, __l);
+
+
+
+       if (__l < __gnu_cxx::__numeric_traits<int>::__min)
+  {
+    __err |= ios_base::failbit;
+    __n = __gnu_cxx::__numeric_traits<int>::__min;
+  }
+       else if (__l > __gnu_cxx::__numeric_traits<int>::__max)
+  {
+    __err |= ios_base::failbit;
+    __n = __gnu_cxx::__numeric_traits<int>::__max;
+  }
+       else
+  __n = int(__l);
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(__err);
+ }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    operator>>(__streambuf_type* __sbout)
+    {
+      ios_base::iostate __err = ios_base::goodbit;
+      sentry __cerb(*this, false);
+      if (__cerb && __sbout)
+ {
+   try
+     {
+       bool __ineof;
+       if (!__copy_streambufs_eof(this->rdbuf(), __sbout, __ineof))
+  __err |= ios_base::failbit;
+       if (__ineof)
+  __err |= ios_base::eofbit;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::failbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::failbit); }
+ }
+      else if (!__sbout)
+ __err |= ios_base::failbit;
+      if (__err)
+ this->setstate(__err);
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    typename basic_istream<_CharT, _Traits>::int_type
+    basic_istream<_CharT, _Traits>::
+    get(void)
+    {
+      const int_type __eof = traits_type::eof();
+      int_type __c = __eof;
+      _M_gcount = 0;
+      ios_base::iostate __err = ios_base::goodbit;
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   try
+     {
+       __c = this->rdbuf()->sbumpc();
+
+       if (!traits_type::eq_int_type(__c, __eof))
+  _M_gcount = 1;
+       else
+  __err |= ios_base::eofbit;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+ }
+      if (!_M_gcount)
+ __err |= ios_base::failbit;
+      if (__err)
+ this->setstate(__err);
+      return __c;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    get(char_type& __c)
+    {
+      _M_gcount = 0;
+      ios_base::iostate __err = ios_base::goodbit;
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   try
+     {
+       const int_type __cb = this->rdbuf()->sbumpc();
+
+       if (!traits_type::eq_int_type(__cb, traits_type::eof()))
+  {
+    _M_gcount = 1;
+    __c = traits_type::to_char_type(__cb);
+  }
+       else
+  __err |= ios_base::eofbit;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+ }
+      if (!_M_gcount)
+ __err |= ios_base::failbit;
+      if (__err)
+ this->setstate(__err);
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    get(char_type* __s, streamsize __n, char_type __delim)
+    {
+      _M_gcount = 0;
+      ios_base::iostate __err = ios_base::goodbit;
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   try
+     {
+       const int_type __idelim = traits_type::to_int_type(__delim);
+       const int_type __eof = traits_type::eof();
+       __streambuf_type* __sb = this->rdbuf();
+       int_type __c = __sb->sgetc();
+
+       while (_M_gcount + 1 < __n
+       && !traits_type::eq_int_type(__c, __eof)
+       && !traits_type::eq_int_type(__c, __idelim))
+  {
+    *__s++ = traits_type::to_char_type(__c);
+    ++_M_gcount;
+    __c = __sb->snextc();
+  }
+       if (traits_type::eq_int_type(__c, __eof))
+  __err |= ios_base::eofbit;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+ }
+
+
+      if (__n > 0)
+ *__s = char_type();
+      if (!_M_gcount)
+ __err |= ios_base::failbit;
+      if (__err)
+ this->setstate(__err);
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    get(__streambuf_type& __sb, char_type __delim)
+    {
+      _M_gcount = 0;
+      ios_base::iostate __err = ios_base::goodbit;
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   try
+     {
+       const int_type __idelim = traits_type::to_int_type(__delim);
+       const int_type __eof = traits_type::eof();
+       __streambuf_type* __this_sb = this->rdbuf();
+       int_type __c = __this_sb->sgetc();
+       char_type __c2 = traits_type::to_char_type(__c);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wlong-long"
+       unsigned long long __gcount = 0;
+#pragma GCC diagnostic pop
+
+       while (!traits_type::eq_int_type(__c, __eof)
+       && !traits_type::eq_int_type(__c, __idelim)
+       && !traits_type::eq_int_type(__sb.sputc(__c2), __eof))
+  {
+    ++__gcount;
+    __c = __this_sb->snextc();
+    __c2 = traits_type::to_char_type(__c);
+  }
+       if (traits_type::eq_int_type(__c, __eof))
+  __err |= ios_base::eofbit;
+
+
+       if (__gcount <= __gnu_cxx::__numeric_traits<streamsize>::__max)
+  _M_gcount = __gcount;
+       else
+  _M_gcount = __gnu_cxx::__numeric_traits<streamsize>::__max;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+ }
+      if (!_M_gcount)
+ __err |= ios_base::failbit;
+      if (__err)
+ this->setstate(__err);
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    getline(char_type* __s, streamsize __n, char_type __delim)
+    {
+      _M_gcount = 0;
+      ios_base::iostate __err = ios_base::goodbit;
+      sentry __cerb(*this, true);
+      if (__cerb)
+        {
+          try
+            {
+              const int_type __idelim = traits_type::to_int_type(__delim);
+              const int_type __eof = traits_type::eof();
+              __streambuf_type* __sb = this->rdbuf();
+              int_type __c = __sb->sgetc();
+
+              while (_M_gcount + 1 < __n
+                     && !traits_type::eq_int_type(__c, __eof)
+                     && !traits_type::eq_int_type(__c, __idelim))
+                {
+                  *__s++ = traits_type::to_char_type(__c);
+                  __c = __sb->snextc();
+                  ++_M_gcount;
+                }
+              if (traits_type::eq_int_type(__c, __eof))
+                __err |= ios_base::eofbit;
+              else
+                {
+                  if (traits_type::eq_int_type(__c, __idelim))
+                    {
+                      __sb->sbumpc();
+                      ++_M_gcount;
+                    }
+                  else
+                    __err |= ios_base::failbit;
+                }
+            }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+          catch(...)
+            { this->_M_setstate(ios_base::badbit); }
+        }
+
+
+      if (__n > 0)
+ *__s = char_type();
+      if (!_M_gcount)
+        __err |= ios_base::failbit;
+      if (__err)
+        this->setstate(__err);
+      return *this;
+    }
+
+
+
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    ignore(void)
+    {
+      _M_gcount = 0;
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       const int_type __eof = traits_type::eof();
+       __streambuf_type* __sb = this->rdbuf();
+
+       if (traits_type::eq_int_type(__sb->sbumpc(), __eof))
+  __err |= ios_base::eofbit;
+       else
+  _M_gcount = 1;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(__err);
+ }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    ignore(streamsize __n)
+    {
+      _M_gcount = 0;
+      sentry __cerb(*this, true);
+      if (__cerb && __n > 0)
+        {
+          ios_base::iostate __err = ios_base::goodbit;
+          try
+            {
+              const int_type __eof = traits_type::eof();
+              __streambuf_type* __sb = this->rdbuf();
+              int_type __c = __sb->sgetc();
+# 553 "C:/msys64/mingw64/include/c++/15.2.0/bits/istream.tcc" 3
+       bool __large_ignore = false;
+       while (true)
+  {
+    while (_M_gcount < __n
+    && !traits_type::eq_int_type(__c, __eof))
+      {
+        ++_M_gcount;
+        __c = __sb->snextc();
+      }
+    if (__n == __gnu_cxx::__numeric_traits<streamsize>::__max
+        && !traits_type::eq_int_type(__c, __eof))
+      {
+        _M_gcount =
+   __gnu_cxx::__numeric_traits<streamsize>::__min;
+        __large_ignore = true;
+      }
+    else
+      break;
+  }
+
+       if (__n == __gnu_cxx::__numeric_traits<streamsize>::__max)
+  {
+    if (__large_ignore)
+      _M_gcount = __gnu_cxx::__numeric_traits<streamsize>::__max;
+
+    if (traits_type::eq_int_type(__c, __eof))
+      __err |= ios_base::eofbit;
+  }
+       else if (_M_gcount < __n)
+  {
+    if (traits_type::eq_int_type(__c, __eof))
+      __err |= ios_base::eofbit;
+  }
+            }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+          catch(...)
+            { this->_M_setstate(ios_base::badbit); }
+          if (__err)
+            this->setstate(__err);
+        }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    ignore(streamsize __n, int_type __delim)
+    {
+      _M_gcount = 0;
+      sentry __cerb(*this, true);
+      if (__cerb && __n > 0)
+        {
+          ios_base::iostate __err = ios_base::goodbit;
+          try
+            {
+              const int_type __eof = traits_type::eof();
+              __streambuf_type* __sb = this->rdbuf();
+              int_type __c = __sb->sgetc();
+
+
+       bool __large_ignore = false;
+       while (true)
+  {
+    while (_M_gcount < __n
+    && !traits_type::eq_int_type(__c, __eof)
+    && !traits_type::eq_int_type(__c, __delim))
+      {
+        ++_M_gcount;
+        __c = __sb->snextc();
+      }
+    if (__n == __gnu_cxx::__numeric_traits<streamsize>::__max
+        && !traits_type::eq_int_type(__c, __eof)
+        && !traits_type::eq_int_type(__c, __delim))
+      {
+        _M_gcount =
+   __gnu_cxx::__numeric_traits<streamsize>::__min;
+        __large_ignore = true;
+      }
+    else
+      break;
+  }
+
+       if (__n == __gnu_cxx::__numeric_traits<streamsize>::__max)
+  {
+    if (__large_ignore)
+      _M_gcount = __gnu_cxx::__numeric_traits<streamsize>::__max;
+
+    if (traits_type::eq_int_type(__c, __eof))
+      __err |= ios_base::eofbit;
+    else
+      {
+        if (_M_gcount != __n)
+   ++_M_gcount;
+        __sb->sbumpc();
+      }
+  }
+       else if (_M_gcount < __n)
+  {
+    if (traits_type::eq_int_type(__c, __eof))
+      __err |= ios_base::eofbit;
+    else
+      {
+        ++_M_gcount;
+        __sb->sbumpc();
+      }
+  }
+            }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+          catch(...)
+            { this->_M_setstate(ios_base::badbit); }
+          if (__err)
+            this->setstate(__err);
+        }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    typename basic_istream<_CharT, _Traits>::int_type
+    basic_istream<_CharT, _Traits>::
+    peek(void)
+    {
+      int_type __c = traits_type::eof();
+      _M_gcount = 0;
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       __c = this->rdbuf()->sgetc();
+       if (traits_type::eq_int_type(__c, traits_type::eof()))
+  __err |= ios_base::eofbit;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(__err);
+ }
+      return __c;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    read(char_type* __s, streamsize __n)
+    {
+      _M_gcount = 0;
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       _M_gcount = this->rdbuf()->sgetn(__s, __n);
+       if (_M_gcount != __n)
+  __err |= (ios_base::eofbit | ios_base::failbit);
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(__err);
+ }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    streamsize
+    basic_istream<_CharT, _Traits>::
+    readsome(char_type* __s, streamsize __n)
+    {
+      _M_gcount = 0;
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+
+       const streamsize __num = this->rdbuf()->in_avail();
+       if (__num > 0)
+  _M_gcount = this->rdbuf()->sgetn(__s, std::min(__num, __n));
+       else if (__num == -1)
+  __err |= ios_base::eofbit;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(__err);
+ }
+      return _M_gcount;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    putback(char_type __c)
+    {
+
+
+      _M_gcount = 0;
+
+      this->clear(this->rdstate() & ~ios_base::eofbit);
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       const int_type __eof = traits_type::eof();
+       __streambuf_type* __sb = this->rdbuf();
+       if (!__sb
+    || traits_type::eq_int_type(__sb->sputbackc(__c), __eof))
+  __err |= ios_base::badbit;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(__err);
+ }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    unget(void)
+    {
+
+
+      _M_gcount = 0;
+
+      this->clear(this->rdstate() & ~ios_base::eofbit);
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       const int_type __eof = traits_type::eof();
+       __streambuf_type* __sb = this->rdbuf();
+       if (!__sb
+    || traits_type::eq_int_type(__sb->sungetc(), __eof))
+  __err |= ios_base::badbit;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(__err);
+ }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    int
+    basic_istream<_CharT, _Traits>::
+    sync(void)
+    {
+
+
+      int __ret = -1;
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       __streambuf_type* __sb = this->rdbuf();
+       if (__sb)
+  {
+    if (__sb->pubsync() == -1)
+      __err |= ios_base::badbit;
+    else
+      __ret = 0;
+  }
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(__err);
+ }
+      return __ret;
+    }
+
+  template<typename _CharT, typename _Traits>
+    typename basic_istream<_CharT, _Traits>::pos_type
+    basic_istream<_CharT, _Traits>::
+    tellg(void)
+    {
+
+
+      pos_type __ret = pos_type(-1);
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   try
+     {
+       if (!this->fail())
+  __ret = this->rdbuf()->pubseekoff(0, ios_base::cur,
+        ios_base::in);
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+ }
+      return __ret;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    seekg(pos_type __pos)
+    {
+
+
+
+      this->clear(this->rdstate() & ~ios_base::eofbit);
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       if (!this->fail())
+  {
+
+    const pos_type __p = this->rdbuf()->pubseekpos(__pos,
+         ios_base::in);
+
+
+    if (__p == pos_type(off_type(-1)))
+      __err |= ios_base::failbit;
+  }
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(__err);
+ }
+      return *this;
+    }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    basic_istream<_CharT, _Traits>::
+    seekg(off_type __off, ios_base::seekdir __dir)
+    {
+
+
+
+      this->clear(this->rdstate() & ~ios_base::eofbit);
+      sentry __cerb(*this, true);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       if (!this->fail())
+  {
+
+    const pos_type __p = this->rdbuf()->pubseekoff(__off, __dir,
+         ios_base::in);
+
+
+    if (__p == pos_type(off_type(-1)))
+      __err |= ios_base::failbit;
+  }
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       this->_M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { this->_M_setstate(ios_base::badbit); }
+   if (__err)
+     this->setstate(__err);
+ }
+      return *this;
+    }
+
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    operator>>(basic_istream<_CharT, _Traits>& __in, _CharT& __c)
+    {
+      typedef basic_istream<_CharT, _Traits> __istream_type;
+      typedef typename __istream_type::int_type __int_type;
+
+      typename __istream_type::sentry __cerb(__in, false);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       const __int_type __cb = __in.rdbuf()->sbumpc();
+       if (!_Traits::eq_int_type(__cb, _Traits::eof()))
+  __c = _Traits::to_char_type(__cb);
+       else
+  __err |= (ios_base::eofbit | ios_base::failbit);
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       __in._M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { __in._M_setstate(ios_base::badbit); }
+   if (__err)
+     __in.setstate(__err);
+ }
+      return __in;
+    }
+
+  template<typename _CharT, typename _Traits>
+    void
+    __istream_extract(basic_istream<_CharT, _Traits>& __in, _CharT* __s,
+        streamsize __num)
+    {
+      typedef basic_istream<_CharT, _Traits> __istream_type;
+      typedef basic_streambuf<_CharT, _Traits> __streambuf_type;
+      typedef typename _Traits::int_type int_type;
+      typedef _CharT char_type;
+      typedef ctype<_CharT> __ctype_type;
+
+      streamsize __extracted = 0;
+      ios_base::iostate __err = ios_base::goodbit;
+      typename __istream_type::sentry __cerb(__in, false);
+      if (__cerb)
+ {
+   try
+     {
+
+       streamsize __width = __in.width();
+       if (0 < __width && __width < __num)
+  __num = __width;
+
+       const __ctype_type& __ct = use_facet<__ctype_type>(__in.getloc());
+
+       const int_type __eof = _Traits::eof();
+       __streambuf_type* __sb = __in.rdbuf();
+       int_type __c = __sb->sgetc();
+
+       while (__extracted < __num - 1
+       && !_Traits::eq_int_type(__c, __eof)
+       && !__ct.is(ctype_base::space,
+     _Traits::to_char_type(__c)))
+  {
+    *__s++ = _Traits::to_char_type(__c);
+    ++__extracted;
+    __c = __sb->snextc();
+  }
+
+       if (__extracted < __num - 1
+    && _Traits::eq_int_type(__c, __eof))
+  __err |= ios_base::eofbit;
+
+
+
+       *__s = char_type();
+       __in.width(0);
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       __in._M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { __in._M_setstate(ios_base::badbit); }
+ }
+      if (!__extracted)
+ __err |= ios_base::failbit;
+      if (__err)
+ __in.setstate(__err);
+    }
+
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    ws(basic_istream<_CharT, _Traits>& __in)
+    {
+      typedef basic_istream<_CharT, _Traits> __istream_type;
+      typedef basic_streambuf<_CharT, _Traits> __streambuf_type;
+      typedef typename __istream_type::int_type __int_type;
+      typedef ctype<_CharT> __ctype_type;
+
+
+
+      typename __istream_type::sentry __cerb(__in, true);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       const __ctype_type& __ct = use_facet<__ctype_type>(__in.getloc());
+       const __int_type __eof = _Traits::eof();
+       __streambuf_type* __sb = __in.rdbuf();
+       __int_type __c = __sb->sgetc();
+
+       while (true)
+  {
+    if (_Traits::eq_int_type(__c, __eof))
+      {
+        __err = ios_base::eofbit;
+        break;
+      }
+    if (!__ct.is(ctype_base::space, _Traits::to_char_type(__c)))
+      break;
+    __c = __sb->snextc();
+  }
+     }
+   catch(const __cxxabiv1::__forced_unwind&)
+     {
+       __in._M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     {
+       __in._M_setstate(ios_base::badbit);
+     }
+   if (__err)
+     __in.setstate(__err);
+ }
+      return __in;
+    }
+
+
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wc++11-extensions"
+#pragma GCC diagnostic ignored "-Wlong-long"
+  extern template class basic_istream<char>;
+  extern template istream& ws(istream&);
+  extern template istream& operator>>(istream&, char&);
+  extern template istream& operator>>(istream&, unsigned char&);
+  extern template istream& operator>>(istream&, signed char&);
+
+  extern template istream& istream::_M_extract(unsigned short&);
+  extern template istream& istream::_M_extract(unsigned int&);
+  extern template istream& istream::_M_extract(long&);
+  extern template istream& istream::_M_extract(unsigned long&);
+  extern template istream& istream::_M_extract(bool&);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wlong-long"
+  extern template istream& istream::_M_extract(long long&);
+  extern template istream& istream::_M_extract(unsigned long long&);
+#pragma GCC diagnostic pop
+
+  extern template istream& istream::_M_extract(float&);
+  extern template istream& istream::_M_extract(double&);
+  extern template istream& istream::_M_extract(long double&);
+  extern template istream& istream::_M_extract(void*&);
+
+  extern template class basic_iostream<char>;
+
+
+  extern template class basic_istream<wchar_t>;
+  extern template wistream& ws(wistream&);
+  extern template wistream& operator>>(wistream&, wchar_t&);
+  extern template void __istream_extract(wistream&, wchar_t*, streamsize);
+
+  extern template wistream& wistream::_M_extract(unsigned short&);
+  extern template wistream& wistream::_M_extract(unsigned int&);
+  extern template wistream& wistream::_M_extract(long&);
+  extern template wistream& wistream::_M_extract(unsigned long&);
+  extern template wistream& wistream::_M_extract(bool&);
+
+  extern template wistream& wistream::_M_extract(long long&);
+  extern template wistream& wistream::_M_extract(unsigned long long&);
+
+  extern template wistream& wistream::_M_extract(float&);
+  extern template wistream& wistream::_M_extract(double&);
+  extern template wistream& wistream::_M_extract(long double&);
+  extern template wistream& wistream::_M_extract(void*&);
+
+  extern template class basic_iostream<wchar_t>;
+
+#pragma GCC diagnostic pop
+
+
+
+}
+
+#pragma GCC diagnostic pop
+# 1112 "C:/msys64/mingw64/include/c++/15.2.0/istream" 2 3
+# 43 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 2 3
+# 57 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+namespace std
+{
+
+namespace __cxx11 {
+# 80 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+  template<typename _CharT, typename _Traits, typename _Alloc>
+    class basic_stringbuf : public basic_streambuf<_CharT, _Traits>
+    {
+      struct __xfer_bufptrs;
+
+
+      using allocator_traits = std::allocator_traits<_Alloc>;
+      using _Noexcept_swap
+ = __or_<typename allocator_traits::propagate_on_container_swap,
+  typename allocator_traits::is_always_equal>;
+
+
+    public:
+
+      typedef _CharT char_type;
+      typedef _Traits traits_type;
+
+
+      typedef _Alloc allocator_type;
+      typedef typename traits_type::int_type int_type;
+      typedef typename traits_type::pos_type pos_type;
+      typedef typename traits_type::off_type off_type;
+
+      typedef basic_streambuf<char_type, traits_type> __streambuf_type;
+      typedef basic_string<char_type, _Traits, _Alloc> __string_type;
+      typedef typename __string_type::size_type __size_type;
+
+    protected:
+
+      ios_base::openmode _M_mode;
+
+
+      __string_type _M_string;
+
+    public:
+# 123 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      basic_stringbuf()
+      : __streambuf_type(), _M_mode(ios_base::in | ios_base::out), _M_string()
+      { }
+# 134 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      explicit
+      basic_stringbuf(ios_base::openmode __mode)
+      : __streambuf_type(), _M_mode(__mode), _M_string()
+      { }
+# 147 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      explicit
+      basic_stringbuf(const __string_type& __str,
+        ios_base::openmode __mode = ios_base::in | ios_base::out)
+      : __streambuf_type(), _M_mode(),
+ _M_string(__str.data(), __str.size(), __str.get_allocator())
+      { _M_stringbuf_init(__mode); }
+
+
+      basic_stringbuf(const basic_stringbuf&) = delete;
+
+      basic_stringbuf(basic_stringbuf&& __rhs)
+      : basic_stringbuf(std::move(__rhs), __xfer_bufptrs(__rhs, this))
+      { __rhs._M_sync(const_cast<char_type*>(__rhs._M_string.data()), 0, 0); }
+
+
+      explicit
+      basic_stringbuf(const allocator_type& __a)
+      : basic_stringbuf(ios_base::in | std::ios_base::out, __a)
+      { }
+
+      basic_stringbuf(ios_base::openmode __mode,
+        const allocator_type& __a)
+      : __streambuf_type(), _M_mode(__mode), _M_string(__a)
+      { }
+
+      explicit
+      basic_stringbuf(__string_type&& __s,
+        ios_base::openmode __mode = ios_base::in
+        | ios_base::out)
+      : __streambuf_type(), _M_mode(__mode), _M_string(std::move(__s))
+      { _M_stringbuf_init(__mode); }
+
+      template<typename _SAlloc>
+ basic_stringbuf(const basic_string<_CharT, _Traits, _SAlloc>& __s,
+   const allocator_type& __a)
+ : basic_stringbuf(__s, ios_base::in | std::ios_base::out, __a)
+ { }
+
+      template<typename _SAlloc>
+ basic_stringbuf(const basic_string<_CharT, _Traits, _SAlloc>& __s,
+   ios_base::openmode __mode,
+   const allocator_type& __a)
+ : __streambuf_type(), _M_mode(__mode),
+   _M_string(__s.data(), __s.size(), __a)
+ { _M_stringbuf_init(__mode); }
+
+      template<typename _SAlloc>
+ explicit
+ basic_stringbuf(const basic_string<_CharT, _Traits, _SAlloc>& __s,
+   ios_base::openmode __mode = ios_base::in
+          | ios_base::out)
+ : basic_stringbuf(__s, __mode, allocator_type{})
+ { }
+
+      basic_stringbuf(basic_stringbuf&& __rhs, const allocator_type& __a)
+      : basic_stringbuf(std::move(__rhs), __a, __xfer_bufptrs(__rhs, this))
+      { __rhs._M_sync(const_cast<char_type*>(__rhs._M_string.data()), 0, 0); }
+
+      allocator_type get_allocator() const noexcept
+      { return _M_string.get_allocator(); }
+
+
+
+
+      basic_stringbuf&
+      operator=(const basic_stringbuf&) = delete;
+
+      basic_stringbuf&
+      operator=(basic_stringbuf&& __rhs)
+      {
+ __xfer_bufptrs __st{__rhs, this};
+ const __streambuf_type& __base = __rhs;
+ __streambuf_type::operator=(__base);
+ this->pubimbue(__rhs.getloc());
+ _M_mode = __rhs._M_mode;
+ _M_string = std::move(__rhs._M_string);
+ __rhs._M_sync(const_cast<char_type*>(__rhs._M_string.data()), 0, 0);
+ return *this;
+      }
+
+      void
+      swap(basic_stringbuf& __rhs) noexcept(_Noexcept_swap::value)
+      {
+ __xfer_bufptrs __l_st{*this, std::__addressof(__rhs)};
+ __xfer_bufptrs __r_st{__rhs, this};
+ __streambuf_type& __base = __rhs;
+ __streambuf_type::swap(__base);
+ __rhs.pubimbue(this->pubimbue(__rhs.getloc()));
+ std::swap(_M_mode, __rhs._M_mode);
+ std::swap(_M_string, __rhs._M_string);
+      }
+# 250 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      [[__nodiscard__]]
+      __string_type
+      str() const &
+      {
+ __string_type __ret(_M_string.get_allocator());
+ if (char_type* __hi = _M_high_mark())
+   __ret.assign(this->pbase(), __hi);
+ else
+   __ret = _M_string;
+ return __ret;
+      }
+
+
+
+
+      template<__allocator_like _SAlloc>
+ [[__nodiscard__]]
+ basic_string<_CharT, _Traits, _SAlloc>
+ str(const _SAlloc& __sa) const
+ {
+   auto __sv = view();
+   return { __sv.data(), __sv.size(), __sa };
+ }
+
+
+      [[__nodiscard__]]
+      __string_type
+      str() &&
+      {
+ if (char_type* __hi = _M_high_mark())
+   {
+
+     _M_string._M_set_length(_M_high_mark() - this->pbase());
+   }
+ auto __str = std::move(_M_string);
+ _M_string.clear();
+ _M_sync(_M_string.data(), 0, 0);
+ return __str;
+      }
+
+
+     
+      basic_string_view<char_type, traits_type>
+      view() const noexcept
+      {
+ if (char_type* __hi = _M_high_mark())
+   return { this->pbase(), __hi };
+ else
+   return _M_string;
+      }
+# 309 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      void
+      str(const __string_type& __s)
+      {
+
+
+ _M_string.assign(__s.data(), __s.size());
+ _M_stringbuf_init(_M_mode);
+      }
+
+
+
+      template<__allocator_like _SAlloc>
+ requires (!is_same_v<_SAlloc, _Alloc>)
+ void
+ str(const basic_string<_CharT, _Traits, _SAlloc>& __s)
+ {
+   _M_string.assign(__s.data(), __s.size());
+   _M_stringbuf_init(_M_mode);
+ }
+
+
+      void
+      str(__string_type&& __s)
+      {
+ _M_string = std::move(__s);
+ _M_stringbuf_init(_M_mode);
+      }
+
+
+    protected:
+
+      void
+      _M_stringbuf_init(ios_base::openmode __mode)
+      {
+ _M_mode = __mode;
+ __size_type __len = 0;
+ if (_M_mode & (ios_base::ate | ios_base::app))
+   __len = _M_string.size();
+ _M_sync(const_cast<char_type*>(_M_string.data()), 0, __len);
+      }
+
+      virtual streamsize
+      showmanyc()
+      {
+ streamsize __ret = -1;
+ if (_M_mode & ios_base::in)
+   {
+     _M_update_egptr();
+     __ret = this->egptr() - this->gptr();
+   }
+ return __ret;
+      }
+
+      virtual int_type
+      underflow();
+
+      virtual int_type
+      pbackfail(int_type __c = traits_type::eof());
+
+      virtual int_type
+      overflow(int_type __c = traits_type::eof());
+# 382 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      virtual __streambuf_type*
+      setbuf(char_type* __s, streamsize __n)
+      {
+ if (__s && __n >= 0)
+   {
+
+
+
+
+
+
+     _M_string.clear();
+
+
+     _M_sync(__s, __n, 0);
+   }
+ return this;
+      }
+
+      virtual pos_type
+      seekoff(off_type __off, ios_base::seekdir __way,
+       ios_base::openmode __mode = ios_base::in | ios_base::out);
+
+      virtual pos_type
+      seekpos(pos_type __sp,
+       ios_base::openmode __mode = ios_base::in | ios_base::out);
+
+
+
+
+      void
+      _M_sync(char_type* __base, __size_type __i, __size_type __o);
+
+
+
+      void
+      _M_update_egptr()
+      {
+ if (char_type* __pptr = this->pptr())
+   {
+     char_type* __egptr = this->egptr();
+     if (!__egptr || __pptr > __egptr)
+       {
+  if (_M_mode & ios_base::in)
+    this->setg(this->eback(), this->gptr(), __pptr);
+  else
+    this->setg(__pptr, __pptr, __pptr);
+       }
+   }
+      }
+
+
+
+      void
+      _M_pbump(char_type* __pbeg, char_type* __pend, off_type __off);
+
+    private:
+
+
+
+
+      __attribute__((__always_inline__))
+      char_type*
+      _M_high_mark() const noexcept
+      {
+ if (char_type* __pptr = this->pptr())
+   {
+     char_type* __egptr = this->egptr();
+     if (!__egptr || __pptr > __egptr)
+       return __pptr;
+     else
+       return __egptr;
+   }
+ return 0;
+      }
+
+
+
+
+
+      struct __xfer_bufptrs
+      {
+ __xfer_bufptrs(const basic_stringbuf& __from, basic_stringbuf* __to)
+ : _M_to{__to}, _M_goff{-1, -1, -1}, _M_poff{-1, -1, -1}
+ {
+   const _CharT* const __str = __from._M_string.data();
+   const _CharT* __end = nullptr;
+   if (__from.eback())
+     {
+       _M_goff[0] = __from.eback() - __str;
+       _M_goff[1] = __from.gptr() - __str;
+       _M_goff[2] = __from.egptr() - __str;
+       __end = __from.egptr();
+     }
+   if (__from.pbase())
+     {
+       _M_poff[0] = __from.pbase() - __str;
+       _M_poff[1] = __from.pptr() - __from.pbase();
+       _M_poff[2] = __from.epptr() - __str;
+       if (!__end || __from.pptr() > __end)
+  __end = __from.pptr();
+     }
+
+
+   if (__end)
+     {
+
+
+       auto& __mut_from = const_cast<basic_stringbuf&>(__from);
+       __mut_from._M_string._M_length(__end - __str);
+     }
+ }
+
+ ~__xfer_bufptrs()
+ {
+   char_type* __str = const_cast<char_type*>(_M_to->_M_string.data());
+   if (_M_goff[0] != -1)
+     _M_to->setg(__str+_M_goff[0], __str+_M_goff[1], __str+_M_goff[2]);
+   if (_M_poff[0] != -1)
+     _M_to->_M_pbump(__str+_M_poff[0], __str+_M_poff[2], _M_poff[1]);
+ }
+
+ basic_stringbuf* _M_to;
+ off_type _M_goff[3];
+ off_type _M_poff[3];
+      };
+# 518 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      basic_stringbuf(basic_stringbuf&& __rhs, __xfer_bufptrs&&)
+      : __streambuf_type(static_cast<const __streambuf_type&>(__rhs)),
+      _M_mode(__rhs._M_mode), _M_string(std::move(__rhs._M_string))
+      { }
+
+
+
+
+      basic_stringbuf(basic_stringbuf&& __rhs, const allocator_type& __a,
+        __xfer_bufptrs&&)
+      : __streambuf_type(static_cast<const __streambuf_type&>(__rhs)),
+      _M_mode(__rhs._M_mode), _M_string(std::move(__rhs._M_string), __a)
+      { }
+
+
+    };
+# 551 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+  template<typename _CharT, typename _Traits, typename _Alloc>
+    class basic_istringstream : public basic_istream<_CharT, _Traits>
+    {
+    public:
+
+      typedef _CharT char_type;
+      typedef _Traits traits_type;
+
+
+      typedef _Alloc allocator_type;
+      typedef typename traits_type::int_type int_type;
+      typedef typename traits_type::pos_type pos_type;
+      typedef typename traits_type::off_type off_type;
+
+
+      typedef basic_string<_CharT, _Traits, _Alloc> __string_type;
+      typedef basic_stringbuf<_CharT, _Traits, _Alloc> __stringbuf_type;
+      typedef basic_istream<char_type, traits_type> __istream_type;
+
+    private:
+      __stringbuf_type _M_stringbuf;
+
+    public:
+# 585 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      basic_istringstream()
+      : __istream_type(), _M_stringbuf(ios_base::in)
+      { this->init(&_M_stringbuf); }
+# 601 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      explicit
+      basic_istringstream(ios_base::openmode __mode)
+      : __istream_type(), _M_stringbuf(__mode | ios_base::in)
+      { this->init(&_M_stringbuf); }
+# 619 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      explicit
+      basic_istringstream(const __string_type& __str,
+     ios_base::openmode __mode = ios_base::in)
+      : __istream_type(), _M_stringbuf(__str, __mode | ios_base::in)
+      { this->init(&_M_stringbuf); }
+
+
+
+
+
+
+
+      ~basic_istringstream()
+      { }
+
+
+      basic_istringstream(const basic_istringstream&) = delete;
+
+      basic_istringstream(basic_istringstream&& __rhs)
+      : __istream_type(std::move(__rhs)),
+      _M_stringbuf(std::move(__rhs._M_stringbuf))
+      { __istream_type::set_rdbuf(&_M_stringbuf); }
+
+
+      basic_istringstream(ios_base::openmode __mode, const allocator_type& __a)
+      : __istream_type(), _M_stringbuf(__mode | ios_base::in, __a)
+      { this->init(std::__addressof(_M_stringbuf)); }
+
+      explicit
+      basic_istringstream(__string_type&& __str,
+     ios_base::openmode __mode = ios_base::in)
+      : __istream_type(), _M_stringbuf(std::move(__str), __mode | ios_base::in)
+      { this->init(std::__addressof(_M_stringbuf)); }
+
+      template<typename _SAlloc>
+ basic_istringstream(const basic_string<_CharT, _Traits, _SAlloc>& __str,
+       const allocator_type& __a)
+ : basic_istringstream(__str, ios_base::in, __a)
+ { }
+
+      template<typename _SAlloc>
+ basic_istringstream(const basic_string<_CharT, _Traits, _SAlloc>& __str,
+       ios_base::openmode __mode,
+       const allocator_type& __a)
+ : __istream_type(), _M_stringbuf(__str, __mode | ios_base::in, __a)
+ { this->init(std::__addressof(_M_stringbuf)); }
+
+      template<typename _SAlloc>
+ explicit
+ basic_istringstream(const basic_string<_CharT, _Traits, _SAlloc>& __str,
+       ios_base::openmode __mode = ios_base::in)
+ : basic_istringstream(__str, __mode, allocator_type())
+ { }
+
+
+
+
+      basic_istringstream&
+      operator=(const basic_istringstream&) = delete;
+
+      basic_istringstream&
+      operator=(basic_istringstream&& __rhs)
+      {
+ __istream_type::operator=(std::move(__rhs));
+ _M_stringbuf = std::move(__rhs._M_stringbuf);
+ return *this;
+      }
+
+      void
+      swap(basic_istringstream& __rhs)
+      {
+ __istream_type::swap(__rhs);
+ _M_stringbuf.swap(__rhs._M_stringbuf);
+      }
+# 702 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      [[__nodiscard__]]
+      __stringbuf_type*
+      rdbuf() const
+      { return const_cast<__stringbuf_type*>(&_M_stringbuf); }
+
+
+
+
+
+      [[__nodiscard__]]
+      __string_type
+      str() const &
+      { return _M_stringbuf.str(); }
+
+
+
+
+      template<__allocator_like _SAlloc>
+ [[__nodiscard__]]
+ basic_string<_CharT, _Traits, _SAlloc>
+ str(const _SAlloc& __sa) const
+ { return _M_stringbuf.str(__sa); }
+
+
+      [[__nodiscard__]]
+      __string_type
+      str() &&
+      { return std::move(_M_stringbuf).str(); }
+
+
+     
+      basic_string_view<char_type, traits_type>
+      view() const noexcept
+      { return _M_stringbuf.view(); }
+# 744 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      void
+      str(const __string_type& __s)
+      { _M_stringbuf.str(__s); }
+
+
+
+      template<__allocator_like _SAlloc>
+ requires (!is_same_v<_SAlloc, _Alloc>)
+ void
+ str(const basic_string<_CharT, _Traits, _SAlloc>& __s)
+ { _M_stringbuf.str(__s); }
+
+
+      void
+      str(__string_type&& __s)
+      { _M_stringbuf.str(std::move(__s)); }
+
+    };
+# 779 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+  template <typename _CharT, typename _Traits, typename _Alloc>
+    class basic_ostringstream : public basic_ostream<_CharT, _Traits>
+    {
+    public:
+
+      typedef _CharT char_type;
+      typedef _Traits traits_type;
+
+
+      typedef _Alloc allocator_type;
+      typedef typename traits_type::int_type int_type;
+      typedef typename traits_type::pos_type pos_type;
+      typedef typename traits_type::off_type off_type;
+
+
+      typedef basic_string<_CharT, _Traits, _Alloc> __string_type;
+      typedef basic_stringbuf<_CharT, _Traits, _Alloc> __stringbuf_type;
+      typedef basic_ostream<char_type, traits_type> __ostream_type;
+
+    private:
+      __stringbuf_type _M_stringbuf;
+
+    public:
+# 813 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      basic_ostringstream()
+      : __ostream_type(), _M_stringbuf(ios_base::out)
+      { this->init(&_M_stringbuf); }
+# 829 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      explicit
+      basic_ostringstream(ios_base::openmode __mode)
+      : __ostream_type(), _M_stringbuf(__mode | ios_base::out)
+      { this->init(&_M_stringbuf); }
+# 847 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      explicit
+      basic_ostringstream(const __string_type& __str,
+     ios_base::openmode __mode = ios_base::out)
+      : __ostream_type(), _M_stringbuf(__str, __mode | ios_base::out)
+      { this->init(&_M_stringbuf); }
+
+
+
+
+
+
+
+      ~basic_ostringstream()
+      { }
+
+
+      basic_ostringstream(const basic_ostringstream&) = delete;
+
+      basic_ostringstream(basic_ostringstream&& __rhs)
+      : __ostream_type(std::move(__rhs)),
+      _M_stringbuf(std::move(__rhs._M_stringbuf))
+      { __ostream_type::set_rdbuf(&_M_stringbuf); }
+
+
+      basic_ostringstream(ios_base::openmode __mode, const allocator_type& __a)
+      : __ostream_type(), _M_stringbuf(__mode | ios_base::out, __a)
+      { this->init(std::__addressof(_M_stringbuf)); }
+
+      explicit
+      basic_ostringstream(__string_type&& __str,
+     ios_base::openmode __mode = ios_base::out)
+      : __ostream_type(), _M_stringbuf(std::move(__str), __mode | ios_base::out)
+      { this->init(std::__addressof(_M_stringbuf)); }
+
+      template<typename _SAlloc>
+ basic_ostringstream(const basic_string<_CharT, _Traits, _SAlloc>& __str,
+       const allocator_type& __a)
+ : basic_ostringstream(__str, ios_base::out, __a)
+ { }
+
+      template<typename _SAlloc>
+ basic_ostringstream(const basic_string<_CharT, _Traits, _SAlloc>& __str,
+       ios_base::openmode __mode,
+       const allocator_type& __a)
+ : __ostream_type(), _M_stringbuf(__str, __mode | ios_base::out, __a)
+ { this->init(std::__addressof(_M_stringbuf)); }
+
+      template<typename _SAlloc>
+ explicit
+ basic_ostringstream(const basic_string<_CharT, _Traits, _SAlloc>& __str,
+       ios_base::openmode __mode = ios_base::out)
+ : basic_ostringstream(__str, __mode, allocator_type())
+ { }
+
+
+
+
+      basic_ostringstream&
+      operator=(const basic_ostringstream&) = delete;
+
+      basic_ostringstream&
+      operator=(basic_ostringstream&& __rhs)
+      {
+ __ostream_type::operator=(std::move(__rhs));
+ _M_stringbuf = std::move(__rhs._M_stringbuf);
+ return *this;
+      }
+
+      void
+      swap(basic_ostringstream& __rhs)
+      {
+ __ostream_type::swap(__rhs);
+ _M_stringbuf.swap(__rhs._M_stringbuf);
+      }
+# 930 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      [[__nodiscard__]]
+      __stringbuf_type*
+      rdbuf() const
+      { return const_cast<__stringbuf_type*>(&_M_stringbuf); }
+
+
+
+
+
+      [[__nodiscard__]]
+      __string_type
+      str() const &
+      { return _M_stringbuf.str(); }
+
+
+
+
+      template<__allocator_like _SAlloc>
+ [[__nodiscard__]]
+ basic_string<_CharT, _Traits, _SAlloc>
+ str(const _SAlloc& __sa) const
+ { return _M_stringbuf.str(__sa); }
+
+
+      [[__nodiscard__]]
+      __string_type
+      str() &&
+      { return std::move(_M_stringbuf).str(); }
+
+
+     
+      basic_string_view<char_type, traits_type>
+      view() const noexcept
+      { return _M_stringbuf.view(); }
+# 972 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      void
+      str(const __string_type& __s)
+      { _M_stringbuf.str(__s); }
+
+
+
+      template<__allocator_like _SAlloc>
+ requires (!is_same_v<_SAlloc, _Alloc>)
+ void
+ str(const basic_string<_CharT, _Traits, _SAlloc>& __s)
+ { _M_stringbuf.str(__s); }
+
+
+      void
+      str(__string_type&& __s)
+      { _M_stringbuf.str(std::move(__s)); }
+
+    };
+# 1007 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+  template <typename _CharT, typename _Traits, typename _Alloc>
+    class basic_stringstream : public basic_iostream<_CharT, _Traits>
+    {
+    public:
+
+      typedef _CharT char_type;
+      typedef _Traits traits_type;
+
+
+      typedef _Alloc allocator_type;
+      typedef typename traits_type::int_type int_type;
+      typedef typename traits_type::pos_type pos_type;
+      typedef typename traits_type::off_type off_type;
+
+
+      typedef basic_string<_CharT, _Traits, _Alloc> __string_type;
+      typedef basic_stringbuf<_CharT, _Traits, _Alloc> __stringbuf_type;
+      typedef basic_iostream<char_type, traits_type> __iostream_type;
+
+    private:
+      __stringbuf_type _M_stringbuf;
+
+    public:
+# 1041 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      basic_stringstream()
+      : __iostream_type(), _M_stringbuf(ios_base::out | ios_base::in)
+      { this->init(&_M_stringbuf); }
+# 1055 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      explicit
+      basic_stringstream(ios_base::openmode __m)
+      : __iostream_type(), _M_stringbuf(__m)
+      { this->init(&_M_stringbuf); }
+# 1071 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      explicit
+      basic_stringstream(const __string_type& __str,
+    ios_base::openmode __m = ios_base::out | ios_base::in)
+      : __iostream_type(), _M_stringbuf(__str, __m)
+      { this->init(&_M_stringbuf); }
+
+
+
+
+
+
+
+      ~basic_stringstream()
+      { }
+
+
+      basic_stringstream(const basic_stringstream&) = delete;
+
+      basic_stringstream(basic_stringstream&& __rhs)
+      : __iostream_type(std::move(__rhs)),
+      _M_stringbuf(std::move(__rhs._M_stringbuf))
+      { __iostream_type::set_rdbuf(&_M_stringbuf); }
+
+
+      basic_stringstream(ios_base::openmode __mode, const allocator_type& __a)
+      : __iostream_type(), _M_stringbuf(__mode, __a)
+      { this->init(&_M_stringbuf); }
+
+      explicit
+      basic_stringstream(__string_type&& __str,
+    ios_base::openmode __mode = ios_base::in
+           | ios_base::out)
+      : __iostream_type(), _M_stringbuf(std::move(__str), __mode)
+      { this->init(std::__addressof(_M_stringbuf)); }
+
+      template<typename _SAlloc>
+ basic_stringstream(const basic_string<_CharT, _Traits, _SAlloc>& __str,
+      const allocator_type& __a)
+ : basic_stringstream(__str, ios_base::in | ios_base::out, __a)
+ { }
+
+      template<typename _SAlloc>
+ basic_stringstream(const basic_string<_CharT, _Traits, _SAlloc>& __str,
+      ios_base::openmode __mode,
+      const allocator_type& __a)
+ : __iostream_type(), _M_stringbuf(__str, __mode, __a)
+ { this->init(std::__addressof(_M_stringbuf)); }
+
+      template<typename _SAlloc>
+ explicit
+ basic_stringstream(const basic_string<_CharT, _Traits, _SAlloc>& __str,
+      ios_base::openmode __mode = ios_base::in
+             | ios_base::out)
+ : basic_stringstream(__str, __mode, allocator_type())
+ { }
+
+
+
+
+      basic_stringstream&
+      operator=(const basic_stringstream&) = delete;
+
+      basic_stringstream&
+      operator=(basic_stringstream&& __rhs)
+      {
+ __iostream_type::operator=(std::move(__rhs));
+ _M_stringbuf = std::move(__rhs._M_stringbuf);
+ return *this;
+      }
+
+      void
+      swap(basic_stringstream& __rhs)
+      {
+ __iostream_type::swap(__rhs);
+ _M_stringbuf.swap(__rhs._M_stringbuf);
+      }
+# 1156 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      [[__nodiscard__]]
+      __stringbuf_type*
+      rdbuf() const
+      { return const_cast<__stringbuf_type*>(&_M_stringbuf); }
+
+
+
+
+
+      [[__nodiscard__]]
+      __string_type
+      str() const &
+      { return _M_stringbuf.str(); }
+
+
+
+
+      template<__allocator_like _SAlloc>
+ [[__nodiscard__]]
+ basic_string<_CharT, _Traits, _SAlloc>
+ str(const _SAlloc& __sa) const
+ { return _M_stringbuf.str(__sa); }
+
+
+      [[__nodiscard__]]
+      __string_type
+      str() &&
+      { return std::move(_M_stringbuf).str(); }
+
+
+     
+      basic_string_view<char_type, traits_type>
+      view() const noexcept
+      { return _M_stringbuf.view(); }
+# 1198 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 3
+      void
+      str(const __string_type& __s)
+      { _M_stringbuf.str(__s); }
+
+
+
+      template<__allocator_like _SAlloc>
+ requires (!is_same_v<_SAlloc, _Alloc>)
+ void
+ str(const basic_string<_CharT, _Traits, _SAlloc>& __s)
+ { _M_stringbuf.str(__s); }
+
+
+      void
+      str(__string_type&& __s)
+      { _M_stringbuf.str(std::move(__s)); }
+
+    };
+
+
+
+  template <class _CharT, class _Traits, class _Allocator>
+    inline void
+    swap(basic_stringbuf<_CharT, _Traits, _Allocator>& __x,
+  basic_stringbuf<_CharT, _Traits, _Allocator>& __y)
+    noexcept(noexcept(__x.swap(__y)))
+    { __x.swap(__y); }
+
+
+  template <class _CharT, class _Traits, class _Allocator>
+    inline void
+    swap(basic_istringstream<_CharT, _Traits, _Allocator>& __x,
+  basic_istringstream<_CharT, _Traits, _Allocator>& __y)
+    { __x.swap(__y); }
+
+
+  template <class _CharT, class _Traits, class _Allocator>
+    inline void
+    swap(basic_ostringstream<_CharT, _Traits, _Allocator>& __x,
+  basic_ostringstream<_CharT, _Traits, _Allocator>& __y)
+    { __x.swap(__y); }
+
+
+  template <class _CharT, class _Traits, class _Allocator>
+    inline void
+    swap(basic_stringstream<_CharT, _Traits, _Allocator>& __x,
+  basic_stringstream<_CharT, _Traits, _Allocator>& __y)
+    { __x.swap(__y); }
+
+
+}
+
+}
+
+
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/sstream.tcc" 1 3
+# 40 "C:/msys64/mingw64/include/c++/15.2.0/bits/sstream.tcc" 3
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wc++11-extensions"
+
+namespace std
+{
+
+
+  template <class _CharT, class _Traits, class _Alloc>
+    typename basic_stringbuf<_CharT, _Traits, _Alloc>::int_type
+    basic_stringbuf<_CharT, _Traits, _Alloc>::
+    pbackfail(int_type __c)
+    {
+      int_type __ret = traits_type::eof();
+      if (this->eback() < this->gptr())
+ {
+
+
+   const bool __testeof = traits_type::eq_int_type(__c, __ret);
+   if (!__testeof)
+     {
+       const bool __testeq = traits_type::eq(traits_type::
+          to_char_type(__c),
+          this->gptr()[-1]);
+       const bool __testout = this->_M_mode & ios_base::out;
+       if (__testeq || __testout)
+  {
+    this->gbump(-1);
+    if (!__testeq)
+      *this->gptr() = traits_type::to_char_type(__c);
+    __ret = __c;
+  }
+     }
+   else
+     {
+       this->gbump(-1);
+       __ret = traits_type::not_eof(__c);
+     }
+ }
+      return __ret;
+    }
+
+  template <class _CharT, class _Traits, class _Alloc>
+    typename basic_stringbuf<_CharT, _Traits, _Alloc>::int_type
+    basic_stringbuf<_CharT, _Traits, _Alloc>::
+    overflow(int_type __c)
+    {
+      const bool __testout = this->_M_mode & ios_base::out;
+      if (__builtin_expect(!__testout, false))
+ return traits_type::eof();
+
+      const bool __testeof = traits_type::eq_int_type(__c, traits_type::eof());
+      if (__builtin_expect(__testeof, false))
+ return traits_type::not_eof(__c);
+
+      const __size_type __capacity = _M_string.capacity();
+
+
+      if (size_t(this->epptr() - this->pbase()) < __capacity)
+ {
+
+   char_type* __base = const_cast<char_type*>(_M_string.data());
+   _M_pbump(__base, __base + __capacity, this->pptr() - this->pbase());
+   if (_M_mode & ios_base::in)
+     {
+       const __size_type __nget = this->gptr() - this->eback();
+       const __size_type __eget = this->egptr() - this->eback();
+       this->setg(__base, __base + __nget, __base + __eget + 1);
+     }
+   *this->pptr() = traits_type::to_char_type(__c);
+   this->pbump(1);
+   return __c;
+ }
+
+
+      const __size_type __max_size = _M_string.max_size();
+      const bool __testput = this->pptr() < this->epptr();
+      if (__builtin_expect(!__testput && __capacity == __max_size, false))
+ return traits_type::eof();
+
+
+
+      const char_type __conv = traits_type::to_char_type(__c);
+      if (!__testput)
+ {
+# 133 "C:/msys64/mingw64/include/c++/15.2.0/bits/sstream.tcc" 3
+   const __size_type __opt_len = std::max(__size_type(2 * __capacity),
+       __size_type(512));
+   const __size_type __len = std::min(__opt_len, __max_size);
+   __string_type __tmp(_M_string.get_allocator());
+   __tmp.reserve(__len);
+   if (this->pbase())
+     __tmp.assign(this->pbase(), this->epptr() - this->pbase());
+   __tmp.push_back(__conv);
+   _M_string.swap(__tmp);
+   _M_sync(const_cast<char_type*>(_M_string.data()),
+    this->gptr() - this->eback(), this->pptr() - this->pbase());
+ }
+      else
+ *this->pptr() = __conv;
+      this->pbump(1);
+      return __c;
+    }
+
+  template <class _CharT, class _Traits, class _Alloc>
+    typename basic_stringbuf<_CharT, _Traits, _Alloc>::int_type
+    basic_stringbuf<_CharT, _Traits, _Alloc>::
+    underflow()
+    {
+      int_type __ret = traits_type::eof();
+      const bool __testin = this->_M_mode & ios_base::in;
+      if (__testin)
+ {
+
+   _M_update_egptr();
+
+   if (this->gptr() < this->egptr())
+     __ret = traits_type::to_int_type(*this->gptr());
+ }
+      return __ret;
+    }
+
+  template <class _CharT, class _Traits, class _Alloc>
+    typename basic_stringbuf<_CharT, _Traits, _Alloc>::pos_type
+    basic_stringbuf<_CharT, _Traits, _Alloc>::
+    seekoff(off_type __off, ios_base::seekdir __way, ios_base::openmode __mode)
+    {
+      pos_type __ret = pos_type(off_type(-1));
+      bool __testin = (ios_base::in & this->_M_mode & __mode) != 0;
+      bool __testout = (ios_base::out & this->_M_mode & __mode) != 0;
+      const bool __testboth = __testin && __testout && __way != ios_base::cur;
+      __testin &= !(__mode & ios_base::out);
+      __testout &= !(__mode & ios_base::in);
+
+
+
+      const char_type* __beg = __testin ? this->eback() : this->pbase();
+      if ((__beg || !__off) && (__testin || __testout || __testboth))
+ {
+   _M_update_egptr();
+
+   off_type __newoffi = __off;
+   off_type __newoffo = __newoffi;
+   if (__way == ios_base::cur)
+     {
+       __newoffi += this->gptr() - __beg;
+       __newoffo += this->pptr() - __beg;
+     }
+   else if (__way == ios_base::end)
+     __newoffo = __newoffi += this->egptr() - __beg;
+
+   if ((__testin || __testboth)
+       && __newoffi >= 0
+       && this->egptr() - __beg >= __newoffi)
+     {
+       this->setg(this->eback(), this->eback() + __newoffi,
+    this->egptr());
+       __ret = pos_type(__newoffi);
+     }
+   if ((__testout || __testboth)
+       && __newoffo >= 0
+       && this->egptr() - __beg >= __newoffo)
+     {
+       _M_pbump(this->pbase(), this->epptr(), __newoffo);
+       __ret = pos_type(__newoffo);
+     }
+ }
+      return __ret;
+    }
+
+  template <class _CharT, class _Traits, class _Alloc>
+    typename basic_stringbuf<_CharT, _Traits, _Alloc>::pos_type
+    basic_stringbuf<_CharT, _Traits, _Alloc>::
+    seekpos(pos_type __sp, ios_base::openmode __mode)
+    {
+      pos_type __ret = pos_type(off_type(-1));
+      const bool __testin = (ios_base::in & this->_M_mode & __mode) != 0;
+      const bool __testout = (ios_base::out & this->_M_mode & __mode) != 0;
+
+      const char_type* __beg = __testin ? this->eback() : this->pbase();
+      if ((__beg || !off_type(__sp)) && (__testin || __testout))
+ {
+   _M_update_egptr();
+
+   const off_type __pos(__sp);
+   const bool __testpos = (0 <= __pos
+      && __pos <= this->egptr() - __beg);
+   if (__testpos)
+     {
+       if (__testin)
+  this->setg(this->eback(), this->eback() + __pos,
+      this->egptr());
+       if (__testout)
+  _M_pbump(this->pbase(), this->epptr(), __pos);
+       __ret = __sp;
+     }
+ }
+      return __ret;
+    }
+
+  template <class _CharT, class _Traits, class _Alloc>
+    void
+    basic_stringbuf<_CharT, _Traits, _Alloc>::
+    _M_sync(char_type* __base, __size_type __i, __size_type __o)
+    {
+      const bool __testin = _M_mode & ios_base::in;
+      const bool __testout = _M_mode & ios_base::out;
+      char_type* __endg = __base + _M_string.size();
+      char_type* __endp = __base + _M_string.capacity();
+
+      if (__base != _M_string.data())
+ {
+
+   __endg += __i;
+   __i = 0;
+   __endp = __endg;
+ }
+
+      if (__testin)
+ this->setg(__base, __base + __i, __endg);
+      if (__testout)
+ {
+   _M_pbump(__base, __endp, __o);
+
+
+
+   if (!__testin)
+     this->setg(__endg, __endg, __endg);
+ }
+    }
+
+  template <class _CharT, class _Traits, class _Alloc>
+    void
+    basic_stringbuf<_CharT, _Traits, _Alloc>::
+    _M_pbump(char_type* __pbeg, char_type* __pend, off_type __off)
+    {
+      this->setp(__pbeg, __pend);
+      while (__off > __gnu_cxx::__numeric_traits<int>::__max)
+ {
+   this->pbump(__gnu_cxx::__numeric_traits<int>::__max);
+   __off -= __gnu_cxx::__numeric_traits<int>::__max;
+ }
+      this->pbump(__off);
+    }
+
+
+
+
+  extern template class basic_stringbuf<char>;
+  extern template class basic_istringstream<char>;
+  extern template class basic_ostringstream<char>;
+  extern template class basic_stringstream<char>;
+
+
+  extern template class basic_stringbuf<wchar_t>;
+  extern template class basic_istringstream<wchar_t>;
+  extern template class basic_ostringstream<wchar_t>;
+  extern template class basic_stringstream<wchar_t>;
+
+
+
+
+}
+
+#pragma GCC diagnostic pop
+# 1256 "C:/msys64/mingw64/include/c++/15.2.0/sstream" 2 3
+# 52 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 2 3
+# 61 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 62 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 2 3
+
+namespace std
+{
+
+# 80 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 3
+  namespace chrono
+  {
+
+
+
+    struct local_t { };
+    template<typename _Duration>
+      using local_time = time_point<local_t, _Duration>;
+    using local_seconds = local_time<seconds>;
+    using local_days = local_time<days>;
+
+
+    class utc_clock;
+    class tai_clock;
+    class gps_clock;
+
+    template<typename _Duration>
+      using utc_time = time_point<utc_clock, _Duration>;
+    using utc_seconds = utc_time<seconds>;
+
+    template<typename _Duration>
+      using tai_time = time_point<tai_clock, _Duration>;
+    using tai_seconds = tai_time<seconds>;
+
+    template<typename _Duration>
+      using gps_time = time_point<gps_clock, _Duration>;
+    using gps_seconds = gps_time<seconds>;
+
+    template<> struct is_clock<utc_clock> : true_type { };
+    template<> struct is_clock<tai_clock> : true_type { };
+    template<> struct is_clock<gps_clock> : true_type { };
+
+    template<> inline constexpr bool is_clock_v<utc_clock> = true;
+    template<> inline constexpr bool is_clock_v<tai_clock> = true;
+    template<> inline constexpr bool is_clock_v<gps_clock> = true;
+
+    struct leap_second_info
+    {
+      bool is_leap_second;
+      seconds elapsed;
+    };
+
+    template<typename _Duration>
+      leap_second_info
+      get_leap_second_info(const utc_time<_Duration>& __ut);
+
+
+
+
+
+
+
+    class utc_clock
+    {
+    public:
+      using rep = system_clock::rep;
+      using period = system_clock::period;
+      using duration = chrono::duration<rep, period>;
+      using time_point = chrono::time_point<utc_clock>;
+      static constexpr bool is_steady = false;
+
+      [[nodiscard]]
+      static time_point
+      now()
+      { return from_sys(system_clock::now()); }
+
+      template<typename _Duration>
+ [[nodiscard]]
+ static sys_time<common_type_t<_Duration, seconds>>
+ to_sys(const utc_time<_Duration>& __t)
+ {
+   using _CDur = common_type_t<_Duration, seconds>;
+   const auto __li = chrono::get_leap_second_info(__t);
+   sys_time<_CDur> __s{__t.time_since_epoch() - __li.elapsed};
+   if (__li.is_leap_second)
+     __s = chrono::floor<seconds>(__s) + seconds{1} - _CDur{1};
+   return __s;
+ }
+
+      template<typename _Duration>
+ [[nodiscard]]
+ static utc_time<common_type_t<_Duration, seconds>>
+ from_sys(const sys_time<_Duration>& __t);
+    };
+
+
+
+
+
+
+
+    class tai_clock
+    {
+    public:
+      using rep = system_clock::rep;
+      using period = system_clock::period;
+      using duration = chrono::duration<rep, period>;
+      using time_point = chrono::time_point<tai_clock>;
+      static constexpr bool is_steady = false;
+
+
+      [[nodiscard]]
+      static time_point
+      now()
+      { return from_utc(utc_clock::now()); }
+
+      template<typename _Duration>
+ [[nodiscard]]
+ static utc_time<common_type_t<_Duration, seconds>>
+ to_utc(const tai_time<_Duration>& __t)
+ {
+   using _CDur = common_type_t<_Duration, seconds>;
+   return utc_time<_CDur>{__t.time_since_epoch()} - 378691210s;
+ }
+
+      template<typename _Duration>
+ [[nodiscard]]
+ static tai_time<common_type_t<_Duration, seconds>>
+ from_utc(const utc_time<_Duration>& __t)
+ {
+   using _CDur = common_type_t<_Duration, seconds>;
+   return tai_time<_CDur>{__t.time_since_epoch()} + 378691210s;
+ }
+    };
+
+
+
+
+
+
+
+    class gps_clock
+    {
+    public:
+      using rep = system_clock::rep;
+      using period = system_clock::period;
+      using duration = chrono::duration<rep, period>;
+      using time_point = chrono::time_point<gps_clock>;
+      static constexpr bool is_steady = false;
+
+
+      [[nodiscard]]
+      static time_point
+      now()
+      { return from_utc(utc_clock::now()); }
+
+      template<typename _Duration>
+ [[nodiscard]]
+ static utc_time<common_type_t<_Duration, seconds>>
+ to_utc(const gps_time<_Duration>& __t)
+ {
+   using _CDur = common_type_t<_Duration, seconds>;
+   return utc_time<_CDur>{__t.time_since_epoch()} + 315964809s;
+ }
+
+      template<typename _Duration>
+ [[nodiscard]]
+ static gps_time<common_type_t<_Duration, seconds>>
+ from_utc(const utc_time<_Duration>& __t)
+ {
+   using _CDur = common_type_t<_Duration, seconds>;
+   return gps_time<_CDur>{__t.time_since_epoch()} - 315964809s;
+ }
+    };
+
+
+    template<typename _DestClock, typename _SourceClock>
+      struct clock_time_conversion
+      { };
+
+
+
+    template<typename _Clock>
+      struct clock_time_conversion<_Clock, _Clock>
+      {
+ template<typename _Duration>
+   time_point<_Clock, _Duration>
+   operator()(const time_point<_Clock, _Duration>& __t) const
+   { return __t; }
+      };
+
+
+    template<>
+      struct clock_time_conversion<system_clock, system_clock>
+      {
+ template<typename _Duration>
+   sys_time<_Duration>
+   operator()(const sys_time<_Duration>& __t) const
+   { return __t; }
+      };
+
+    template<>
+      struct clock_time_conversion<utc_clock, utc_clock>
+      {
+ template<typename _Duration>
+   utc_time<_Duration>
+   operator()(const utc_time<_Duration>& __t) const
+   { return __t; }
+      };
+
+
+
+    template<>
+      struct clock_time_conversion<utc_clock, system_clock>
+      {
+ template<typename _Duration>
+   utc_time<common_type_t<_Duration, seconds>>
+   operator()(const sys_time<_Duration>& __t) const
+   { return utc_clock::from_sys(__t); }
+      };
+
+    template<>
+      struct clock_time_conversion<system_clock, utc_clock>
+      {
+ template<typename _Duration>
+   sys_time<common_type_t<_Duration, seconds>>
+   operator()(const utc_time<_Duration>& __t) const
+   { return utc_clock::to_sys(__t); }
+      };
+
+    template<typename _Tp, typename _Clock>
+      inline constexpr bool __is_time_point_for_v = false;
+
+    template<typename _Clock, typename _Duration>
+      inline constexpr bool
+       __is_time_point_for_v<time_point<_Clock, _Duration>, _Clock> = true;
+
+
+
+    template<typename _SourceClock>
+      struct clock_time_conversion<system_clock, _SourceClock>
+      {
+ template<typename _Duration, typename _Src = _SourceClock>
+   auto
+   operator()(const time_point<_SourceClock, _Duration>& __t) const
+   -> decltype(_Src::to_sys(__t))
+   {
+     using _Ret = decltype(_SourceClock::to_sys(__t));
+     static_assert(__is_time_point_for_v<_Ret, system_clock>);
+     return _SourceClock::to_sys(__t);
+   }
+      };
+
+    template<typename _DestClock>
+      struct clock_time_conversion<_DestClock, system_clock>
+      {
+ template<typename _Duration, typename _Dest = _DestClock>
+   auto
+   operator()(const sys_time<_Duration>& __t) const
+   -> decltype(_Dest::from_sys(__t))
+   {
+     using _Ret = decltype(_DestClock::from_sys(__t));
+     static_assert(__is_time_point_for_v<_Ret, _DestClock>);
+     return _DestClock::from_sys(__t);
+   }
+      };
+
+
+
+    template<typename _SourceClock>
+      struct clock_time_conversion<utc_clock, _SourceClock>
+      {
+ template<typename _Duration, typename _Src = _SourceClock>
+   auto
+   operator()(const time_point<_SourceClock, _Duration>& __t) const
+   -> decltype(_Src::to_utc(__t))
+   {
+     using _Ret = decltype(_SourceClock::to_utc(__t));
+     static_assert(__is_time_point_for_v<_Ret, utc_clock>);
+     return _SourceClock::to_utc(__t);
+   }
+      };
+
+    template<typename _DestClock>
+      struct clock_time_conversion<_DestClock, utc_clock>
+      {
+ template<typename _Duration, typename _Dest = _DestClock>
+   auto
+   operator()(const utc_time<_Duration>& __t) const
+   -> decltype(_Dest::from_utc(__t))
+   {
+     using _Ret = decltype(_DestClock::from_utc(__t));
+     static_assert(__is_time_point_for_v<_Ret, _DestClock>);
+     return _DestClock::from_utc(__t);
+   }
+      };
+
+
+
+    namespace __detail
+    {
+      template<typename _DestClock, typename _SourceClock, typename _Duration>
+       concept __clock_convs
+   = requires (const time_point<_SourceClock, _Duration>& __t) {
+     clock_time_conversion<_DestClock, _SourceClock>{}(__t);
+   };
+
+
+      template<typename _DestClock, typename _SourceClock, typename _Duration>
+       concept __clock_convs_sys
+   = requires (const time_point<_SourceClock, _Duration>& __t) {
+     clock_time_conversion<_DestClock, system_clock>{}(
+       clock_time_conversion<system_clock, _SourceClock>{}(__t));
+   };
+
+      template<typename _DestClock, typename _SourceClock, typename _Duration>
+       concept __clock_convs_utc
+   = requires (const time_point<_SourceClock, _Duration>& __t) {
+     clock_time_conversion<_DestClock, utc_clock>{}(
+       clock_time_conversion<utc_clock, _SourceClock>{}(__t));
+   };
+
+      template<typename _DestClock, typename _SourceClock, typename _Duration>
+ concept __clock_convs_sys_utc
+   = requires (const time_point<_SourceClock, _Duration>& __t) {
+     clock_time_conversion<_DestClock, utc_clock>{}(
+       clock_time_conversion<utc_clock, system_clock>{}(
+  clock_time_conversion<system_clock, _SourceClock>{}(__t)));
+   };
+
+      template<typename _DestClock, typename _SourceClock, typename _Duration>
+       concept __clock_convs_utc_sys
+   = requires (const time_point<_SourceClock, _Duration>& __t) {
+     clock_time_conversion<_DestClock, system_clock>{}(
+       clock_time_conversion<system_clock, utc_clock>{}(
+  clock_time_conversion<utc_clock, _SourceClock>{}(__t)));
+   };
+
+    }
+
+
+
+    template<typename _DestClock, typename _SourceClock, typename _Duration>
+      [[nodiscard]]
+      inline auto
+      clock_cast(const time_point<_SourceClock, _Duration>& __t)
+      requires __detail::__clock_convs<_DestClock, _SourceClock, _Duration>
+
+ || __detail::__clock_convs_sys<_DestClock, _SourceClock, _Duration>
+ || __detail::__clock_convs_utc<_DestClock, _SourceClock, _Duration>
+ || __detail::__clock_convs_sys_utc<_DestClock, _SourceClock, _Duration>
+ || __detail::__clock_convs_utc_sys<_DestClock, _SourceClock, _Duration>
+
+      {
+       constexpr bool __direct
+  = __detail::__clock_convs<_DestClock, _SourceClock, _Duration>;
+       if constexpr (__direct)
+  {
+    return clock_time_conversion<_DestClock, _SourceClock>{}(__t);
+  }
+
+       else
+  {
+    constexpr bool __convert_via_sys_clock
+      = __detail::__clock_convs_sys<_DestClock, _SourceClock, _Duration>;
+    constexpr bool __convert_via_utc_clock
+      = __detail::__clock_convs_utc<_DestClock, _SourceClock, _Duration>;
+    if constexpr (__convert_via_sys_clock)
+      {
+        static_assert(!__convert_via_utc_clock,
+   "clock_cast requires a unique best conversion, but "
+   "conversion is possible via system_clock and also via"
+   "utc_clock");
+        return clock_time_conversion<_DestClock, system_clock>{}(
+   clock_time_conversion<system_clock, _SourceClock>{}(__t));
+      }
+    else if constexpr (__convert_via_utc_clock)
+      {
+        return clock_time_conversion<_DestClock, utc_clock>{}(
+   clock_time_conversion<utc_clock, _SourceClock>{}(__t));
+      }
+    else
+      {
+        constexpr bool __convert_via_sys_and_utc_clocks
+   = __detail::__clock_convs_sys_utc<_DestClock,
+         _SourceClock,
+         _Duration>;
+
+        if constexpr (__convert_via_sys_and_utc_clocks)
+   {
+     constexpr bool __convert_via_utc_and_sys_clocks
+       = __detail::__clock_convs_utc_sys<_DestClock,
+             _SourceClock,
+             _Duration>;
+     static_assert(!__convert_via_utc_and_sys_clocks,
+       "clock_cast requires a unique best conversion, but "
+       "conversion is possible via system_clock followed by "
+       "utc_clock, and also via utc_clock followed by "
+       "system_clock");
+     return clock_time_conversion<_DestClock, utc_clock>{}(
+       clock_time_conversion<utc_clock, system_clock>{}(
+         clock_time_conversion<system_clock, _SourceClock>{}(__t)));
+   }
+        else
+   {
+     return clock_time_conversion<_DestClock, system_clock>{}(
+       clock_time_conversion<system_clock, utc_clock>{}(
+         clock_time_conversion<utc_clock, _SourceClock>{}(__t)));
+   }
+      }
+  }
+
+      }
+
+
+
+
+    class day;
+    class month;
+    class year;
+    class weekday;
+    class weekday_indexed;
+    class weekday_last;
+    class month_day;
+    class month_day_last;
+    class month_weekday;
+    class month_weekday_last;
+    class year_month;
+    class year_month_day;
+    class year_month_day_last;
+    class year_month_weekday;
+    class year_month_weekday_last;
+
+    struct last_spec
+    {
+      explicit last_spec() = default;
+
+      friend constexpr month_day_last
+      operator/(int __m, last_spec) noexcept;
+
+      friend constexpr month_day_last
+      operator/(last_spec, int __m) noexcept;
+    };
+
+    inline constexpr last_spec last{};
+
+    namespace __detail
+    {
+
+      template <unsigned __d, typename _Tp>
+      consteval auto
+      __modulo_offset()
+      {
+ using _Up = make_unsigned_t<_Tp>;
+ auto constexpr __a = _Up(-1) - _Up(255 + __d - 2);
+ auto constexpr __b = _Up(__d * (__a / __d) - 1);
+
+ return _Up(-1) - __b;
+      }
+
+
+
+
+      template <unsigned __d, typename _Tp>
+      constexpr unsigned
+      __add_modulo(unsigned __x, _Tp __y)
+      {
+ using _Up = make_unsigned_t<_Tp>;
+# 547 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 3
+ auto const __offset = __y >= 0 ? _Up(0) : __modulo_offset<__d, _Tp>();
+ return (__x + _Up(__y) - __offset) % __d;
+      }
+
+
+      template <unsigned __d, typename _Tp>
+      constexpr unsigned
+      __sub_modulo(unsigned __x, _Tp __y)
+      {
+ using _Up = make_unsigned_t<_Tp>;
+ auto const __offset = __y <= 0 ? _Up(0) : __modulo_offset<__d, _Tp>();
+ return (__x - _Up(__y) - __offset) % __d;
+      }
+
+      inline constexpr unsigned __days_per_month[12]
+ = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    }
+
+
+
+    class day
+    {
+    private:
+      unsigned char _M_d;
+
+    public:
+      day() = default;
+
+      explicit constexpr
+      day(unsigned __d) noexcept
+      : _M_d(__d)
+      { }
+
+      constexpr day&
+      operator++() noexcept
+      {
+ ++_M_d;
+ return *this;
+      }
+
+      constexpr day
+      operator++(int) noexcept
+      {
+ auto __ret = *this;
+ ++(*this);
+ return __ret;
+      }
+
+      constexpr day&
+      operator--() noexcept
+      {
+ --_M_d;
+ return *this;
+      }
+
+      constexpr day
+      operator--(int) noexcept
+      {
+ auto __ret = *this;
+ --(*this);
+ return __ret;
+      }
+
+      constexpr day&
+      operator+=(const days& __d) noexcept
+      {
+ *this = *this + __d;
+ return *this;
+      }
+
+      constexpr day&
+      operator-=(const days& __d) noexcept
+      {
+ *this = *this - __d;
+ return *this;
+      }
+
+      constexpr explicit
+      operator unsigned() const noexcept
+      { return _M_d; }
+
+      constexpr bool
+      ok() const noexcept
+      { return 1 <= _M_d && _M_d <= 31; }
+
+      friend constexpr bool
+      operator==(const day& __x, const day& __y) noexcept
+      { return unsigned{__x} == unsigned{__y}; }
+
+      friend constexpr strong_ordering
+      operator<=>(const day& __x, const day& __y) noexcept
+      { return unsigned{__x} <=> unsigned{__y}; }
+
+      friend constexpr day
+      operator+(const day& __x, const days& __y) noexcept
+      { return day(unsigned{__x} + __y.count()); }
+
+      friend constexpr day
+      operator+(const days& __x, const day& __y) noexcept
+      { return __y + __x; }
+
+      friend constexpr day
+      operator-(const day& __x, const days& __y) noexcept
+      { return __x + -__y; }
+
+      friend constexpr days
+      operator-(const day& __x, const day& __y) noexcept
+      { return days{int(unsigned{__x}) - int(unsigned{__y})}; }
+
+      friend constexpr month_day
+      operator/(const month& __m, const day& __d) noexcept;
+
+      friend constexpr month_day
+      operator/(int __m, const day& __d) noexcept;
+
+      friend constexpr month_day
+      operator/(const day& __d, const month& __m) noexcept;
+
+      friend constexpr month_day
+      operator/(const day& __d, int __m) noexcept;
+
+      friend constexpr year_month_day
+      operator/(const year_month& __ym, const day& __d) noexcept;
+    };
+
+
+
+    class month
+    {
+    private:
+      unsigned char _M_m;
+
+    public:
+      month() = default;
+
+      explicit constexpr
+      month(unsigned __m) noexcept
+      : _M_m(__m)
+      { }
+
+      constexpr month&
+      operator++() noexcept
+      {
+ *this += months{1};
+ return *this;
+      }
+
+      constexpr month
+      operator++(int) noexcept
+      {
+ auto __ret = *this;
+ ++(*this);
+ return __ret;
+      }
+
+      constexpr month&
+      operator--() noexcept
+      {
+ *this -= months{1};
+ return *this;
+      }
+
+      constexpr month
+      operator--(int) noexcept
+      {
+ auto __ret = *this;
+ --(*this);
+ return __ret;
+      }
+
+      constexpr month&
+      operator+=(const months& __m) noexcept
+      {
+ *this = *this + __m;
+ return *this;
+      }
+
+      constexpr month&
+      operator-=(const months& __m) noexcept
+      {
+ *this = *this - __m;
+ return *this;
+      }
+
+      explicit constexpr
+      operator unsigned() const noexcept
+      { return _M_m; }
+
+      constexpr bool
+      ok() const noexcept
+      { return 1 <= _M_m && _M_m <= 12; }
+
+      friend constexpr bool
+      operator==(const month& __x, const month& __y) noexcept
+      { return unsigned{__x} == unsigned{__y}; }
+
+      friend constexpr strong_ordering
+      operator<=>(const month& __x, const month& __y) noexcept
+      { return unsigned{__x} <=> unsigned{__y}; }
+
+      friend constexpr month
+      operator+(const month& __x, const months& __y) noexcept
+      {
+
+
+ return month{1 + __detail::__add_modulo<12>(
+   unsigned{__x} + 11, __y.count())};
+      }
+
+      friend constexpr month
+      operator+(const months& __x, const month& __y) noexcept
+      { return __y + __x; }
+
+      friend constexpr month
+      operator-(const month& __x, const months& __y) noexcept
+      {
+
+
+ return month{1 + __detail::__sub_modulo<12>(
+   unsigned{__x} + 11, __y.count())};
+      }
+
+      friend constexpr months
+      operator-(const month& __x, const month& __y) noexcept
+      {
+ const auto __dm = int(unsigned(__x)) - int(unsigned(__y));
+ return months{__dm < 0 ? 12 + __dm : __dm};
+      }
+
+      friend constexpr year_month
+      operator/(const year& __y, const month& __m) noexcept;
+
+      friend constexpr month_day
+      operator/(const month& __m, int __d) noexcept;
+
+      friend constexpr month_day_last
+      operator/(const month& __m, last_spec) noexcept;
+
+      friend constexpr month_day_last
+      operator/(last_spec, const month& __m) noexcept;
+
+      friend constexpr month_weekday
+      operator/(const month& __m, const weekday_indexed& __wdi) noexcept;
+
+      friend constexpr month_weekday
+      operator/(const weekday_indexed& __wdi, const month& __m) noexcept;
+
+      friend constexpr month_weekday_last
+      operator/(const month& __m, const weekday_last& __wdl) noexcept;
+
+      friend constexpr month_weekday_last
+      operator/(const weekday_last& __wdl, const month& __m) noexcept;
+    };
+
+    inline constexpr month January{1};
+    inline constexpr month February{2};
+    inline constexpr month March{3};
+    inline constexpr month April{4};
+    inline constexpr month May{5};
+    inline constexpr month June{6};
+    inline constexpr month July{7};
+    inline constexpr month August{8};
+    inline constexpr month September{9};
+    inline constexpr month October{10};
+    inline constexpr month November{11};
+    inline constexpr month December{12};
+
+
+
+    class year
+    {
+    private:
+      short _M_y;
+
+    public:
+      year() = default;
+
+      explicit constexpr
+      year(int __y) noexcept
+      : _M_y{static_cast<short>(__y)}
+      { }
+
+      static constexpr year
+      min() noexcept
+      { return year{-32767}; }
+
+      static constexpr year
+      max() noexcept
+      { return year{32767}; }
+
+      constexpr year&
+      operator++() noexcept
+      {
+ ++_M_y;
+ return *this;
+      }
+
+      constexpr year
+      operator++(int) noexcept
+      {
+ auto __ret = *this;
+ ++(*this);
+ return __ret;
+      }
+
+      constexpr year&
+      operator--() noexcept
+      {
+ --_M_y;
+ return *this;
+      }
+
+      constexpr year
+      operator--(int) noexcept
+      {
+ auto __ret = *this;
+ --(*this);
+ return __ret;
+      }
+
+      constexpr year&
+      operator+=(const years& __y) noexcept
+      {
+ *this = *this + __y;
+ return *this;
+      }
+
+      constexpr year&
+      operator-=(const years& __y) noexcept
+      {
+ *this = *this - __y;
+ return *this;
+      }
+
+      constexpr year
+      operator+() const noexcept
+      { return *this; }
+
+      constexpr year
+      operator-() const noexcept
+      { return year{-_M_y}; }
+
+      constexpr bool
+      is_leap() const noexcept
+      {
+# 914 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 3
+ return (_M_y & (_M_y % 25 == 0 ? 15 : 3)) == 0;
+      }
+
+      explicit constexpr
+      operator int() const noexcept
+      { return _M_y; }
+
+      constexpr bool
+      ok() const noexcept
+      { return min()._M_y <= _M_y && _M_y <= max()._M_y; }
+
+      friend constexpr bool
+      operator==(const year& __x, const year& __y) noexcept
+      { return int{__x} == int{__y}; }
+
+      friend constexpr strong_ordering
+      operator<=>(const year& __x, const year& __y) noexcept
+      { return int{__x} <=> int{__y}; }
+
+      friend constexpr year
+      operator+(const year& __x, const years& __y) noexcept
+      { return year{int{__x} + static_cast<int>(__y.count())}; }
+
+      friend constexpr year
+      operator+(const years& __x, const year& __y) noexcept
+      { return __y + __x; }
+
+      friend constexpr year
+      operator-(const year& __x, const years& __y) noexcept
+      { return __x + -__y; }
+
+      friend constexpr years
+      operator-(const year& __x, const year& __y) noexcept
+      { return years{int{__x} - int{__y}}; }
+
+      friend constexpr year_month
+      operator/(const year& __y, int __m) noexcept;
+
+      friend constexpr year_month_day
+      operator/(const year& __y, const month_day& __md) noexcept;
+
+      friend constexpr year_month_day
+      operator/(const month_day& __md, const year& __y) noexcept;
+
+      friend constexpr year_month_day_last
+      operator/(const year& __y, const month_day_last& __mdl) noexcept;
+
+      friend constexpr year_month_day_last
+      operator/(const month_day_last& __mdl, const year& __y) noexcept;
+
+      friend constexpr year_month_weekday
+      operator/(const year& __y, const month_weekday& __mwd) noexcept;
+
+      friend constexpr year_month_weekday
+      operator/(const month_weekday& __mwd, const year& __y) noexcept;
+
+      friend constexpr year_month_weekday_last
+      operator/(const year& __y, const month_weekday_last& __mwdl) noexcept;
+
+      friend constexpr year_month_weekday_last
+      operator/(const month_weekday_last& __mwdl, const year& __y) noexcept;
+    };
+
+
+
+    class weekday
+    {
+    private:
+      unsigned char _M_wd;
+
+      static constexpr weekday
+      _S_from_days(const days& __d)
+      {
+ return weekday{__detail::__add_modulo<7>(4, __d.count())};
+      }
+
+    public:
+      weekday() = default;
+
+      explicit constexpr
+      weekday(unsigned __wd) noexcept
+      : _M_wd(__wd == 7 ? 0 : __wd)
+      { }
+
+      constexpr
+      weekday(const sys_days& __dp) noexcept
+      : weekday{_S_from_days(__dp.time_since_epoch())}
+      { }
+
+      explicit constexpr
+      weekday(const local_days& __dp) noexcept
+      : weekday{sys_days{__dp.time_since_epoch()}}
+      { }
+
+      constexpr weekday&
+      operator++() noexcept
+      {
+ *this += days{1};
+ return *this;
+      }
+
+      constexpr weekday
+      operator++(int) noexcept
+      {
+ auto __ret = *this;
+ ++(*this);
+ return __ret;
+      }
+
+      constexpr weekday&
+      operator--() noexcept
+      {
+ *this -= days{1};
+ return *this;
+      }
+
+      constexpr weekday
+      operator--(int) noexcept
+      {
+ auto __ret = *this;
+ --(*this);
+ return __ret;
+      }
+
+      constexpr weekday&
+      operator+=(const days& __d) noexcept
+      {
+ *this = *this + __d;
+ return *this;
+      }
+
+      constexpr weekday&
+      operator-=(const days& __d) noexcept
+      {
+ *this = *this - __d;
+ return *this;
+      }
+
+      constexpr unsigned
+      c_encoding() const noexcept
+      { return _M_wd; }
+
+      constexpr unsigned
+      iso_encoding() const noexcept
+      { return _M_wd == 0u ? 7u : _M_wd; }
+
+      constexpr bool
+      ok() const noexcept
+      { return _M_wd <= 6; }
+
+      constexpr weekday_indexed
+      operator[](unsigned __index) const noexcept;
+
+      constexpr weekday_last
+      operator[](last_spec) const noexcept;
+
+      friend constexpr bool
+      operator==(const weekday& __x, const weekday& __y) noexcept
+      { return __x._M_wd == __y._M_wd; }
+
+      friend constexpr weekday
+      operator+(const weekday& __x, const days& __y) noexcept
+      {
+ return weekday{__detail::__add_modulo<7>(__x._M_wd, __y.count())};
+      }
+
+      friend constexpr weekday
+      operator+(const days& __x, const weekday& __y) noexcept
+      { return __y + __x; }
+
+      friend constexpr weekday
+      operator-(const weekday& __x, const days& __y) noexcept
+      {
+ return weekday{__detail::__sub_modulo<7>(__x._M_wd, __y.count())};
+      }
+
+      friend constexpr days
+      operator-(const weekday& __x, const weekday& __y) noexcept
+      {
+ const auto __n = __x.c_encoding() - __y.c_encoding();
+ return static_cast<int>(__n) >= 0 ? days{__n} : days{__n + 7};
+      }
+    };
+
+    inline constexpr weekday Sunday{0};
+    inline constexpr weekday Monday{1};
+    inline constexpr weekday Tuesday{2};
+    inline constexpr weekday Wednesday{3};
+    inline constexpr weekday Thursday{4};
+    inline constexpr weekday Friday{5};
+    inline constexpr weekday Saturday{6};
+
+
+
+    class weekday_indexed
+    {
+    private:
+      chrono::weekday _M_wd;
+      unsigned char _M_index;
+
+    public:
+      weekday_indexed() = default;
+
+      constexpr
+      weekday_indexed(const chrono::weekday& __wd, unsigned __index) noexcept
+      : _M_wd(__wd), _M_index(__index)
+      { }
+
+      constexpr chrono::weekday
+      weekday() const noexcept
+      { return _M_wd; }
+
+      constexpr unsigned
+      index() const noexcept
+      { return _M_index; };
+
+      constexpr bool
+      ok() const noexcept
+      { return _M_wd.ok() && 1 <= _M_index && _M_index <= 5; }
+
+      friend constexpr bool
+      operator==(const weekday_indexed& __x, const weekday_indexed& __y) noexcept
+      { return __x.weekday() == __y.weekday() && __x.index() == __y.index(); }
+
+      friend constexpr month_weekday
+      operator/(const month& __m, const weekday_indexed& __wdi) noexcept;
+
+      friend constexpr month_weekday
+      operator/(int __m, const weekday_indexed& __wdi) noexcept;
+
+      friend constexpr month_weekday
+      operator/(const weekday_indexed& __wdi, const month& __m) noexcept;
+
+      friend constexpr month_weekday
+      operator/(const weekday_indexed& __wdi, int __m) noexcept;
+
+      friend constexpr year_month_weekday
+      operator/(const year_month& __ym, const weekday_indexed& __wdi) noexcept;
+    };
+
+    constexpr weekday_indexed
+    weekday::operator[](unsigned __index) const noexcept
+    { return {*this, __index}; }
+
+
+
+    class weekday_last
+    {
+    private:
+      chrono::weekday _M_wd;
+
+    public:
+      explicit constexpr
+      weekday_last(const chrono::weekday& __wd) noexcept
+      : _M_wd{__wd}
+      { }
+
+      constexpr chrono::weekday
+      weekday() const noexcept
+      { return _M_wd; }
+
+      constexpr bool
+      ok() const noexcept
+      { return _M_wd.ok(); }
+
+      friend constexpr bool
+      operator==(const weekday_last& __x, const weekday_last& __y) noexcept
+      { return __x.weekday() == __y.weekday(); }
+
+      friend constexpr month_weekday_last
+      operator/(int __m, const weekday_last& __wdl) noexcept;
+
+      friend constexpr month_weekday_last
+      operator/(const weekday_last& __wdl, int __m) noexcept;
+
+      friend constexpr year_month_weekday_last
+      operator/(const year_month& __ym, const weekday_last& __wdl) noexcept;
+    };
+
+    constexpr weekday_last
+    weekday::operator[](last_spec) const noexcept
+    { return weekday_last{*this}; }
+
+
+
+    class month_day
+    {
+    private:
+      chrono::month _M_m;
+      chrono::day _M_d;
+
+    public:
+      month_day() = default;
+
+      constexpr
+      month_day(const chrono::month& __m, const chrono::day& __d) noexcept
+      : _M_m{__m}, _M_d{__d}
+      { }
+
+      constexpr chrono::month
+      month() const noexcept
+      { return _M_m; }
+
+      constexpr chrono::day
+      day() const noexcept
+      { return _M_d; }
+
+      constexpr bool
+      ok() const noexcept
+      {
+ return _M_m.ok()
+   && 1u <= unsigned(_M_d)
+   && unsigned(_M_d) <= __detail::__days_per_month[unsigned(_M_m) - 1];
+      }
+
+      friend constexpr bool
+      operator==(const month_day& __x, const month_day& __y) noexcept
+      { return __x.month() == __y.month() && __x.day() == __y.day(); }
+
+      friend constexpr strong_ordering
+      operator<=>(const month_day& __x, const month_day& __y) noexcept
+ = default;
+
+      friend constexpr month_day
+      operator/(const chrono::month& __m, const chrono::day& __d) noexcept
+      { return {__m, __d}; }
+
+      friend constexpr month_day
+      operator/(const chrono::month& __m, int __d) noexcept
+      { return {__m, chrono::day(unsigned(__d))}; }
+
+      friend constexpr month_day
+      operator/(int __m, const chrono::day& __d) noexcept
+      { return {chrono::month(unsigned(__m)), __d}; }
+
+      friend constexpr month_day
+      operator/(const chrono::day& __d, const chrono::month& __m) noexcept
+      { return {__m, __d}; }
+
+      friend constexpr month_day
+      operator/(const chrono::day& __d, int __m) noexcept
+      { return {chrono::month(unsigned(__m)), __d}; }
+
+      friend constexpr year_month_day
+      operator/(int __y, const month_day& __md) noexcept;
+
+      friend constexpr year_month_day
+      operator/(const month_day& __md, int __y) noexcept;
+    };
+
+
+
+    class month_day_last
+    {
+    private:
+      chrono::month _M_m;
+
+    public:
+      explicit constexpr
+      month_day_last(const chrono::month& __m) noexcept
+      : _M_m{__m}
+      { }
+
+      constexpr chrono::month
+      month() const noexcept
+      { return _M_m; }
+
+      constexpr bool
+      ok() const noexcept
+      { return _M_m.ok(); }
+
+      friend constexpr bool
+      operator==(const month_day_last& __x, const month_day_last& __y) noexcept
+      { return __x.month() == __y.month(); }
+
+      friend constexpr strong_ordering
+      operator<=>(const month_day_last& __x, const month_day_last& __y) noexcept
+ = default;
+
+      friend constexpr month_day_last
+      operator/(const chrono::month& __m, last_spec) noexcept
+      { return month_day_last{__m}; }
+
+      friend constexpr month_day_last
+      operator/(int __m, last_spec) noexcept
+      { return chrono::month(unsigned(__m)) / last; }
+
+      friend constexpr month_day_last
+      operator/(last_spec, const chrono::month& __m) noexcept
+      { return __m / last; }
+
+      friend constexpr month_day_last
+      operator/(last_spec, int __m) noexcept
+      { return __m / last; }
+
+      friend constexpr year_month_day_last
+      operator/(int __y, const month_day_last& __mdl) noexcept;
+
+      friend constexpr year_month_day_last
+      operator/(const month_day_last& __mdl, int __y) noexcept;
+    };
+
+
+
+    class month_weekday
+    {
+    private:
+      chrono::month _M_m;
+      chrono::weekday_indexed _M_wdi;
+
+    public:
+      constexpr
+      month_weekday(const chrono::month& __m,
+      const chrono::weekday_indexed& __wdi) noexcept
+      : _M_m{__m}, _M_wdi{__wdi}
+      { }
+
+      constexpr chrono::month
+      month() const noexcept
+      { return _M_m; }
+
+      constexpr chrono::weekday_indexed
+      weekday_indexed() const noexcept
+      { return _M_wdi; }
+
+      constexpr bool
+      ok() const noexcept
+      { return _M_m.ok() && _M_wdi.ok(); }
+
+      friend constexpr bool
+      operator==(const month_weekday& __x, const month_weekday& __y) noexcept
+      {
+ return __x.month() == __y.month()
+   && __x.weekday_indexed() == __y.weekday_indexed();
+      }
+
+      friend constexpr month_weekday
+      operator/(const chrono::month& __m,
+  const chrono::weekday_indexed& __wdi) noexcept
+      { return {__m, __wdi}; }
+
+      friend constexpr month_weekday
+      operator/(int __m, const chrono::weekday_indexed& __wdi) noexcept
+      { return chrono::month(unsigned(__m)) / __wdi; }
+
+      friend constexpr month_weekday
+      operator/(const chrono::weekday_indexed& __wdi,
+  const chrono::month& __m) noexcept
+      { return __m / __wdi; }
+
+      friend constexpr month_weekday
+      operator/(const chrono::weekday_indexed& __wdi, int __m) noexcept
+      { return __m / __wdi; }
+
+      friend constexpr year_month_weekday
+      operator/(int __y, const month_weekday& __mwd) noexcept;
+
+      friend constexpr year_month_weekday
+      operator/(const month_weekday& __mwd, int __y) noexcept;
+    };
+
+
+
+    class month_weekday_last
+    {
+    private:
+      chrono::month _M_m;
+      chrono::weekday_last _M_wdl;
+
+    public:
+      constexpr
+      month_weekday_last(const chrono::month& __m,
+    const chrono::weekday_last& __wdl) noexcept
+      :_M_m{__m}, _M_wdl{__wdl}
+      { }
+
+      constexpr chrono::month
+      month() const noexcept
+      { return _M_m; }
+
+      constexpr chrono::weekday_last
+      weekday_last() const noexcept
+      { return _M_wdl; }
+
+      constexpr bool
+      ok() const noexcept
+      { return _M_m.ok() && _M_wdl.ok(); }
+
+      friend constexpr bool
+      operator==(const month_weekday_last& __x,
+   const month_weekday_last& __y) noexcept
+      {
+ return __x.month() == __y.month()
+   && __x.weekday_last() == __y.weekday_last();
+      }
+
+      friend constexpr month_weekday_last
+      operator/(const chrono::month& __m,
+  const chrono::weekday_last& __wdl) noexcept
+      { return {__m, __wdl}; }
+
+      friend constexpr month_weekday_last
+      operator/(int __m, const chrono::weekday_last& __wdl) noexcept
+      { return chrono::month(unsigned(__m)) / __wdl; }
+
+      friend constexpr month_weekday_last
+      operator/(const chrono::weekday_last& __wdl,
+  const chrono::month& __m) noexcept
+      { return __m / __wdl; }
+
+      friend constexpr month_weekday_last
+      operator/(const chrono::weekday_last& __wdl, int __m) noexcept
+      { return chrono::month(unsigned(__m)) / __wdl; }
+
+      friend constexpr year_month_weekday_last
+      operator/(int __y, const month_weekday_last& __mwdl) noexcept;
+
+      friend constexpr year_month_weekday_last
+      operator/(const month_weekday_last& __mwdl, int __y) noexcept;
+    };
+
+
+
+    namespace __detail
+    {
+# 1451 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 3
+      using __months_years_conversion_disambiguator = void;
+    }
+
+    class year_month
+    {
+    private:
+      chrono::year _M_y;
+      chrono::month _M_m;
+
+    public:
+      year_month() = default;
+
+      constexpr
+      year_month(const chrono::year& __y, const chrono::month& __m) noexcept
+      : _M_y{__y}, _M_m{__m}
+      { }
+
+      constexpr chrono::year
+      year() const noexcept
+      { return _M_y; }
+
+      constexpr chrono::month
+      month() const noexcept
+      { return _M_m; }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ constexpr year_month&
+ operator+=(const months& __dm) noexcept
+ {
+   *this = *this + __dm;
+   return *this;
+ }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ constexpr year_month&
+ operator-=(const months& __dm) noexcept
+ {
+   *this = *this - __dm;
+   return *this;
+ }
+
+      constexpr year_month&
+      operator+=(const years& __dy) noexcept
+      {
+ *this = *this + __dy;
+ return *this;
+      }
+
+      constexpr year_month&
+      operator-=(const years& __dy) noexcept
+      {
+ *this = *this - __dy;
+ return *this;
+      }
+
+      constexpr bool
+      ok() const noexcept
+      { return _M_y.ok() && _M_m.ok(); }
+
+      friend constexpr bool
+      operator==(const year_month& __x, const year_month& __y) noexcept
+      { return __x.year() == __y.year() && __x.month() == __y.month(); }
+
+      friend constexpr strong_ordering
+      operator<=>(const year_month& __x, const year_month& __y) noexcept
+ = default;
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month
+ operator+(const year_month& __ym, const months& __dm) noexcept
+ {
+
+   auto __m = __ym.month() + __dm;
+   auto __i = int(unsigned(__ym.month())) - 1 + __dm.count();
+   auto __y = (__i < 0
+        ? __ym.year() + years{(__i - 11) / 12}
+        : __ym.year() + years{__i / 12});
+   return __y / __m;
+ }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month
+ operator+(const months& __dm, const year_month& __ym) noexcept
+ { return __ym + __dm; }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month
+ operator-(const year_month& __ym, const months& __dm) noexcept
+ { return __ym + -__dm; }
+
+      friend constexpr months
+      operator-(const year_month& __x, const year_month& __y) noexcept
+      {
+ return (__x.year() - __y.year()
+  + months{static_cast<int>(unsigned{__x.month()})
+    - static_cast<int>(unsigned{__y.month()})});
+      }
+
+      friend constexpr year_month
+      operator+(const year_month& __ym, const years& __dy) noexcept
+      { return (__ym.year() + __dy) / __ym.month(); }
+
+      friend constexpr year_month
+      operator+(const years& __dy, const year_month& __ym) noexcept
+      { return __ym + __dy; }
+
+      friend constexpr year_month
+      operator-(const year_month& __ym, const years& __dy) noexcept
+      { return __ym + -__dy; }
+
+      friend constexpr year_month
+      operator/(const chrono::year& __y, const chrono::month& __m) noexcept
+      { return {__y, __m}; }
+
+      friend constexpr year_month
+      operator/(const chrono::year& __y, int __m) noexcept
+      { return {__y, chrono::month(unsigned(__m))}; }
+
+      friend constexpr year_month_day
+      operator/(const year_month& __ym, int __d) noexcept;
+
+      friend constexpr year_month_day_last
+      operator/(const year_month& __ym, last_spec) noexcept;
+    };
+
+
+
+    class year_month_day
+    {
+    private:
+      chrono::year _M_y;
+      chrono::month _M_m;
+      chrono::day _M_d;
+
+      static constexpr year_month_day _S_from_days(const days& __dp) noexcept;
+
+      constexpr days _M_days_since_epoch() const noexcept;
+
+    public:
+      year_month_day() = default;
+
+      constexpr
+      year_month_day(const chrono::year& __y, const chrono::month& __m,
+       const chrono::day& __d) noexcept
+      : _M_y{__y}, _M_m{__m}, _M_d{__d}
+      { }
+
+      constexpr
+      year_month_day(const year_month_day_last& __ymdl) noexcept;
+
+      constexpr
+      year_month_day(const sys_days& __dp) noexcept
+      : year_month_day(_S_from_days(__dp.time_since_epoch()))
+      { }
+
+      explicit constexpr
+      year_month_day(const local_days& __dp) noexcept
+      : year_month_day(sys_days{__dp.time_since_epoch()})
+      { }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ constexpr year_month_day&
+ operator+=(const months& __m) noexcept
+ {
+   *this = *this + __m;
+   return *this;
+ }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ constexpr year_month_day&
+ operator-=(const months& __m) noexcept
+ {
+   *this = *this - __m;
+   return *this;
+ }
+
+      constexpr year_month_day&
+      operator+=(const years& __y) noexcept
+      {
+ *this = *this + __y;
+ return *this;
+      }
+
+      constexpr year_month_day&
+      operator-=(const years& __y) noexcept
+      {
+ *this = *this - __y;
+ return *this;
+      }
+
+      constexpr chrono::year
+      year() const noexcept
+      { return _M_y; }
+
+      constexpr chrono::month
+      month() const noexcept
+      { return _M_m; }
+
+      constexpr chrono::day
+      day() const noexcept
+      { return _M_d; }
+
+      constexpr
+      operator sys_days() const noexcept
+      { return sys_days{_M_days_since_epoch()}; }
+
+      explicit constexpr
+      operator local_days() const noexcept
+      { return local_days{sys_days{*this}.time_since_epoch()}; }
+
+      constexpr bool ok() const noexcept;
+
+      friend constexpr bool
+      operator==(const year_month_day& __x, const year_month_day& __y) noexcept
+      {
+ return __x.year() == __y.year()
+   && __x.month() == __y.month()
+   && __x.day() == __y.day();
+      }
+
+      friend constexpr strong_ordering
+      operator<=>(const year_month_day& __x, const year_month_day& __y) noexcept
+ = default;
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month_day
+ operator+(const year_month_day& __ymd, const months& __dm) noexcept
+ { return (__ymd.year() / __ymd.month() + __dm) / __ymd.day(); }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month_day
+ operator+(const months& __dm, const year_month_day& __ymd) noexcept
+ { return __ymd + __dm; }
+
+      friend constexpr year_month_day
+      operator+(const year_month_day& __ymd, const years& __dy) noexcept
+      { return (__ymd.year() + __dy) / __ymd.month() / __ymd.day(); }
+
+      friend constexpr year_month_day
+      operator+(const years& __dy, const year_month_day& __ymd) noexcept
+      { return __ymd + __dy; }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month_day
+ operator-(const year_month_day& __ymd, const months& __dm) noexcept
+ { return __ymd + -__dm; }
+
+      friend constexpr year_month_day
+      operator-(const year_month_day& __ymd, const years& __dy) noexcept
+      { return __ymd + -__dy; }
+
+      friend constexpr year_month_day
+      operator/(const year_month& __ym, const chrono::day& __d) noexcept
+      { return {__ym.year(), __ym.month(), __d}; }
+
+      friend constexpr year_month_day
+      operator/(const year_month& __ym, int __d) noexcept
+      { return __ym / chrono::day{unsigned(__d)}; }
+
+      friend constexpr year_month_day
+      operator/(const chrono::year& __y, const month_day& __md) noexcept
+      { return __y / __md.month() / __md.day(); }
+
+      friend constexpr year_month_day
+      operator/(int __y, const month_day& __md) noexcept
+      { return chrono::year{__y} / __md; }
+
+      friend constexpr year_month_day
+      operator/(const month_day& __md, const chrono::year& __y) noexcept
+      { return __y / __md; }
+
+      friend constexpr year_month_day
+      operator/(const month_day& __md, int __y) noexcept
+      { return chrono::year(__y) / __md; }
+    };
+
+
+
+
+
+    constexpr year_month_day
+    year_month_day::_S_from_days(const days& __dp) noexcept
+    {
+      constexpr auto __z2 = static_cast<uint32_t>(-1468000);
+      constexpr auto __r2_e3 = static_cast<uint32_t>(536895458);
+
+      const auto __r0 = static_cast<uint32_t>(__dp.count()) + __r2_e3;
+
+      const auto __n1 = 4 * __r0 + 3;
+      const auto __q1 = __n1 / 146097;
+      const auto __r1 = __n1 % 146097 / 4;
+
+      constexpr auto __p32 = static_cast<uint64_t>(1) << 32;
+      const auto __n2 = 4 * __r1 + 3;
+      const auto __u2 = static_cast<uint64_t>(2939745) * __n2;
+      const auto __q2 = static_cast<uint32_t>(__u2 / __p32);
+      const auto __r2 = static_cast<uint32_t>(__u2 % __p32) / 2939745 / 4;
+
+      constexpr auto __p16 = static_cast<uint32_t>(1) << 16;
+      const auto __n3 = 2141 * __r2 + 197913;
+      const auto __q3 = __n3 / __p16;
+      const auto __r3 = __n3 % __p16 / 2141;
+
+      const auto __y0 = 100 * __q1 + __q2;
+      const auto __m0 = __q3;
+      const auto __d0 = __r3;
+
+      const auto __j = __r2 >= 306;
+      const auto __y1 = __y0 + __j;
+      const auto __m1 = __j ? __m0 - 12 : __m0;
+      const auto __d1 = __d0 + 1;
+
+      return year_month_day{chrono::year{static_cast<int>(__y1 + __z2)},
+       chrono::month{__m1}, chrono::day{__d1}};
+    }
+
+
+
+
+
+    constexpr days
+    year_month_day::_M_days_since_epoch() const noexcept
+    {
+      auto constexpr __z2 = static_cast<uint32_t>(-1468000);
+      auto constexpr __r2_e3 = static_cast<uint32_t>(536895458);
+
+      const auto __y1 = static_cast<uint32_t>(static_cast<int>(_M_y)) - __z2;
+      const auto __m1 = static_cast<uint32_t>(static_cast<unsigned>(_M_m));
+      const auto __d1 = static_cast<uint32_t>(static_cast<unsigned>(_M_d));
+
+      const auto __j = static_cast<uint32_t>(__m1 < 3);
+      const auto __y0 = __y1 - __j;
+      const auto __m0 = __j ? __m1 + 12 : __m1;
+      const auto __d0 = __d1 - 1;
+
+      const auto __q1 = __y0 / 100;
+      const auto __yc = 1461 * __y0 / 4 - __q1 + __q1 / 4;
+      const auto __mc = (979 *__m0 - 2919) / 32;
+      const auto __dc = __d0;
+
+      return days{static_cast<int32_t>(__yc + __mc + __dc - __r2_e3)};
+    }
+
+
+
+    class year_month_day_last
+    {
+    private:
+      chrono::year _M_y;
+      chrono::month_day_last _M_mdl;
+
+    public:
+      constexpr
+      year_month_day_last(const chrono::year& __y,
+     const chrono::month_day_last& __mdl) noexcept
+      : _M_y{__y}, _M_mdl{__mdl}
+      { }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ constexpr year_month_day_last&
+ operator+=(const months& __m) noexcept
+ {
+   *this = *this + __m;
+   return *this;
+ }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ constexpr year_month_day_last&
+ operator-=(const months& __m) noexcept
+ {
+   *this = *this - __m;
+   return *this;
+ }
+
+      constexpr year_month_day_last&
+      operator+=(const years& __y) noexcept
+      {
+ *this = *this + __y;
+ return *this;
+      }
+
+      constexpr year_month_day_last&
+      operator-=(const years& __y) noexcept
+      {
+ *this = *this - __y;
+ return *this;
+      }
+
+      constexpr chrono::year
+      year() const noexcept
+      { return _M_y; }
+
+      constexpr chrono::month
+      month() const noexcept
+      { return _M_mdl.month(); }
+
+      constexpr chrono::month_day_last
+      month_day_last() const noexcept
+      { return _M_mdl; }
+
+
+      constexpr chrono::day
+      day() const noexcept
+      {
+ const auto __m = static_cast<unsigned>(month());
+# 1875 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 3
+ return chrono::day{__m != 2 ? (__m ^ (__m >> 3)) | 30
+   : _M_y.is_leap() ? 29 : 28};
+      }
+
+      constexpr
+      operator sys_days() const noexcept
+      { return sys_days{year() / month() / day()}; }
+
+      explicit constexpr
+      operator local_days() const noexcept
+      { return local_days{sys_days{*this}.time_since_epoch()}; }
+
+      constexpr bool
+      ok() const noexcept
+      { return _M_y.ok() && _M_mdl.ok(); }
+
+      friend constexpr bool
+      operator==(const year_month_day_last& __x,
+   const year_month_day_last& __y) noexcept
+      {
+ return __x.year() == __y.year()
+   && __x.month_day_last() == __y.month_day_last();
+      }
+
+      friend constexpr strong_ordering
+      operator<=>(const year_month_day_last& __x,
+    const year_month_day_last& __y) noexcept
+ = default;
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month_day_last
+ operator+(const year_month_day_last& __ymdl,
+    const months& __dm) noexcept
+ { return (__ymdl.year() / __ymdl.month() + __dm) / last; }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month_day_last
+ operator+(const months& __dm,
+    const year_month_day_last& __ymdl) noexcept
+ { return __ymdl + __dm; }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month_day_last
+ operator-(const year_month_day_last& __ymdl,
+    const months& __dm) noexcept
+ { return __ymdl + -__dm; }
+
+      friend constexpr year_month_day_last
+      operator+(const year_month_day_last& __ymdl,
+  const years& __dy) noexcept
+      { return {__ymdl.year() + __dy, __ymdl.month_day_last()}; }
+
+      friend constexpr year_month_day_last
+      operator+(const years& __dy,
+  const year_month_day_last& __ymdl) noexcept
+      { return __ymdl + __dy; }
+
+      friend constexpr year_month_day_last
+      operator-(const year_month_day_last& __ymdl,
+  const years& __dy) noexcept
+      { return __ymdl + -__dy; }
+
+      friend constexpr year_month_day_last
+      operator/(const year_month& __ym, last_spec) noexcept
+      { return {__ym.year(), chrono::month_day_last{__ym.month()}}; }
+
+      friend constexpr year_month_day_last
+      operator/(const chrono::year& __y,
+  const chrono::month_day_last& __mdl) noexcept
+      { return {__y, __mdl}; }
+
+      friend constexpr year_month_day_last
+      operator/(int __y, const chrono::month_day_last& __mdl) noexcept
+      { return chrono::year(__y) / __mdl; }
+
+      friend constexpr year_month_day_last
+      operator/(const chrono::month_day_last& __mdl,
+  const chrono::year& __y) noexcept
+      { return __y / __mdl; }
+
+      friend constexpr year_month_day_last
+      operator/(const chrono::month_day_last& __mdl, int __y) noexcept
+      { return chrono::year(__y) / __mdl; }
+    };
+
+
+    constexpr
+    year_month_day::year_month_day(const year_month_day_last& __ymdl) noexcept
+    : _M_y{__ymdl.year()}, _M_m{__ymdl.month()}, _M_d{__ymdl.day()}
+    { }
+
+    constexpr bool
+    year_month_day::ok() const noexcept
+    {
+      if (!_M_y.ok() || !_M_m.ok())
+ return false;
+      return chrono::day{1} <= _M_d && _M_d <= (_M_y / _M_m / last).day();
+    }
+
+
+
+    class year_month_weekday
+    {
+    private:
+      chrono::year _M_y;
+      chrono::month _M_m;
+      chrono::weekday_indexed _M_wdi;
+
+      static constexpr year_month_weekday
+      _S_from_sys_days(const sys_days& __dp)
+      {
+ year_month_day __ymd{__dp};
+ chrono::weekday __wd{__dp};
+ auto __index = __wd[(unsigned{__ymd.day()} - 1) / 7 + 1];
+ return {__ymd.year(), __ymd.month(), __index};
+      }
+
+    public:
+      year_month_weekday() = default;
+
+      constexpr
+      year_month_weekday(const chrono::year& __y, const chrono::month& __m,
+    const chrono::weekday_indexed& __wdi) noexcept
+      : _M_y{__y}, _M_m{__m}, _M_wdi{__wdi}
+      { }
+
+      constexpr
+      year_month_weekday(const sys_days& __dp) noexcept
+      : year_month_weekday{_S_from_sys_days(__dp)}
+      { }
+
+      explicit constexpr
+      year_month_weekday(const local_days& __dp) noexcept
+      : year_month_weekday{sys_days{__dp.time_since_epoch()}}
+      { }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ constexpr year_month_weekday&
+ operator+=(const months& __m) noexcept
+ {
+   *this = *this + __m;
+   return *this;
+ }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ constexpr year_month_weekday&
+ operator-=(const months& __m) noexcept
+ {
+   *this = *this - __m;
+   return *this;
+ }
+
+      constexpr year_month_weekday&
+      operator+=(const years& __y) noexcept
+      {
+ *this = *this + __y;
+ return *this;
+      }
+
+      constexpr year_month_weekday&
+      operator-=(const years& __y) noexcept
+      {
+ *this = *this - __y;
+ return *this;
+      }
+
+      constexpr chrono::year
+      year() const noexcept
+      { return _M_y; }
+
+      constexpr chrono::month
+      month() const noexcept
+      { return _M_m; }
+
+      constexpr chrono::weekday
+      weekday() const noexcept
+      { return _M_wdi.weekday(); }
+
+      constexpr unsigned
+      index() const noexcept
+      { return _M_wdi.index(); }
+
+      constexpr chrono::weekday_indexed
+      weekday_indexed() const noexcept
+      { return _M_wdi; }
+
+      constexpr
+      operator sys_days() const noexcept
+      {
+ auto __d = sys_days{year() / month() / 1};
+ return __d + (weekday() - chrono::weekday(__d)
+        + days{(static_cast<int>(index())-1)*7});
+      }
+
+      explicit constexpr
+      operator local_days() const noexcept
+      { return local_days{sys_days{*this}.time_since_epoch()}; }
+
+      constexpr bool
+      ok() const noexcept
+      {
+ if (!_M_y.ok() || !_M_m.ok() || !_M_wdi.ok())
+   return false;
+ if (_M_wdi.index() <= 4)
+   return true;
+ days __d = (_M_wdi.weekday()
+      - chrono::weekday{sys_days{_M_y / _M_m / 1}}
+      + days((_M_wdi.index()-1)*7 + 1));
+ do { if (std::__is_constant_evaluated() && !bool(__d.count() >= 1)) std::__glibcxx_assert_fail(); } while (false);
+ return (unsigned)__d.count() <= (unsigned)(_M_y / _M_m / last).day();
+      }
+
+      friend constexpr bool
+      operator==(const year_month_weekday& __x,
+   const year_month_weekday& __y) noexcept
+      {
+ return __x.year() == __y.year()
+   && __x.month() == __y.month()
+   && __x.weekday_indexed() == __y.weekday_indexed();
+      }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month_weekday
+ operator+(const year_month_weekday& __ymwd, const months& __dm) noexcept
+ {
+   return ((__ymwd.year() / __ymwd.month() + __dm)
+    / __ymwd.weekday_indexed());
+ }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month_weekday
+ operator+(const months& __dm, const year_month_weekday& __ymwd) noexcept
+ { return __ymwd + __dm; }
+
+      friend constexpr year_month_weekday
+      operator+(const year_month_weekday& __ymwd, const years& __dy) noexcept
+      { return {__ymwd.year() + __dy, __ymwd.month(), __ymwd.weekday_indexed()}; }
+
+      friend constexpr year_month_weekday
+      operator+(const years& __dy, const year_month_weekday& __ymwd) noexcept
+      { return __ymwd + __dy; }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month_weekday
+ operator-(const year_month_weekday& __ymwd, const months& __dm) noexcept
+ { return __ymwd + -__dm; }
+
+      friend constexpr year_month_weekday
+      operator-(const year_month_weekday& __ymwd, const years& __dy) noexcept
+      { return __ymwd + -__dy; }
+
+      friend constexpr year_month_weekday
+      operator/(const year_month& __ym,
+  const chrono::weekday_indexed& __wdi) noexcept
+      { return {__ym.year(), __ym.month(), __wdi}; }
+
+      friend constexpr year_month_weekday
+      operator/(const chrono::year& __y, const month_weekday& __mwd) noexcept
+      { return {__y, __mwd.month(), __mwd.weekday_indexed()}; }
+
+      friend constexpr year_month_weekday
+      operator/(int __y, const month_weekday& __mwd) noexcept
+      { return chrono::year(__y) / __mwd; }
+
+      friend constexpr year_month_weekday
+      operator/(const month_weekday& __mwd, const chrono::year& __y) noexcept
+      { return __y / __mwd; }
+
+      friend constexpr year_month_weekday
+      operator/(const month_weekday& __mwd, int __y) noexcept
+      { return chrono::year(__y) / __mwd; }
+    };
+
+
+
+    class year_month_weekday_last
+    {
+    private:
+      chrono::year _M_y;
+      chrono::month _M_m;
+      chrono::weekday_last _M_wdl;
+
+    public:
+      constexpr
+      year_month_weekday_last(const chrono::year& __y, const chrono::month& __m,
+         const chrono::weekday_last& __wdl) noexcept
+      : _M_y{__y}, _M_m{__m}, _M_wdl{__wdl}
+      { }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ constexpr year_month_weekday_last&
+ operator+=(const months& __m) noexcept
+ {
+   *this = *this + __m;
+   return *this;
+ }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ constexpr year_month_weekday_last&
+ operator-=(const months& __m) noexcept
+ {
+   *this = *this - __m;
+   return *this;
+ }
+
+      constexpr year_month_weekday_last&
+      operator+=(const years& __y) noexcept
+      {
+ *this = *this + __y;
+ return *this;
+      }
+
+      constexpr year_month_weekday_last&
+      operator-=(const years& __y) noexcept
+      {
+ *this = *this - __y;
+ return *this;
+      }
+
+      constexpr chrono::year
+      year() const noexcept
+      { return _M_y; }
+
+      constexpr chrono::month
+      month() const noexcept
+      { return _M_m; }
+
+      constexpr chrono::weekday
+      weekday() const noexcept
+      { return _M_wdl.weekday(); }
+
+      constexpr chrono::weekday_last
+      weekday_last() const noexcept
+      { return _M_wdl; }
+
+      constexpr
+      operator sys_days() const noexcept
+      {
+ const auto __d = sys_days{_M_y / _M_m / last};
+ return sys_days{(__d - (chrono::weekday{__d}
+    - _M_wdl.weekday())).time_since_epoch()};
+      }
+
+      explicit constexpr
+      operator local_days() const noexcept
+      { return local_days{sys_days{*this}.time_since_epoch()}; }
+
+      constexpr bool
+      ok() const noexcept
+      { return _M_y.ok() && _M_m.ok() && _M_wdl.ok(); }
+
+      friend constexpr bool
+      operator==(const year_month_weekday_last& __x,
+   const year_month_weekday_last& __y) noexcept
+      {
+ return __x.year() == __y.year()
+   && __x.month() == __y.month()
+   && __x.weekday_last() == __y.weekday_last();
+      }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month_weekday_last
+ operator+(const year_month_weekday_last& __ymwdl,
+    const months& __dm) noexcept
+ {
+   return ((__ymwdl.year() / __ymwdl.month() + __dm)
+    / __ymwdl.weekday_last());
+ }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month_weekday_last
+ operator+(const months& __dm,
+    const year_month_weekday_last& __ymwdl) noexcept
+ { return __ymwdl + __dm; }
+
+      friend constexpr year_month_weekday_last
+      operator+(const year_month_weekday_last& __ymwdl,
+  const years& __dy) noexcept
+      { return {__ymwdl.year() + __dy, __ymwdl.month(), __ymwdl.weekday_last()}; }
+
+      friend constexpr year_month_weekday_last
+      operator+(const years& __dy,
+  const year_month_weekday_last& __ymwdl) noexcept
+      { return __ymwdl + __dy; }
+
+      template<typename = __detail::__months_years_conversion_disambiguator>
+ friend constexpr year_month_weekday_last
+ operator-(const year_month_weekday_last& __ymwdl,
+    const months& __dm) noexcept
+ { return __ymwdl + -__dm; }
+
+      friend constexpr year_month_weekday_last
+      operator-(const year_month_weekday_last& __ymwdl,
+  const years& __dy) noexcept
+      { return __ymwdl + -__dy; }
+
+      friend constexpr year_month_weekday_last
+      operator/(const year_month& __ym,
+  const chrono::weekday_last& __wdl) noexcept
+      { return {__ym.year(), __ym.month(), __wdl}; }
+
+      friend constexpr year_month_weekday_last
+      operator/(const chrono::year& __y,
+  const chrono::month_weekday_last& __mwdl) noexcept
+      { return {__y, __mwdl.month(), __mwdl.weekday_last()}; }
+
+      friend constexpr year_month_weekday_last
+      operator/(int __y, const chrono::month_weekday_last& __mwdl) noexcept
+      { return chrono::year(__y) / __mwdl; }
+
+      friend constexpr year_month_weekday_last
+      operator/(const chrono::month_weekday_last& __mwdl,
+  const chrono::year& __y) noexcept
+      { return __y / __mwdl; }
+
+      friend constexpr year_month_weekday_last
+      operator/(const chrono::month_weekday_last& __mwdl, int __y) noexcept
+      { return chrono::year(__y) / __mwdl; }
+    };
+
+
+
+
+    namespace __detail
+    {
+      consteval long long
+      __pow10(unsigned __n)
+      {
+ long long __r = 1;
+ while (__n-- > 0)
+   __r *= 10;
+ return __r;
+      }
+
+      template<typename _Duration> struct __utc_leap_second;
+    }
+# 2320 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 3
+    template<typename _Duration>
+      class hh_mm_ss
+      {
+ static_assert( __is_duration<_Duration>::value );
+
+      private:
+ static consteval int
+ _S_fractional_width()
+ {
+   auto __den = _Duration::period::den;
+   const int __multiplicity_2 = std::__countr_zero((uintmax_t)__den);
+   __den >>= __multiplicity_2;
+   int __multiplicity_5 = 0;
+   while ((__den % 5) == 0)
+     {
+       ++__multiplicity_5;
+       __den /= 5;
+     }
+   if (__den != 1)
+     return 6;
+
+   int __width = (__multiplicity_2 > __multiplicity_5
+    ? __multiplicity_2 : __multiplicity_5);
+   if (__width > 18)
+     __width = 18;
+   return __width;
+ }
+
+ constexpr
+ hh_mm_ss(_Duration __d, bool __is_neg)
+ : _M_h (duration_cast<chrono::hours>(__d)),
+   _M_m (duration_cast<chrono::minutes>(__d - hours())),
+   _M_s (duration_cast<chrono::seconds>(__d - hours() - minutes())),
+   _M_is_neg(__is_neg)
+ {
+   auto __ss = __d - hours() - minutes() - seconds();
+   if constexpr (treat_as_floating_point_v<typename precision::rep>)
+     _M_ss._M_r = __ss.count();
+   else if constexpr (precision::period::den != 1)
+     _M_ss._M_r = duration_cast<precision>(__ss).count();
+ }
+
+ static constexpr _Duration
+ _S_abs(_Duration __d)
+ {
+   if constexpr (numeric_limits<typename _Duration::rep>::is_signed)
+     return chrono::abs(__d);
+   else
+     return __d;
+ }
+
+      public:
+ static constexpr unsigned fractional_width = {_S_fractional_width()};
+
+ using precision
+   = duration<common_type_t<typename _Duration::rep,
+       chrono::seconds::rep>,
+       ratio<1, __detail::__pow10(fractional_width)>>;
+
+ constexpr hh_mm_ss() noexcept = default;
+
+ constexpr explicit
+ hh_mm_ss(_Duration __d)
+ : hh_mm_ss(_S_abs(__d), __d < _Duration::zero())
+ { }
+
+ constexpr bool
+ is_negative() const noexcept
+ {
+   if constexpr (!_S_is_unsigned)
+     return _M_is_neg;
+   else
+     return false;
+ }
+
+ constexpr chrono::hours
+ hours() const noexcept
+ { return _M_h; }
+
+ constexpr chrono::minutes
+ minutes() const noexcept
+ { return _M_m; }
+
+ constexpr chrono::seconds
+ seconds() const noexcept
+ { return _M_s; }
+
+ constexpr precision
+ subseconds() const noexcept
+ { return static_cast<precision>(_M_ss); }
+
+ constexpr explicit
+ operator precision() const noexcept
+ { return to_duration(); }
+
+ constexpr precision
+ to_duration() const noexcept
+ {
+   if constexpr (!_S_is_unsigned)
+     if (_M_is_neg)
+       return -(_M_h + _M_m + _M_s + subseconds());
+   return _M_h + _M_m + _M_s + subseconds();
+ }
+
+      private:
+ static constexpr bool _S_is_unsigned
+   = __and_v<is_integral<typename _Duration::rep>,
+      is_unsigned<typename _Duration::rep>>;
+
+ template<typename _Ratio>
+   using __byte_duration = duration<unsigned char, _Ratio>;
+
+
+ template<typename _Dur>
+   struct __subseconds
+   {
+     typename _Dur::rep _M_r{};
+
+     constexpr explicit
+     operator _Dur() const noexcept
+     { return _Dur(_M_r); }
+   };
+
+
+ template<typename _Rep>
+   requires (!treat_as_floating_point_v<_Rep>)
+   struct __subseconds<duration<_Rep, ratio<1>>>
+   {
+     constexpr explicit
+     operator duration<_Rep, ratio<1>>() const noexcept
+     { return {}; }
+   };
+
+ template<typename _Rep, typename _Period>
+   requires (!treat_as_floating_point_v<_Rep>)
+     && ratio_less_v<_Period, ratio<1, 1>>
+     && ratio_greater_equal_v<_Period, ratio<1, 250>>
+   struct __subseconds<duration<_Rep, _Period>>
+   {
+     unsigned char _M_r{};
+
+     constexpr explicit
+     operator duration<_Rep, _Period>() const noexcept
+     { return duration<_Rep, _Period>(_M_r); }
+   };
+
+ template<typename _Rep, typename _Period>
+   requires (!treat_as_floating_point_v<_Rep>)
+     && ratio_less_v<_Period, ratio<1, 250>>
+     && ratio_greater_equal_v<_Period, ratio<1, 4000000000>>
+   struct __subseconds<duration<_Rep, _Period>>
+   {
+     uint_least32_t _M_r{};
+
+     constexpr explicit
+     operator duration<_Rep, _Period>() const noexcept
+     { return duration<_Rep, _Period>(_M_r); }
+   };
+
+ chrono::hours _M_h{};
+ __byte_duration<ratio<60>> _M_m{};
+ __byte_duration<ratio<1>> _M_s{};
+ bool _M_is_neg{};
+ __subseconds<precision> _M_ss{};
+
+ template<typename> friend struct __detail::__utc_leap_second;
+      };
+
+
+    namespace __detail
+    {
+
+      template<typename _Duration>
+ struct __utc_leap_second
+ {
+   explicit
+   __utc_leap_second(const sys_time<_Duration>& __s)
+   : _M_date(chrono::floor<days>(__s)), _M_time(__s - _M_date)
+   {
+     ++_M_time._M_s;
+   }
+
+   sys_days _M_date;
+   hh_mm_ss<common_type_t<_Duration, days>> _M_time;
+ };
+    }
+
+
+
+
+    constexpr bool
+    is_am(const hours& __h) noexcept
+    { return 0h <= __h && __h <= 11h; }
+
+    constexpr bool
+    is_pm(const hours& __h) noexcept
+    { return 12h <= __h && __h <= 23h; }
+
+    constexpr hours
+    make12(const hours& __h) noexcept
+    {
+      if (__h == 0h)
+ return 12h;
+      else if (__h > 12h)
+ return __h - 12h;
+      return __h;
+    }
+
+    constexpr hours
+    make24(const hours& __h, bool __is_pm) noexcept
+    {
+      if (!__is_pm)
+ {
+   if (__h == 12h)
+     return 0h;
+   else
+     return __h;
+ }
+      else
+ {
+   if (__h == 12h)
+     return __h;
+   else
+     return __h + 12h;
+ }
+    }
+
+
+
+
+
+    struct tzdb;
+
+    struct sys_info
+    {
+      sys_seconds begin;
+      sys_seconds end;
+      seconds offset;
+      minutes save;
+      string abbrev;
+    };
+
+    struct local_info
+    {
+      static constexpr int unique = 0;
+      static constexpr int nonexistent = 1;
+      static constexpr int ambiguous = 2;
+
+      int result;
+      sys_info first;
+      sys_info second;
+    };
+
+    class nonexistent_local_time : public runtime_error
+    {
+    public:
+      template<typename _Duration>
+ nonexistent_local_time(const local_time<_Duration>& __tp,
+          const local_info& __i)
+ : runtime_error(_S_make_what_str(__tp, __i))
+ { do { if (std::__is_constant_evaluated() && !bool(__i.result == local_info::nonexistent)) std::__glibcxx_assert_fail(); } while (false); }
+
+    private:
+      template<typename _Duration>
+ static string
+ _S_make_what_str(const local_time<_Duration>& __tp,
+    const local_info& __i)
+ {
+   std::ostringstream __os;
+   __os << __tp << " is in a gap between\n"
+        << local_seconds(__i.first.end.time_since_epoch())
+        + __i.first.offset << ' ' << __i.first.abbrev << " and\n"
+        << local_seconds(__i.second.begin.time_since_epoch())
+        + __i.second.offset << ' ' << __i.second.abbrev
+        << " which are both equivalent to\n"
+        << __i.first.end << " UTC";
+   return std::move(__os).str();
+ }
+    };
+
+    class ambiguous_local_time : public runtime_error
+    {
+    public:
+      template<typename _Duration>
+ ambiguous_local_time(const local_time<_Duration>& __tp,
+        const local_info& __i)
+ : runtime_error(_S_make_what_str(__tp, __i))
+ { do { if (std::__is_constant_evaluated() && !bool(__i.result == local_info::ambiguous)) std::__glibcxx_assert_fail(); } while (false); }
+
+    private:
+      template<typename _Duration>
+ static string
+ _S_make_what_str(const local_time<_Duration>& __tp,
+    const local_info& __i)
+ {
+   std::ostringstream __os;
+   __os << __tp << " is ambiguous.  It could be\n"
+        << __tp << ' ' << __i.first.abbrev << " == "
+        << __tp - __i.first.offset << " UTC or\n"
+        << __tp << ' ' << __i.second.abbrev << " == "
+        << __tp - __i.second.offset << " UTC";
+   return std::move(__os).str();
+ }
+    };
+
+    template<typename _Duration>
+      [[noreturn]] void
+      __throw_bad_local_time(const local_time<_Duration>& __tp,
+        const local_info& __i)
+      {
+
+ if (__i.result == local_info::nonexistent)
+   throw nonexistent_local_time(__tp, __i);
+ throw ambiguous_local_time(__tp, __i);
+
+
+
+      }
+
+    enum class choose { earliest, latest };
+
+    class time_zone
+    {
+    public:
+      time_zone(time_zone&&) = default;
+      time_zone& operator=(time_zone&&) = default;
+
+      ~time_zone();
+
+      [[nodiscard]]
+      string_view name() const noexcept { return _M_name; }
+
+      template<typename _Duration>
+ sys_info
+ get_info(const sys_time<_Duration>& __st) const
+ { return _M_get_sys_info(chrono::floor<seconds>(__st)); }
+
+      template<typename _Duration>
+ local_info
+ get_info(const local_time<_Duration>& __tp) const
+ { return _M_get_local_info(chrono::floor<seconds>(__tp)); }
+
+      template<typename _Duration>
+ sys_time<common_type_t<_Duration, seconds>>
+ to_sys(const local_time<_Duration>& __tp) const
+ {
+   local_info __info = get_info(__tp);
+
+   if (__info.result != local_info::unique)
+     __throw_bad_local_time(__tp, __info);
+
+   return sys_time<_Duration>(__tp.time_since_epoch())
+     - __info.first.offset;
+ }
+
+      template<typename _Duration>
+ sys_time<common_type_t<_Duration, seconds>>
+ to_sys(const local_time<_Duration>& __tp, choose __z) const
+ {
+   local_info __info = get_info(__tp);
+
+   if (__info.result == local_info::nonexistent)
+     return __info.first.end;
+
+   sys_time<_Duration> __st(__tp.time_since_epoch());
+
+   if (__info.result == local_info::ambiguous && __z == choose::latest)
+     return __st - __info.second.offset;
+
+
+   return __st - __info.first.offset;
+ }
+
+      template<typename _Duration>
+ local_time<common_type_t<_Duration, seconds>>
+ to_local(const sys_time<_Duration>& __tp) const
+ {
+   auto __d = (__tp + get_info(__tp).offset).time_since_epoch();
+   return local_time<common_type_t<_Duration, seconds>>(__d);
+ }
+
+      [[nodiscard]] friend bool
+      operator==(const time_zone& __x, const time_zone& __y) noexcept
+      { return __x._M_name == __y._M_name; }
+
+      [[nodiscard]] friend strong_ordering
+      operator<=>(const time_zone& __x, const time_zone& __y) noexcept
+      { return __x._M_name <=> __y._M_name; }
+
+    private:
+      sys_info _M_get_sys_info(sys_seconds) const;
+      local_info _M_get_local_info(local_seconds) const;
+
+      friend const tzdb& reload_tzdb();
+      friend struct tzdb;
+      friend class tzdb_list;
+
+      struct _Impl;
+
+      explicit time_zone(unique_ptr<_Impl> __p);
+      string _M_name;
+      unique_ptr<_Impl> _M_impl;
+    };
+
+    const time_zone* locate_zone(string_view __tz_name);
+    const time_zone* current_zone();
+# 2741 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 3
+    class tzdb_list
+    {
+      struct _Node;
+
+    public:
+      tzdb_list(const tzdb_list&) = delete;
+      tzdb_list& operator=(const tzdb_list&) = delete;
+# 2756 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 3
+      class const_iterator
+      {
+      public:
+ using value_type = tzdb;
+ using reference = const tzdb&;
+ using pointer = const tzdb*;
+ using difference_type = ptrdiff_t;
+ using iterator_category = forward_iterator_tag;
+
+ constexpr const_iterator() = default;
+ const_iterator(const const_iterator&) = default;
+ const_iterator(const_iterator&&) = default;
+ const_iterator& operator=(const const_iterator&) = default;
+ const_iterator& operator=(const_iterator&&) = default;
+
+ reference operator*() const noexcept;
+ pointer operator->() const noexcept { return &**this; }
+ const_iterator& operator++();
+ const_iterator operator++(int);
+
+ bool operator==(const const_iterator&) const noexcept = default;
+
+      private:
+ explicit const_iterator(const shared_ptr<_Node>&) noexcept;
+
+ friend class tzdb_list;
+
+ shared_ptr<_Node> _M_node;
+ void* _M_reserved = nullptr;
+      };
+# 2794 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 3
+      const tzdb& front() const noexcept;
+# 2810 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 3
+      const_iterator erase_after(const_iterator __p);
+
+      const_iterator begin() const noexcept;
+      const_iterator end() const noexcept { return {}; }
+      const_iterator cbegin() const noexcept { return begin(); }
+      const_iterator cend() const noexcept { return end(); }
+
+    private:
+      constexpr explicit tzdb_list(nullptr_t);
+
+      friend tzdb_list& get_tzdb_list();
+      friend const tzdb& get_tzdb();
+      friend const tzdb& reload_tzdb();
+      friend struct tzdb;
+      friend class leap_second;
+      friend struct time_zone::_Impl;
+      friend class time_zone_link;
+    };
+
+    class time_zone_link
+    {
+    public:
+      time_zone_link(time_zone_link&&) = default;
+      time_zone_link& operator=(time_zone_link&&) = default;
+
+      string_view name() const noexcept { return _M_name; }
+      string_view target() const noexcept { return _M_target; }
+
+      friend bool
+      operator==(const time_zone_link& __x, const time_zone_link& __y) noexcept
+      { return __x.name() == __y.name(); }
+
+      friend strong_ordering
+      operator<=>(const time_zone_link& __x, const time_zone_link& __y) noexcept
+      { return __x.name() <=> __y.name(); }
+
+    private:
+      friend const tzdb& reload_tzdb();
+      friend struct tzdb_list::_Node;
+
+      explicit time_zone_link(nullptr_t) { }
+
+      string _M_name;
+      string _M_target;
+    };
+
+    class leap_second
+    {
+    public:
+      leap_second(const leap_second&) = default;
+      leap_second& operator=(const leap_second&) = default;
+
+      [[nodiscard]]
+      constexpr sys_seconds
+      date() const noexcept
+      {
+ if (_M_s >= _M_s.zero()) [[likely]]
+   return sys_seconds(_M_s);
+ return sys_seconds(-_M_s);
+      }
+
+      [[nodiscard]]
+      constexpr seconds
+      value() const noexcept
+      {
+ if (_M_s >= _M_s.zero()) [[likely]]
+   return seconds(1);
+ return seconds(-1);
+      }
+
+
+
+      [[nodiscard]] friend constexpr bool
+      operator==(const leap_second&, const leap_second&) noexcept = default;
+
+      [[nodiscard]] friend constexpr strong_ordering
+      operator<=>(const leap_second& __x, const leap_second& __y) noexcept
+      { return __x.date() <=> __y.date(); }
+
+      template<typename _Duration>
+ [[nodiscard]] friend constexpr bool
+ operator==(const leap_second& __x,
+     const sys_time<_Duration>& __y) noexcept
+ { return __x.date() == __y; }
+
+      template<typename _Duration>
+ [[nodiscard]] friend constexpr bool
+ operator<(const leap_second& __x,
+    const sys_time<_Duration>& __y) noexcept
+ { return __x.date() < __y; }
+
+      template<typename _Duration>
+ [[nodiscard]] friend constexpr bool
+ operator<(const sys_time<_Duration>& __x,
+    const leap_second& __y) noexcept
+ { return __x < __y.date(); }
+
+      template<typename _Duration>
+ [[nodiscard]] friend constexpr bool
+ operator>(const leap_second& __x,
+    const sys_time<_Duration>& __y) noexcept
+ { return __y < __x.date(); }
+
+      template<typename _Duration>
+ [[nodiscard]] friend constexpr bool
+ operator>(const sys_time<_Duration>& __x,
+    const leap_second& __y) noexcept
+ { return __y.date() < __x; }
+
+      template<typename _Duration>
+ [[nodiscard]] friend constexpr bool
+ operator<=(const leap_second& __x,
+     const sys_time<_Duration>& __y) noexcept
+ { return !(__y < __x.date()); }
+
+      template<typename _Duration>
+ [[nodiscard]] friend constexpr bool
+ operator<=(const sys_time<_Duration>& __x,
+     const leap_second& __y) noexcept
+ { return !(__y.date() < __x); }
+
+      template<typename _Duration>
+ [[nodiscard]] friend constexpr bool
+ operator>=(const leap_second& __x,
+     const sys_time<_Duration>& __y) noexcept
+ { return !(__x.date() < __y); }
+
+      template<typename _Duration>
+ [[nodiscard]] friend constexpr bool
+ operator>=(const sys_time<_Duration>& __x,
+     const leap_second& __y) noexcept
+ { return !(__x < __y.date()); }
+
+
+
+      template<three_way_comparable_with<seconds> _Duration>
+ [[nodiscard]] friend constexpr auto
+ operator<=>(const leap_second& __x,
+      const sys_time<_Duration>& __y) noexcept
+ { return __x.date() <=> __y; }
+
+    private:
+      explicit leap_second(seconds::rep __s) : _M_s(__s) { }
+
+      friend struct tzdb_list::_Node;
+
+      friend const tzdb& reload_tzdb();
+
+      template<typename _Duration>
+ friend leap_second_info
+ get_leap_second_info(const utc_time<_Duration>&);
+
+      seconds _M_s;
+    };
+
+    template<class _Tp> struct zoned_traits { };
+
+    template<>
+      struct zoned_traits<const time_zone*>
+      {
+ static const time_zone*
+ default_zone()
+ { return std::chrono::locate_zone("UTC"); }
+
+ static const time_zone*
+ locate_zone(string_view __name)
+ { return std::chrono::locate_zone(__name); }
+      };
+
+    struct tzdb
+    {
+      string version;
+      std::vector<time_zone> zones;
+      std::vector<time_zone_link> links;
+      std::vector<leap_second> leap_seconds;
+
+      const time_zone*
+      locate_zone(string_view __tz_name) const;
+
+      const time_zone*
+      current_zone() const;
+
+    private:
+      friend const tzdb& reload_tzdb();
+      friend class time_zone;
+      friend struct tzdb_list::_Node;
+    };
+
+    tzdb_list& get_tzdb_list();
+    const tzdb& get_tzdb();
+
+    const tzdb& reload_tzdb();
+    string remote_version();
+
+    template<typename _Duration, typename _TimeZonePtr = const time_zone*>
+      class zoned_time
+      {
+ static_assert(__is_duration_v<_Duration>);
+
+ using _Traits = zoned_traits<_TimeZonePtr>;
+
+
+
+ using string_view = type_identity_t<std::string_view>;
+
+      public:
+ using duration = common_type_t<_Duration, seconds>;
+
+ zoned_time() requires requires { _Traits::default_zone(); }
+ { }
+
+ zoned_time(const zoned_time&) = default;
+ zoned_time& operator=(const zoned_time&) = default;
+
+ zoned_time(const sys_time<_Duration>& __st)
+   requires requires { _Traits::default_zone(); }
+ : _M_tp(__st)
+ { }
+
+ explicit
+ zoned_time(_TimeZonePtr __z) : _M_zone(std::move(__z)) { }
+
+ explicit
+ zoned_time(string_view __name)
+   requires requires {
+     _TimeZonePtr{_Traits::locate_zone(std::string_view{})};
+   }
+ : _M_zone(_Traits::locate_zone(__name))
+ { }
+
+ template<typename _Duration2>
+   zoned_time(const zoned_time<_Duration2, _TimeZonePtr>& __zt)
+   requires is_convertible_v<sys_time<_Duration2>, sys_time<_Duration>>
+   : _M_zone(__zt._M_zone), _M_tp(__zt._M_tp)
+   { }
+
+ zoned_time(_TimeZonePtr __z, const sys_time<_Duration>& __st)
+ : _M_zone(std::move(__z)), _M_tp(__st)
+ { }
+
+ zoned_time(string_view __name, const sys_time<_Duration>& __st)
+ : zoned_time(_Traits::locate_zone(__name), __st)
+ { }
+
+ zoned_time(_TimeZonePtr __z, const local_time<_Duration>& __tp)
+ requires requires {
+   { __z->to_sys(__tp) } -> convertible_to<sys_time<_Duration>>;
+ }
+ : _M_zone(std::move(__z)), _M_tp(_M_zone->to_sys(__tp))
+ { }
+
+ zoned_time(string_view __name, const local_time<_Duration>& __tp)
+ requires requires (_TimeZonePtr __z) {
+   { _Traits::locate_zone(__name) } -> convertible_to<_TimeZonePtr>;
+   { __z->to_sys(__tp) } -> convertible_to<sys_time<_Duration>>;
+ }
+ : zoned_time(_Traits::locate_zone(__name), __tp)
+ { }
+
+ zoned_time(_TimeZonePtr __z, const local_time<_Duration>& __tp,
+     choose __c)
+ requires requires {
+   { __z->to_sys(__tp, __c) } -> convertible_to<sys_time<_Duration>>;
+ }
+ : _M_zone(std::move(__z)), _M_tp(_M_zone->to_sys(__tp, __c))
+ { }
+
+ zoned_time(string_view __name, const local_time<_Duration>& __tp,
+     choose __c)
+ requires requires (_TimeZonePtr __z) {
+   { _Traits::locate_zone(__name) } -> convertible_to<_TimeZonePtr>;
+   { __z->to_sys(__tp, __c) } -> convertible_to<sys_time<_Duration>>;
+ }
+ : _M_zone(_Traits::locate_zone(__name)),
+   _M_tp(_M_zone->to_sys(__tp, __c))
+ { }
+
+ template<typename _Duration2, typename _TimeZonePtr2>
+   zoned_time(_TimeZonePtr __z,
+       const zoned_time<_Duration2, _TimeZonePtr2>& __zt)
+   requires is_convertible_v<sys_time<_Duration2>, sys_time<_Duration>>
+   : _M_zone(__z), _M_tp(__zt._M_tp)
+   { }
+
+ template<typename _Duration2, typename _TimeZonePtr2>
+   zoned_time(_TimeZonePtr __z,
+       const zoned_time<_Duration2, _TimeZonePtr2>& __zt,
+       choose)
+   requires is_convertible_v<sys_time<_Duration2>, sys_time<_Duration>>
+   : _M_zone(__z), _M_tp(__zt._M_tp)
+   { }
+
+ template<typename _Duration2, typename _TimeZonePtr2>
+   zoned_time(string_view __name,
+       const zoned_time<_Duration2, _TimeZonePtr2>& __zt)
+   requires is_convertible_v<sys_time<_Duration2>, sys_time<_Duration>>
+   && requires {
+     { _Traits::locate_zone(__name) } -> convertible_to<_TimeZonePtr>;
+   }
+   : _M_zone(_Traits::locate_zone(__name)), _M_tp(__zt._M_tp)
+   { }
+
+ template<typename _Duration2, typename _TimeZonePtr2>
+   zoned_time(string_view __name,
+       const zoned_time<_Duration2, _TimeZonePtr2>& __zt,
+       choose)
+   requires is_convertible_v<sys_time<_Duration2>, sys_time<_Duration>>
+   && requires {
+     { _Traits::locate_zone(__name) } -> convertible_to<_TimeZonePtr>;
+   }
+   : _M_zone(_Traits::locate_zone(__name)), _M_tp(__zt._M_tp)
+   { }
+
+ zoned_time&
+ operator=(const sys_time<_Duration>& __st)
+ {
+   _M_tp = __st;
+   return *this;
+ }
+
+ zoned_time&
+ operator=(const local_time<_Duration>& __lt)
+ {
+   _M_tp = _M_zone->to_sys(__lt);
+   return *this;
+ }
+
+ [[nodiscard]]
+ operator sys_time<duration>() const { return _M_tp; }
+
+ [[nodiscard]]
+ explicit operator local_time<duration>() const
+ { return get_local_time(); }
+
+ [[nodiscard]]
+ _TimeZonePtr
+ get_time_zone() const
+ { return _M_zone; }
+
+ [[nodiscard]]
+ local_time<duration>
+ get_local_time() const
+ { return _M_zone->to_local(_M_tp); }
+
+ [[nodiscard]]
+ sys_time<duration>
+ get_sys_time() const
+ { return _M_tp; }
+
+ [[nodiscard]]
+ sys_info
+ get_info() const
+ { return _M_zone->get_info(_M_tp); }
+
+ [[nodiscard]] friend bool
+ operator==(const zoned_time&, const zoned_time&) = default;
+
+      private:
+ _TimeZonePtr _M_zone{ _Traits::default_zone() };
+ sys_time<duration> _M_tp{};
+
+ template<typename _Duration2, typename _TimeZonePtr2>
+   friend class zoned_time;
+      };
+
+    zoned_time() -> zoned_time<seconds>;
+
+    template<typename _Duration>
+    zoned_time(sys_time<_Duration>)
+      -> zoned_time<common_type_t<_Duration, seconds>>;
+
+
+  template<typename _TimeZonePtrOrName>
+    using __time_zone_representation
+      = __conditional_t<is_convertible_v<_TimeZonePtrOrName, string_view>,
+   const time_zone*,
+   remove_cvref_t<_TimeZonePtrOrName>>;
+
+
+  template<typename _TimeZonePtrOrName>
+    zoned_time(_TimeZonePtrOrName&&)
+      -> zoned_time<seconds, __time_zone_representation<_TimeZonePtrOrName>>;
+
+  template<typename _TimeZonePtrOrName, typename _Duration>
+    zoned_time(_TimeZonePtrOrName&&, sys_time<_Duration>)
+      -> zoned_time<common_type_t<_Duration, seconds>,
+                    __time_zone_representation<_TimeZonePtrOrName>>;
+
+  template<typename _TimeZonePtrOrName, typename _Duration>
+    zoned_time(_TimeZonePtrOrName&&, local_time<_Duration>,
+               choose = choose::earliest)
+      -> zoned_time<common_type_t<_Duration, seconds>,
+                    __time_zone_representation<_TimeZonePtrOrName>>;
+
+  template<typename _Duration, typename _TimeZonePtrOrName,
+    typename _TimeZonePtr2>
+    zoned_time(_TimeZonePtrOrName&&, zoned_time<_Duration, _TimeZonePtr2>,
+               choose = choose::earliest)
+      -> zoned_time<common_type_t<_Duration, seconds>,
+                    __time_zone_representation<_TimeZonePtrOrName>>;
+
+  template<typename _Dur1, typename _TZPtr1, typename _Dur2, typename _TZPtr2>
+    [[nodiscard]]
+    inline bool
+    operator==(const zoned_time<_Dur1, _TZPtr1>& __x,
+        const zoned_time<_Dur2, _TZPtr2>& __y)
+    {
+      return __x.get_time_zone() == __y.get_time_zone()
+        && __x.get_sys_time() == __y.get_sys_time();
+    }
+
+    using zoned_seconds = zoned_time<seconds>;
+
+
+namespace __detail
+{
+    inline leap_second_info
+    __get_leap_second_info(sys_seconds __ss, bool __is_utc)
+    {
+      if (__ss < sys_seconds{}) [[unlikely]]
+ return {};
+
+      const seconds::rep __leaps[] {
+   78796800,
+   94694400,
+  126230400,
+  157766400,
+  189302400,
+  220924800,
+  252460800,
+  283996800,
+  315532800,
+  362793600,
+  394329600,
+  425865600,
+  489024000,
+  567993600,
+  631152000,
+  662688000,
+  709948800,
+  741484800,
+  773020800,
+  820454400,
+  867715200,
+  915148800,
+ 1136073600,
+ 1230768000,
+ 1341100800,
+ 1435708800,
+ 1483228800,
+      };
+
+
+      const sys_seconds __expires(1766880000s);
+
+
+      if (__ss > __expires)
+ {
+
+   size_t __n = std::size(__leaps);
+
+   auto __db = get_tzdb_list().begin();
+   auto __first = __db->leap_seconds.begin() + __n;
+   auto __last = __db->leap_seconds.end();
+   auto __pos = std::upper_bound(__first, __last, __ss);
+   seconds __elapsed(__n);
+   for (auto __i = __first; __i != __pos; ++__i)
+     __elapsed += __i->value();
+
+   if (__is_utc)
+     {
+
+       __ss -= __elapsed;
+
+       if (__pos != __first && __ss < __pos[-1])
+  {
+    if ((__ss + 1s) >= __pos[-1])
+      return {true, __elapsed};
+    __elapsed -= __pos[-1].value();
+  }
+     }
+   return {false, __elapsed};
+ }
+      else
+
+ {
+   seconds::rep __s = __ss.time_since_epoch().count();
+   const seconds::rep* __first = std::begin(__leaps);
+   const seconds::rep* __last = std::end(__leaps);
+
+
+   if (__s > (__last[-1] + (__last - __first) + 1))
+     return { false, seconds(__last - __first) };
+
+   auto __pos = std::upper_bound(__first, __last, __s);
+   seconds __elapsed{__pos - __first};
+   if (__is_utc)
+     {
+
+       __s -= __elapsed.count();
+
+       if (__pos != __first && __s < __pos[-1])
+  {
+    if ((__s + 1) >= __pos[-1])
+      return {true, __elapsed};
+    --__elapsed;
+  }
+     }
+   return {false, __elapsed};
+ }
+    }
+}
+
+    template<typename _Duration>
+      [[nodiscard]]
+      inline leap_second_info
+      get_leap_second_info(const utc_time<_Duration>& __ut)
+      {
+ auto __s = chrono::duration_cast<seconds>(__ut.time_since_epoch());
+ return __detail::__get_leap_second_info(sys_seconds(__s), true);
+      }
+
+    template<typename _Duration>
+      [[nodiscard]]
+      inline utc_time<common_type_t<_Duration, seconds>>
+      utc_clock::from_sys(const sys_time<_Duration>& __t)
+      {
+ using _CDur = common_type_t<_Duration, seconds>;
+ auto __s = chrono::time_point_cast<seconds>(__t);
+ const auto __li = __detail::__get_leap_second_info(__s, false);
+ return utc_time<_CDur>{__t.time_since_epoch()} + __li.elapsed;
+      }
+
+
+
+
+  }
+
+
+  inline namespace literals
+  {
+  inline namespace chrono_literals
+  {
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wliteral-suffix"
+
+
+    constexpr chrono::day
+    operator""d(unsigned long long __d) noexcept
+    { return chrono::day{static_cast<unsigned>(__d)}; }
+
+
+
+    constexpr chrono::year
+    operator""y(unsigned long long __y) noexcept
+    { return chrono::year{static_cast<int>(__y)}; }
+#pragma GCC diagnostic pop
+
+  }
+  }
+
+
+
+}
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 1 3
+# 40 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 1 3
+# 40 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wc++11-extensions"
+# 50 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/version.h" 1 3
+# 51 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 2 3
+
+
+
+
+# 1 "C:/msys64/mingw64/include/c++/15.2.0/bits/quoted_string.h" 1 3
+# 42 "C:/msys64/mingw64/include/c++/15.2.0/bits/quoted_string.h" 3
+namespace std
+{
+
+
+  namespace __detail {
+
+
+
+    template<typename _String, typename _CharT>
+      struct _Quoted_string
+      {
+ static_assert(is_reference<_String>::value
+     || is_pointer<_String>::value,
+        "String type must be pointer or reference");
+
+ _Quoted_string(_String __str, _CharT __del, _CharT __esc)
+ : _M_string(__str), _M_delim{__del}, _M_escape{__esc}
+ { }
+
+ _Quoted_string&
+ operator=(_Quoted_string&) = delete;
+
+ _String _M_string;
+ _CharT _M_delim;
+ _CharT _M_escape;
+      };
+
+
+    template<typename _CharT, typename _Traits>
+      struct _Quoted_string<basic_string_view<_CharT, _Traits>, _CharT>
+      {
+ _Quoted_string(basic_string_view<_CharT, _Traits> __str,
+         _CharT __del, _CharT __esc)
+ : _M_string(__str), _M_delim{__del}, _M_escape{__esc}
+ { }
+
+ _Quoted_string&
+ operator=(_Quoted_string&) = delete;
+
+ basic_string_view<_CharT, _Traits> _M_string;
+ _CharT _M_delim;
+ _CharT _M_escape;
+      };
+
+
+
+
+
+
+
+    template<typename _CharT, typename _Traits>
+      std::basic_ostream<_CharT, _Traits>&
+      operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+   const _Quoted_string<const _CharT*, _CharT>& __str)
+      {
+
+
+ std::basic_ostringstream<_CharT, _Traits> __ostr;
+ __ostr << __str._M_delim;
+ for (const _CharT* __c = __str._M_string; *__c; ++__c)
+   {
+     if (*__c == __str._M_delim || *__c == __str._M_escape)
+       __ostr << __str._M_escape;
+     __ostr << *__c;
+   }
+ __ostr << __str._M_delim;
+
+ return __os << __ostr.str();
+      }
+
+
+
+
+
+
+    template<typename _CharT, typename _Traits, typename _String>
+      std::basic_ostream<_CharT, _Traits>&
+      operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+   const _Quoted_string<_String, _CharT>& __str)
+      {
+
+
+ std::basic_ostringstream<_CharT, _Traits> __ostr;
+ __ostr << __str._M_delim;
+ for (auto __c : __str._M_string)
+   {
+     if (__c == __str._M_delim || __c == __str._M_escape)
+       __ostr << __str._M_escape;
+     __ostr << __c;
+   }
+ __ostr << __str._M_delim;
+
+ return __os << __ostr.str();
+      }
+
+
+
+
+
+
+
+    template<typename _CharT, typename _Traits, typename _Alloc>
+      std::basic_istream<_CharT, _Traits>&
+      operator>>(std::basic_istream<_CharT, _Traits>& __is,
+   const _Quoted_string<basic_string<_CharT, _Traits, _Alloc>&,
+          _CharT>& __str)
+      {
+ _CharT __c;
+ __is >> __c;
+ if (!__is.good())
+   return __is;
+ if (__c != __str._M_delim)
+   {
+     __is.unget();
+     __is >> __str._M_string;
+     return __is;
+   }
+ __str._M_string.clear();
+ std::ios_base::fmtflags __flags
+   = __is.flags(__is.flags() & ~std::ios_base::skipws);
+ do
+   {
+     __is >> __c;
+     if (!__is.good())
+       break;
+     if (__c == __str._M_escape)
+       {
+  __is >> __c;
+  if (!__is.good())
+    break;
+       }
+     else if (__c == __str._M_delim)
+       break;
+     __str._M_string += __c;
+   }
+ while (true);
+ __is.setf(__flags);
+
+ return __is;
+      }
+  }
+
+
+}
+# 56 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 2 3
+
+
+
+namespace std
+{
+
+
+
+
+
+  struct _Resetiosflags { ios_base::fmtflags _M_mask; };
+# 75 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+  inline _Resetiosflags
+  resetiosflags(ios_base::fmtflags __mask)
+  { return { __mask }; }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_istream<_CharT, _Traits>&
+    operator>>(basic_istream<_CharT, _Traits>& __is, _Resetiosflags __f)
+    {
+      __is.setf(ios_base::fmtflags(0), __f._M_mask);
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, _Resetiosflags __f)
+    {
+      __os.setf(ios_base::fmtflags(0), __f._M_mask);
+      return __os;
+    }
+
+
+  struct _Setiosflags { ios_base::fmtflags _M_mask; };
+# 105 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+  inline _Setiosflags
+  setiosflags(ios_base::fmtflags __mask)
+  { return { __mask }; }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_istream<_CharT, _Traits>&
+    operator>>(basic_istream<_CharT, _Traits>& __is, _Setiosflags __f)
+    {
+      __is.setf(__f._M_mask);
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, _Setiosflags __f)
+    {
+      __os.setf(__f._M_mask);
+      return __os;
+    }
+
+
+  struct _Setbase { int _M_base; };
+# 136 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+  inline _Setbase
+  setbase(int __base)
+  { return { __base }; }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_istream<_CharT, _Traits>&
+    operator>>(basic_istream<_CharT, _Traits>& __is, _Setbase __f)
+    {
+      __is.setf(__f._M_base == 8 ? ios_base::oct :
+  __f._M_base == 10 ? ios_base::dec :
+  __f._M_base == 16 ? ios_base::hex :
+  ios_base::fmtflags(0), ios_base::basefield);
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, _Setbase __f)
+    {
+      __os.setf(__f._M_base == 8 ? ios_base::oct :
+  __f._M_base == 10 ? ios_base::dec :
+  __f._M_base == 16 ? ios_base::hex :
+  ios_base::fmtflags(0), ios_base::basefield);
+      return __os;
+    }
+
+
+  template<typename _CharT>
+    struct _Setfill { _CharT _M_c; };
+# 173 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+  template<typename _CharT>
+    inline _Setfill<_CharT>
+    setfill(_CharT __c)
+    { return { __c }; }
+
+  template<typename _CharT, typename _Traits>
+    __attribute__((__deprecated__("'std::setfill' should only be used with "
+      "output streams")))
+    inline basic_istream<_CharT, _Traits>&
+    operator>>(basic_istream<_CharT, _Traits>& __is, _Setfill<_CharT> __f)
+    {
+      __is.fill(__f._M_c);
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, _Setfill<_CharT> __f)
+    {
+      __os.fill(__f._M_c);
+      return __os;
+    }
+
+
+  struct _Setprecision { int _M_n; };
+# 206 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+  inline _Setprecision
+  setprecision(int __n)
+  { return { __n }; }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_istream<_CharT, _Traits>&
+    operator>>(basic_istream<_CharT, _Traits>& __is, _Setprecision __f)
+    {
+      __is.precision(__f._M_n);
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, _Setprecision __f)
+    {
+      __os.precision(__f._M_n);
+      return __os;
+    }
+
+
+  struct _Setw { int _M_n; };
+# 236 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+  inline _Setw
+  setw(int __n)
+  { return { __n }; }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_istream<_CharT, _Traits>&
+    operator>>(basic_istream<_CharT, _Traits>& __is, _Setw __f)
+    {
+      __is.width(__f._M_n);
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, _Setw __f)
+    {
+      __os.width(__f._M_n);
+      return __os;
+    }
+
+
+
+  template<typename _MoneyT>
+    struct _Get_money { _MoneyT& _M_mon; bool _M_intl; };
+# 269 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+  template<typename _MoneyT>
+    inline _Get_money<_MoneyT>
+    get_money(_MoneyT& __mon, bool __intl = false)
+    { return { __mon, __intl }; }
+
+  template<typename _CharT, typename _Traits, typename _MoneyT>
+    basic_istream<_CharT, _Traits>&
+    operator>>(basic_istream<_CharT, _Traits>& __is, _Get_money<_MoneyT> __f)
+    {
+      typename basic_istream<_CharT, _Traits>::sentry __cerb(__is, false);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       typedef istreambuf_iterator<_CharT, _Traits> _Iter;
+       typedef money_get<_CharT, _Iter> _MoneyGet;
+
+       const _MoneyGet& __mg = use_facet<_MoneyGet>(__is.getloc());
+       __mg.get(_Iter(__is.rdbuf()), _Iter(), __f._M_intl,
+         __is, __err, __f._M_mon);
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       __is._M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { __is._M_setstate(ios_base::badbit); }
+   if (__err)
+     __is.setstate(__err);
+ }
+      return __is;
+    }
+
+
+  template<typename _MoneyT>
+    struct _Put_money { const _MoneyT& _M_mon; bool _M_intl; };
+# 316 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+  template<typename _MoneyT>
+    inline _Put_money<_MoneyT>
+    put_money(const _MoneyT& __mon, bool __intl = false)
+    { return { __mon, __intl }; }
+
+  template<typename _CharT, typename _Traits, typename _MoneyT>
+    basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, _Put_money<_MoneyT> __f)
+    {
+      typename basic_ostream<_CharT, _Traits>::sentry __cerb(__os);
+      if (__cerb)
+ {
+   ios_base::iostate __err = ios_base::goodbit;
+   try
+     {
+       typedef ostreambuf_iterator<_CharT, _Traits> _Iter;
+       typedef money_put<_CharT, _Iter> _MoneyPut;
+
+       const _MoneyPut& __mp = use_facet<_MoneyPut>(__os.getloc());
+       if (__mp.put(_Iter(__os.rdbuf()), __f._M_intl, __os,
+      __os.fill(), __f._M_mon).failed())
+  __err |= ios_base::badbit;
+     }
+   catch(__cxxabiv1::__forced_unwind&)
+     {
+       __os._M_setstate(ios_base::badbit);
+       throw;
+     }
+   catch(...)
+     { __os._M_setstate(ios_base::badbit); }
+   if (__err)
+     __os.setstate(__err);
+ }
+      return __os;
+    }
+
+  template<typename _CharT>
+    struct _Put_time
+    {
+      const std::tm* _M_tmb;
+      const _CharT* _M_fmt;
+    };
+# 368 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+  template<typename _CharT>
+    inline _Put_time<_CharT>
+    put_time(const std::tm* __tmb, const _CharT* __fmt)
+    { return { __tmb, __fmt }; }
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, _Put_time<_CharT> __f)
+    {
+      typename basic_ostream<_CharT, _Traits>::sentry __cerb(__os);
+      if (__cerb)
+        {
+          ios_base::iostate __err = ios_base::goodbit;
+          try
+            {
+              typedef ostreambuf_iterator<_CharT, _Traits> _Iter;
+              typedef time_put<_CharT, _Iter> _TimePut;
+
+              const _CharT* const __fmt_end = __f._M_fmt +
+                _Traits::length(__f._M_fmt);
+
+              const _TimePut& __mp = use_facet<_TimePut>(__os.getloc());
+              if (__mp.put(_Iter(__os.rdbuf()), __os, __os.fill(),
+                           __f._M_tmb, __f._M_fmt, __fmt_end).failed())
+                __err |= ios_base::badbit;
+            }
+          catch(__cxxabiv1::__forced_unwind&)
+            {
+              __os._M_setstate(ios_base::badbit);
+              throw;
+            }
+          catch(...)
+            { __os._M_setstate(ios_base::badbit); }
+          if (__err)
+            __os.setstate(__err);
+        }
+      return __os;
+    }
+
+  template<typename _CharT>
+    struct _Get_time
+    {
+      std::tm* _M_tmb;
+      const _CharT* _M_fmt;
+    };
+# 423 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+  template<typename _CharT>
+    inline _Get_time<_CharT>
+    get_time(std::tm* __tmb, const _CharT* __fmt)
+    { return { __tmb, __fmt }; }
+
+  template<typename _CharT, typename _Traits>
+    basic_istream<_CharT, _Traits>&
+    operator>>(basic_istream<_CharT, _Traits>& __is, _Get_time<_CharT> __f)
+    {
+      typename basic_istream<_CharT, _Traits>::sentry __cerb(__is, false);
+      if (__cerb)
+        {
+          ios_base::iostate __err = ios_base::goodbit;
+          try
+            {
+              typedef istreambuf_iterator<_CharT, _Traits> _Iter;
+              typedef time_get<_CharT, _Iter> _TimeGet;
+
+              const _CharT* const __fmt_end = __f._M_fmt +
+                _Traits::length(__f._M_fmt);
+
+              const _TimeGet& __mg = use_facet<_TimeGet>(__is.getloc());
+              __mg.get(_Iter(__is.rdbuf()), _Iter(), __is,
+                       __err, __f._M_tmb, __f._M_fmt, __fmt_end);
+            }
+          catch(__cxxabiv1::__forced_unwind&)
+            {
+              __is._M_setstate(ios_base::badbit);
+              throw;
+            }
+          catch(...)
+            { __is._M_setstate(ios_base::badbit); }
+          if (__err)
+            __is.setstate(__err);
+        }
+      return __is;
+    }
+# 470 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+  template<typename _CharT>
+    inline auto
+    quoted(const _CharT* __string,
+    _CharT __delim = _CharT('"'), _CharT __escape = _CharT('\\'))
+    {
+      return __detail::_Quoted_string<const _CharT*, _CharT>(__string, __delim,
+            __escape);
+    }
+
+  template<typename _CharT, typename _Traits, typename _Alloc>
+    inline auto
+    quoted(const basic_string<_CharT, _Traits, _Alloc>& __string,
+    _CharT __delim = _CharT('"'), _CharT __escape = _CharT('\\'))
+    {
+      return __detail::_Quoted_string<
+ const basic_string<_CharT, _Traits, _Alloc>&, _CharT>(
+     __string, __delim, __escape);
+    }
+
+  template<typename _CharT, typename _Traits, typename _Alloc>
+    inline auto
+    quoted(basic_string<_CharT, _Traits, _Alloc>& __string,
+    _CharT __delim = _CharT('"'), _CharT __escape = _CharT('\\'))
+    {
+      return __detail::_Quoted_string<
+ basic_string<_CharT, _Traits, _Alloc>&, _CharT>(
+     __string, __delim, __escape);
+    }
+
+
+
+
+  template<typename _CharT, typename _Traits>
+    inline auto
+    quoted(basic_string_view<_CharT, _Traits> __sv,
+    _CharT __delim = _CharT('"'), _CharT __escape = _CharT('\\'))
+    {
+      return __detail::_Quoted_string<
+ basic_string_view<_CharT, _Traits>, _CharT>(__sv, __delim, __escape);
+    }
+# 519 "C:/msys64/mingw64/include/c++/15.2.0/iomanip" 3
+  extern template ostream& operator<<(ostream&, _Setfill<char>);
+  extern template ostream& operator<<(ostream&, _Setiosflags);
+  extern template ostream& operator<<(ostream&, _Resetiosflags);
+  extern template ostream& operator<<(ostream&, _Setbase);
+  extern template ostream& operator<<(ostream&, _Setprecision);
+  extern template ostream& operator<<(ostream&, _Setw);
+  extern template istream& operator>>(istream&, _Setfill<char>);
+  extern template istream& operator>>(istream&, _Setiosflags);
+  extern template istream& operator>>(istream&, _Resetiosflags);
+  extern template istream& operator>>(istream&, _Setbase);
+  extern template istream& operator>>(istream&, _Setprecision);
+  extern template istream& operator>>(istream&, _Setw);
+
+
+  extern template wostream& operator<<(wostream&, _Setfill<wchar_t>);
+  extern template wostream& operator<<(wostream&, _Setiosflags);
+  extern template wostream& operator<<(wostream&, _Resetiosflags);
+  extern template wostream& operator<<(wostream&, _Setbase);
+  extern template wostream& operator<<(wostream&, _Setprecision);
+  extern template wostream& operator<<(wostream&, _Setw);
+  extern template wistream& operator>>(wistream&, _Setfill<wchar_t>);
+  extern template wistream& operator>>(wistream&, _Setiosflags);
+  extern template wistream& operator>>(wistream&, _Resetiosflags);
+  extern template wistream& operator>>(wistream&, _Setbase);
+  extern template wistream& operator>>(wistream&, _Setprecision);
+  extern template wistream& operator>>(wistream&, _Setw);
+
+
+
+
+}
+
+#pragma GCC diagnostic pop
+# 41 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 2 3
+
+
+
+
+
+
+
+namespace std
+{
+
+
+namespace chrono
+{
+
+
+
+
+namespace __detail
+{
+
+
+
+  template<typename _Period, typename _CharT>
+    constexpr basic_string_view<_CharT>
+    __units_suffix() noexcept
+    {
+# 75 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 3
+      if constexpr (is_same_v<_Period, atto>) return ::std::__format::_Widen<_CharT>("as", L"as"); else
+      if constexpr (is_same_v<_Period, femto>) return ::std::__format::_Widen<_CharT>("fs", L"fs"); else
+      if constexpr (is_same_v<_Period, pico>) return ::std::__format::_Widen<_CharT>("ps", L"ps"); else
+      if constexpr (is_same_v<_Period, nano>) return ::std::__format::_Widen<_CharT>("ns", L"ns"); else
+      if constexpr (is_same_v<_Period, milli>) return ::std::__format::_Widen<_CharT>("ms", L"ms"); else
+
+
+
+
+
+      if constexpr (is_same_v<_Period, micro>) return ::std::__format::_Widen<_CharT>("us", L"us"); else
+
+      if constexpr (is_same_v<_Period, centi>) return ::std::__format::_Widen<_CharT>("cs", L"cs"); else
+      if constexpr (is_same_v<_Period, deci>) return ::std::__format::_Widen<_CharT>("ds", L"ds"); else
+      if constexpr (is_same_v<_Period, ratio<1> >) return ::std::__format::_Widen<_CharT>("s", L"s"); else
+      if constexpr (is_same_v<_Period, deca>) return ::std::__format::_Widen<_CharT>("das", L"das"); else
+      if constexpr (is_same_v<_Period, hecto>) return ::std::__format::_Widen<_CharT>("hs", L"hs"); else
+      if constexpr (is_same_v<_Period, kilo>) return ::std::__format::_Widen<_CharT>("ks", L"ks"); else
+      if constexpr (is_same_v<_Period, mega>) return ::std::__format::_Widen<_CharT>("Ms", L"Ms"); else
+      if constexpr (is_same_v<_Period, giga>) return ::std::__format::_Widen<_CharT>("Gs", L"Gs"); else
+      if constexpr (is_same_v<_Period, tera>) return ::std::__format::_Widen<_CharT>("Ts", L"Ts"); else
+      if constexpr (is_same_v<_Period, tera>) return ::std::__format::_Widen<_CharT>("Ts", L"Ts"); else
+      if constexpr (is_same_v<_Period, peta>) return ::std::__format::_Widen<_CharT>("Ps", L"Ps"); else
+      if constexpr (is_same_v<_Period, exa>) return ::std::__format::_Widen<_CharT>("Es", L"Es"); else
+      if constexpr (is_same_v<_Period, ratio<60> >) return ::std::__format::_Widen<_CharT>("min", L"min"); else
+      if constexpr (is_same_v<_Period, ratio<3600> >) return ::std::__format::_Widen<_CharT>("h", L"h"); else
+      if constexpr (is_same_v<_Period, ratio<86400> >) return ::std::__format::_Widen<_CharT>("d", L"d"); else
+
+ return {};
+    }
+
+  template<typename _Period, typename _CharT, typename _Out>
+    inline _Out
+    __fmt_units_suffix(_Out __out) noexcept
+    {
+      if (auto __s = __detail::__units_suffix<_Period, _CharT>(); __s.size())
+ return __format::__write(std::move(__out), __s);
+      else if constexpr (_Period::den == 1)
+ return std::format_to(std::move(__out), ::std::__format::_Widen<_CharT>("[{}]s", L"[{}]s"),
+         (uintmax_t)_Period::num);
+      else
+ return std::format_to(std::move(__out), ::std::__format::_Widen<_CharT>("[{}/{}]s", L"[{}/{}]s"),
+         (uintmax_t)_Period::num,
+         (uintmax_t)_Period::den);
+    }
+}
+
+
+
+
+
+
+  template<typename _CharT, typename _Traits,
+    typename _Rep, typename _Period>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+        const duration<_Rep, _Period>& __d)
+    {
+      using _Out = ostreambuf_iterator<_CharT, _Traits>;
+      using period = typename _Period::type;
+      std::basic_ostringstream<_CharT, _Traits> __s;
+      __s.flags(__os.flags());
+      __s.imbue(__os.getloc());
+      __s.precision(__os.precision());
+
+
+      __s << +__d.count();
+      __detail::__fmt_units_suffix<period, _CharT>(_Out(__s));
+      __os << std::move(__s).str();
+      return __os;
+    }
+
+
+namespace __detail
+{
+
+
+  template<typename _Duration>
+    struct __local_time_fmt
+    {
+      local_time<_Duration> _M_time;
+      const string* _M_abbrev;
+      const seconds* _M_offset_sec;
+    };
+
+
+
+  template<typename _Duration>
+    using __local_time_fmt_for
+      = __local_time_fmt<common_type_t<_Duration, seconds>>;
+}
+# 177 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 3
+  template<typename _Duration>
+    inline __detail::__local_time_fmt<_Duration>
+    local_time_format(local_time<_Duration> __time,
+        const string* __abbrev = nullptr,
+        const seconds* __offset_sec = nullptr)
+    { return {__time, __abbrev, __offset_sec}; }
+
+
+}
+
+
+namespace __format
+{
+  [[noreturn,__gnu__::__always_inline__]]
+  inline void
+  __no_timezone_available()
+  { __throw_format_error("format error: no timezone available for %Z or %z"); }
+
+  [[noreturn,__gnu__::__always_inline__]]
+  inline void
+  __not_valid_for_duration()
+  { __throw_format_error("format error: chrono-format-spec not valid for "
+    "chrono::duration"); }
+
+  [[noreturn,__gnu__::__always_inline__]]
+  inline void
+  __invalid_chrono_spec()
+  { __throw_format_error("format error: chrono-format-spec not valid for "
+    "argument type"); }
+
+  template<typename _CharT>
+    struct _ChronoSpec : _Spec<_CharT>
+    {
+      basic_string_view<_CharT> _M_chrono_specs;
+
+
+
+
+
+
+
+      constexpr bool
+      _M_locale_specific() const noexcept
+      { return this->_M_reserved; }
+
+      constexpr void
+      _M_locale_specific(bool __b) noexcept
+      { this->_M_reserved = __b; }
+    };
+
+
+
+
+  enum _ChronoParts {
+    _Year = 1, _Month = 2, _Day = 4, _Weekday = 8, _TimeOfDay = 16,
+    _TimeZone = 32,
+    _Date = _Year | _Month | _Day | _Weekday,
+    _DateTime = _Date | _TimeOfDay,
+    _ZonedDateTime = _DateTime | _TimeZone,
+    _Duration = 128
+  };
+
+  constexpr _ChronoParts
+  operator|(_ChronoParts __x, _ChronoParts __y) noexcept
+  { return static_cast<_ChronoParts>((int)__x | (int)__y); }
+
+  constexpr _ChronoParts&
+  operator|=(_ChronoParts& __x, _ChronoParts __y) noexcept
+  { return __x = __x | __y; }
+
+
+  template<typename _CharT>
+    struct __formatter_chrono
+    {
+      using __string_view = basic_string_view<_CharT>;
+      using __string = basic_string<_CharT>;
+
+      template<typename _ParseContext>
+ constexpr typename _ParseContext::iterator
+ _M_parse(_ParseContext& __pc, _ChronoParts __parts)
+ {
+   auto __first = __pc.begin();
+   auto __last = __pc.end();
+
+   _ChronoSpec<_CharT> __spec{};
+
+   auto __finalize = [this, &__spec] {
+     _M_spec = __spec;
+   };
+
+   auto __finished = [&] {
+     if (__first == __last || *__first == '}')
+       {
+  __finalize();
+  return true;
+       }
+     return false;
+   };
+
+   if (__finished())
+     return __first;
+
+   __first = __spec._M_parse_fill_and_align(__first, __last);
+   if (__finished())
+     return __first;
+
+   __first = __spec._M_parse_width(__first, __last, __pc);
+   if (__finished())
+     return __first;
+
+   if (__parts & _ChronoParts::_Duration)
+     {
+       __first = __spec._M_parse_precision(__first, __last, __pc);
+       if (__finished())
+  return __first;
+     }
+
+   __first = __spec._M_parse_locale(__first, __last);
+   if (__finished())
+     return __first;
+
+
+
+   {
+     __string_view __str(__first, __last - __first);
+     auto __end = __str.find('}');
+     if (__end != __str.npos)
+       {
+  __str.remove_suffix(__str.length() - __end);
+  __last = __first + __end;
+       }
+     if (__str.find('{') != __str.npos)
+       __throw_format_error("chrono format error: '{' in chrono-specs");
+   }
+
+
+
+
+
+   const auto __chrono_specs = __first++;
+   if (*__chrono_specs != '%')
+     __throw_format_error("chrono format error: no '%' at start of "
+     "chrono-specs");
+
+   _CharT __mod{};
+   bool __conv = true;
+   int __needed = 0;
+   bool __locale_specific = false;
+
+   while (__first != __last)
+     {
+       enum _Mods { _Mod_none, _Mod_E, _Mod_O, _Mod_E_O };
+       _Mods __allowed_mods = _Mod_none;
+
+       _CharT __c = *__first++;
+       switch (__c)
+  {
+  case 'a':
+  case 'A':
+    __needed = _Weekday;
+    __locale_specific = true;
+    break;
+  case 'b':
+  case 'h':
+  case 'B':
+    __needed = _Month;
+    __locale_specific = true;
+    break;
+  case 'c':
+    __needed = _DateTime;
+    __allowed_mods = _Mod_E;
+    __locale_specific = true;
+    break;
+  case 'C':
+    __needed = _Year;
+    __allowed_mods = _Mod_E;
+    break;
+  case 'd':
+  case 'e':
+    __needed = _Day;
+    __allowed_mods = _Mod_O;
+    break;
+  case 'D':
+  case 'F':
+    __needed = _Date;
+    break;
+  case 'g':
+  case 'G':
+    __needed = _Date;
+    break;
+  case 'H':
+  case 'I':
+    __needed = _TimeOfDay;
+    __allowed_mods = _Mod_O;
+    break;
+  case 'j':
+    if (!(__parts & _Duration))
+      __needed = _Date;
+    break;
+  case 'm':
+    __needed = _Month;
+    __allowed_mods = _Mod_O;
+    break;
+  case 'M':
+    __needed = _TimeOfDay;
+    __allowed_mods = _Mod_O;
+    break;
+  case 'p':
+  case 'r':
+    __locale_specific = true;
+    [[fallthrough]];
+  case 'R':
+  case 'T':
+    __needed = _TimeOfDay;
+    break;
+  case 'q':
+  case 'Q':
+    __needed = _Duration;
+    break;
+  case 'S':
+    __needed = _TimeOfDay;
+    __allowed_mods = _Mod_O;
+    break;
+  case 'u':
+  case 'w':
+    __needed = _Weekday;
+    __allowed_mods = _Mod_O;
+    break;
+  case 'U':
+  case 'V':
+  case 'W':
+    __needed = _Date;
+    __allowed_mods = _Mod_O;
+    break;
+  case 'x':
+    __needed = _Date;
+    __locale_specific = true;
+    __allowed_mods = _Mod_E;
+    break;
+  case 'X':
+    __needed = _TimeOfDay;
+    __locale_specific = true;
+    __allowed_mods = _Mod_E;
+    break;
+  case 'y':
+    __needed = _Year;
+    __allowed_mods = _Mod_E_O;
+    break;
+  case 'Y':
+    __needed = _Year;
+    __allowed_mods = _Mod_E;
+    break;
+  case 'z':
+    __needed = _TimeZone;
+    __allowed_mods = _Mod_E_O;
+    break;
+  case 'Z':
+    __needed = _TimeZone;
+    break;
+  case 'n':
+  case 't':
+  case '%':
+    break;
+  case 'O':
+  case 'E':
+    if (__mod) [[unlikely]]
+      {
+        __allowed_mods = _Mod_none;
+        break;
+      }
+    __mod = __c;
+    continue;
+  default:
+    __throw_format_error("chrono format error: invalid "
+           " specifier in chrono-specs");
+  }
+
+       if ((__mod == 'E' && !(__allowed_mods & _Mod_E))
+      || (__mod == 'O' && !(__allowed_mods & _Mod_O)))
+  __throw_format_error("chrono format error: invalid "
+         " modifier in chrono-specs");
+       if (__mod && __c != 'z')
+  __locale_specific = true;
+       __mod = _CharT();
+
+       if ((__parts & __needed) != __needed)
+  __throw_format_error("chrono format error: format argument "
+         "does not contain the information "
+         "required by the chrono-specs");
+
+
+       size_t __pos = __string_view(__first, __last - __first).find('%');
+       if (__pos == 0)
+  ++__first;
+       else
+  {
+    if (__pos == __string_view::npos)
+      {
+        __first = __last;
+        __conv = false;
+      }
+    else
+      __first += __pos + 1;
+  }
+     }
+
+
+   if (__conv || __mod != _CharT())
+     __throw_format_error("chrono format error: unescaped '%' in "
+     "chrono-specs");
+
+   _M_spec = __spec;
+   _M_spec._M_chrono_specs
+   = __string_view(__chrono_specs, __first - __chrono_specs);
+   _M_spec._M_locale_specific(__locale_specific);
+
+   return __first;
+ }
+
+
+
+
+
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_format(const _Tp& __t, _FormatContext& __fc,
+    bool __is_neg = false) const
+ {
+   auto __first = _M_spec._M_chrono_specs.begin();
+   const auto __last = _M_spec._M_chrono_specs.end();
+   if (__first == __last)
+     return _M_format_to_ostream(__t, __fc, __is_neg);
+# 529 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 3
+   _Sink_iter<_CharT> __out;
+   __format::_Str_sink<_CharT> __sink;
+   bool __write_direct = false;
+   if constexpr (is_same_v<typename _FormatContext::iterator,
+      _Sink_iter<_CharT>>)
+     {
+       if (_M_spec._M_width_kind == __format::_WP_none)
+  {
+    __out = __fc.out();
+    __write_direct = true;
+  }
+       else
+  __out = __sink.out();
+     }
+   else
+     __out = __sink.out();
+
+
+
+   if constexpr (__is_specialization_of<_Tp, chrono::hh_mm_ss>)
+     __is_neg = __t.is_negative();
+
+   auto __print_sign = [&__is_neg, &__out] {
+     if constexpr (chrono::__is_duration_v<_Tp>
+       || __is_specialization_of<_Tp, chrono::hh_mm_ss>)
+       if (__is_neg)
+  {
+    *__out++ = _S_plus_minus[1];
+    __is_neg = false;
+  }
+     return std::move(__out);
+   };
+
+
+   constexpr const _CharT* __literals = ::std::__format::_Widen<_CharT>("\n\t%", L"\n\t%");
+
+   ++__first;
+
+   _CharT __mod{};
+   do
+     {
+       _CharT __c = *__first++;
+       switch (__c)
+  {
+  case 'a':
+  case 'A':
+    __out = _M_a_A(__t, std::move(__out), __fc, __c == 'A');
+    break;
+  case 'b':
+  case 'h':
+  case 'B':
+    __out = _M_b_B(__t, std::move(__out), __fc, __c == 'B');
+    break;
+  case 'c':
+  case 'r':
+  case 'x':
+  case 'X':
+    __out = _M_c_r_x_X(__t, std::move(__out), __fc, __c, __mod);
+    break;
+  case 'C':
+  case 'y':
+  case 'Y':
+    __out = _M_C_y_Y(__t, std::move(__out), __fc, __c, __mod);
+    break;
+  case 'd':
+  case 'e':
+    __out = _M_d_e(__t, std::move(__out), __fc, __c, __mod == 'O');
+    break;
+  case 'D':
+    __out = _M_D(__t, std::move(__out), __fc);
+    break;
+  case 'F':
+    __out = _M_F(__t, std::move(__out), __fc);
+    break;
+  case 'g':
+  case 'G':
+    __out = _M_g_G(__t, std::move(__out), __fc, __c == 'G');
+    break;
+  case 'H':
+  case 'I':
+    __out = _M_H_I(__t, __print_sign(), __fc, __c, __mod == 'O');
+    break;
+  case 'j':
+    __out = _M_j(__t, __print_sign(), __fc);
+    break;
+  case 'm':
+    __out = _M_m(__t, std::move(__out), __fc, __mod == 'O');
+    break;
+  case 'M':
+    __out = _M_M(__t, __print_sign(), __fc, __mod == 'O');
+    break;
+  case 'p':
+    __out = _M_p(__t, std::move(__out), __fc);
+    break;
+  case 'q':
+    __out = _M_q(__t, std::move(__out), __fc);
+    break;
+  case 'Q':
+
+    if constexpr (chrono::__is_duration_v<_Tp>)
+
+
+      __out = std::format_to(__print_sign(), _S_empty_spec,
+        +__t.count());
+    else
+      __throw_format_error("chrono format error: argument is "
+      "not a duration");
+    break;
+  case 'R':
+  case 'T':
+    __out = _M_R_T(__t, __print_sign(), __fc, __c == 'T');
+    break;
+  case 'S':
+    __out = _M_S(__t, __print_sign(), __fc, __mod == 'O');
+    break;
+  case 'u':
+  case 'w':
+    __out = _M_u_w(__t, std::move(__out), __fc, __c, __mod == 'O');
+    break;
+  case 'U':
+  case 'V':
+  case 'W':
+    __out = _M_U_V_W(__t, std::move(__out), __fc, __c,
+       __mod == 'O');
+    break;
+  case 'z':
+    __out = _M_z(__t, std::move(__out), __fc, (bool)__mod);
+    break;
+  case 'Z':
+    __out = _M_Z(__t, std::move(__out), __fc);
+    break;
+  case 'n':
+    *__out++ = __literals[0];
+    break;
+  case 't':
+    *__out++ = __literals[1];
+    break;
+  case '%':
+    *__out++ = __literals[2];
+    break;
+  case 'O':
+  case 'E':
+    __mod = __c;
+    continue;
+  case '}':
+    __first = __last;
+    break;
+  }
+       __mod = _CharT();
+
+       __string_view __str(__first, __last - __first);
+       size_t __pos = __str.find('%');
+       if (__pos == 0)
+  ++__first;
+       else
+  {
+    if (__pos == __str.npos)
+      __first = __last;
+    else
+      {
+        __str.remove_suffix(__str.length() - __pos);
+        __first += __pos + 1;
+      }
+    __out = __format::__write(std::move(__out), __str);
+  }
+     }
+   while (__first != __last);
+
+   if constexpr (is_same_v<typename _FormatContext::iterator,
+      _Sink_iter<_CharT>>)
+     if (__write_direct)
+       return __out;
+
+   auto __span = __sink.view();
+   __string_view __str(__span.data(), __span.size());
+   size_t __width;
+   if constexpr (__unicode::__literal_encoding_is_unicode<_CharT>())
+     __width = __unicode::__field_width(__str);
+   else
+     __width = __str.size();
+   return __format::__write_padded_as_spec(__str, __width,
+        __fc, _M_spec);
+ }
+
+      _ChronoSpec<_CharT> _M_spec;
+
+    private:
+
+      template<typename _FormatContext>
+ std::locale
+ _M_locale(_FormatContext& __fc) const
+ {
+   if (!_M_spec._M_localized)
+     return std::locale::classic();
+   else
+     return __fc.locale();
+ }
+
+
+
+
+
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_format_to_ostream(const _Tp& __t, _FormatContext& __fc,
+        bool __is_neg) const
+ {
+   using ::std::chrono::__detail::__utc_leap_second;
+   using ::std::chrono::__detail::__local_time_fmt;
+
+   basic_ostringstream<_CharT> __os;
+   __os.imbue(_M_locale(__fc));
+
+   if constexpr (__is_specialization_of<_Tp, __local_time_fmt>)
+     {
+
+       auto __days = chrono::floor<chrono::days>(__t._M_time);
+       __os << chrono::year_month_day(__days) << ' '
+     << chrono::hh_mm_ss(__t._M_time - __days);
+
+
+
+       if (__is_neg)
+  {
+    if (!__t._M_abbrev) [[unlikely]]
+      __format::__no_timezone_available();
+    else if constexpr (is_same_v<_CharT, char>)
+      __os << ' ' << *__t._M_abbrev;
+    else
+      {
+        __os << L' ';
+        for (char __c : *__t._M_abbrev)
+   __os << __c;
+      }
+  }
+     }
+   else
+     {
+       if constexpr (__is_specialization_of<_Tp, __utc_leap_second>)
+  __os << __t._M_date << ' ' << __t._M_time;
+       else if constexpr (chrono::__is_time_point_v<_Tp>)
+  {
+
+
+
+
+
+    if constexpr (is_convertible_v<_Tp, chrono::sys_days>)
+      __os << _S_date(__t);
+
+    else if constexpr (is_convertible_v<_Tp, chrono::local_days>)
+      __os << _S_date(__t);
+    else
+      {
+        auto __days = chrono::floor<chrono::days>(__t);
+        __os << chrono::year_month_day(__days) << ' '
+    << chrono::hh_mm_ss(__t - __days);
+      }
+  }
+       else
+  {
+    if constexpr (chrono::__is_duration_v<_Tp>)
+      if (__is_neg) [[unlikely]]
+        __os << _S_plus_minus[1];
+    __os << __t;
+  }
+     }
+
+   auto __str = std::move(__os).str();
+   return __format::__write_padded_as_spec(__str, __str.size(),
+        __fc, _M_spec);
+ }
+
+      static constexpr const _CharT* _S_chars
+ = ::std::__format::_Widen<_CharT>("0123456789+-:/ {}", L"0123456789+-:/ {}");
+      static constexpr const _CharT* _S_plus_minus = _S_chars + 10;
+      static constexpr _CharT _S_colon = _S_chars[12];
+      static constexpr _CharT _S_slash = _S_chars[13];
+      static constexpr _CharT _S_space = _S_chars[14];
+      static constexpr const _CharT* _S_empty_spec = _S_chars + 15;
+
+      template<typename _OutIter>
+ _OutIter
+ _M_write(_OutIter __out, const locale& __loc, __string_view __s) const
+ {
+# 831 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 3
+   return __format::__write(std::move(__out), __s);
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_a_A(const _Tp& __t, typename _FormatContext::iterator __out,
+        _FormatContext& __ctx, bool __full) const
+ {
+
+
+   chrono::weekday __wd = _S_weekday(__t);
+   if (!__wd.ok())
+     __throw_format_error("format error: invalid weekday");
+
+   locale __loc = _M_locale(__ctx);
+   const auto& __tp = use_facet<__timepunct<_CharT>>(__loc);
+   const _CharT* __days[7];
+   if (__full)
+     __tp._M_days(__days);
+   else
+     __tp._M_days_abbreviated(__days);
+   __string_view __str(__days[__wd.c_encoding()]);
+   return _M_write(std::move(__out), __loc, __str);
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_b_B(const _Tp& __t, typename _FormatContext::iterator __out,
+        _FormatContext& __ctx, bool __full) const
+ {
+
+
+   chrono::month __m = _S_month(__t);
+   if (!__m.ok())
+     __throw_format_error("format error: invalid month");
+   locale __loc = _M_locale(__ctx);
+   const auto& __tp = use_facet<__timepunct<_CharT>>(__loc);
+   const _CharT* __months[12];
+   if (__full)
+     __tp._M_months(__months);
+   else
+     __tp._M_months_abbreviated(__months);
+   __string_view __str(__months[(unsigned)__m - 1]);
+   return _M_write(std::move(__out), __loc, __str);
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_c_r_x_X(const _Tp& __t, typename _FormatContext::iterator __out,
+     _FormatContext& __ctx, _CharT __conv, _CharT __mod) const
+ {
+# 890 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 3
+   using namespace chrono;
+   using ::std::chrono::__detail::__utc_leap_second;
+   using ::std::chrono::__detail::__local_time_fmt;
+
+   struct tm __tm{};
+
+
+
+
+
+   __tm.tm_isdst = -1;
+# 922 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 3
+   if (__conv == 'c' || __conv == 'x')
+   {
+     auto __d = _S_days(__t);
+     using _TDays = decltype(__d);
+     const year_month_day __ymd(__d);
+     const auto __y = __ymd.year();
+
+     __tm.tm_year = (int)__y - 1900;
+     __tm.tm_yday = (__d - _TDays(__y/January/1)).count();
+     __tm.tm_mon = (unsigned)__ymd.month() - 1;
+     __tm.tm_mday = (unsigned)__ymd.day();
+     __tm.tm_wday = weekday(__d).c_encoding();
+   }
+
+   if (__conv != 'x')
+   {
+     const auto __hms = _S_hms(__t);
+     __tm.tm_hour = __hms.hours().count();
+     __tm.tm_min = __hms.minutes().count();
+     __tm.tm_sec = __hms.seconds().count();
+   }
+
+   return _M_locale_fmt(std::move(__out), _M_locale(__ctx), __tm,
+          __conv, __mod);
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_C_y_Y(const _Tp& __t, typename _FormatContext::iterator __out,
+        _FormatContext& __ctx, _CharT __conv, _CharT __mod = 0) const
+ {
+# 961 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 3
+   chrono::year __y = _S_year(__t);
+
+   if (__mod && _M_spec._M_localized) [[unlikely]]
+     if (auto __loc = __ctx.locale(); __loc != locale::classic())
+       {
+  struct tm __tm{};
+  __tm.tm_year = (int)__y - 1900;
+  return _M_locale_fmt(std::move(__out), __loc, __tm,
+         __conv, __mod);
+       }
+
+   basic_string<_CharT> __s;
+   int __yi = (int)__y;
+   const bool __is_neg = __yi < 0;
+   __yi = __builtin_abs(__yi);
+
+   if (__conv == 'Y' || __conv == 'C')
+     {
+       int __ci = __yi / 100;
+       if (__is_neg) [[unlikely]]
+  {
+    __s.assign(1, _S_plus_minus[1]);
+
+    if (__conv == 'C' && (__ci * 100) != __yi)
+      ++__ci;
+  }
+       if (__ci >= 100) [[unlikely]]
+  {
+    __s += std::format(_S_empty_spec, __ci / 100);
+    __ci %= 100;
+  }
+       __s += _S_two_digits(__ci);
+     }
+
+   if (__conv == 'Y' || __conv == 'y')
+     __s += _S_two_digits(__yi % 100);
+
+   return __format::__write(std::move(__out), __string_view(__s));
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_D(const _Tp& __t, typename _FormatContext::iterator __out,
+      _FormatContext&) const
+ {
+   auto __ymd = _S_date(__t);
+   basic_string<_CharT> __s;
+
+
+
+   __s = _S_two_digits((unsigned)__ymd.month());
+   __s += _S_slash;
+   __s += _S_two_digits((unsigned)__ymd.day());
+   __s += _S_slash;
+   __s += _S_two_digits(__builtin_abs((int)__ymd.year()) % 100);
+   return __format::__write(std::move(__out), __string_view(__s));
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_d_e(const _Tp& __t, typename _FormatContext::iterator __out,
+        _FormatContext& __ctx, _CharT __conv, bool __mod = false) const
+ {
+
+
+
+
+
+   chrono::day __d = _S_day(__t);
+   unsigned __i = (unsigned)__d;
+
+   if (__mod && _M_spec._M_localized) [[unlikely]]
+     if (auto __loc = __ctx.locale(); __loc != locale::classic())
+       {
+  struct tm __tm{};
+  __tm.tm_mday = __i;
+  return _M_locale_fmt(std::move(__out), __loc, __tm,
+         (char)__conv, 'O');
+       }
+
+   auto __sv = _S_two_digits(__i);
+   _CharT __buf[2];
+   if (__conv == _CharT('e') && __i < 10)
+     {
+       __buf[0] = _S_space;
+       __buf[1] = __sv[1];
+       __sv = {__buf, 2};
+     }
+   return __format::__write(std::move(__out), __sv);
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_F(const _Tp& __t, typename _FormatContext::iterator __out,
+      _FormatContext&) const
+ {
+   auto __ymd = _S_date(__t);
+   auto __s = std::format(::std::__format::_Widen<_CharT>("{:04d}-  -  ", L"{:04d}-  -  "),
+     (int)__ymd.year());
+   auto __sv = _S_two_digits((unsigned)__ymd.month());
+   __s[__s.size() - 5] = __sv[0];
+   __s[__s.size() - 4] = __sv[1];
+   __sv = _S_two_digits((unsigned)__ymd.day());
+   __s[__s.size() - 2] = __sv[0];
+   __s[__s.size() - 1] = __sv[1];
+   __sv = __s;
+   return __format::__write(std::move(__out), __sv);
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_g_G(const _Tp& __t, typename _FormatContext::iterator __out,
+      _FormatContext& __ctx, bool __full) const
+ {
+
+
+   using namespace chrono;
+   auto __d = _S_days(__t);
+
+   __d -= (weekday(__d) - Monday) - days(3);
+
+   year __y = year_month_day(__d).year();
+   return _M_C_y_Y(__y, std::move(__out), __ctx, "yY"[__full]);
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_H_I(const _Tp& __t, typename _FormatContext::iterator __out,
+        _FormatContext& __ctx, _CharT __conv, bool __mod = false) const
+ {
+
+
+
+
+
+   const auto __hms = _S_hms(__t);
+   int __i = __hms.hours().count();
+
+   if (__mod && _M_spec._M_localized) [[unlikely]]
+     if (auto __loc = __ctx.locale(); __loc != locale::classic())
+       {
+  struct tm __tm{};
+  __tm.tm_hour = __i;
+  return _M_locale_fmt(std::move(__out), __loc, __tm,
+         (char)__conv, 'O');
+       }
+
+   if (__conv == _CharT('I'))
+     {
+       if (__i == 0)
+  __i = 12;
+       else if (__i > 12)
+  __i -= 12;
+     }
+   return __format::__write(std::move(__out), _S_two_digits(__i));
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_j(const _Tp& __t, typename _FormatContext::iterator __out,
+      _FormatContext&) const
+ {
+   if constexpr (chrono::__is_duration_v<_Tp>)
+     {
+
+       unsigned __d = chrono::duration_cast<chrono::days>(__t).count();
+       return std::format_to(std::move(__out), _S_empty_spec, __d);
+     }
+   else
+     {
+
+       using namespace chrono;
+       auto __day = _S_days(__t);
+       auto __ymd = _S_date(__t);
+       days __d;
+
+
+       if constexpr (is_same_v<typename decltype(__day)::clock, local_t>)
+  __d = __day - local_days(__ymd.year()/January/0);
+       else
+  __d = __day - sys_days(__ymd.year()/January/0);
+       return std::format_to(std::move(__out), ::std::__format::_Widen<_CharT>("{:03d}", L"{:03d}"),
+        __d.count());
+     }
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_m(const _Tp& __t, typename _FormatContext::iterator __out,
+      _FormatContext& __ctx, bool __mod) const
+ {
+
+
+
+   auto __m = _S_month(__t);
+   auto __i = (unsigned)__m;
+
+   if (__mod && _M_spec._M_localized) [[unlikely]]
+     if (auto __loc = __ctx.locale(); __loc != locale::classic())
+       {
+  struct tm __tm{};
+  __tm.tm_mon = __i - 1;
+  return _M_locale_fmt(std::move(__out), __loc, __tm,
+         'm', 'O');
+       }
+
+   return __format::__write(std::move(__out), _S_two_digits(__i));
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_M(const _Tp& __t, typename _FormatContext::iterator __out,
+      _FormatContext& __ctx, bool __mod) const
+ {
+
+
+
+   auto __m = _S_hms(__t).minutes();
+   auto __i = __m.count();
+
+   if (__mod && _M_spec._M_localized) [[unlikely]]
+     if (auto __loc = __ctx.locale(); __loc != locale::classic())
+       {
+  struct tm __tm{};
+  __tm.tm_min = __i;
+  return _M_locale_fmt(std::move(__out), __loc, __tm,
+         'M', 'O');
+       }
+
+   return __format::__write(std::move(__out), _S_two_digits(__i));
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_p(const _Tp& __t, typename _FormatContext::iterator __out,
+      _FormatContext& __ctx) const
+ {
+
+   auto __hms = _S_hms(__t);
+   locale __loc = _M_locale(__ctx);
+   const auto& __tp = use_facet<__timepunct<_CharT>>(__loc);
+   const _CharT* __ampm[2];
+   __tp._M_am_pm(__ampm);
+   return _M_write(std::move(__out), __loc,
+     __ampm[__hms.hours().count() >= 12]);
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_q(const _Tp&, typename _FormatContext::iterator __out,
+      _FormatContext&) const
+ {
+
+   if constexpr (!chrono::__is_duration_v<_Tp>)
+     __throw_format_error("format error: argument is not a duration");
+   else
+     {
+       namespace __d = chrono::__detail;
+       using period = typename _Tp::period;
+       return __d::__fmt_units_suffix<period, _CharT>(std::move(__out));
+     }
+ }
+
+
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_R_T(const _Tp& __t, typename _FormatContext::iterator __out,
+        _FormatContext& __ctx, bool __secs) const
+ {
+
+
+   auto __hms = _S_hms(__t);
+
+   auto __s = std::format(::std::__format::_Widen<_CharT>("{:02d}:00", L"{:02d}:00"),
+     __hms.hours().count());
+   auto __sv = _S_two_digits(__hms.minutes().count());
+   __s[__s.size() - 2] = __sv[0];
+   __s[__s.size() - 1] = __sv[1];
+   __sv = __s;
+   __out = __format::__write(std::move(__out), __sv);
+   if (__secs)
+     {
+       *__out++ = _S_colon;
+       __out = _M_S(__hms, std::move(__out), __ctx);
+     }
+   return __out;
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_S(const _Tp& __t, typename _FormatContext::iterator __out,
+      _FormatContext& __ctx, bool __mod = false) const
+ {
+
+
+   auto __hms = _S_hms(__t);
+   auto __s = __hms.seconds();
+
+   if (__mod) [[unlikely]]
+     {
+       if (_M_spec._M_localized)
+  if (auto __loc = __ctx.locale(); __loc != locale::classic())
+    {
+      struct tm __tm{};
+      __tm.tm_sec = (int)__s.count();
+      return _M_locale_fmt(std::move(__out), __loc, __tm,
+      'S', 'O');
+    }
+
+
+       return __format::__write(std::move(__out),
+           _S_two_digits(__s.count()));
+     }
+
+   if constexpr (__hms.fractional_width == 0)
+     __out = __format::__write(std::move(__out),
+          _S_two_digits(__s.count()));
+   else
+     {
+       locale __loc = _M_locale(__ctx);
+       auto __ss = __hms.subseconds();
+       using rep = typename decltype(__ss)::rep;
+       if constexpr (is_floating_point_v<rep>)
+  {
+    chrono::duration<rep> __fs = __s + __ss;
+    __out = std::format_to(std::move(__out), __loc,
+      ::std::__format::_Widen<_CharT>("{:#0{}.{}Lf}", L"{:#0{}.{}Lf}"),
+      __fs.count(),
+      3 + __hms.fractional_width,
+      __hms.fractional_width);
+  }
+       else
+  {
+    const auto& __np
+      = use_facet<numpunct<_CharT>>(__loc);
+    __out = __format::__write(std::move(__out),
+         _S_two_digits(__s.count()));
+    *__out++ = __np.decimal_point();
+    if constexpr (is_integral_v<rep>)
+      __out = std::format_to(std::move(__out),
+        ::std::__format::_Widen<_CharT>("{:0{}}", L"{:0{}}"),
+        __ss.count(),
+        __hms.fractional_width);
+    else
+      {
+        auto __str = std::format(_S_empty_spec, __ss.count());
+        __out = std::format_to(std::move(__out),
+          ::std::__format::_Widen<_CharT>("{:0>{}s}", L"{:0>{}s}"),
+          __str,
+          __hms.fractional_width);
+      }
+  }
+     }
+   return __out;
+ }
+
+
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_u_w(const _Tp& __t, typename _FormatContext::iterator __out,
+        _FormatContext& __ctx, _CharT __conv, bool __mod = false) const
+ {
+
+
+
+
+
+   chrono::weekday __wd = _S_weekday(__t);
+
+   if (__mod && _M_spec._M_localized) [[unlikely]]
+     if (auto __loc = __ctx.locale(); __loc != locale::classic())
+       {
+  struct tm __tm{};
+  __tm.tm_wday = __wd.c_encoding();
+  return _M_locale_fmt(std::move(__out), __loc, __tm,
+         (char)__conv, 'O');
+       }
+
+   unsigned __wdi = __conv == 'u' ? __wd.iso_encoding()
+      : __wd.c_encoding();
+   const _CharT __d = _S_digit(__wdi);
+   return __format::__write(std::move(__out), __string_view(&__d, 1));
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_U_V_W(const _Tp& __t, typename _FormatContext::iterator __out,
+   _FormatContext& __ctx, _CharT __conv, bool __mod = false) const
+ {
+
+
+
+
+
+
+   using namespace chrono;
+   auto __d = _S_days(__t);
+   using _TDays = decltype(__d);
+
+   if (__mod && _M_spec._M_localized) [[unlikely]]
+     if (auto __loc = __ctx.locale(); __loc != locale::classic())
+       {
+  const year_month_day __ymd(__d);
+  const year __y = __ymd.year();
+  struct tm __tm{};
+  __tm.tm_year = (int)__y - 1900;
+  __tm.tm_yday = (__d - _TDays(__y/January/1)).count();
+  __tm.tm_wday = weekday(__d).c_encoding();
+  return _M_locale_fmt(std::move(__out), __loc, __tm,
+         (char)__conv, 'O');
+       }
+
+   _TDays __first;
+   if (__conv == 'V')
+     {
+
+       __d -= (weekday(__d) - Monday) - days(3);
+
+
+       __first = _TDays(year_month_day(__d).year()/January/1);
+     }
+   else
+     {
+       year __y;
+       if constexpr (requires { __t.year(); })
+  __y = __t.year();
+       else
+  __y = year_month_day(__d).year();
+       const weekday __weekstart = __conv == 'U' ? Sunday : Monday;
+       __first = _TDays(__y/January/__weekstart[1]);
+     }
+   auto __weeks = chrono::floor<weeks>(__d - __first);
+   __string_view __sv = _S_two_digits(__weeks.count() + 1);
+   return __format::__write(std::move(__out), __sv);
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_z(const _Tp& __t, typename _FormatContext::iterator __out,
+      _FormatContext&, bool __mod = false) const
+ {
+   using ::std::chrono::__detail::__utc_leap_second;
+   using ::std::chrono::__detail::__local_time_fmt;
+
+   auto __utc = __mod ? __string_view(::std::__format::_Widen<_CharT>("+00:00", L"+00:00"), 6)
+        : __string_view(::std::__format::_Widen<_CharT>("+0000", L"+0000"), 5);
+
+   if constexpr (chrono::__is_time_point_v<_Tp>)
+     {
+       if constexpr (is_same_v<typename _Tp::clock,
+          chrono::system_clock>)
+  return __format::__write(std::move(__out), __utc);
+     }
+   else if constexpr (__is_specialization_of<_Tp, __local_time_fmt>)
+     {
+       if (__t._M_offset_sec)
+  {
+    auto __sv = __utc;
+    basic_string<_CharT> __s;
+    if (*__t._M_offset_sec != 0s)
+      {
+        chrono:: hh_mm_ss __hms(*__t._M_offset_sec);
+        __s = _S_plus_minus[__hms.is_negative()];
+        __s += _S_two_digits(__hms.hours().count());
+        if (__mod)
+   __s += _S_colon;
+        __s += _S_two_digits(__hms.minutes().count());
+        __sv = __s;
+      }
+    return __format::__write(std::move(__out), __sv);
+  }
+     }
+   else if constexpr (__is_specialization_of<_Tp, __utc_leap_second>)
+     return __format::__write(std::move(__out), __utc);
+
+   __no_timezone_available();
+ }
+
+      template<typename _Tp, typename _FormatContext>
+ typename _FormatContext::iterator
+ _M_Z(const _Tp& __t, typename _FormatContext::iterator __out,
+      _FormatContext& __ctx) const
+ {
+   using ::std::chrono::__detail::__utc_leap_second;
+   using ::std::chrono::__detail::__local_time_fmt;
+
+   __string_view __utc(::std::__format::_Widen<_CharT>("UTC", L"UTC"), 3);
+   if constexpr (chrono::__is_time_point_v<_Tp>)
+     {
+       if constexpr (is_same_v<typename _Tp::clock,
+          chrono::system_clock>)
+  return __format::__write(std::move(__out), __utc);
+     }
+   else if constexpr (__is_specialization_of<_Tp, __local_time_fmt>)
+     {
+       if (__t._M_abbrev)
+  {
+    string_view __sv = *__t._M_abbrev;
+    if constexpr (is_same_v<_CharT, char>)
+      return __format::__write(std::move(__out), __sv);
+    else
+      {
+
+        basic_string<_CharT> __ws(__sv.size(), _CharT());
+        auto& __ct = use_facet<ctype<_CharT>>(_M_locale(__ctx));
+        __ct.widen(__sv.begin(), __sv.end(), __ws.data());
+        __string_view __wsv = __ws;
+        return __format::__write(std::move(__out), __wsv);
+      }
+  }
+     }
+   else if constexpr (__is_specialization_of<_Tp, __utc_leap_second>)
+     return __format::__write(std::move(__out), __utc);
+
+   __no_timezone_available();
+ }
+
+
+
+
+      static _CharT
+      _S_digit(int __n) noexcept
+      {
+
+ return ::std::__format::_Widen<_CharT>("0123456789999999", L"0123456789999999")[__n & 0xf];
+      }
+
+
+      static basic_string_view<_CharT>
+      _S_two_digits(int __n) noexcept
+      {
+ return {
+   ::std::__format::_Widen<_CharT>("0001020304050607080910111213141516171819" "2021222324252627282930313233343536373839" "4041424344454647484950515253545556575859" "6061626364656667686970717273747576777879" "8081828384858687888990919293949596979899" "9999999999999999999999999999999999999999" "9999999999999999", L"0001020304050607080910111213141516171819" "2021222324252627282930313233343536373839" "4041424344454647484950515253545556575859" "6061626364656667686970717273747576777879" "8081828384858687888990919293949596979899" "9999999999999999999999999999999999999999" "9999999999999999")
+
+
+
+
+
+                        + 2 * (__n & 0x7f),
+   2
+ };
+      }
+
+
+
+
+      template<typename _Tp>
+ static decltype(auto)
+ _S_hms(const _Tp& __t)
+ {
+   using ::std::chrono::__detail::__utc_leap_second;
+   using ::std::chrono::__detail::__local_time_fmt;
+
+   if constexpr (__is_specialization_of<_Tp, chrono::hh_mm_ss>)
+     return __t;
+   else if constexpr (__is_specialization_of<_Tp, __utc_leap_second>)
+     return __t._M_time;
+   else if constexpr (chrono::__is_duration_v<_Tp>)
+     return chrono::hh_mm_ss<_Tp>(__t);
+   else if constexpr (chrono::__is_time_point_v<_Tp>)
+     return chrono::hh_mm_ss(__t - chrono::floor<chrono::days>(__t));
+   else if constexpr (__is_specialization_of<_Tp, __local_time_fmt>)
+     return _S_hms(__t._M_time);
+   else
+     {
+       __invalid_chrono_spec();
+       return chrono::hh_mm_ss<chrono::seconds>();
+     }
+ }
+
+
+      template<typename _Tp>
+ static auto
+ _S_days(const _Tp& __t)
+ {
+   using namespace chrono;
+   using ::std::chrono::__detail::__utc_leap_second;
+   using ::std::chrono::__detail::__local_time_fmt;
+
+   if constexpr (__is_time_point_v<_Tp>)
+     return chrono::floor<days>(__t);
+   else if constexpr (__is_specialization_of<_Tp, __utc_leap_second>)
+     return __t._M_date;
+   else if constexpr (__is_specialization_of<_Tp, __local_time_fmt>)
+     return chrono::floor<days>(__t._M_time);
+   else if constexpr (is_same_v<_Tp, year_month_day>
+          || is_same_v<_Tp, year_month_day_last>
+          || is_same_v<_Tp, year_month_weekday>
+          || is_same_v<_Tp, year_month_weekday_last>)
+     return sys_days(__t);
+   else
+     {
+       if constexpr (__is_duration_v<_Tp>)
+  __not_valid_for_duration();
+       else
+  __invalid_chrono_spec();
+       return chrono::sys_days();
+     }
+ }
+
+
+      template<typename _Tp>
+ static chrono::year_month_day
+ _S_date(const _Tp& __t)
+ {
+   if constexpr (is_same_v<_Tp, chrono::year_month_day>)
+     return __t;
+   else
+     return chrono::year_month_day(_S_days(__t));
+ }
+
+      template<typename _Tp>
+ static chrono::day
+ _S_day(const _Tp& __t)
+ {
+   using namespace chrono;
+
+   if constexpr (is_same_v<_Tp, day>)
+     return __t;
+   else if constexpr (requires { __t.day(); })
+     return __t.day();
+   else
+     return _S_date(__t).day();
+ }
+
+      template<typename _Tp>
+ static chrono::month
+ _S_month(const _Tp& __t)
+ {
+   using namespace chrono;
+
+   if constexpr (is_same_v<_Tp, month>)
+     return __t;
+   else if constexpr (requires { __t.month(); })
+     return __t.month();
+   else
+     return _S_date(__t).month();
+ }
+
+      template<typename _Tp>
+ static chrono::year
+ _S_year(const _Tp& __t)
+ {
+   using namespace chrono;
+
+   if constexpr (is_same_v<_Tp, year>)
+     return __t;
+   else if constexpr (requires { __t.year(); })
+     return __t.year();
+   else
+     return _S_date(__t).year();
+ }
+
+      template<typename _Tp>
+ static chrono::weekday
+ _S_weekday(const _Tp& __t)
+ {
+   using namespace ::std::chrono;
+   using ::std::chrono::__detail::__local_time_fmt;
+
+   if constexpr (is_same_v<_Tp, weekday>)
+     return __t;
+   else if constexpr (requires { __t.weekday(); })
+     return __t.weekday();
+   else if constexpr (is_same_v<_Tp, month_weekday>)
+     return __t.weekday_indexed().weekday();
+   else if constexpr (is_same_v<_Tp, month_weekday_last>)
+     return __t.weekday_last().weekday();
+   else
+     return weekday(_S_days(__t));
+ }
+
+
+      template<typename _Tp>
+ static auto
+ _S_floor_seconds(const _Tp& __t)
+ {
+   using chrono::__detail::__local_time_fmt;
+   if constexpr (chrono::__is_time_point_v<_Tp>
+     || chrono::__is_duration_v<_Tp>)
+     {
+       if constexpr (_Tp::period::den != 1)
+  return chrono::floor<chrono::seconds>(__t);
+       else
+  return __t;
+     }
+   else if constexpr (__is_specialization_of<_Tp, chrono::hh_mm_ss>)
+     {
+       if constexpr (_Tp::fractional_width != 0)
+  return chrono::floor<chrono::seconds>(__t.to_duration());
+       else
+  return __t;
+     }
+   else if constexpr (__is_specialization_of<_Tp, __local_time_fmt>)
+     return _S_floor_seconds(__t._M_time);
+   else
+     return __t;
+ }
+
+
+
+      template<typename _Iter>
+ _Iter
+ _M_locale_fmt(_Iter __out, const locale& __loc, const struct tm& __tm,
+        char __fmt, char __mod) const
+ {
+   basic_ostringstream<_CharT> __os;
+   __os.imbue(__loc);
+   const auto& __tp = use_facet<time_put<_CharT>>(__loc);
+   __tp.put(__os, __os, _S_space, &__tm, __fmt, __mod);
+   if (__os)
+     __out = _M_write(std::move(__out), __loc, __os.view());
+   return __out;
+ }
+    };
+
+}
+
+
+  template<typename _Rep, typename _Period, typename _CharT>
+    requires __format::__formattable_impl<_Rep, _CharT>
+    struct formatter<chrono::duration<_Rep, _Period>, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      {
+ using namespace __format;
+ auto __it = _M_f._M_parse(__pc, _Duration|_TimeOfDay);
+ if constexpr (!is_floating_point_v<_Rep>)
+   if (_M_f._M_spec._M_prec_kind != __format::_WP_none)
+     __throw_format_error("format error: invalid precision for duration");
+ return __it;
+      }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::duration<_Rep, _Period>& __d,
+        basic_format_context<_Out, _CharT>& __fc) const
+ {
+   if constexpr (numeric_limits<_Rep>::is_signed)
+     if (__d < __d.zero()) [[unlikely]]
+       {
+  if constexpr (is_integral_v<_Rep>)
+    {
+
+
+      using _URep = make_unsigned_t<_Rep>;
+      auto __ucnt = -static_cast<_URep>(__d.count());
+      auto __ud = chrono::duration<_URep, _Period>(__ucnt);
+      return _M_f._M_format(__ud, __fc, true);
+    }
+  else
+    return _M_f._M_format(-__d, __fc, true);
+       }
+   return _M_f._M_format(__d, __fc, false);
+ }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::day, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Day); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::day& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::month, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Month); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::month& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::year, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Year); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::year& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::weekday, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Weekday); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::weekday& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::weekday_indexed, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Weekday); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::weekday_indexed& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::weekday_last, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Weekday); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::weekday_last& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::month_day, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Month|__format::_Day); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::month_day& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::month_day_last, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Month); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::month_day_last& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::month_weekday, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Month|__format::_Weekday); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::month_weekday& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::month_weekday_last, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Month|__format::_Weekday); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::month_weekday_last& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::year_month, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Year|__format::_Month); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::year_month& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::year_month_day, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Date); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::year_month_day& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::year_month_day_last, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Date); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::year_month_day_last& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::year_month_weekday, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Date); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::year_month_weekday& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::year_month_weekday_last, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_Date); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::year_month_weekday_last& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+       { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<typename _Rep, typename _Period, __format::__char _CharT>
+    struct formatter<chrono::hh_mm_ss<chrono::duration<_Rep, _Period>>, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_TimeOfDay); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::hh_mm_ss<chrono::duration<_Rep, _Period>>& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::sys_info, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_ChronoParts{}); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::sys_info& __i,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__i, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<__format::__char _CharT>
+    struct formatter<chrono::local_info, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_ChronoParts{}); }
+
+      template<typename _Out>
+ typename basic_format_context<_Out, _CharT>::iterator
+ format(const chrono::local_info& __i,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__i, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+
+  template<typename _Duration, __format::__char _CharT>
+    struct formatter<chrono::sys_time<_Duration>, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      {
+ auto __next = _M_f._M_parse(__pc, __format::_ZonedDateTime);
+ if constexpr (!__stream_insertable)
+   if (_M_f._M_spec._M_chrono_specs.empty())
+     __format::__invalid_chrono_spec();
+ return __next;
+     }
+
+     template<typename _Out>
+       typename basic_format_context<_Out, _CharT>::iterator
+       format(const chrono::sys_time<_Duration>& __t,
+       basic_format_context<_Out, _CharT>& __fc) const
+       { return _M_f._M_format(__t, __fc); }
+
+    private:
+      static constexpr bool __stream_insertable
+ = requires (basic_ostream<_CharT>& __os,
+      chrono::sys_time<_Duration> __t) { __os << __t; };
+
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<typename _Duration, __format::__char _CharT>
+    struct formatter<chrono::utc_time<_Duration>, _CharT>
+    : __format::__formatter_chrono<_CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_ZonedDateTime); }
+
+      template<typename _Out>
+        typename basic_format_context<_Out, _CharT>::iterator
+        format(const chrono::utc_time<_Duration>& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ {
+
+
+
+   using chrono::__detail::__utc_leap_second;
+   using chrono::seconds;
+   using chrono::sys_time;
+   using _CDur = common_type_t<_Duration, seconds>;
+   const auto __li = chrono::get_leap_second_info(__t);
+   sys_time<_CDur> __s{__t.time_since_epoch() - __li.elapsed};
+   if (!__li.is_leap_second) [[likely]]
+     return _M_f._M_format(__s, __fc);
+   else
+     return _M_f._M_format(__utc_leap_second(__s), __fc);
+ }
+
+    private:
+      friend formatter<chrono::__detail::__utc_leap_second<_Duration>, _CharT>;
+
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<typename _Duration, __format::__char _CharT>
+    struct formatter<chrono::tai_time<_Duration>, _CharT>
+    : __format::__formatter_chrono<_CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_ZonedDateTime); }
+
+      template<typename _Out>
+        typename basic_format_context<_Out, _CharT>::iterator
+        format(const chrono::tai_time<_Duration>& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ {
+
+
+
+
+
+   constexpr chrono::days __tai_offset = chrono::days(4383);
+   using _CDur = common_type_t<_Duration, chrono::days>;
+   chrono::local_time<_CDur> __lt(__t.time_since_epoch() - __tai_offset);
+   const string __abbrev("TAI", 3);
+   const chrono::seconds __off = 0s;
+   const auto __lf = chrono::local_time_format(__lt, &__abbrev, &__off);
+   return _M_f._M_format(__lf, __fc);
+ }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<typename _Duration, __format::__char _CharT>
+    struct formatter<chrono::gps_time<_Duration>, _CharT>
+    : __format::__formatter_chrono<_CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_ZonedDateTime); }
+
+      template<typename _Out>
+        typename basic_format_context<_Out, _CharT>::iterator
+        format(const chrono::gps_time<_Duration>& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ {
+
+
+
+
+
+   constexpr chrono::days __gps_offset = chrono::days(3657);
+   using _CDur = common_type_t<_Duration, chrono::days>;
+   chrono::local_time<_CDur> __lt(__t.time_since_epoch() + __gps_offset);
+   const string __abbrev("GPS", 3);
+   const chrono::seconds __off = 0s;
+   const auto __lf = chrono::local_time_format(__lt, &__abbrev, &__off);
+   return _M_f._M_format(__lf, __fc);
+ }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<typename _Duration, __format::__char _CharT>
+    struct formatter<chrono::file_time<_Duration>, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_ZonedDateTime); }
+
+      template<typename _Out>
+        typename basic_format_context<_Out, _CharT>::iterator
+        format(const chrono::file_time<_Duration>& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ {
+   using namespace chrono;
+   return _M_f._M_format(chrono::clock_cast<system_clock>(__t), __fc);
+ }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<typename _Duration, __format::__char _CharT>
+    struct formatter<chrono::local_time<_Duration>, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_DateTime); }
+
+      template<typename _Out>
+        typename basic_format_context<_Out, _CharT>::iterator
+        format(const chrono::local_time<_Duration>& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+  template<typename _Duration, __format::__char _CharT>
+    struct formatter<chrono::__detail::__local_time_fmt<_Duration>, _CharT>
+    {
+      constexpr typename basic_format_parse_context<_CharT>::iterator
+      parse(basic_format_parse_context<_CharT>& __pc)
+      { return _M_f._M_parse(__pc, __format::_ZonedDateTime); }
+
+      template<typename _Out>
+        typename basic_format_context<_Out, _CharT>::iterator
+        format(const chrono::__detail::__local_time_fmt<_Duration>& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return _M_f._M_format(__t, __fc, true); }
+
+    private:
+      __format::__formatter_chrono<_CharT> _M_f;
+    };
+
+
+  template<typename _Duration, typename _TimeZonePtr, __format::__char _CharT>
+    struct formatter<chrono::zoned_time<_Duration, _TimeZonePtr>, _CharT>
+    : formatter<chrono::__detail::__local_time_fmt_for<_Duration>, _CharT>
+    {
+      template<typename _Out>
+        typename basic_format_context<_Out, _CharT>::iterator
+        format(const chrono::zoned_time<_Duration, _TimeZonePtr>& __tp,
+        basic_format_context<_Out, _CharT>& __fc) const
+ {
+   using _Ltf = chrono::__detail::__local_time_fmt_for<_Duration>;
+   using _Base = formatter<_Ltf, _CharT>;
+   const chrono::sys_info __info = __tp.get_info();
+   const auto __lf = chrono::local_time_format(__tp.get_local_time(),
+            &__info.abbrev,
+            &__info.offset);
+   return _Base::format(__lf, __fc);
+ }
+    };
+
+
+
+  template<typename _Duration, __format::__char _CharT>
+    struct formatter<chrono::__detail::__utc_leap_second<_Duration>, _CharT>
+    : formatter<chrono::utc_time<_Duration>, _CharT>
+    {
+      template<typename _Out>
+        typename basic_format_context<_Out, _CharT>::iterator
+        format(const chrono::__detail::__utc_leap_second<_Duration>& __t,
+        basic_format_context<_Out, _CharT>& __fc) const
+ { return this->_M_f._M_format(__t, __fc); }
+    };
+
+namespace chrono
+{
+
+
+
+
+namespace __detail
+{
+  template<typename _Duration = seconds>
+    struct _Parser
+    {
+      static_assert(is_same_v<common_type_t<_Duration, seconds>, _Duration>);
+
+      explicit
+      _Parser(__format::_ChronoParts __need) : _M_need(__need) { }
+
+      _Parser(_Parser&&) = delete;
+      void operator=(_Parser&&) = delete;
+
+      _Duration _M_time{};
+      sys_days _M_sys_days{};
+      year_month_day _M_ymd{};
+      weekday _M_wd{};
+      __format::_ChronoParts _M_need;
+      unsigned _M_is_leap_second : 1 {};
+      unsigned _M_reserved : 15 {};
+
+      template<typename _CharT, typename _Traits, typename _Alloc>
+ basic_istream<_CharT, _Traits>&
+ operator()(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+     basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+     minutes* __offset = nullptr);
+
+    private:
+
+
+      template<typename _CharT, typename _Traits>
+ static int_least32_t
+ _S_read_unsigned(basic_istream<_CharT, _Traits>& __is,
+    ios_base::iostate& __err, int __n)
+ {
+   int_least32_t __val = _S_try_read_digit(__is, __err);
+   if (__val == -1) [[unlikely]]
+     __err |= ios_base::failbit;
+   else
+     {
+       int __n1 = (std::min)(__n, 9);
+
+       for (int __i = 1; __i < __n1; ++__i)
+  if (auto __dig = _S_try_read_digit(__is, __err); __dig != -1)
+    {
+      __val *= 10;
+      __val += __dig;
+    }
+
+       while (__n1++ < __n) [[unlikely]]
+  if (auto __dig = _S_try_read_digit(__is, __err); __dig != -1)
+    {
+      if (__builtin_mul_overflow(__val, 10, &__val)
+     || __builtin_add_overflow(__val, __dig, &__val))
+        {
+   __err |= ios_base::failbit;
+   return -1;
+        }
+    }
+     }
+   return __val;
+ }
+
+
+
+      template<typename _CharT, typename _Traits>
+ static int_least32_t
+ _S_read_signed(basic_istream<_CharT, _Traits>& __is,
+    ios_base::iostate& __err, int __n)
+ {
+   auto __sign = __is.peek();
+   if (__sign == '-' || __sign == '+')
+     (void) __is.get();
+   int_least32_t __val = _S_read_unsigned(__is, __err, __n);
+   if (__err & ios_base::failbit)
+     {
+       if (__sign == '-') [[unlikely]]
+  __val *= -1;
+     }
+   return __val;
+ }
+
+
+
+      template<typename _CharT, typename _Traits>
+ static int_least32_t
+ _S_try_read_digit(basic_istream<_CharT, _Traits>& __is,
+     ios_base::iostate& __err)
+ {
+   int_least32_t __val = -1;
+   auto __i = __is.peek();
+   if (!_Traits::eq_int_type(__i, _Traits::eof())) [[likely]]
+     {
+       _CharT __c = _Traits::to_char_type(__i);
+       if (_CharT('0') <= __c && __c <= _CharT('9')) [[likely]]
+  {
+    (void) __is.get();
+    __val = __c - _CharT('0');
+  }
+     }
+   else
+     __err |= ios_base::eofbit;
+   return __val;
+ }
+
+
+
+      template<typename _CharT, typename _Traits>
+ static bool
+ _S_read_chr(basic_istream<_CharT, _Traits>& __is,
+      ios_base::iostate& __err, _CharT __c)
+ {
+   auto __i = __is.peek();
+   if (_Traits::eq_int_type(__i, _Traits::eof()))
+     __err |= ios_base::eofbit;
+   else if (_Traits::to_char_type(__i) == __c) [[likely]]
+     {
+       (void) __is.get();
+       return true;
+     }
+   __err |= ios_base::failbit;
+   return false;
+ }
+    };
+
+  template<typename _Duration>
+    using _Parser_t = _Parser<common_type_t<_Duration, seconds>>;
+
+  template<typename _Duration>
+    consteval bool
+    __use_floor()
+    {
+      if constexpr (_Duration::period::den == 1)
+ {
+   switch (_Duration::period::num)
+   {
+     case minutes::period::num:
+     case hours::period::num:
+     case days::period::num:
+     case weeks::period::num:
+     case years::period::num:
+       return true;
+   }
+ }
+      return false;
+    }
+# 2405 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 3
+  template<typename _ToDur, typename _Tp>
+    constexpr auto
+    __round(const _Tp& __t)
+    {
+      if constexpr (__is_duration_v<_Tp>)
+ {
+   if constexpr (treat_as_floating_point_v<typename _Tp::rep>)
+     return chrono::duration_cast<_ToDur>(__t);
+   else if constexpr (__detail::__use_floor<_ToDur>())
+     return chrono::floor<_ToDur>(__t);
+   else
+     return chrono::round<_ToDur>(__t);
+ }
+      else
+ {
+   static_assert(__is_time_point_v<_Tp>);
+   using _Tpt = time_point<typename _Tp::clock, _ToDur>;
+   return _Tpt(__detail::__round<_ToDur>(__t.time_since_epoch()));
+ }
+    }
+
+}
+
+
+  template<typename _CharT, typename _Traits, typename _Rep, typename _Period,
+    typename _Alloc = allocator<_CharT>>
+    inline basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  duration<_Rep, _Period>& __d,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      auto __need = __format::_ChronoParts::_TimeOfDay;
+      __detail::_Parser_t<duration<_Rep, _Period>> __p(__need);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ __d = __detail::__round<duration<_Rep, _Period>>(__p._M_time);
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, const day& __d)
+    {
+      using _Ctx = __format::__format_context<_CharT>;
+      using _Str = basic_string_view<_CharT>;
+      _Str __s = ::std::__format::_Widen<_CharT>("{:02d} is not a valid day", L"{:02d} is not a valid day");
+      if (__d.ok())
+ __s = __s.substr(0, 6);
+      auto __u = (unsigned)__d;
+      __os << std::vformat(__s, make_format_args<_Ctx>(__u));
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits,
+    typename _Alloc = allocator<_CharT>>
+    inline basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  day& __d,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      __detail::_Parser<> __p(__format::_ChronoParts::_Day);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ __d = __p._M_ymd.day();
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, const month& __m)
+    {
+      using _Ctx = __format::__format_context<_CharT>;
+      using _Str = basic_string_view<_CharT>;
+      _Str __s = ::std::__format::_Widen<_CharT>("{:L%b}{} is not a valid month", L"{:L%b}{} is not a valid month");
+      if (__m.ok())
+ __os << std::vformat(__os.getloc(), __s.substr(0, 6),
+        make_format_args<_Ctx>(__m));
+      else
+ {
+   auto __u = (unsigned)__m;
+   __os << std::vformat(__s.substr(6), make_format_args<_Ctx>(__u));
+ }
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits,
+    typename _Alloc = allocator<_CharT>>
+    inline basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  month& __m,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      __detail::_Parser<> __p(__format::_ChronoParts::_Month);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ __m = __p._M_ymd.month();
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, const year& __y)
+    {
+      using _Ctx = __format::__format_context<_CharT>;
+      using _Str = basic_string_view<_CharT>;
+      _Str __s = ::std::__format::_Widen<_CharT>("-{:04d} is not a valid year", L"-{:04d} is not a valid year");
+      if (__y.ok())
+ __s = __s.substr(0, 7);
+      int __i = (int)__y;
+      if (__i >= 0) [[likely]]
+ __s.remove_prefix(1);
+      else
+ __i = -__i;
+      __os << std::vformat(__s, make_format_args<_Ctx>(__i));
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits,
+    typename _Alloc = allocator<_CharT>>
+    inline basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  year& __y,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      __detail::_Parser<> __p(__format::_ChronoParts::_Year);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ __y = __p._M_ymd.year();
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, const weekday& __wd)
+    {
+      using _Ctx = __format::__format_context<_CharT>;
+      using _Str = basic_string_view<_CharT>;
+      _Str __s = ::std::__format::_Widen<_CharT>("{:L%a}{} is not a valid weekday", L"{:L%a}{} is not a valid weekday");
+      if (__wd.ok())
+ __os << std::vformat(__os.getloc(), __s.substr(0, 6),
+        make_format_args<_Ctx>(__wd));
+      else
+ {
+   auto __c = __wd.c_encoding();
+   __os << std::vformat(__s.substr(6), make_format_args<_Ctx>(__c));
+ }
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits,
+    typename _Alloc = allocator<_CharT>>
+    inline basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  weekday& __wd,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      __detail::_Parser<> __p(__format::_ChronoParts::_Weekday);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ __wd = __p._M_wd;
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const weekday_indexed& __wdi)
+    {
+
+
+
+      basic_stringstream<_CharT> __os2;
+      __os2.imbue(__os.getloc());
+      __os2 << __wdi.weekday();
+      const auto __i = __wdi.index();
+      basic_string_view<_CharT> __s
+ = ::std::__format::_Widen<_CharT>("[ is not a valid index]", L"[ is not a valid index]");
+      __os2 << __s[0];
+      __os2 << std::format(::std::__format::_Widen<_CharT>("{}", L"{}"), __i);
+      if (__i >= 1 && __i <= 5)
+ __os2 << __s.back();
+      else
+ __os2 << __s.substr(1);
+      __os << __os2.view();
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const weekday_last& __wdl)
+    {
+
+      basic_stringstream<_CharT> __os2;
+      __os2.imbue(__os.getloc());
+      __os2 << __wdl.weekday() << ::std::__format::_Widen<_CharT>("[last]", L"[last]");
+      __os << __os2.view();
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, const month_day& __md)
+    {
+
+      basic_stringstream<_CharT> __os2;
+      __os2.imbue(__os.getloc());
+      __os2 << __md.month();
+      if constexpr (is_same_v<_CharT, char>)
+ __os2 << '/';
+      else
+ __os2 << L'/';
+      __os2 << __md.day();
+      __os << __os2.view();
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits,
+    typename _Alloc = allocator<_CharT>>
+    inline basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  month_day& __md,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      using __format::_ChronoParts;
+      auto __need = _ChronoParts::_Month | _ChronoParts::_Day;
+      __detail::_Parser<> __p(__need);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ __md = month_day(__p._M_ymd.month(), __p._M_ymd.day());
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const month_day_last& __mdl)
+    {
+
+      basic_stringstream<_CharT> __os2;
+      __os2.imbue(__os.getloc());
+      __os2 << __mdl.month() << ::std::__format::_Widen<_CharT>("/last", L"/last");
+      __os << __os2.view();
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const month_weekday& __mwd)
+    {
+
+      basic_stringstream<_CharT> __os2;
+      __os2.imbue(__os.getloc());
+      __os2 << __mwd.month();
+      if constexpr (is_same_v<_CharT, char>)
+ __os2 << '/';
+      else
+ __os2 << L'/';
+      __os2 << __mwd.weekday_indexed();
+      __os << __os2.view();
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const month_weekday_last& __mwdl)
+    {
+
+      basic_stringstream<_CharT> __os2;
+      __os2.imbue(__os.getloc());
+      __os2 << __mwdl.month();
+      if constexpr (is_same_v<_CharT, char>)
+ __os2 << '/';
+      else
+ __os2 << L'/';
+      __os2 << __mwdl.weekday_last();
+      __os << __os2.view();
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, const year_month& __ym)
+    {
+
+      basic_stringstream<_CharT> __os2;
+      __os2.imbue(__os.getloc());
+      __os2 << __ym.year();
+      if constexpr (is_same_v<_CharT, char>)
+ __os2 << '/';
+      else
+ __os2 << L'/';
+      __os2 << __ym.month();
+      __os << __os2.view();
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits,
+    typename _Alloc = allocator<_CharT>>
+    inline basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  year_month& __ym,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      using __format::_ChronoParts;
+      auto __need = _ChronoParts::_Year | _ChronoParts::_Month;
+      __detail::_Parser<> __p(__need);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ __ym = year_month(__p._M_ymd.year(), __p._M_ymd.month());
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const year_month_day& __ymd)
+    {
+      using _Ctx = __format::__format_context<_CharT>;
+      using _Str = basic_string_view<_CharT>;
+      _Str __s = ::std::__format::_Widen<_CharT>("{:%F} is not a valid date", L"{:%F} is not a valid date");
+      __os << std::vformat(__ymd.ok() ? __s.substr(0, 5) : __s,
+      make_format_args<_Ctx>(__ymd));
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits,
+    typename _Alloc = allocator<_CharT>>
+    inline basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  year_month_day& __ymd,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      using __format::_ChronoParts;
+      auto __need = _ChronoParts::_Year | _ChronoParts::_Month
+      | _ChronoParts::_Day;
+      __detail::_Parser<> __p(__need);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ __ymd = __p._M_ymd;
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const year_month_day_last& __ymdl)
+    {
+
+      basic_stringstream<_CharT> __os2;
+      __os2.imbue(__os.getloc());
+      __os2 << __ymdl.year();
+      if constexpr (is_same_v<_CharT, char>)
+ __os2 << '/';
+      else
+ __os2 << L'/';
+      __os2 << __ymdl.month_day_last();
+      __os << __os2.view();
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const year_month_weekday& __ymwd)
+    {
+
+
+      basic_stringstream<_CharT> __os2;
+      __os2.imbue(__os.getloc());
+      _CharT __slash;
+      if constexpr (is_same_v<_CharT, char>)
+ __slash = '/';
+      else
+ __slash = L'/';
+      __os2 << __ymwd.year() << __slash << __ymwd.month() << __slash
+     << __ymwd.weekday_indexed();
+      __os << __os2.view();
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const year_month_weekday_last& __ymwdl)
+    {
+
+
+      basic_stringstream<_CharT> __os2;
+      __os2.imbue(__os.getloc());
+      _CharT __slash;
+      if constexpr (is_same_v<_CharT, char>)
+ __slash = '/';
+      else
+ __slash = L'/';
+      __os2 << __ymwdl.year() << __slash << __ymwdl.month() << __slash
+     << __ymwdl.weekday_last();
+      __os << __os2.view();
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const hh_mm_ss<_Duration>& __hms)
+    {
+      return __os << format(__os.getloc(), ::std::__format::_Widen<_CharT>("{:L%T}", L"{:L%T}"), __hms);
+    }
+
+
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, const sys_info& __i)
+    {
+      __os << '[' << __i.begin << ',' << __i.end
+    << ',' << hh_mm_ss(__i.offset) << ',' << __i.save
+    << ',' << __i.abbrev << ']';
+      return __os;
+    }
+
+
+  template<typename _CharT, typename _Traits>
+    basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, const local_info& __li)
+    {
+      __os << '[';
+      if (__li.result == local_info::unique)
+ __os << __li.first;
+      else
+ {
+   if (__li.result == local_info::nonexistent)
+     __os << "nonexistent";
+   else
+     __os << "ambiguous";
+   __os << " local time between " << __li.first;
+   __os << " and " << __li.second;
+ }
+      __os << ']';
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration,
+    typename _TimeZonePtr>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const zoned_time<_Duration, _TimeZonePtr>& __t)
+    {
+      __os << format(__os.getloc(), ::std::__format::_Widen<_CharT>("{:L%F %T %Z}", L"{:L%F %T %Z}"), __t);
+      return __os;
+    }
+
+
+  template<typename _CharT, typename _Traits, typename _Duration>
+    requires (!treat_as_floating_point_v<typename _Duration::rep>)
+      && ratio_less_v<typename _Duration::period, days::period>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const sys_time<_Duration>& __tp)
+    {
+      __os << std::format(__os.getloc(), ::std::__format::_Widen<_CharT>("{:L%F %T}", L"{:L%F %T}"), __tp);
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os, const sys_days& __dp)
+    {
+      __os << year_month_day{__dp};
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration,
+    typename _Alloc = allocator<_CharT>>
+    basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  sys_time<_Duration>& __tp,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      minutes __off{};
+      if (!__offset)
+ __offset = &__off;
+      using __format::_ChronoParts;
+      auto __need = _ChronoParts::_Year | _ChronoParts::_Month
+      | _ChronoParts::_Day | _ChronoParts::_TimeOfDay;
+      __detail::_Parser_t<_Duration> __p(__need);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ {
+   if (__p._M_is_leap_second)
+     __is.setstate(ios_base::failbit);
+   else
+     {
+       auto __st = __p._M_sys_days + __p._M_time - *__offset;
+       __tp = __detail::__round<_Duration>(__st);
+     }
+ }
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const utc_time<_Duration>& __t)
+    {
+      __os << std::format(__os.getloc(), ::std::__format::_Widen<_CharT>("{:L%F %T}", L"{:L%F %T}"), __t);
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration,
+    typename _Alloc = allocator<_CharT>>
+    inline basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  utc_time<_Duration>& __tp,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      minutes __off{};
+      if (!__offset)
+ __offset = &__off;
+      using __format::_ChronoParts;
+      auto __need = _ChronoParts::_Year | _ChronoParts::_Month
+      | _ChronoParts::_Day | _ChronoParts::_TimeOfDay;
+      __detail::_Parser_t<_Duration> __p(__need);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ {
+
+
+   auto __ut = utc_clock::from_sys(__p._M_sys_days) + __p._M_time
+   - *__offset;
+   __tp = __detail::__round<_Duration>(__ut);
+ }
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const tai_time<_Duration>& __t)
+    {
+      __os << std::format(__os.getloc(), ::std::__format::_Widen<_CharT>("{:L%F %T}", L"{:L%F %T}"), __t);
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration,
+    typename _Alloc = allocator<_CharT>>
+    inline basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  tai_time<_Duration>& __tp,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      minutes __off{};
+      if (!__offset)
+ __offset = &__off;
+      using __format::_ChronoParts;
+      auto __need = _ChronoParts::_Year | _ChronoParts::_Month
+      | _ChronoParts::_Day | _ChronoParts::_TimeOfDay;
+      __detail::_Parser_t<_Duration> __p(__need);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ {
+   if (__p._M_is_leap_second)
+     __is.setstate(ios_base::failbit);
+   else
+     {
+       constexpr sys_days __epoch(-days(4383));
+       auto __d = __p._M_sys_days - __epoch + __p._M_time - *__offset;
+       tai_time<common_type_t<_Duration, seconds>> __tt(__d);
+       __tp = __detail::__round<_Duration>(__tt);
+     }
+ }
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const gps_time<_Duration>& __t)
+    {
+      __os << std::format(__os.getloc(), ::std::__format::_Widen<_CharT>("{:L%F %T}", L"{:L%F %T}"), __t);
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration,
+    typename _Alloc = allocator<_CharT>>
+    inline basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  gps_time<_Duration>& __tp,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      minutes __off{};
+      if (!__offset)
+ __offset = &__off;
+      using __format::_ChronoParts;
+      auto __need = _ChronoParts::_Year | _ChronoParts::_Month
+      | _ChronoParts::_Day | _ChronoParts::_TimeOfDay;
+      __detail::_Parser_t<_Duration> __p(__need);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ {
+   if (__p._M_is_leap_second)
+     __is.setstate(ios_base::failbit);
+   else
+     {
+       constexpr sys_days __epoch(days(3657));
+       auto __d = __p._M_sys_days - __epoch + __p._M_time - *__offset;
+       gps_time<common_type_t<_Duration, seconds>> __gt(__d);
+       __tp = __detail::__round<_Duration>(__gt);
+     }
+ }
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const file_time<_Duration>& __t)
+    {
+      __os << std::format(__os.getloc(), ::std::__format::_Widen<_CharT>("{:L%F %T}", L"{:L%F %T}"), __t);
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration,
+    typename _Alloc = allocator<_CharT>>
+    inline basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  file_time<_Duration>& __tp,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      sys_time<_Duration> __st;
+      if (chrono::from_stream(__is, __fmt, __st, __abbrev, __offset))
+ __tp = __detail::__round<_Duration>(file_clock::from_sys(__st));
+      return __is;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration>
+    inline basic_ostream<_CharT, _Traits>&
+    operator<<(basic_ostream<_CharT, _Traits>& __os,
+        const local_time<_Duration>& __lt)
+    {
+      __os << sys_time<_Duration>{__lt.time_since_epoch()};
+      return __os;
+    }
+
+  template<typename _CharT, typename _Traits, typename _Duration,
+    typename _Alloc = allocator<_CharT>>
+    basic_istream<_CharT, _Traits>&
+    from_stream(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+  local_time<_Duration>& __tp,
+  basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+  minutes* __offset = nullptr)
+    {
+      using __format::_ChronoParts;
+      auto __need = _ChronoParts::_Year | _ChronoParts::_Month
+      | _ChronoParts::_Day | _ChronoParts::_TimeOfDay;
+      __detail::_Parser_t<_Duration> __p(__need);
+      if (__p(__is, __fmt, __abbrev, __offset))
+ {
+   days __d = __p._M_sys_days.time_since_epoch();
+   auto __t = local_days(__d) + __p._M_time;
+   __tp = __detail::__round<_Duration>(__t);
+ }
+      return __is;
+    }
+
+
+
+namespace __detail
+{
+
+
+  void from_stream() = delete;
+
+  template<typename _Parsable, typename _CharT,
+    typename _Traits = std::char_traits<_CharT>,
+    typename... _OptArgs>
+    concept __parsable = requires (basic_istream<_CharT, _Traits>& __is,
+       const _CharT* __fmt, _Parsable& __tp,
+       _OptArgs*... __args)
+    { from_stream(__is, __fmt, __tp, __args...); };
+
+  template<typename _Parsable, typename _CharT,
+    typename _Traits = char_traits<_CharT>,
+    typename _Alloc = allocator<_CharT>>
+    struct _Parse
+    {
+    private:
+      using __string_type = basic_string<_CharT, _Traits, _Alloc>;
+
+    public:
+      _Parse(const _CharT* __fmt, _Parsable& __tp,
+      basic_string<_CharT, _Traits, _Alloc>* __abbrev = nullptr,
+      minutes* __offset = nullptr)
+      : _M_fmt(__fmt), _M_tp(std::__addressof(__tp)),
+ _M_abbrev(__abbrev), _M_offset(__offset)
+      { }
+
+      _Parse(_Parse&&) = delete;
+      _Parse& operator=(_Parse&&) = delete;
+
+    private:
+      using __stream_type = basic_istream<_CharT, _Traits>;
+
+      const _CharT* const _M_fmt;
+      _Parsable* const _M_tp;
+      __string_type* const _M_abbrev;
+      minutes* const _M_offset;
+
+      friend __stream_type&
+      operator>>(__stream_type& __is, _Parse&& __p)
+      {
+ if (__p._M_offset)
+   from_stream(__is, __p._M_fmt, *__p._M_tp, __p._M_abbrev,
+        __p._M_offset);
+ else if (__p._M_abbrev)
+   from_stream(__is, __p._M_fmt, *__p._M_tp, __p._M_abbrev);
+ else
+   from_stream(__is, __p._M_fmt, *__p._M_tp);
+ return __is;
+      }
+
+      friend void operator>>(__stream_type&, _Parse&) = delete;
+      friend void operator>>(__stream_type&, const _Parse&) = delete;
+    };
+}
+
+  template<typename _CharT, __detail::__parsable<_CharT> _Parsable>
+    [[nodiscard, __gnu__::__access__(__read_only__, 1)]]
+    inline auto
+    parse(const _CharT* __fmt, _Parsable& __tp)
+    { return __detail::_Parse<_Parsable, _CharT>(__fmt, __tp); }
+
+  template<typename _CharT, typename _Traits, typename _Alloc,
+    __detail::__parsable<_CharT, _Traits> _Parsable>
+    [[nodiscard]]
+    inline auto
+    parse(const basic_string<_CharT, _Traits, _Alloc>& __fmt, _Parsable& __tp)
+    {
+      return __detail::_Parse<_Parsable, _CharT, _Traits>(__fmt.c_str(), __tp);
+    }
+
+  template<typename _CharT, typename _Traits, typename _Alloc,
+    typename _StrT = basic_string<_CharT, _Traits, _Alloc>,
+    __detail::__parsable<_CharT, _Traits, _StrT> _Parsable>
+    [[nodiscard, __gnu__::__access__(__read_only__, 1)]]
+    inline auto
+    parse(const _CharT* __fmt, _Parsable& __tp,
+   basic_string<_CharT, _Traits, _Alloc>& __abbrev)
+    {
+      auto __pa = std::__addressof(__abbrev);
+      return __detail::_Parse<_Parsable, _CharT, _Traits, _Alloc>(__fmt, __tp,
+          __pa);
+    }
+
+  template<typename _CharT, typename _Traits, typename _Alloc,
+    typename _StrT = basic_string<_CharT, _Traits, _Alloc>,
+    __detail::__parsable<_CharT, _Traits, _StrT> _Parsable>
+    [[nodiscard]]
+    inline auto
+    parse(const basic_string<_CharT, _Traits, _Alloc>& __fmt, _Parsable& __tp,
+   basic_string<_CharT, _Traits, _Alloc>& __abbrev)
+    {
+      auto __pa = std::__addressof(__abbrev);
+      return __detail::_Parse<_Parsable, _CharT, _Traits, _Alloc>(__fmt.c_str(),
+          __tp, __pa);
+    }
+
+  template<typename _CharT, typename _Traits = char_traits<_CharT>,
+    typename _StrT = basic_string<_CharT, _Traits>,
+    __detail::__parsable<_CharT, _Traits, _StrT, minutes> _Parsable>
+    [[nodiscard, __gnu__::__access__(__read_only__, 1)]]
+    inline auto
+    parse(const _CharT* __fmt, _Parsable& __tp, minutes& __offset)
+    {
+      return __detail::_Parse<_Parsable, _CharT>(__fmt, __tp, nullptr,
+       &__offset);
+    }
+
+  template<typename _CharT, typename _Traits, typename _Alloc,
+    typename _StrT = basic_string<_CharT, _Traits>,
+    __detail::__parsable<_CharT, _Traits, _StrT, minutes> _Parsable>
+    [[nodiscard]]
+    inline auto
+    parse(const basic_string<_CharT, _Traits, _Alloc>& __fmt, _Parsable& __tp,
+   minutes& __offset)
+    {
+      return __detail::_Parse<_Parsable, _CharT, _Traits, _Alloc>(__fmt.c_str(),
+          __tp, nullptr,
+          &__offset);
+    }
+
+  template<typename _CharT, typename _Traits, typename _Alloc,
+    typename _StrT = basic_string<_CharT, _Traits, _Alloc>,
+    __detail::__parsable<_CharT, _Traits, _StrT, minutes> _Parsable>
+    [[nodiscard, __gnu__::__access__(__read_only__, 1)]]
+    inline auto
+    parse(const _CharT* __fmt, _Parsable& __tp,
+   basic_string<_CharT, _Traits, _Alloc>& __abbrev, minutes& __offset)
+    {
+      auto __pa = std::__addressof(__abbrev);
+      return __detail::_Parse<_Parsable, _CharT, _Traits, _Alloc>(__fmt, __tp,
+          __pa,
+          &__offset);
+    }
+
+  template<typename _CharT, typename _Traits, typename _Alloc,
+    typename _StrT = basic_string<_CharT, _Traits, _Alloc>,
+    __detail::__parsable<_CharT, _Traits, _StrT, minutes> _Parsable>
+    [[nodiscard]]
+    inline auto
+    parse(const basic_string<_CharT, _Traits, _Alloc>& __fmt, _Parsable& __tp,
+   basic_string<_CharT, _Traits, _Alloc>& __abbrev, minutes& __offset)
+    {
+      auto __pa = std::__addressof(__abbrev);
+      return __detail::_Parse<_Parsable, _CharT, _Traits, _Alloc>(__fmt.c_str(),
+          __tp, __pa,
+          &__offset);
+    }
+
+
+  template<typename _Duration>
+  template<typename _CharT, typename _Traits, typename _Alloc>
+    basic_istream<_CharT, _Traits>&
+    __detail::_Parser<_Duration>::
+    operator()(basic_istream<_CharT, _Traits>& __is, const _CharT* __fmt,
+        basic_string<_CharT, _Traits, _Alloc>* __abbrev,
+        minutes* __offset)
+    {
+      using sentry = typename basic_istream<_CharT, _Traits>::sentry;
+      ios_base::iostate __err = ios_base::goodbit;
+      if (sentry __cerb(__is, true); __cerb)
+ {
+   locale __loc = __is.getloc();
+   auto& __tmget = std::use_facet<std::time_get<_CharT>>(__loc);
+   auto& __tmpunct = std::use_facet<std::__timepunct<_CharT>>(__loc);
+
+
+   struct _Stream_state
+   {
+     explicit
+     _Stream_state(basic_istream<_CharT, _Traits>& __i)
+     : _M_is(__i),
+       _M_flags(__i.flags(ios_base::skipws | ios_base::dec)),
+       _M_w(__i.width(0))
+     { }
+
+     ~_Stream_state()
+     {
+       _M_is.flags(_M_flags);
+       _M_is.width(_M_w);
+     }
+
+     _Stream_state(_Stream_state&&) = delete;
+
+     basic_istream<_CharT, _Traits>& _M_is;
+     ios_base::fmtflags _M_flags;
+     streamsize _M_w;
+   };
+
+   auto __is_failed = [](ios_base::iostate __e) {
+     return static_cast<bool>(__e & ios_base::failbit);
+   };
+
+
+
+   auto __read_unsigned = [&] (int __n) {
+     return _S_read_unsigned(__is, __err, __n);
+   };
+
+
+
+   auto __read_signed = [&] (int __n) {
+     return _S_read_signed(__is, __err, __n);
+   };
+
+
+   auto __read_chr = [&__is, &__err] (_CharT __c) {
+     return _S_read_chr(__is, __err, __c);
+   };
+
+   using __format::_ChronoParts;
+   _ChronoParts __parts{};
+
+   const year __bad_y = --year::min();
+   const month __bad_mon(255);
+   const day __bad_day(255);
+   const weekday __bad_wday(255);
+   const hours __bad_h(-1);
+   const minutes __bad_min(-9999);
+   const seconds __bad_sec(-1);
+
+   year __y = __bad_y, __yy = __bad_y;
+   year __iso_y = __bad_y, __iso_yy = __bad_y;
+   month __m = __bad_mon;
+   day __d = __bad_day;
+   weekday __wday = __bad_wday;
+   hours __h = __bad_h, __h12 = __bad_h;
+   minutes __min = __bad_min;
+   _Duration __s = __bad_sec;
+   int __ampm = 0;
+   int __iso_wk = -1, __sunday_wk = -1, __monday_wk = -1;
+   int __century = -1;
+   int __dayofyear = -1;
+
+   minutes __tz_offset = __bad_min;
+   basic_string<_CharT, _Traits> __tz_abbr;
+
+   if ((_M_need & _ChronoParts::_TimeOfDay)
+  && (_M_need & _ChronoParts::_Year))
+     {
+
+
+
+       __h = hours(0);
+       __parts = _ChronoParts::_TimeOfDay;
+     }
+
+
+
+   _CharT __mod{};
+   unsigned __num = 0;
+   bool __is_flag = false;
+
+   constexpr bool __is_floating
+     = treat_as_floating_point_v<typename _Duration::rep>;
+# 3349 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 3
+   while (*__fmt)
+     {
+       _CharT __c = *__fmt++;
+       if (!__is_flag)
+  {
+    if (__c == '%')
+      __is_flag = true;
+    else if (std::isspace(__c, __loc))
+      std::ws(__is);
+    else if (!__read_chr(__c)) [[unlikely]]
+      break;
+
+    continue;
+  }
+
+
+       switch (__c)
+       {
+  case 'a':
+  case 'A':
+    if (__mod || __num) [[unlikely]]
+      __err = ios_base::failbit;
+    else
+      {
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 2, __fmt);
+        if (!__is_failed(__err))
+   __wday = weekday(__tm.tm_wday);
+      }
+    __parts |= _ChronoParts::_Weekday;
+    break;
+
+  case 'b':
+  case 'h':
+  case 'B':
+    if (__mod || __num) [[unlikely]]
+      __err = ios_base::failbit;
+    else
+      {
+
+
+
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 2, __fmt);
+        if (!__is_failed(__err))
+   __m = month(__tm.tm_mon + 1);
+      }
+    __parts |= _ChronoParts::_Month;
+    break;
+
+  case 'c':
+    if (__mod == 'O' || __num) [[unlikely]]
+      __err |= ios_base::failbit;
+    else
+      {
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 2 - (__mod == 'E'), __fmt);
+        if (!__is_failed(__err))
+   {
+     __y = year(__tm.tm_year + 1900);
+     __m = month(__tm.tm_mon + 1);
+     __d = day(__tm.tm_mday);
+     __h = hours(__tm.tm_hour);
+     __min = minutes(__tm.tm_min);
+     __s = seconds(__tm.tm_sec);
+   }
+      }
+    __parts |= _ChronoParts::_DateTime;
+    break;
+
+  case 'C':
+    if (!__mod) [[likely]]
+      {
+        auto __v = __read_signed(__num ? __num : 2);
+        if (!__is_failed(__err))
+   {
+     int __cmin = (int)year::min() / 100;
+     int __cmax = (int)year::max() / 100;
+     if (__cmin <= __v && __v <= __cmax)
+       __century = __v * 100;
+     else
+       __century = -2;
+   }
+      }
+    else if (__mod == 'E')
+      {
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 3, __fmt);
+        if (!__is_failed(__err))
+   __century = __tm.tm_year;
+      }
+    else [[unlikely]]
+      __err |= ios_base::failbit;
+
+    break;
+
+  case 'd':
+  case 'e':
+    if (!__mod) [[likely]]
+      {
+        auto __v = __read_unsigned(__num ? __num : 2);
+        if (!__is_failed(__err))
+   __d = day(__v);
+      }
+    else if (__mod == 'O')
+      {
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 3, __fmt);
+        if (!__is_failed(__err))
+   __d = day(__tm.tm_mday);
+      }
+    else [[unlikely]]
+      __err |= ios_base::failbit;
+    __parts |= _ChronoParts::_Day;
+    break;
+
+  case 'D':
+    if (__mod || __num) [[unlikely]]
+      __err |= ios_base::failbit;
+    else
+      {
+        auto __month = __read_unsigned(2);
+        __read_chr('/');
+        auto __day = __read_unsigned(2);
+        __read_chr('/');
+        auto __year = __read_unsigned(2);
+        if (__is_failed(__err))
+   break;
+        __y = year(__year + 1900 + 100 * int(__year < 69));
+        __m = month(__month);
+        __d = day(__day);
+        if (!year_month_day(__y, __m, __d).ok())
+   {
+     __y = __yy = __iso_y = __iso_yy = __bad_y;
+     __m = __bad_mon;
+     __d = __bad_day;
+     break;
+   }
+      }
+    __parts |= _ChronoParts::_Date;
+    break;
+
+  case 'F':
+    if (__mod) [[unlikely]]
+      __err |= ios_base::failbit;
+    else
+      {
+        auto __year = __read_signed(__num ? __num : 4);
+        __read_chr('-');
+        auto __month = __read_unsigned(2);
+        __read_chr('-');
+        auto __day = __read_unsigned(2);
+        if (__is_failed(__err))
+   break;
+        __y = year(__year);
+        __m = month(__month);
+        __d = day(__day);
+        if (!year_month_day(__y, __m, __d).ok())
+   {
+     __y = __yy = __iso_y = __iso_yy = __bad_y;
+     __m = __bad_mon;
+     __d = __bad_day;
+     break;
+   }
+      }
+    __parts |= _ChronoParts::_Date;
+    break;
+
+  case 'g':
+    if (__mod) [[unlikely]]
+      __err |= ios_base::failbit;
+    else
+      {
+        auto __val = __read_unsigned(__num ? __num : 2);
+        if (__val >= 0 && __val <= 99)
+   {
+     __iso_yy = year(__val);
+     if (__century == -1)
+       __century = 2000;
+   }
+        else
+   __iso_yy = __iso_y = __y = __yy = __bad_y;
+      }
+    __parts |= _ChronoParts::_Year;
+    break;
+
+  case 'G':
+    if (__mod) [[unlikely]]
+      __err |= ios_base::failbit;
+    else
+      __iso_y = year(__read_unsigned(__num ? __num : 4));
+    __parts |= _ChronoParts::_Year;
+    break;
+
+  case 'H':
+  case 'I':
+    if (__mod == 'E') [[unlikely]]
+      __err |= ios_base::failbit;
+    else if (__mod == 'O')
+      {
+# 3571 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 3
+        __err |= ios_base::failbit;
+
+      }
+    else
+      {
+        auto __val = __read_unsigned(__num ? __num : 2);
+        if (__c == 'I' && __val >= 1 && __val <= 12)
+   {
+     __h12 = hours(__val);
+     __h = __bad_h;
+   }
+        else if (__c == 'H' && __val >= 0 && __val <= 23)
+   {
+     __h = hours(__val);
+     __h12 = __bad_h;
+   }
+        else
+   {
+     if (_M_need & _ChronoParts::_TimeOfDay)
+       __err |= ios_base::failbit;
+     break;
+   }
+      }
+    __parts |= _ChronoParts::_TimeOfDay;
+    break;
+
+  case 'j':
+    if (__mod) [[unlikely]]
+      __err |= ios_base::failbit;
+    else if (_M_need == _ChronoParts::_TimeOfDay)
+      {
+        auto __val = __read_signed(__num ? __num : 3);
+        if (!__is_failed(__err))
+   {
+     __h = days(__val);
+     __parts |= _ChronoParts::_TimeOfDay;
+   }
+      }
+    else
+      {
+        __dayofyear = __read_unsigned(__num ? __num : 3);
+
+
+      }
+    break;
+
+  case 'm':
+    if (__mod == 'E') [[unlikely]]
+      __err |= ios_base::failbit;
+    else if (__mod == 'O')
+      {
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 2, __fmt);
+        if (!__is_failed(__err))
+   __m = month(__tm.tm_mon + 1);
+      }
+    else
+      {
+        auto __val = __read_unsigned(__num ? __num : 2);
+        if (__val >= 1 && __val <= 12)
+   __m = month(__val);
+        else
+   __m = __bad_mon;
+      }
+    __parts |= _ChronoParts::_Month;
+    break;
+
+  case 'M':
+    if (__mod == 'E') [[unlikely]]
+      __err |= ios_base::failbit;
+    else if (__mod == 'O')
+      {
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 2, __fmt);
+        if (!__is_failed(__err))
+   __min = minutes(__tm.tm_min);
+      }
+    else
+      {
+        auto __val = __read_unsigned(__num ? __num : 2);
+        if (0 <= __val && __val < 60)
+   __min = minutes(__val);
+        else
+   {
+     if (_M_need & _ChronoParts::_TimeOfDay)
+       __err |= ios_base::failbit;
+     break;
+   }
+      }
+    __parts |= _ChronoParts::_TimeOfDay;
+    break;
+
+  case 'p':
+    if (__mod || __num)
+      __err |= ios_base::failbit;
+    else
+      {
+
+
+        const _CharT* __ampms[2];
+        __tmpunct._M_am_pm(__ampms);
+        int __n = 0, __which = 3;
+        while (__which != 0)
+   {
+     auto __i = __is.peek();
+     if (_Traits::eq_int_type(__i, _Traits::eof()))
+       {
+         __err |= ios_base::eofbit | ios_base::failbit;
+         break;
+       }
+     __i = std::toupper(_Traits::to_char_type(__i), __loc);
+     if (__which & 1)
+       {
+         if (__i != std::toupper(__ampms[0][__n], __loc))
+    __which ^= 1;
+         else if (__ampms[0][__n + 1] == _CharT())
+    {
+      __which = 1;
+      (void) __is.get();
+      break;
+    }
+       }
+     if (__which & 2)
+       {
+         if (__i != std::toupper(__ampms[1][__n], __loc))
+    __which ^= 2;
+         else if (__ampms[1][__n + 1] == _CharT())
+    {
+      __which = 2;
+      (void) __is.get();
+      break;
+    }
+       }
+     if (__which)
+       (void) __is.get();
+     ++__n;
+   }
+        if (__which == 0 || __which == 3)
+   __err |= ios_base::failbit;
+        else
+   __ampm = __which;
+      }
+    break;
+
+  case 'r':
+    if (__mod || __num)
+      __err |= ios_base::failbit;
+    else
+      {
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 2, __fmt);
+        if (!__is_failed(__err))
+   {
+     __h = hours(__tm.tm_hour);
+     __min = minutes(__tm.tm_min);
+     __s = seconds(__tm.tm_sec);
+   }
+      }
+    __parts |= _ChronoParts::_TimeOfDay;
+    break;
+
+  case 'R':
+  case 'T':
+    if (__mod || __num) [[unlikely]]
+      {
+        __err |= ios_base::failbit;
+        break;
+      }
+    else
+      {
+        auto __val = __read_unsigned(2);
+        if (__val == -1 || __val > 23) [[unlikely]]
+   {
+     if (_M_need & _ChronoParts::_TimeOfDay)
+       __err |= ios_base::failbit;
+     break;
+   }
+        if (!__read_chr(':')) [[unlikely]]
+   break;
+        __h = hours(__val);
+
+        __val = __read_unsigned(2);
+        if (__val == -1 || __val > 60) [[unlikely]]
+   {
+     if (_M_need & _ChronoParts::_TimeOfDay)
+       __err |= ios_base::failbit;
+     break;
+   }
+        __min = minutes(__val);
+
+        if (__c == 'R')
+   {
+     __parts |= _ChronoParts::_TimeOfDay;
+     break;
+   }
+        else if (!__read_chr(':')) [[unlikely]]
+   break;
+      }
+    [[fallthrough]];
+
+  case 'S':
+    if (__mod == 'E') [[unlikely]]
+      __err |= ios_base::failbit;
+    else if (__mod == 'O')
+      {
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 3, __fmt);
+        if (!__is_failed(__err))
+   __s = seconds(__tm.tm_sec);
+      }
+    else if constexpr (_Duration::period::den == 1
+           && !__is_floating)
+      {
+        auto __val = __read_unsigned(__num ? __num : 2);
+        if (0 <= __val && __val <= 59) [[likely]]
+   __s = seconds(__val);
+        else
+   {
+     if (_M_need & _ChronoParts::_TimeOfDay)
+       __err |= ios_base::failbit;
+     break;
+   }
+      }
+    else
+      {
+        basic_stringstream<_CharT> __buf;
+        auto __digit = _S_try_read_digit(__is, __err);
+        if (__digit != -1)
+   {
+     __buf.put(_CharT('0') + __digit);
+     __digit = _S_try_read_digit(__is, __err);
+     if (__digit != -1)
+       __buf.put(_CharT('0') + __digit);
+   }
+
+        auto __i = __is.peek();
+        if (_Traits::eq_int_type(__i, _Traits::eof()))
+   __err |= ios_base::eofbit;
+        else
+   {
+     _CharT __dp = '.';
+     if (__loc != locale::classic())
+       {
+         auto& __np = use_facet<numpunct<_CharT>>(__loc);
+         __dp = __np.decimal_point();
+       }
+     _CharT __c = _Traits::to_char_type(__i);
+     if (__c == __dp)
+       {
+         (void) __is.get();
+         __buf.put('.');
+         int __prec
+    = hh_mm_ss<_Duration>::fractional_width;
+         do
+    {
+      __digit = _S_try_read_digit(__is, __err);
+      if (__digit != -1)
+        __buf.put(_CharT('0') + __digit);
+      else
+        break;
+    }
+         while (--__prec);
+       }
+   }
+
+        if (!__is_failed(__err)) [[likely]]
+   {
+     long double __val{};
+
+     string __str = std::move(__buf).str();
+     auto __first = __str.data();
+     auto __last = __first + __str.size();
+     using enum chars_format;
+     auto [ptr, ec] = std::from_chars(__first, __last,
+          __val, fixed);
+     if ((bool)ec || ptr != __last) [[unlikely]]
+       __err |= ios_base::failbit;
+     else
+
+
+
+       {
+         duration<long double> __fs(__val);
+         if constexpr (__is_floating)
+    __s = __fs;
+         else
+    __s = chrono::round<_Duration>(__fs);
+       }
+   }
+      }
+    __parts |= _ChronoParts::_TimeOfDay;
+    break;
+
+  case 'u':
+  case 'w':
+    if (__mod == 'E') [[unlikely]]
+      __err |= ios_base::failbit;
+    else if (__mod == 'O')
+      {
+        if (__c == 'w')
+   {
+     struct tm __tm{};
+     __tmget.get(__is, {}, __is, __err, &__tm,
+          __fmt - 3, __fmt);
+     if (!__is_failed(__err))
+       __wday = weekday(__tm.tm_wday);
+   }
+        else
+   __err |= ios_base::failbit;
+      }
+    else
+      {
+        const int __lo = __c == 'u' ? 1 : 0;
+        const int __hi = __lo + 6;
+        auto __val = __read_unsigned(__num ? __num : 1);
+        if (__lo <= __val && __val <= __hi)
+   __wday = weekday(__val);
+        else
+   {
+     __wday = __bad_wday;
+     break;
+   }
+      }
+    __parts |= _ChronoParts::_Weekday;
+    break;
+
+  case 'U':
+  case 'V':
+  case 'W':
+    if (__mod == 'E') [[unlikely]]
+      __err |= ios_base::failbit;
+    else if (__mod == 'O')
+      {
+        if (__c == 'V') [[unlikely]]
+   __err |= ios_base::failbit;
+        else
+   {
+
+
+   }
+      }
+    else
+      {
+        const int __lo = __c == 'V' ? 1 : 0;
+        const int __hi = 53;
+        auto __val = __read_unsigned(__num ? __num : 2);
+        if (__lo <= __val && __val <= __hi)
+   {
+     switch (__c)
+     {
+       case 'U':
+         __sunday_wk = __val;
+         break;
+       case 'V':
+         __iso_wk = __val;
+         break;
+       case 'W':
+         __monday_wk = __val;
+         break;
+     }
+   }
+        else
+   __iso_wk = __sunday_wk = __monday_wk = -1;
+      }
+
+    break;
+
+  case 'x':
+    if (__mod == 'O' || __num) [[unlikely]]
+      __err |= ios_base::failbit;
+    else
+      {
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 2 - (__mod == 'E'), __fmt);
+        if (!__is_failed(__err))
+   {
+     __y = year(__tm.tm_year + 1900);
+     __m = month(__tm.tm_mon + 1);
+     __d = day(__tm.tm_mday);
+   }
+      }
+    __parts |= _ChronoParts::_Date;
+    break;
+
+  case 'X':
+    if (__mod == 'O' || __num) [[unlikely]]
+      __err |= ios_base::failbit;
+    else
+      {
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 2 - (__mod == 'E'), __fmt);
+        if (!__is_failed(__err))
+   {
+     __h = hours(__tm.tm_hour);
+     __min = minutes(__tm.tm_min);
+     __s = seconds(__tm.tm_sec);
+   }
+      }
+    __parts |= _ChronoParts::_TimeOfDay;
+    break;
+
+  case 'y':
+    if (__mod) [[unlikely]]
+      {
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 3, __fmt);
+        if (!__is_failed(__err))
+   {
+     int __cent = __tm.tm_year < 2000 ? 1900 : 2000;
+     __yy = year(__tm.tm_year - __cent);
+     if (__century == -1)
+       __century = __cent;
+   }
+      }
+    else
+      {
+        auto __val = __read_unsigned(__num ? __num : 2);
+        if (__val >= 0 && __val <= 99)
+   {
+     __yy = year(__val);
+     if (__century == -1)
+       __century = __val < 69 ? 2000 : 1900;
+   }
+        else
+   __y = __yy = __iso_yy = __iso_y = __bad_y;
+      }
+    __parts |= _ChronoParts::_Year;
+    break;
+
+  case 'Y':
+    if (__mod == 'O') [[unlikely]]
+      __err |= ios_base::failbit;
+    else if (__mod == 'E')
+      {
+        struct tm __tm{};
+        __tmget.get(__is, {}, __is, __err, &__tm,
+      __fmt - 3, __fmt);
+        if (!__is_failed(__err))
+   __y = year(__tm.tm_year);
+      }
+    else
+      {
+        auto __val = __read_unsigned(__num ? __num : 4);
+        if (!__is_failed(__err))
+   __y = year(__val);
+      }
+    __parts |= _ChronoParts::_Year;
+    break;
+
+  case 'z':
+    if (__num) [[unlikely]]
+      __err |= ios_base::failbit;
+    else
+      {
+
+
+
+        auto __i = __is.peek();
+        if (_Traits::eq_int_type(__i, _Traits::eof()))
+   {
+     __err |= ios_base::eofbit | ios_base::failbit;
+     break;
+   }
+        _CharT __ic = _Traits::to_char_type(__i);
+        const bool __neg = __ic == _CharT('-');
+        if (__ic == _CharT('-') || __ic == _CharT('+'))
+   (void) __is.get();
+
+        int_least32_t __hh;
+        if (__mod)
+   {
+
+     __hh = __read_unsigned(2);
+   }
+        else
+   {
+
+     __hh = 10 * _S_try_read_digit(__is, __err);
+     __hh += _S_try_read_digit(__is, __err);
+   }
+
+        if (__is_failed(__err))
+   break;
+
+        __i = __is.peek();
+        if (_Traits::eq_int_type(__i, _Traits::eof()))
+   {
+     __err |= ios_base::eofbit;
+     __tz_offset = minutes(__hh * (__neg ? -60 : 60));
+     break;
+   }
+        __ic = _Traits::to_char_type(__i);
+
+        bool __read_mm = false;
+        if (__mod)
+   {
+     if (__ic == ::std::__format::_Widen<_CharT>(":", L":")[0])
+       {
+
+         (void) __is.get();
+         __read_mm = true;
+       }
+   }
+        else if (_CharT('0') <= __ic && __ic <= _CharT('9'))
+   {
+
+     __read_mm = true;
+   }
+
+        int_least32_t __mm = 0;
+        if (__read_mm)
+   {
+     __mm = 10 * _S_try_read_digit(__is, __err);
+     __mm += _S_try_read_digit(__is, __err);
+   }
+
+        if (!__is_failed(__err))
+   {
+     auto __z = __hh * 60 + __mm;
+     __tz_offset = minutes(__neg ? -__z : __z);
+   }
+      }
+    break;
+
+  case 'Z':
+    if (__mod || __num) [[unlikely]]
+      __err |= ios_base::failbit;
+    else
+      {
+        basic_string_view<_CharT> __x = ::std::__format::_Widen<_CharT>("_/-+", L"_/-+");
+        __tz_abbr.clear();
+        while (true)
+   {
+     auto __i = __is.peek();
+     if (!_Traits::eq_int_type(__i, _Traits::eof()))
+       {
+         _CharT __a = _Traits::to_char_type(__i);
+         if (std::isalnum(__a, __loc)
+        || __x.find(__a) != __x.npos)
+    {
+      __tz_abbr.push_back(__a);
+      (void) __is.get();
+      continue;
+    }
+       }
+     else
+       __err |= ios_base::eofbit;
+     break;
+   }
+        if (__tz_abbr.empty())
+   __err |= ios_base::failbit;
+      }
+    break;
+
+  case 'n':
+    if (__mod || __num) [[unlikely]]
+      __err |= ios_base::failbit;
+    else
+      {
+        _CharT __i = __is.peek();
+        if (_Traits::eq_int_type(__i, _Traits::eof()))
+   __err |= ios_base::eofbit | ios_base::failbit;
+        else if (std::isspace(_Traits::to_char_type(__i), __loc))
+   (void) __is.get();
+        else
+   __err |= ios_base::failbit;
+      }
+    break;
+
+  case 't':
+    if (__mod || __num) [[unlikely]]
+      __err |= ios_base::failbit;
+    else
+      {
+        _CharT __i = __is.peek();
+        if (_Traits::eq_int_type(__i, _Traits::eof()))
+   __err |= ios_base::eofbit;
+        else if (std::isspace(_Traits::to_char_type(__i), __loc))
+   (void) __is.get();
+      }
+    break;
+
+  case '%':
+    if (__mod || __num) [[unlikely]]
+      __err |= ios_base::failbit;
+    else
+      __read_chr('%');
+    break;
+
+  case 'O':
+  case 'E':
+    if (__mod || __num) [[unlikely]]
+      {
+        __err |= ios_base::failbit;
+        break;
+      }
+    __mod = __c;
+    continue;
+
+  default:
+    if (_CharT('1') <= __c && __c <= _CharT('9'))
+      {
+        if (!__mod) [[likely]]
+   {
+
+     auto __end = __fmt + _Traits::length(__fmt);
+     auto [__v, __ptr]
+       = __format::__parse_integer(__fmt - 1, __end);
+     if (__ptr) [[likely]]
+       {
+         __num = __v;
+         __fmt = __ptr;
+         continue;
+       }
+   }
+      }
+    __err |= ios_base::failbit;
+  }
+
+       if (__is_failed(__err)) [[unlikely]]
+  break;
+
+       __is_flag = false;
+       __num = 0;
+       __mod = _CharT();
+     }
+
+   if (__century >= 0)
+     {
+       if (__yy != __bad_y && __y == __bad_y)
+  __y = years(__century) + __yy;
+       if (__iso_yy != __bad_y && __iso_y == __bad_y)
+  __iso_y = years(__century) + __iso_yy;
+     }
+
+   bool __can_use_doy = false;
+   bool __can_use_iso_wk = false;
+   bool __can_use_sun_wk = false;
+   bool __can_use_mon_wk = false;
+
+
+   if (__y != __bad_y && __dayofyear >= 0)
+     {
+       __can_use_doy = true;
+       __parts |= _ChronoParts::_Date;
+     }
+   else if (__y != __bad_y && __wday != __bad_wday && __sunday_wk >= 0)
+     {
+       __can_use_sun_wk = true;
+       __parts |= _ChronoParts::_Date;
+     }
+   else if (__y != __bad_y && __wday != __bad_wday && __monday_wk >= 0)
+     {
+       __can_use_mon_wk = true;
+       __parts |= _ChronoParts::_Date;
+     }
+   else if (__iso_y != __bad_y && __wday != __bad_wday && __iso_wk > 0)
+     {
+
+       __can_use_iso_wk = true;
+       __parts |= _ChronoParts::_Date;
+     }
+
+   if (__is_failed(__err)) [[unlikely]]
+     ;
+   else if (__is_flag) [[unlikely]]
+     __err |= ios_base::failbit;
+   else if ((_M_need & __parts) == _M_need) [[likely]]
+     {
+# 4267 "C:/msys64/mingw64/include/c++/15.2.0/bits/chrono_io.h" 3
+       const bool __need_wday = _M_need & _ChronoParts::_Weekday;
+
+
+
+       const bool __need_time = _M_need & _ChronoParts::_TimeOfDay;
+
+       if (__need_wday && __wday != __bad_wday)
+  _M_wd = __wday;
+       else if (_M_need & _ChronoParts::_Date)
+  {
+
+
+    const bool __need_ymd = !__need_wday && !__need_time;
+
+    if ((_M_need & _ChronoParts::_Year && __y == __bad_y)
+       || (_M_need & _ChronoParts::_Month && __m == __bad_mon)
+       || (_M_need & _ChronoParts::_Day && __d == __bad_day))
+      {
+
+
+
+        if (__can_use_doy)
+   {
+     if ((0 < __dayofyear && __dayofyear <= 365)
+    || (__dayofyear == 366 && __y.is_leap()))
+       [[likely]]
+       {
+         _M_sys_days = sys_days(__y/January/1)
+           + days(__dayofyear - 1);
+         if (__need_ymd)
+    _M_ymd = year_month_day(_M_sys_days);
+       }
+     else
+       __err |= ios_base::failbit;
+   }
+        else if (__can_use_iso_wk)
+   {
+
+
+     if (__iso_wk == 53)
+       {
+
+
+         const sys_days __jan4(__iso_y/January/4);
+         weekday __wd1(__jan4 - days(3));
+         if (__wd1 != Thursday)
+    if (__wd1 != Wednesday || !__iso_y.is_leap())
+      __err |= ios_base::failbit;
+       }
+
+     if (!__is_failed(__err)) [[likely]]
+       {
+
+         sys_days __w(Thursday[1]/January/__iso_y);
+
+         __w -= Thursday - Monday;
+         __w += days(weeks(__iso_wk - 1));
+         __w += __wday - Monday;
+         _M_sys_days = __w;
+
+         if (__need_ymd)
+    _M_ymd = year_month_day(_M_sys_days);
+       }
+   }
+        else if (__can_use_sun_wk)
+   {
+
+     sys_days __wk1(__y/January/Sunday[1]);
+     _M_sys_days = __wk1 + weeks(__sunday_wk - 1)
+     + days(__wday.c_encoding());
+     _M_ymd = year_month_day(_M_sys_days);
+     if (_M_ymd.year() != __y) [[unlikely]]
+       __err |= ios_base::failbit;
+   }
+        else if (__can_use_mon_wk)
+   {
+
+     sys_days __wk1(__y/January/Monday[1]);
+     _M_sys_days = __wk1 + weeks(__monday_wk - 1)
+     + days(__wday.c_encoding() - 1);
+     _M_ymd = year_month_day(_M_sys_days);
+     if (_M_ymd.year() != __y) [[unlikely]]
+       __err |= ios_base::failbit;
+   }
+        else
+   __err |= ios_base::failbit;
+      }
+    else
+      {
+
+
+
+
+        if (_M_need & _ChronoParts::_Year)
+   {
+     if (!__y.ok()) [[unlikely]]
+       __err |= ios_base::failbit;
+   }
+        else if (__y == __bad_y)
+   __y = 1972y;
+
+        if (_M_need & _ChronoParts::_Month)
+   {
+     if (!__m.ok()) [[unlikely]]
+       __err |= ios_base::failbit;
+   }
+        else if (__m == __bad_mon)
+   __m = January;
+
+        if (_M_need & _ChronoParts::_Day)
+   {
+     if (__d < day(1) || __d > (__y/__m/last).day())
+       __err |= ios_base::failbit;
+   }
+        else if (__d == __bad_day)
+   __d = 1d;
+
+        if (year_month_day __ymd(__y, __m, __d); __ymd.ok())
+   {
+     _M_ymd = __ymd;
+     if (__need_wday || __need_time)
+       _M_sys_days = sys_days(_M_ymd);
+   }
+        else [[unlikely]]
+   __err |= ios_base::failbit;
+      }
+
+    if (__need_wday)
+      _M_wd = weekday(_M_sys_days);
+  }
+
+
+       if (__need_time)
+  {
+    if (__h == __bad_h && __h12 != __bad_h)
+      {
+        if (__ampm == 1)
+   __h = __h12 == hours(12) ? hours(0) : __h12;
+        else if (__ampm == 2)
+   __h = __h12 == hours(12) ? __h12 : __h12 + hours(12);
+        else [[unlikely]]
+   __err |= ios_base::failbit;
+      }
+
+    auto __t = _M_time.zero();
+    bool __ok = false;
+
+    if (__h != __bad_h)
+      {
+        __ok = true;
+        __t += __h;
+      }
+
+    if (__min != __bad_min)
+      {
+        __ok = true;
+        __t += __min;
+      }
+
+    if (__s != __bad_sec)
+      {
+        __ok = true;
+        __t += __s;
+        _M_is_leap_second = __s >= seconds(60);
+      }
+
+    if (__ok)
+      _M_time = __t;
+    else
+      __err |= ios_base::failbit;
+  }
+
+       if (!__is_failed(__err)) [[likely]]
+  {
+    if (__offset && __tz_offset != __bad_min)
+      *__offset = __tz_offset;
+    if (__abbrev && !__tz_abbr.empty())
+      *__abbrev = std::move(__tz_abbr);
+  }
+     }
+   else
+     __err |= ios_base::failbit;
+ }
+      if (__err)
+ __is.setstate(__err);
+      return __is;
+    }
+
+
+
+
+}
+
+
+}
+# 3379 "C:/msys64/mingw64/include/c++/15.2.0/chrono" 2 3
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/engine.h" 2
+
+
+
+
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/system.h" 1
+       
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/event.h" 1
+       
+
+
+
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/event.h"
+namespace Neon
+{
+    class Event
+    {
+    public:
+        virtual ~Event() = default;
+
+        void cancel()
+        {
+            canceled = true;
+        }
+
+        [[nodiscard]] bool isCanceled() const
+        {
+            return canceled;
+        }
+
+        template<typename... Types>
+        [[nodiscard]] bool isAny() const
+        {
+            return ( (dynamic_cast<const Types*>(this) != nullptr) || ... );
+        }
+    private:
+        bool canceled = false;
+    };
+
+    template <typename T>
+    concept DerivedFromEvent = std::derived_from<T, Event>;
+}
+# 3 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/system.h" 2
 
 namespace Neon
 {
-    void Camera::setAspectRatio(const float ratio)
+    class System
     {
-        if(aspectRatio != ratio)
+    public:
+        virtual ~System() = default;
+
+        virtual void preStartup() { }
+        virtual void startup() { }
+        virtual void postStartup() { }
+
+        virtual void shutdown() { }
+
+        virtual void preRender() { }
+        virtual void postRender() { }
+        virtual void render() { }
+
+        virtual void preUpdate() { }
+        virtual void postUpdate() { }
+        virtual void update() { }
+
+        virtual void event(Event* event) { }
+    };
+}
+# 8 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/core/engine.h" 2
+
+namespace Neon
+{
+    class EventManager;
+    class AssetManager;
+    class AudioManager;
+    class SceneManager;
+
+    struct EngineConfig
+    {
+        std::string engineResourcesPath;
+        std::string gameResourcesPath;
+        RHI::WindowCreationOptions windowOptions;
+    };
+
+    class Engine
+    {
+    public:
+        static void initialize(const EngineConfig &config);
+        static void run();
+
+        static void quit();
+
+        template <typename T, typename... Args>
+        static void registerSystem(Args&&... args)
         {
-            aspectRatio = ratio;
-            projectionDirty = true;
+            T* system = new T(std::forward<Args>(args)...);
+            registeredSystems.push_back(system);
         }
+
+        template <typename T>
+        static T* getSystem()
+        {
+            for (System* system : registeredSystems)
+            {
+                if (system && typeid(*system) == typeid(T))
+                {
+                    return static_cast<T*>(system);
+                }
+            }
+            return nullptr;
+        }
+
+        static EngineConfig getConfig();
+        static std::vector<System*> getSystems();
+
+        static EventManager& getEventManager();
+        static AssetManager& getAssetManager();
+        static AudioManager& getAudioManager();
+        static SceneManager& getSceneManager();
+
+        static float getDeltaTime();
+    private:
+        static Box<EventManager> eventManager;
+        static Box<AssetManager> assetManager;
+        static Box<AudioManager> audioManager;
+        static Box<SceneManager> sceneManager;
+
+        static std::vector<System*> registeredSystems;
+        static EngineConfig config;
+
+        static void shutdown();
+        static void startup();
+
+        static bool running;
+        static float deltaTime;
+    };
+}
+# 4 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/components/camera.cpp" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/graphicsSystem.h" 1
+       
+
+
+
+
+namespace Neon
+{
+class GraphicsSystem final : public System
+{
+public:
+    explicit GraphicsSystem(const RHI::WindowCreationOptions &windowOptions);
+    void preStartup() override;
+    void preUpdate() override;
+    void preRender() override;
+    void postRender() override;
+    void shutdown() override;
+
+    void drawTexture(const Rc<RHI::TextureView> &texture, const Rc<RHI::Sampler> &sampler) const;
+
+    [[nodiscard]] Rc<RHI::Device> getDevice() const { return m_device; }
+    [[nodiscard]] Rc<RHI::Window> getWindow() const { return m_window; }
+    [[nodiscard]] Rc<RHI::Swapchain> getSwapchain() const { return m_swapchain; }
+private:
+    uint32_t m_imageIndex{};
+
+    Rc<RHI::Device> m_device;
+    Rc<RHI::Window> m_window;
+    Rc<RHI::Swapchain> m_swapchain{};
+
+    Rc<RHI::Buffer> m_vertexBuffer{};
+    Rc<RHI::Buffer> m_indexBuffer{};
+    Rc<RHI::Pipeline> m_pipeline{};
+
+    std::vector<Rc<RHI::Framebuffer>> m_framebuffers{};
+};
+}
+# 5 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/src/graphics/components/camera.cpp" 2
+
+
+namespace Neon
+{
+
+    void Camera::setWidth(const uint32_t width)
+    {
+        if(this->width == width) return;
+
+        this->width = width;
+        projectionDirty = true;
+        fbDirty = true;
     }
 
-    float Camera::getAspectRatio() const
+    uint32_t Camera::getWidth() const
     {
-        return aspectRatio;
+        return width;
+    }
+
+    void Camera::setHeight(const uint32_t height)
+    {
+        if(this->height == height) return;
+
+        this->height = height;
+        projectionDirty = true;
+        fbDirty = true;
+    }
+
+    uint32_t Camera::getHeight() const
+    {
+        return height;
     }
 
     void Camera::setFov(const float fov)
     {
-        if(this->fov != fov)
-        {
-            this->fov = fov;
-            projectionDirty = true;
-        }
+        if(this->fov == fov) return;
+
+        this->fov = fov;
+        projectionDirty = true;
     }
 
     float Camera::getFov() const
@@ -97491,11 +131228,10 @@ namespace Neon
 
     void Camera::setNear(const float near)
     {
-        if(nearClip != near)
-        {
-            nearClip = near;
-            projectionDirty = true;
-        }
+        if(nearClip == near) return;
+
+        nearClip = near;
+        projectionDirty = true;
     }
 
     float Camera::getNear() const
@@ -97505,11 +131241,11 @@ namespace Neon
 
     void Camera::setFar(const float far)
     {
-        if(farClip != far)
-        {
-            farClip = far;
-            projectionDirty = true;
-        }
+        if(farClip == far) return;
+
+        farClip = far;
+        projectionDirty = true;
+
     }
 
     float Camera::getFar() const
@@ -97538,8 +131274,34 @@ namespace Neon
         return projectionMatrix;
     }
 
+    Rc<RHI::Framebuffer> Camera::getFramebuffer()
+    {
+        if(fbDirty)
+        {
+            updateFramebuffer();
+            fbDirty = false;
+        }
+
+        return framebuffer;
+    }
+
+    Rc<RHI::TextureView> Camera::getDepthTexture()
+    {
+        return depthView;
+    }
+
+    Rc<RHI::TextureView> Camera::getColorTexture()
+    {
+        return colorView;
+    }
+
     void Camera::updateProjectionMatrix()
     {
+        float aspectRatio = 1.0f;
+        if(width != 0 && height != 0)
+        {
+            aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+        }
         projectionMatrix = glm::perspective(
             glm::radians(fov),
             aspectRatio,
@@ -97550,5 +131312,35 @@ namespace Neon
         frustum.update(projectionMatrix, viewMatrix);
 
         projectionDirty = false;
+    }
+
+    void Camera::updateFramebuffer()
+    {
+        const Rc<RHI::Device> device = Engine::getSystem<GraphicsSystem>()->getDevice();
+
+        const RHI::TextureDescription depthDesc = RHI::TextureDescription::Texture2D(
+                width,
+                height,
+                RHI::PixelFormat::D32FloatS8Uint,
+                RHI::TextureUsage::DepthStencilTarget);
+
+        const Rc<RHI::Texture> depthTex = device->createTexture(depthDesc);
+
+        const auto depthViewDesc = RHI::TextureViewDescription(depthTex);
+        depthView = device->createTextureView(depthViewDesc);
+
+        const RHI::TextureDescription colDesc = RHI::TextureDescription::Texture2D(
+                width,
+                height,
+                RHI::PixelFormat::R8G8B8A8Unorm,
+                RHI::TextureUsage::ColorTarget);
+
+        const Rc<RHI::Texture> colTex = device->createTexture(colDesc);
+
+        const auto colViewDesc = RHI::TextureViewDescription(colTex);
+        colorView = device->createTextureView(colViewDesc);
+
+        const auto fbDesc = RHI::FramebufferDescription(depthView, colorView);
+        framebuffer = device->createFramebuffer(fbDesc);
     }
 }

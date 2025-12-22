@@ -29,7 +29,9 @@ build neonEngine/CMakeFiles/neonEngine.dir/src/graphics/components/camera.cpp.ob
 
 build neonEngine/CMakeFiles/neonEngine.dir/src/graphics/frustum.cpp.obj: dyndep
 
-build neonEngine/CMakeFiles/neonEngine.dir/src/graphics/guiSystem.cpp.obj: dyndep
+build neonEngine/CMakeFiles/neonEngine.dir/src/graphics/graphicsSystem.cpp.obj: dyndep
+
+build neonEngine/CMakeFiles/neonEngine.dir/src/graphics/imGuiSystem.cpp.obj: dyndep
 
 build neonEngine/CMakeFiles/neonEngine.dir/src/graphics/image.cpp.obj: dyndep
 
@@ -44,6 +46,12 @@ build neonEngine/CMakeFiles/neonEngine.dir/src/graphics/materialShader.cpp.obj: 
 build neonEngine/CMakeFiles/neonEngine.dir/src/graphics/mesh.cpp.obj: dyndep
 
 build neonEngine/CMakeFiles/neonEngine.dir/src/graphics/renderSystem.cpp.obj: dyndep
+
+build neonEngine/CMakeFiles/neonEngine.dir/src/graphics/windows/sceneGraph.cpp.obj: dyndep
+
+build neonEngine/CMakeFiles/neonEngine.dir/src/graphics/windows/statsWindow.cpp.obj: dyndep
+
+build neonEngine/CMakeFiles/neonEngine.dir/src/graphics/windows/viewportWindow.cpp.obj: dyndep
 
 build neonEngine/CMakeFiles/neonEngine.dir/src/input/input.cpp.obj: dyndep
 

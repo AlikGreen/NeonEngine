@@ -4186,6 +4186,47 @@ namespace Neon::RHI
     };
 }
 # 13 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendFactor.h" 1
+       
+
+
+namespace Neon::RHI
+{
+    enum class BlendFactor
+    {
+        One,
+        Zero,
+        SrcAlpha,
+        InvSrcAlpha,
+    };
+}
+# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/blendOp.h" 1
+       
+
+namespace Neon::RHI
+{
+    enum class BlendOp
+    {
+        Add,
+        Subtract,
+        RevSubtract,
+        Min,
+        Max
+    };
+}
+# 15 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
+# 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/enums/indexFormat.h" 1
+       
+
+namespace Neon::RHI
+{
+enum class IndexFormat
+{
+    UInt32, UInt16
+};
+}
+# 16 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
 # 1 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/input/keyCodes.h" 1
        
 # 1 "C:/msys64/mingw64/include/c++/15.2.0/cstdint" 1 3
@@ -4534,7 +4575,7 @@ enum class MouseButton
     Side1,
     Side2,
 };
-# 14 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
+# 17 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.h" 2
 
 namespace Neon::RHI
 {
@@ -4553,7 +4594,11 @@ public:
     static GLenum textureFilterCombineToGL(TextureFilter filter, MipmapFilter mipmapFilter);
     static GLenum pixelTypeToGL(PixelType type);
     static GLenum pixelLayoutToGL(PixelLayout layout);
-    static GLenum textureTypeToGLType(TextureType type);
+    static GLenum textureTypeToGL(TextureType type);
+    static GLenum blendFactorToGL(BlendFactor factor);
+    static GLenum blendOpToGL(BlendOp op);
+    static GLenum indexFormatToGL(IndexFormat format);
+    static uint32_t indexFormatToSize(IndexFormat format);
 };
 }
 # 2 "C:/Users/alikg/CLionProjects/NeonEngine/neonEngine/dependencies/neonrhi/src/implementations/opengl/convertOGL.cpp" 2
@@ -73304,7 +73349,7 @@ namespace Neon::RHI
         }
     }
 
-    GLenum ConvertOGL::textureTypeToGLType(const TextureType type)
+    GLenum ConvertOGL::textureTypeToGL(const TextureType type)
     {
         switch (type)
         {
@@ -73315,6 +73360,58 @@ namespace Neon::RHI
             case TextureType::Texture3D:
                 return 0x806F;
         }
+        return 0;
+    }
+
+    GLenum ConvertOGL::blendFactorToGL(const BlendFactor factor)
+    {
+        switch (factor)
+        {
+            case BlendFactor::Zero: return 0;
+            case BlendFactor::One: return 1;
+            case BlendFactor::SrcAlpha: return 0x0302;
+            case BlendFactor::InvSrcAlpha: return 0x0303;
+        }
+
+        return 1;
+    }
+
+    GLenum ConvertOGL::blendOpToGL(const BlendOp op)
+    {
+        switch (op)
+        {
+            case BlendOp::Add: return 0x8006;
+            case BlendOp::Subtract: return 0x800A;
+            case BlendOp::RevSubtract: return 0x800B;
+            case BlendOp::Min: return 0x8007;
+            case BlendOp::Max: return 0x8008;
+        }
+
+        return 0x8006;
+    }
+
+    GLenum ConvertOGL::indexFormatToGL(const IndexFormat format)
+    {
+        switch (format)
+        {
+            case IndexFormat::UInt16:
+                return 0x1403;
+            case IndexFormat::UInt32:
+                return 0x1405;
+        }
+        return 0x0500;
+    }
+
+    uint32_t ConvertOGL::indexFormatToSize(const IndexFormat format)
+    {
+        switch (format)
+        {
+            case IndexFormat::UInt16:
+                return 2;
+            case IndexFormat::UInt32:
+                return 4;
+        }
+
         return 0;
     }
 }
