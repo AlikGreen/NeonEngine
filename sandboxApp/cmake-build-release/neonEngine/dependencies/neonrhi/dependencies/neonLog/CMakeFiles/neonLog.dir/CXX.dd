@@ -1,7 +1,0 @@
-ninja_dyndep_version = 1.0
-build neonEngine/dependencies/neonrhi/dependencies/neonLog/CMakeFiles/neonLog.dir/src/debug.cpp.obj: dyndep
-
-build neonEngine/dependencies/neonrhi/dependencies/neonLog/CMakeFiles/neonLog.dir/src/streams/consoleStream.cpp.obj: dyndep
-
-build neonEngine/dependencies/neonrhi/dependencies/neonLog/CMakeFiles/neonLog.dir/src/streams/fileStream.cpp.obj: dyndep
-
