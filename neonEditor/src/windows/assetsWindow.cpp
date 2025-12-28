@@ -5,15 +5,13 @@
 #include <util/file.h>
 
 #include "asset/assetManager.h"
+#include "graphics/imGuiSystem.h"
 #include "graphics/loaders/prefabLoaderGLB.h"
 
 struct ImRect;
 
 namespace Neon::Editor
 {
-    AssetsWindow::AssetsWindow()
-        : ImGuiWindow("Assets") {  }
-
     void AssetsWindow::consumeFileDropInRect(const ImRect& rect)
     {
         AssetManager& assetManager = Engine::getAssetManager();
@@ -27,7 +25,11 @@ namespace Neon::Editor
                 std::string ext = File::getFileExtension(path);
 
                 if(ext == "glb")
+                {
                     assetManager.loadAsset<PrefabLoaderGLB>(path);
+                    Log::info("Loaded Prefab {}", path);
+                }
+
             }
         }
 
@@ -44,6 +46,8 @@ namespace Neon::Editor
 
         static AssetHandle hoveredAssetId = 0;
         static double hoverStartTime = 0.0;
+
+        ImGui::Begin("Assets");
 
         assetFilter.Draw("Search", 220.0f);
         ImGui::Separator();
@@ -81,6 +85,7 @@ namespace Neon::Editor
         }
 
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(padding * 0.5f, padding * 0.5f));
+        ImGui::PushFont(ImGuiSystem::smallFont);
 
         if (ImGui::BeginTable("##assetGridTable", columns, ImGuiTableFlags_SizingFixedFit))
         {
@@ -183,14 +188,17 @@ namespace Neon::Editor
 
             ImGui::EndTable();
         }
+        ImGui::PopFont();
 
         ImGui::PopStyleVar();
         ImGui::EndChild();
+        ImGui::End();
     }
 
 
-    void AssetsWindow::dropFile(const char *filepath)
+    void AssetsWindow::dropFile(std::string filepath)
     {
         droppedPaths.emplace_back(filepath);
+        Log::info("Dropped file: {}", filepath);
     }
 }

@@ -3,17 +3,12 @@
 #include <unordered_set>
 #include <neonECS/neonECS.h>
 
-#include "graphics/windows/imGuiWindow.h"
-
 namespace Neon::Editor
 {
-class SceneGraphWindow final : public ImGuiWindow
+class SceneGraphWindow final
 {
 public:
-    SceneGraphWindow();
-
-    void render() override;
-
+    void render();
     std::optional<ECS::Entity> getSelectedEntity();
 private:
     void buildChildrenMap();

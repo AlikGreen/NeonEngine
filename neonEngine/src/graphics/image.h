@@ -11,10 +11,7 @@ class Image
 public:
     Image(const Rc<RHI::Texture>& texture, const Rc<RHI::Sampler>& sampler);
 
-    [[nodiscard]] Rc<RHI::Texture> getTexture() const;
-    [[nodiscard]] Rc<RHI::Sampler> getSampler() const;
-private:
-    AssetRef<Rc<RHI::Texture>> textureHandle;
-    AssetRef<Rc<RHI::Sampler>> samplerHandle;
+    AssetRef<Rc<RHI::Texture>> texture;
+    AssetRef<Rc<RHI::Sampler>> sampler;
 };
 }

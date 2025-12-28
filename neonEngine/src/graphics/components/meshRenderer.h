@@ -1,16 +1,16 @@
 #pragma once
-#include "material.h"
 #include "asset/assetRef.h"
+#include "graphics/materialShader.h"
 #include "graphics/mesh.h"
 
 namespace Neon
 {
 struct MeshRenderer
 {
-    std::vector<AssetRef<Material>> materials{};
+    std::vector<AssetRef<MaterialShader>> materials{};
     AssetRef<Mesh> mesh{};
 
-    void setMaterial(const AssetRef<Material> material)
+    void setMaterial(const AssetRef<MaterialShader> material)
     {
         if(materials.empty())
             materials.push_back(material);
@@ -18,7 +18,7 @@ struct MeshRenderer
             materials[0] = material;
     }
 
-    AssetRef<Material> getMaterial() const
+    AssetRef<MaterialShader> getMaterial() const
     {
         if(materials.empty()) return nullptr;
         return materials[0];

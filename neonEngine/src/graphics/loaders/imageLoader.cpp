@@ -24,13 +24,13 @@ namespace Neon
         else
             pixels = stbi_load(filePath.c_str(), &w, &h, &channels, 4);
 
-        Debug::ensure(pixels != nullptr, "Failed to load image %s\n", stbi_failure_reason());
+        Debug::ensure(pixels != nullptr, "Failed to load image {}\n", stbi_failure_reason());
         const auto& device = Engine::getSystem<GraphicsSystem>()->getDevice();
 
         RHI::TextureDescription texDesc{};
         texDesc.width = w;
         texDesc.height = h;
-        texDesc.format = getOptimalFormat(ext, channels);
+        texDesc.format = getOptimalFormat(ext, 4);
 
         const auto texture = device->createTexture(texDesc);
 
@@ -38,6 +38,8 @@ namespace Neon
 
         uploadDesc.data = pixels;
         uploadDesc.pixelType = getPixelTypeFromExtension(ext);
+        uploadDesc.width = w;
+        uploadDesc.height = h;
 
         const auto cl = device->createCommandList();
 

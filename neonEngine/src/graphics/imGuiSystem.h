@@ -5,46 +5,40 @@
 #include "imgui/imGuiController.h"
 #include "core/system.h"
 #include "imgui/imGuiConfig.h"
-#include "windows/imGuiWindow.h"
 
 namespace Neon
 {
-class ImGuiSystem final : public System
+class ImGuiSystem final : public System, Log::Stream
 {
 public:
+    ImGuiSystem();
+
     void preStartup() override;
     void update() override;
     void render() override;
 
-    template<typename T, typename ...Args>
-    requires std::is_base_of_v<ImGuiWindow, T>
-    Rc<T> registerWindow(Args&&... args)
-    {
-        Rc<T> window = makeRc<T>(std::forward<Args>(args)...);
-        m_windows.push_back(window);
-        return window;
-    }
-
-    template<typename T>
-    requires std::is_base_of_v<ImGuiWindow, T>
-    [[nodiscard]] Rc<T> getWindow() const
-    {
-        for (const Rc<ImGuiWindow>& window : m_windows)
-        {
-            if (Rc<T> casted = std::dynamic_pointer_cast<T>(window))
-            {
-                return casted;
-            }
-        }
-        return {};
-    }
-
-    static void drawDockSpace();
+    void addRenderCallback(const std::function<void()> &callback);
 
     void event(Event *event) override;
+
+    bool shouldDrawDockSpace = false;
+    bool shouldDrawConsole = false;
+    bool shouldDrawStats = false;
+
+    void handle(std::string formattedMsg, std::string rawMsg, Level level) override;
+
+    static ImFont* headingFont;
+    static ImFont* subheadingFont;
+    static ImFont* regularFont;
+    static ImFont* smallFont;
 private:
-    std::vector<Rc<ImGuiWindow>> m_windows;
-    Box<RHI::ImGuiController> m_imGuiController;
+    static void drawDockSpace();
+    void drawConsole();
+
+    std::vector<std::pair<Level, std::string>> consoleMessages{};
+    std::vector<std::function<void()>> renderCallbacks{};
+
+    Box<RHI::ImGuiController> m_imGuiController{};
     Rc<RHI::Device> m_device{};
     Rc<RHI::Window> m_window{};
 
@@ -59,6 +53,6 @@ private:
     size_t m_fps = 0;
     float m_frameTime = 0;
     size_t m_frameCount = 0;
-    std::chrono::time_point<std::chrono::high_resolution_clock> m_frameCountStart;
+    std::chrono::time_point<std::chrono::high_resolution_clock> m_frameCountStart{};
 };
 }

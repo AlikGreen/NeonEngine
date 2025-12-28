@@ -9,7 +9,6 @@
 // Components
 #include "graphics/components/meshRenderer.h"
 #include "graphics/components/camera.h"
-#include "graphics/components/material.h"
 #include "graphics/components/pointLight.h"
 
 #include "asset/assetManager.h"

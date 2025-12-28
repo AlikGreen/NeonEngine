@@ -32,25 +32,25 @@ namespace Neon
         static T& registerSystem(Args&&... args)
         {
             T* system = new T(std::forward<Args>(args)...);
-            registeredSystems.push_back(system);
+            registeredSystems.push_back(Box<T>(system));
             return *system;
         }
 
         template <typename T>
         static T* getSystem()
         {
-            for (System* system : registeredSystems)
+            for (const auto& system : registeredSystems)
             {
-                if (system && typeid(*system) == typeid(T))
+                if (system != nullptr && typeid(*system) == typeid(T))
                 {
-                    return static_cast<T*>(system);
+                    return static_cast<T*>(system.get());
                 }
             }
             return nullptr;
         }
 
         static EngineConfig getConfig();
-        static std::vector<System*> getSystems();
+        static const std::vector<Box<System>>& getSystems();
 
         static EventManager& getEventManager();
         static AssetManager& getAssetManager();
@@ -64,7 +64,7 @@ namespace Neon
         static Box<AudioManager> audioManager;
         static Box<SceneManager> sceneManager;
 
-        static std::vector<System*> registeredSystems;
+        static std::vector<Box<System>> registeredSystems;
         static EngineConfig config;
 
         static void shutdown();

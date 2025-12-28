@@ -18,6 +18,7 @@ public:
 
     void drawTexture(const Rc<RHI::TextureView> &texture, const Rc<RHI::Sampler> &sampler) const;
 
+    [[nodiscard]] Rc<RHI::TextureView> getDefaultTexture() { return m_defaultTexture; }
     [[nodiscard]] Rc<RHI::Device> getDevice() const { return m_device; }
     [[nodiscard]] Rc<RHI::Window> getWindow() const { return m_window; }
     [[nodiscard]] Rc<RHI::Swapchain> getSwapchain() const { return m_swapchain; }
@@ -28,6 +29,7 @@ private:
     Rc<RHI::Window> m_window;
     Rc<RHI::Swapchain> m_swapchain{};
 
+    Rc<RHI::TextureView> m_defaultTexture{};
     Rc<RHI::Buffer> m_vertexBuffer{};
     Rc<RHI::Buffer> m_indexBuffer{};
     Rc<RHI::Pipeline> m_pipeline{};

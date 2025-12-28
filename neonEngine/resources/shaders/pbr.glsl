@@ -36,13 +36,12 @@ const int MAX_POINT_LIGHTS = 32;
 
 layout(location = 0) out vec4 outColor;
 
-layout(std140, binding = 2) uniform MaterialUniforms
+layout(std140, binding = 2) uniform Properties
 {
-    float roughness;
-    float metanless;
-    vec4 albedo;
-    bool useAlbedoTexture;
-} material;
+    float matRoughness;
+    float matMetanless;
+    vec4 matAlbedo;
+} props;
 
 struct PointLight
 {
@@ -57,34 +56,20 @@ layout(std140, binding = 3) uniform PointLightUniforms
     PointLight[MAX_POINT_LIGHTS] lights;
 } pointLights;
 
-layout(std140, binding = 4) uniform DebugUniforms
-{
-    bool uvs;
-    bool normals;
-} debug;
 
 layout(binding = 1) uniform sampler2D albedoTexture;
+layout(binding = 2) uniform sampler2D metallicRoughnessTexture;
+layout(binding = 3) uniform sampler2D normalTexture;
+layout(binding = 4) uniform sampler2D occlusionTexture;
+layout(binding = 5) uniform sampler2D emmisionTexture;
 
 layout(location = 0) in vec3 vNormal;
 layout(location = 1) in vec2 vUV;
 layout(location = 2) in vec3 vFragPos;
 
 
-
 void main()
 {
-    if(debug.uvs)
-    {
-        outColor = vec4(vUV, 0.0f, 1.0f);
-        return;
-    }
-
-    if(debug.normals)
-    {
-        outColor = vec4(vNormal * 0.5 + 0.5, 1.0f);
-        return;
-    }
-
     vec3 diffuseLight = vec3(0.0);
 
     for(int i = 0; i < pointLights.count; i++)
@@ -98,12 +83,9 @@ void main()
 
     diffuseLight = max(diffuseLight, vec3(0.2));
 
-    vec4 albedo = material.albedo;
+    vec4 albedo = props.matAlbedo;
 
-    if(material.useAlbedoTexture)
-    {
-        albedo *= texture(albedoTexture, vUV);
-    }
+    albedo *= texture(albedoTexture, vUV);
 
     outColor = albedo*vec4(diffuseLight, 1.0);
 }

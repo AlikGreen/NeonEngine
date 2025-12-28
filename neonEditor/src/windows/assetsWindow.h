@@ -3,17 +3,14 @@
 #include <vector>
 
 #include "asset/assetHandle.h"
-#include "graphics/windows/imGuiWindow.h"
 
 namespace Neon::Editor
 {
-class AssetsWindow final : public ImGuiWindow
+class AssetsWindow final
 {
 public:
-    AssetsWindow();
-
-    void render() override;
-    void dropFile(const char* filepath);
+    void render();
+    void dropFile(std::string filepath);
 private:
     std::vector<std::string> droppedPaths;
     AssetHandle hoveredAssetId = 0;

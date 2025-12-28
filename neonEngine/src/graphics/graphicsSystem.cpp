@@ -50,7 +50,7 @@ namespace Neon
         swapchainDesc.window = m_window;
         m_swapchain = m_device->createSwapchain(swapchainDesc);
 
-        std::vector<glm::vec2> quadPositions =
+        const std::vector<glm::vec2> quadPositions =
         {
             {-1, -1 },
             { 1, -1 },
@@ -58,7 +58,7 @@ namespace Neon
             {-1,  1 }
         };
 
-        std::vector<uint32_t> quadIndices =
+        const std::vector<uint32_t> quadIndices =
         {
             0, 1, 2,
             0, 2, 3
@@ -98,9 +98,28 @@ namespace Neon
         m_vertexBuffer = m_device->createVertexBuffer();
         m_indexBuffer = m_device->createIndexBuffer();
 
+        constexpr uint32_t texSize = 1;
+        RHI::TextureDescription desc = RHI::TextureDescription::Texture2D(
+            texSize,
+            texSize,
+            RHI::PixelFormat::R8G8B8A8Unorm,
+            RHI::TextureUsage::Sampled
+        );
+
+        Rc<RHI::Texture> texture = m_device->createTexture(desc);
+
+        float pixel[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+
         Rc<RHI::CommandList> cl = m_device->createCommandList();
 
+        RHI::TextureUploadDescription uploadDesc{};
+        uploadDesc.width = texSize;
+        uploadDesc.height = texSize;
+        uploadDesc.data = pixel;
+
         cl->begin();
+
+        cl->updateTexture(texture, uploadDesc);
 
         cl->reserveBuffer(m_vertexBuffer, quadPositions.size() * sizeof(glm::vec2));
         cl->updateBuffer(m_vertexBuffer, quadPositions);
@@ -109,6 +128,9 @@ namespace Neon
         cl->updateBuffer(m_indexBuffer, quadIndices);
 
         m_device->submit(cl);
+
+        const auto viewDesc = RHI::TextureViewDescription(texture);
+        m_defaultTexture = m_device->createTextureView(viewDesc);
     }
 
     void GraphicsSystem::preUpdate()
@@ -117,44 +139,73 @@ namespace Neon
 
         EventManager& eventManager = Engine::getEventManager();
 
-        for(const auto event : events)
+        for(const auto& event : events)
         {
-            eventManager.queueEvent(new RhiWindowEvent(event));
+            eventManager.queueEvent<RhiWindowEvent>(event);
 
             switch (event.type)
             {
                 case RHI::Event::Type::Quit:
-                    eventManager.queueEvent(new QuitEvent());
-                break;
+                {
+                    eventManager.queueEvent<QuitEvent>();
+                    break;
+                }
                 case RHI::Event::Type::WindowResize:
-                    eventManager.queueEvent(new WindowResizeEvent(event.window.width, event.window.height));
-                    m_swapchain->resize(event.window.width, event.window.height);
+                {
+                    const auto& windowEvent = std::get<RHI::Event::WindowResizeEvent>(event.data);
+                    eventManager.queueEvent<WindowResizeEvent>(windowEvent.width, windowEvent.height);
+                    m_swapchain->resize(windowEvent.width, windowEvent.height);
                     updateSwapchainFramebuffers();
-                break;
+                    break;
+                }
                 case RHI::Event::Type::KeyDown:
-                    eventManager.queueEvent(new KeyDownEvent(event.key.key, event.key.repeat));
-                break;
+                {
+                    const auto& keyEvent = std::get<RHI::Event::KeyEvent>(event.data);
+                    eventManager.queueEvent<KeyDownEvent>(keyEvent.key, keyEvent.repeat);
+                    break;
+                }
                 case RHI::Event::Type::KeyUp:
-                    eventManager.queueEvent(new KeyUpEvent(event.key.key));
-                break;
+                {
+                    const auto& keyEvent = std::get<RHI::Event::KeyEvent>(event.data);
+                    eventManager.queueEvent<KeyUpEvent>(keyEvent.key);
+                    break;
+                }
                 case RHI::Event::Type::MouseButtonDown:
-                    eventManager.queueEvent(new MouseButtonDownEvent(event.button.button));
-                break;
+                {
+                    const auto& buttonEvent = std::get<RHI::Event::MouseButtonEvent>(event.data);
+                    eventManager.queueEvent<MouseButtonDownEvent>(buttonEvent.button);
+                    break;
+                }
                 case RHI::Event::Type::MouseButtonUp:
-                    eventManager.queueEvent(new MouseButtonUpEvent(event.button.button));
-                break;
+                {
+                    const auto& buttonEvent = std::get<RHI::Event::MouseButtonEvent>(event.data);
+                    eventManager.queueEvent<MouseButtonUpEvent>(buttonEvent.button);
+                    break;
+                }
                 case RHI::Event::Type::MouseMotion:
-                    eventManager.queueEvent(new MouseMoveEvent(event.motion.x, event.motion.y));
-                break;
+                {
+                    const auto& motionEvent = std::get<RHI::Event::MouseMotionEvent>(event.data);
+                    eventManager.queueEvent<MouseMoveEvent>(motionEvent.x, motionEvent.y);
+                    break;
+                }
                 case RHI::Event::Type::MouseWheel:
-                    eventManager.queueEvent(new MouseWheelEvent(event.wheel.x, event.wheel.y));
-                break;
+                {
+                    const auto& wheelEvent = std::get<RHI::Event::MouseWheelEvent>(event.data);
+                    eventManager.queueEvent<MouseWheelEvent>(wheelEvent.x, wheelEvent.y);
+                    break;
+                }
                 case RHI::Event::Type::TextInput:
-                    eventManager.queueEvent(new TextInputEvent(event.text.codepoint));
-                break;
+                {
+                    const auto& textEvent = std::get<RHI::Event::TextInputEvent>(event.data);
+                    eventManager.queueEvent<TextInputEvent>(textEvent.codepoint);
+                    break;
+                }
                 case RHI::Event::Type::DropFile:
-                    eventManager.queueEvent(new DropFileEvent(event.drop.path));
-                break;
+                {
+                    const auto& dropEvent = std::get<RHI::Event::DropFileEvent>(event.data);
+                    eventManager.queueEvent<DropFileEvent>(dropEvent.path);
+                    break;
+                }
             }
         }
     }

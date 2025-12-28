@@ -6,12 +6,13 @@
 #include "core/sceneManager.h"
 #include "events/rhiWindowEvent.h"
 #include "imgui/imGuiExtensions.h"
-#include "windows/consoleWindow.h"
-#include "windows/statsWindow.h"
-#include "windows/viewportWindow.h"
 
 namespace Neon
 {
+    ImFont* ImGuiSystem::headingFont{};
+    ImFont* ImGuiSystem::subheadingFont{};
+    ImFont* ImGuiSystem::regularFont{};
+    ImFont* ImGuiSystem::smallFont{};
 
     void setNeonImGuiStyle()
     {
@@ -19,7 +20,12 @@ namespace Neon
         NeonGui::LoadStyle(AssetManager::getFullPath("style.yaml"), style);
     }
 
-    void ImGuiSystem::preStartup()
+    ImGuiSystem::ImGuiSystem()
+        : Stream(Level::Trace)
+    {
+    }
+
+   void ImGuiSystem::preStartup()
     {
         m_graphicsSystem = Engine::getSystem<GraphicsSystem>();
         m_device = m_graphicsSystem->getDevice();
@@ -27,40 +33,62 @@ namespace Neon
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGuiIO &io = ImGui::GetIO();
+        ImGuiIO& io = ImGui::GetIO();
 
         io.Fonts->Clear();
 
-        io.FontDefault = io.Fonts->AddFontFromFileTTF(AssetManager::getFullPath(R"(fonts\JetBrainsMono-Regular.ttf)").c_str(), 22.0f);
-
-        ImFontConfig mergeCfg{};
-        mergeCfg.MergeMode = true;
-        mergeCfg.PixelSnapH = true;
-
-        // Include the full BMP (0x0020..0xFFFF) so all symbols from the font get baked.
-        // (Noto Sans Symbols 2 glyphs are in BMP; this captures them.)
         static constexpr ImWchar rangesAllBMP[] =
         {
             0x0020, 0xFFFF,
             0
         };
 
-        io.Fonts->AddFontFromFileTTF(
-            AssetManager::getFullPath(R"(fonts\NotoSansSymbols2-Regular.ttf)").c_str(),
-            22.0f,              // same size as base for consistent alignment
-            &mergeCfg,
-            rangesAllBMP
-        );
+        ImFontConfig baseCfg{};
+        baseCfg.PixelSnapH = true;
 
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // optional
+        ImFontConfig mergeCfg{};
+        mergeCfg.MergeMode = true;
+        mergeCfg.PixelSnapH = true;
+
+        auto addFontChecked = [&](const char* relPath, float size, ImFontConfig* cfg) -> ImFont*
+        {
+            const std::string fullPath = AssetManager::getFullPath(relPath);
+
+            std::error_code ec{};
+            if (!std::filesystem::exists(fullPath, ec) || std::filesystem::file_size(fullPath, ec) <= 100)
+            {
+                Log::error(std::string("Invalid font file: ") + fullPath);
+                return nullptr;
+            }
+
+            return io.Fonts->AddFontFromFileTTF(fullPath.c_str(), size, cfg, rangesAllBMP);
+        };
+
+        auto addFontWithSymbols = [&](const char* baseFontPath, float size) -> ImFont*
+        {
+            ImFont* font = addFontChecked(baseFontPath, size, &baseCfg);
+            if (font == nullptr)
+                return nullptr;
+
+            addFontChecked(R"(fonts\NotoSansSymbols2-Regular.ttf)", size, &mergeCfg);
+            return font;
+        };
+
+        headingFont = addFontWithSymbols(R"(fonts\SpaceGrotesk-SemiBold.ttf)", 26.0f);
+        subheadingFont = addFontWithSymbols(R"(fonts\SpaceGrotesk-Medium.ttf)", 24.0f);
+        regularFont = addFontWithSymbols(R"(fonts\SpaceGrotesk-Regular.ttf)", 22.0f);
+        smallFont = addFontWithSymbols(R"(fonts\JetBrainsMono-Regular.ttf)", 18.0f);
+
+        io.FontDefault = regularFont;
+
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-
         const RHI::TextureDescription colDesc = RHI::TextureDescription::Texture2D(
-                m_window->getWidth(),
-                m_window->getHeight(),
-                RHI::PixelFormat::R8G8B8A8Unorm,
-                RHI::TextureUsage::ColorTarget);
+            m_window->getWidth(),
+            m_window->getHeight(),
+            RHI::PixelFormat::R8G8B8A8Unorm,
+            RHI::TextureUsage::ColorTarget);
 
         const Rc<RHI::Texture> colTex = m_device->createTexture(colDesc);
 
@@ -78,19 +106,15 @@ namespace Neon
         m_colorTextureSampler = m_device->createSampler(samplerDesc);
 
         RHI::ImGuiController::InitInfo initInfo{};
-        initInfo.device      = m_device;
+        initInfo.device = m_device;
         initInfo.framebuffer = framebuffer;
-        initInfo.window      = m_window;
+        initInfo.window = m_window;
 
         m_imGuiController = makeBox<RHI::ImGuiController>(initInfo);
 
         m_frameCountStart = std::chrono::high_resolution_clock::now();
 
         setNeonImGuiStyle();
-
-        m_windows.push_back(makeRc<StatsWindow>());
-        m_windows.push_back(makeRc<ViewportWindow>());
-        m_windows.push_back(makeRc<ConsoleWindow>());
     }
 
     void ImGuiSystem::update()
@@ -119,16 +143,15 @@ namespace Neon
 
         m_imGuiController->newFrame();
 
-        drawDockSpace();
+        if(shouldDrawDockSpace)
+            drawDockSpace();
 
-        for(const auto& window : m_windows)
+        if(shouldDrawConsole)
+            drawConsole();
+
+        for(const auto& callback : renderCallbacks)
         {
-            if(!window->open) continue;
-            ImGui::Begin(window->getName().c_str(), &window->open);
-
-            window->render();
-
-            ImGui::End();
+            callback();
         }
 
         ImGui::ShowDemoWindow();
@@ -136,6 +159,17 @@ namespace Neon
         m_imGuiController->endFrame();
 
         m_graphicsSystem->drawTexture(m_colorTextureView, m_colorTextureSampler);
+    }
+
+    void ImGuiSystem::addRenderCallback(const std::function<void()> &callback)
+    {
+        renderCallbacks.push_back(callback);
+    }
+
+
+    void ImGuiSystem::handle(std::string formattedMsg, std::string rawMsg, Level level)
+    {
+        consoleMessages.emplace_back(level, rawMsg);
     }
 
     void ImGuiSystem::drawDockSpace()
@@ -161,6 +195,44 @@ namespace Neon
 
         ImGui::PopStyleColor(2);
 
+    }
+
+    void ImGuiSystem::drawConsole()
+    {
+        ImGui::Begin("Console");
+        std::optional<size_t> pendingDeleteIndex;
+
+        for (size_t i = 0; i < consoleMessages.size(); ++i)
+        {
+            const auto& [level, msg] = consoleMessages[i];
+
+            ImGui::PushID(static_cast<int>(i));
+
+            ImGui::Selectable(msg.c_str());
+
+            if (ImGui::BeginPopupContextItem("MessageContext"))
+            {
+                if (ImGui::MenuItem("Copy"))
+                {
+                    ImGui::SetClipboardText(msg.c_str());
+                }
+
+                if (ImGui::MenuItem("Delete"))
+                {
+                    pendingDeleteIndex = i;
+                }
+
+                ImGui::EndPopup();
+            }
+
+            ImGui::PopID();
+        }
+
+        if (pendingDeleteIndex.has_value())
+        {
+            consoleMessages.erase(consoleMessages.begin() + static_cast<std::ptrdiff_t>(*pendingDeleteIndex));
+        }
+        ImGui::End();
     }
 
     void ImGuiSystem::event(Event *event)

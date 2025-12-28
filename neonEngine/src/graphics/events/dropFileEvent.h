@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include "core/event.h"
 
 namespace Neon
@@ -6,10 +8,10 @@ namespace Neon
     class DropFileEvent final : public Event
     {
     public:
-        explicit DropFileEvent(const char* path) : path(path) { };
+        explicit DropFileEvent(std::string path) : path(std::move(path)) { };
 
-        [[nodiscard]] const char* getPath() const { return path; }
+        [[nodiscard]] std::string getPath() const { return path; }
     private:
-        const char* path;
+        std::string path;
     };
 }

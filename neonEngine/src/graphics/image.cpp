@@ -8,17 +8,7 @@ namespace Neon
     {
         AssetManager& assetManager = Engine::getAssetManager();
 
-        textureHandle = assetManager.addAsset(texture);
-        samplerHandle = assetManager.addAsset(sampler);
-    }
-
-    Rc<RHI::Texture> Image::getTexture() const
-    {
-        return *textureHandle;
-    }
-
-    Rc<RHI::Sampler> Image::getSampler() const
-    {
-        return *samplerHandle;
+        this->texture = assetManager.addAsset(texture);
+        this->sampler = assetManager.addAsset(sampler);
     }
 }

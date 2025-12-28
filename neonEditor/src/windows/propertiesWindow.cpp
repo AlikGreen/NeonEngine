@@ -1,6 +1,7 @@
 #include "propertiesWindow.h"
 
 #include "sceneGraphWindow.h"
+#include "../editorSystem.h"
 #include "core/engine.h"
 #include "core/components/tagComponent.h"
 #include "core/components/transformComponent.h"
@@ -12,19 +13,20 @@
 
 namespace Neon::Editor
 {
-    PropertiesWindow::PropertiesWindow()
-        : ImGuiWindow("Properties") {  }
-
     void PropertiesWindow::render()
     {
-        Rc<SceneGraphWindow> sceneGraphWindow = Engine::getSystem<ImGuiSystem>()->getWindow<SceneGraphWindow>();
+        ImGui::Begin("Properties");
+        SceneGraphWindow sceneGraphWindow = Engine::getSystem<EditorSystem>()->sceneGraphWindow;
 
-        std::optional<ECS::Entity> optEntity = sceneGraphWindow->getSelectedEntity();
+        std::optional<ECS::Entity> optEntity = sceneGraphWindow.getSelectedEntity();
 
         if(!optEntity.has_value())
+        {
+            ImGui::End();
             return;
+        }
 
-        ECS::Entity selected = optEntity.value();
+        const ECS::Entity selected = optEntity.value();
 
         ImGui::Spacing();
         if (selected.has<Tag>())
@@ -54,6 +56,7 @@ namespace Neon::Editor
         }
 
         drawComponentSpacing();
+        ImGui::End();
     }
 
     void PropertiesWindow::drawComponentSpacing()
@@ -63,13 +66,41 @@ namespace Neon::Editor
         ImGui::Spacing();
     }
 
+    void PropertiesWindow::drawComponentTitle(const char* text)
+    {
+        ImGui::PushFont(ImGuiSystem::headingFont);
+
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        const ImGuiStyle& style = ImGui::GetStyle();
+
+        const ImVec2 startPos = ImGui::GetCursorScreenPos();
+        const float width = ImGui::GetContentRegionAvail().x;
+
+        const float paddingX = style.FramePadding.x;
+        const float paddingY = style.FramePadding.y;
+
+        const float textHeight = ImGui::GetTextLineHeight();
+        const float height = textHeight + paddingY * 2.0f;
+
+        const ImVec2 min = startPos;
+        const auto max = ImVec2(startPos.x + width, startPos.y + height);
+
+        drawList->AddRectFilled(min, max, 0x22ffffff, style.FrameRounding);
+
+        ImGui::SetCursorScreenPos(ImVec2(startPos.x + paddingX, startPos.y + paddingY));
+        ImGui::TextUnformatted(text);
+
+        ImGui::SetCursorScreenPos(ImVec2(startPos.x, max.y));
+        ImGui::PopFont();
+        ImGui::Dummy({0.0f, 8.0f});
+    }
+
     template<>
     void PropertiesWindow::drawComponent<Transform>(ECS::Entity entity)
     {
         auto& transform = entity.get<Transform>();
 
-        ImGui::TextUnformatted("Transform");
-        ImGui::Spacing();
+        drawComponentTitle("Transform");
 
         PropertyGrid grid("##TransformGrid");
         if (!grid.isOpen())
@@ -85,11 +116,11 @@ namespace Neon::Editor
         }
         grid.endRow();
 
-        glm::vec3 rotation = transform.getRotation();
+        glm::vec3 rotation = degrees(transform.getRotation());
         grid.nextRow("Rotation");
-        if (ImGui::DragFloat3("##value", &rotation.x, 0.02f))
+        if (ImGui::DragFloat3("##value", &rotation.x, 0.1f))
         {
-            transform.setRotation(rotation);
+            transform.setRotation(radians(rotation));
         }
         grid.endRow();
 
@@ -107,8 +138,7 @@ namespace Neon::Editor
     {
         auto& tag = entity.get<Tag>();
 
-        ImGui::TextUnformatted("Tag");
-        ImGui::Spacing();
+        drawComponentTitle("Tag");
 
         PropertyGrid grid("##TagGrid");
         if (!grid.isOpen())
@@ -126,8 +156,7 @@ namespace Neon::Editor
     {
         auto& camera = entity.get<Camera>();
 
-        ImGui::TextUnformatted("Camera");
-        ImGui::Spacing();
+        drawComponentTitle("Camera");
 
         PropertyGrid grid("##CameraGrid");
         if (!grid.isOpen())
@@ -193,8 +222,7 @@ namespace Neon::Editor
     {
         auto& pointLight = entity.get<PointLight>();
 
-        ImGui::TextUnformatted("Point Light");
-        ImGui::Spacing();
+        drawComponentTitle("Point Light");
 
         PropertyGrid grid("##PointLightGrid");
         if (!grid.isOpen())
@@ -218,8 +246,7 @@ namespace Neon::Editor
     {
         const auto& meshRenderer = entity.get<MeshRenderer>();
 
-        ImGui::TextUnformatted("Mesh Renderer");
-        ImGui::Spacing();
+        drawComponentTitle("Mesh Renderer");
 
         PropertyGrid grid("##MeshRendererGrid");
         if (!grid.isOpen())
@@ -231,7 +258,7 @@ namespace Neon::Editor
         ImGui::TextUnformatted(meshRenderer.mesh ? "<Assigned>" : "<None>");
         grid.endRow();
 
-        const AssetRef<Material> material = meshRenderer.getMaterial();
+        const AssetRef<MaterialShader> material = meshRenderer.getMaterial();
 
         grid.nextRow("Material");
         ImGui::TextUnformatted(material ? "<Assigned>" : "<None>");

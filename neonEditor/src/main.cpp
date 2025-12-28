@@ -24,10 +24,7 @@ int main()
     Neon::Engine::registerSystem<Neon::CoreSystem>();
     Neon::Engine::registerSystem<Neon::GraphicsSystem>(config.windowOptions);
     Neon::Engine::registerSystem<Neon::RenderSystem>();
-    auto& imGuiSystem = Neon::Engine::registerSystem<Neon::ImGuiSystem>();
-    imGuiSystem.registerWindow<Neon::Editor::PropertiesWindow>();
-    imGuiSystem.registerWindow<Neon::Editor::SceneGraphWindow>();
-    imGuiSystem.registerWindow<Neon::Editor::AssetsWindow>();
+    Neon::Engine::registerSystem<Neon::ImGuiSystem>();
 
     Neon::Engine::registerSystem<Neon::InputSystem>();
 

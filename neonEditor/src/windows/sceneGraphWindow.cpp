@@ -12,11 +12,9 @@
 
 namespace Neon::Editor
 {
-    SceneGraphWindow::SceneGraphWindow()
-        : ImGuiWindow("Scene Graph") {  }
-
     void SceneGraphWindow::render()
     {
+        ImGui::Begin("Scene Graph");
         Scene& scene = Engine::getSceneManager().getCurrentScene();
 
         const float lineHeight = ImGui::GetFrameHeight();
@@ -74,6 +72,7 @@ namespace Neon::Editor
             scene.getRegistry().destroy(m_pendingDelete.value());
             m_pendingDelete = std::nullopt;
         }
+        ImGui::End();
     }
 
     std::optional<ECS::Entity> SceneGraphWindow::getSelectedEntity()

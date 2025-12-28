@@ -8,17 +8,14 @@
 #include "graphics/components/camera.h"
 #include "graphics/components/meshRenderer.h"
 #include "graphics/components/pointLight.h"
-#include "graphics/windows/imGuiWindow.h"
 
 
 namespace Neon::Editor
 {
-class PropertiesWindow final : public ImGuiWindow
+class PropertiesWindow final
 {
 public:
-    PropertiesWindow();
-
-    void render() override;
+    void render();
 private:
     template<typename T>
     void drawComponent(const ECS::Entity entity)
@@ -28,6 +25,7 @@ private:
     }
 
     static void drawComponentSpacing();
+    static void drawComponentTitle(const char *text);
 
     std::string m_renameString;
     std::optional<ECS::Entity> m_entityLastFrame;

@@ -21,7 +21,7 @@ namespace Neon
 
     bool Engine::running = false;
     float Engine::deltaTime = 0.0f;
-    std::vector<System*> Engine::registeredSystems = std::vector<System*>();
+    std::vector<Box<System>> Engine::registeredSystems{};
     EngineConfig Engine::config;
 
     void Engine::initialize(const EngineConfig &config)
@@ -44,13 +44,12 @@ namespace Neon
         running = false;
     }
 
-
     EngineConfig Engine::getConfig()
     {
         return config;
     }
 
-    std::vector<System *> Engine::getSystems()
+    const std::vector<Box<System>>& Engine::getSystems()
     {
         return registeredSystems;
     }
@@ -70,7 +69,7 @@ namespace Neon
         return *audioManager;
     }
 
-    SceneManager & Engine::getSceneManager()
+    SceneManager& Engine::getSceneManager()
     {
         return *sceneManager;
     }
@@ -91,32 +90,32 @@ namespace Neon
 
             eventManager->handleEvents();
 
-            for (const auto system: registeredSystems)
+            for (const auto& system: registeredSystems)
             {
                 system->preUpdate();
             }
 
-            for (const auto system: registeredSystems)
+            for (const auto& system: registeredSystems)
             {
                 system->update();
             }
 
-            for (const auto system: registeredSystems)
+            for (const auto& system: registeredSystems)
             {
                 system->postUpdate();
             }
 
-            for (const auto system: registeredSystems)
+            for (const auto& system: registeredSystems)
             {
                 system->preRender();
             }
 
-            for (const auto system: registeredSystems)
+            for (const auto& system: registeredSystems)
             {
                 system->render();
             }
 
-            for (const auto system: registeredSystems)
+            for (const auto& system: registeredSystems)
             {
                 system->postRender();
             }
@@ -132,17 +131,17 @@ namespace Neon
     void Engine::startup()
     {
 
-        for (const auto system: registeredSystems)
+        for (const auto& system: registeredSystems)
         {
             system->preStartup();
         }
 
-        for (const auto system: registeredSystems)
+        for (const auto& system: registeredSystems)
         {
             system->startup();
         }
 
-        for (const auto system: registeredSystems)
+        for (const auto& system: registeredSystems)
         {
             system->postStartup();
         }
@@ -150,7 +149,7 @@ namespace Neon
 
     void Engine::shutdown()
     {
-        for (const auto system: registeredSystems)
+        for (const auto& system: registeredSystems)
         {
             system->shutdown();
         }

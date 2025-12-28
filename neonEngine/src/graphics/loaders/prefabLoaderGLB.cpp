@@ -28,8 +28,8 @@ namespace Neon
         ECS::Entity rootEntity = prefab->scene.createEntity();
         rootEntity.emplace<PrefabComponent>();
 
-        auto materials = processMaterials(model);
-        const AssetRef<Material> defaultMaterial = Engine::getAssetManager().addAsset(new Material());
+        const auto materials = processMaterials(model);
+        const AssetRef<MaterialShader> defaultMaterial = Engine::getAssetManager().addAsset(MaterialShader::createPBR(), "Default Material");
         processNodes(model, *prefab, materials, defaultMaterial);
 
         return prefab.release();
@@ -88,7 +88,7 @@ namespace Neon
         return materials;
     }
 
-    void PrefabLoaderGLB::processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetHandle>& materials, const AssetRef<Material>& defaultMaterial)
+    void PrefabLoaderGLB::processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetHandle>& materials, const AssetRef<MaterialShader>& defaultMaterial)
     {
         for (const auto& node : model.nodes)
         {
@@ -98,7 +98,7 @@ namespace Neon
             const auto nMesh = createMesh(mesh, model);
             if (!nMesh) continue;
 
-            const auto meshHandle = Engine::getAssetManager().addAsset(nMesh);
+            const auto meshHandle = Engine::getAssetManager().addAsset(nMesh, mesh.name);
             ECS::Entity entity = prefab.scene.createEntity();
 
             setupTransform(entity, node);
@@ -128,7 +128,7 @@ namespace Neon
         }
     }
 
-    void PrefabLoaderGLB::setupMeshRenderer(ECS::Entity& entity, const AssetHandle meshHandle, const tinygltf::Mesh& mesh, const AssetRef<Material>& defaultMaterial, const std::vector<AssetHandle>& materials)
+    void PrefabLoaderGLB::setupMeshRenderer(ECS::Entity& entity, const AssetHandle meshHandle, const tinygltf::Mesh& mesh, const AssetRef<MaterialShader>& defaultMaterial, const std::vector<AssetHandle>& materials)
     {
         auto& meshRenderer = entity.emplace<MeshRenderer>();
         meshRenderer.mesh = meshHandle;
@@ -149,64 +149,83 @@ namespace Neon
 
     AssetHandle PrefabLoaderGLB::processMaterial(const tinygltf::Material& material, const tinygltf::Model& model)
     {
-        auto mat = std::make_unique<Material>();
-        mat->name = material.name.c_str();
+        auto mat = MaterialShader::createPBR();
+        // mat.name = material.name;
 
-        setupPBRProperties(mat.get(), material, model);
-        setupTextureProperties(mat.get(), material, model);
-        setupMaterialFlags(mat.get(), material);
+        setupPBRProperties(mat, material, model);
+        setupTextureProperties(mat, material, model);
+        setupMaterialFlags(mat, material);
 
-        return Engine::getAssetManager().addAsset(mat.release());
+        return Engine::getAssetManager().addAsset(mat, material.name);
     }
 
-    void PrefabLoaderGLB::setupPBRProperties(Material* mat, const tinygltf::Material& material, const tinygltf::Model& model)
+    void PrefabLoaderGLB::setupPBRProperties(MaterialShader& mat, const tinygltf::Material& material, const tinygltf::Model& model)
     {
+        const Rc<RHI::Device> device = Engine::getSystem<GraphicsSystem>()->getDevice();
         const auto& pbr = material.pbrMetallicRoughness;
 
         if (pbr.baseColorTexture.index >= 0)
         {
-            mat->albedoTexture = loadTexture(model.textures[pbr.baseColorTexture.index], model, true);
+            const AssetRef<Image> imageRef = loadTexture(model.textures[pbr.baseColorTexture.index], model, true);
+            Rc<RHI::TextureView> view = device->createTextureView(RHI::TextureViewDescription(*imageRef->texture));
+            mat.setTexture("albedoTexture", view);
+            mat.setSampler("albedoTexture", *imageRef->sampler);
         }
 
         const auto& baseColor = pbr.baseColorFactor;
-        mat->albedo = glm::vec4(baseColor[0], baseColor[1], baseColor[2], baseColor[3]);
-
-        mat->metalness = static_cast<float>(pbr.metallicFactor);
-        mat->roughness = static_cast<float>(pbr.roughnessFactor);
+        mat.setProperty("matAlbedo", glm::vec4(baseColor[0], baseColor[1], baseColor[2], baseColor[3]));
+        // mat.setProperty("matMetalness", static_cast<float>(pbr.metallicFactor));
+        mat.setProperty("matRoughness", static_cast<float>(pbr.roughnessFactor));
 
         if (pbr.metallicRoughnessTexture.index >= 0)
         {
-            mat->metallicRoughnessTexture = loadTexture(model.textures[pbr.metallicRoughnessTexture.index], model, false);
+            const AssetRef<Image> imageRef = loadTexture(model.textures[pbr.metallicRoughnessTexture.index], model, false);
+            Rc<RHI::TextureView> view = device->createTextureView(RHI::TextureViewDescription(*imageRef->texture));
+            mat.setTexture("metallicRoughnessTexture", view);
+            mat.setSampler("metallicRoughnessTexture", *imageRef->sampler);
         }
     }
 
-    void PrefabLoaderGLB::setupTextureProperties(Material* mat, const tinygltf::Material& material, const tinygltf::Model& model)
+    void PrefabLoaderGLB::setupTextureProperties(MaterialShader& mat, const tinygltf::Material& material, const tinygltf::Model& model)
     {
+        const Rc<RHI::Device> device = Engine::getSystem<GraphicsSystem>()->getDevice();
+
         if (material.normalTexture.index >= 0)
         {
-            mat->normalTextureStrength = static_cast<float>(material.normalTexture.scale);
-            mat->normalTexture = loadTexture(model.textures[material.normalTexture.index], model, false);
+            const AssetRef<Image> imageRef = loadTexture(model.textures[material.normalTexture.index], model, false);
+            Rc<RHI::TextureView> view = device->createTextureView(RHI::TextureViewDescription(*imageRef->texture));
+            mat.setTexture("normalTexture", view);
+            mat.setSampler("normalTexture", *imageRef->sampler);
+
+            // mat.setProperty("normalTextureStrength", static_cast<float>(material.normalTexture.scale));
         }
 
         if (material.occlusionTexture.index >= 0)
         {
-            mat->occlusionTextureStrength = static_cast<float>(material.occlusionTexture.strength);
-            mat->occlusionTexture = loadTexture(model.textures[material.occlusionTexture.index], model, false);
+            const AssetRef<Image> imageRef = loadTexture(model.textures[material.occlusionTexture.index], model, false);
+            Rc<RHI::TextureView> view = device->createTextureView(RHI::TextureViewDescription(*imageRef->texture));
+            mat.setTexture("occlusionTexture", view);
+            mat.setSampler("occlusionTexture", *imageRef->sampler);
+
+            mat.setProperty("occlusionTextureStrength", static_cast<float>(material.occlusionTexture.strength));
         }
 
         if (material.emissiveTexture.index >= 0)
         {
-            mat->emissionTexture = loadTexture(model.textures[material.emissiveTexture.index], model, false);
+            const AssetRef<Image> imageRef = loadTexture(model.textures[material.emissiveTexture.index], model, false);
+            Rc<RHI::TextureView> view = device->createTextureView(RHI::TextureViewDescription(*imageRef->texture));
+            mat.setTexture("emissionTexture", view);
+            mat.setSampler("emissionTexture", *imageRef->sampler);
         }
 
-        const auto& emissive = material.emissiveFactor;
-        mat->emission = glm::vec3(emissive[0], emissive[1], emissive[2]);
+        const auto& emission = material.emissiveFactor;
+        // mat.setProperty("emission", glm::vec3(emission[0], emission[1], emission[2]));
     }
 
-    void PrefabLoaderGLB::setupMaterialFlags(Material* mat, const tinygltf::Material& material)
+    void PrefabLoaderGLB::setupMaterialFlags(MaterialShader& mat, const tinygltf::Material& material)
     {
-        mat->alphaCutoff = static_cast<float>(material.alphaCutoff);
-        mat->doubleSided = material.doubleSided;
+        // mat.setProperty("alphaCutoff", static_cast<float>(material.alphaCutoff));
+        // mat.setProperty<int>("doubleSided", material.doubleSided);
     }
 
     RHI::TextureFilter convertGLTFFilter(const int gltfFilter)
@@ -320,8 +339,8 @@ namespace Neon
         RHI::TextureUploadDescription uploadDescription{};
         uploadDescription.data = data.data();
         uploadDescription.pixelType = tinyGltfGetPixelType(image);
-        uploadDescription.size.x = image.width;
-        uploadDescription.size.y = image.height;
+        uploadDescription.width = image.width;
+        uploadDescription.height = image.height;
 
         const auto commandList = device->createCommandList();
 
@@ -330,7 +349,7 @@ namespace Neon
         commandList->generateMipmaps(tex);
         device->submit(commandList);
 
-        return assetManager.addAsset(Image(tex, sampler));
+        return assetManager.addAsset(Image(tex, sampler), texture.name);
     }
 
     Mesh* PrefabLoaderGLB::createMesh(const tinygltf::Mesh& mesh, const tinygltf::Model& model)
@@ -392,6 +411,7 @@ namespace Neon
         nMesh->setVertices(vertices);
         return nMesh.release();
     }
+
 
     std::vector<glm::vec3> PrefabLoaderGLB::extractVertexPositions(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
     {

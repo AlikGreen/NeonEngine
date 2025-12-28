@@ -1,5 +1,4 @@
 #pragma once
-#include <concepts>
 #include <vector>
 
 #include "event.h"
@@ -11,14 +10,15 @@ class EventManager
 public:
     EventManager() = default;
 
-    template <DerivedFromEvent T>
-    void queueEvent(T* event)
+    template<typename T, typename... Args>
+    requires(std::is_base_of_v<Event, T>)
+    void queueEvent(Args&&... args)
     {
-        events.push_back(event);
+        events.push_back(makeBox<T>(std::forward<Args>(args)...));
     }
 
     void handleEvents();
 private:
-    std::vector<Event*> events { };
+    std::vector<Box<Event>> events { };
 };
 }

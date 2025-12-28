@@ -5,7 +5,7 @@
 #include "core/prefab.h"
 #include "asset/assetHandle.h"
 #include "asset/assetLoader.h"
-#include "graphics/components/material.h"
+#include "graphics/materialShader.h"
 
 namespace Neon
 {
@@ -18,13 +18,13 @@ private:
 
     static bool loadModel(tinygltf::Model& model, const std::string& filePath);
     static std::vector<AssetHandle> processMaterials(const tinygltf::Model& model);
-    static void processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetHandle>& materials, const AssetRef<Material>& defaultMaterial);
+    static void processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetHandle>& materials, const AssetRef<MaterialShader>& defaultMaterial);
 
     static void setupTransform(ECS::Entity& entity, const tinygltf::Node& node);
-    static void setupMeshRenderer(ECS::Entity& entity, AssetHandle meshHandle, const tinygltf::Mesh& mesh, const AssetRef<Material>& defaultMaterial, const std::vector<AssetHandle>& materials);
-    static void setupPBRProperties(Material* mat, const tinygltf::Material& material, const tinygltf::Model& model);
-    static void setupTextureProperties(Material* mat, const tinygltf::Material& material, const tinygltf::Model& model);
-    static void setupMaterialFlags(Material* mat, const tinygltf::Material& material);
+    static void setupMeshRenderer(ECS::Entity& entity, AssetHandle meshHandle, const tinygltf::Mesh& mesh, const AssetRef<MaterialShader>& defaultMaterial, const std::vector<AssetHandle>& materials);
+    static void setupPBRProperties(MaterialShader& mat, const tinygltf::Material& material, const tinygltf::Model& model);
+    static void setupTextureProperties(MaterialShader& mat, const tinygltf::Material& material, const tinygltf::Model& model);
+    static void setupMaterialFlags(MaterialShader& mat, const tinygltf::Material& material);
 
     static AssetHandle processMaterial(const tinygltf::Material& material, const tinygltf::Model& model);
     static Mesh* createMesh(const tinygltf::Mesh &mesh, const tinygltf::Model &model);

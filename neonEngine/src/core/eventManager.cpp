@@ -8,20 +8,15 @@ namespace Neon
 {
     void EventManager::handleEvents()
     {
-        for(const auto event : events)
+        for(const auto& event : events)
         {
-            for (const auto system : std::ranges::reverse_view(Engine::getSystems()))
+            for (const auto& system : std::ranges::reverse_view(Engine::getSystems()))
             {
-                system->event(event);
+                system->event(event.get());
 
                 if(event->isCanceled())
                     break;
             }
-        }
-
-        for(const auto event : events)
-        {
-            delete event;
         }
 
         events.clear();

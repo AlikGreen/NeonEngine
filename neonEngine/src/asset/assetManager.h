@@ -16,13 +16,18 @@ class AssetManager
 {
 public:
     template<typename T>
-    AssetHandle loadAsset(const std::string& filePath)
+    AssetHandle loadAsset(const std::string& filepath, std::string name = "")
     {
-        const std::filesystem::path fullPath = getFullPath(filePath);
+        const std::filesystem::path fullPath = getFullPath(filepath);
+        if(pathAssetMap.contains(fullPath.string()))
+            return pathAssetMap.at(fullPath.string());
 
-        Debug::ensure(exists(fullPath), "File was not found\n{}", filePath);
+        Debug::ensure(exists(fullPath), "File was not found\n{}", filepath);
 
-        const std::string fileName = fullPath.filename().string();
+        if(name.empty())
+        {
+            name = fullPath.stem().string();
+        }
         const auto typeIndex = std::type_index(typeid(T));
 
         Debug::ensure(loaders.contains(typeIndex), "Cannot load object of type {}", typeid(T).name());
@@ -34,41 +39,42 @@ public:
         void* asset = assetLoader->load(fullPath.string());
 
         AssetHandle handle = AssetHandle::create();
-        assets.emplace(handle, AssetContainer { asset, typeIndex, fileName });
+        assets.emplace(handle, AssetContainer { asset, typeIndex, name });
         assetHandles.push_back(handle);
+        pathAssetMap.emplace(fullPath.string(), handle);
 
         return handle;
     }
 
     template<typename T> // requires (!std::is_const_v<T>)
-    AssetHandle addAsset(T* asset, std::string filename = "")
+    AssetHandle addAsset(T* asset, std::string name = "")
     {
         const auto typeIndex = std::type_index(typeid(T));
 
-        if(filename.empty())
+        if(name.empty())
         {
-            filename = typeIndex.name();
+            name = typeIndex.name();
         }
 
         AssetHandle handle = AssetHandle::create();
-        assets.emplace(handle, AssetContainer { asset, typeIndex, filename});
+        assets.emplace(handle, AssetContainer { asset, typeIndex, name});
         assetHandles.push_back(handle);
         return handle;
     }
 
     template<typename T>
-    AssetHandle addAsset(T asset, std::string filename = "")
+    AssetHandle addAsset(T asset, std::string name = "")
     {
         const auto typeIndex = std::type_index(typeid(T));
 
-        if(filename.empty())
+        if(name.empty())
         {
-            filename = typeIndex.name();
+            name = typeIndex.name();
         }
 
         AssetHandle handle = AssetHandle::create();
         T* heapAsset = new T(std::move(asset));  // Allocate on heap
-        assets.emplace(handle, AssetContainer { heapAsset, typeIndex, filename});
+        assets.emplace(handle, AssetContainer { heapAsset, typeIndex, name});
         assetHandles.push_back(handle);
         return handle;
     }
@@ -129,6 +135,7 @@ private:
     std::unordered_map<std::type_index, Box<AssetDeserializer>> deserializers;
     std::unordered_map<std::type_index, std::unordered_map<std::string, Rc<AssetLoader>>> loaders;
     std::vector<AssetHandle> assetHandles;
+    std::unordered_map<std::string, AssetHandle> pathAssetMap;
     std::unordered_map<AssetHandle, AssetContainer> assets;
 };
 }
