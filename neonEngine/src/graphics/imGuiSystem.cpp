@@ -84,22 +84,6 @@ namespace Neon
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-        const RHI::TextureDescription colDesc = RHI::TextureDescription::Texture2D(
-            m_window->getWidth(),
-            m_window->getHeight(),
-            RHI::PixelFormat::R8G8B8A8Unorm,
-            RHI::TextureUsage::ColorTarget);
-
-        const Rc<RHI::Texture> colTex = m_device->createTexture(colDesc);
-
-        const RHI::TextureViewDescription viewDesc(colTex);
-        m_colorTextureView = m_device->createTextureView(viewDesc);
-
-        RHI::FramebufferDescription framebufferDesc{};
-        framebufferDesc.colorTargets.push_back(m_colorTextureView);
-
-        const Rc<RHI::Framebuffer> framebuffer = m_device->createFramebuffer(framebufferDesc);
-
         RHI::SamplerDescription samplerDesc{};
         samplerDesc.wrapMode.x = RHI::TextureWrap::ClampToEdge;
         samplerDesc.wrapMode.y = RHI::TextureWrap::ClampToEdge;
@@ -107,7 +91,6 @@ namespace Neon
 
         RHI::ImGuiController::InitInfo initInfo{};
         initInfo.device = m_device;
-        initInfo.framebuffer = framebuffer;
         initInfo.window = m_window;
 
         m_imGuiController = makeBox<RHI::ImGuiController>(initInfo);
@@ -157,6 +140,14 @@ namespace Neon
         ImGui::ShowDemoWindow();
 
         m_imGuiController->endFrame();
+
+        const Rc<RHI::Texture> imGuiTexture = m_imGuiController->getFramebufferTexture();;
+        if(!m_imguiTexture || m_imguiTexture != imGuiTexture)
+        {
+            m_imguiTexture = imGuiTexture;
+            const auto viewDesc = RHI::TextureViewDescription(imGuiTexture);
+            m_colorTextureView = m_device->createTextureView(viewDesc);
+        }
 
         m_graphicsSystem->drawTexture(m_colorTextureView, m_colorTextureSampler);
     }

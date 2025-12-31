@@ -37,8 +37,8 @@ private:
     float nearClip = 0.1f;
     float farClip = 1000.0f;
 
-    uint32_t width  = 0;
-    uint32_t height = 0;
+    uint32_t width  = 1;
+    uint32_t height = 1;
 
     bool projectionDirty = true;
     bool fbDirty = true;

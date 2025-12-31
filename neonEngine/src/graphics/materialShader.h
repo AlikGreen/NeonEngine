@@ -7,13 +7,24 @@
 
 namespace Neon
 {
-
+struct MaterialDescription
+{
+    std::string name{};
+    AssetRef<Rc<RHI::Shader>> shader;
+    bool depthWrite{};
+    bool depthTest{};
+    bool blendEnabled{};
+    RHI::CullMode cullMode = RHI::CullMode::None;
+    RHI::BlendFactor srcColorBlendFactor = RHI::BlendFactor::One;
+    RHI::BlendFactor dstColorBlendFactor = RHI::BlendFactor::One;
+    RHI::BlendFactor srcAlphaBlendFactor = RHI::BlendFactor::One;
+    RHI::BlendFactor dstAlphaBlendFactor = RHI::BlendFactor::One;
+};
 
 class MaterialShader
 {
-
 public:
-    explicit MaterialShader(AssetRef<Rc<RHI::Shader>> shader);
+    explicit MaterialShader(const MaterialDescription& description);
 
     template<typename T>
     requires std::is_trivially_copyable_v<T>
@@ -72,9 +83,14 @@ public:
     void bindUniforms(const Rc<RHI::CommandList>& commandList);
 
     static MaterialShader createPBR();
+    static MaterialShader createEquirectangularSkybox();
 private:
+    std::string name;
+
     Rc<RHI::Device> device;
     Rc<RHI::Pipeline> pipeline;
+    Rc<RHI::TextureView> defaultTexture;
+    Rc<RHI::Sampler> defaultSampler;
 
     std::unordered_map<std::string, Rc<RHI::TextureView>> textures;
     std::unordered_map<std::string, Rc<RHI::Sampler>> samplers;

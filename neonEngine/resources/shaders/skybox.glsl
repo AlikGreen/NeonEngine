@@ -1,5 +1,3 @@
-#version 460 core
-
 #type vertex
 layout(location = 0) in vec2 inPosition;
 layout(location = 0) out vec3 vWorldDir;
@@ -26,23 +24,35 @@ void main()
 #type fragment
 layout(location = 0) out vec4 outColor;
 
-layout(binding = 0) uniform samplerCube skyboxTexture;
+layout(binding = 0) uniform sampler2D skyboxTexture;
 
 layout(location = 0) in vec3 vWorldDir;
 
+const float PI = 3.14159265359;
+
+vec2 dirToEquirectUv(vec3 dir)
+{
+    dir = normalize(dir);
+
+    float phi = atan(dir.z, dir.x);
+    float theta = asin(clamp(dir.y, -1.0, 1.0));
+
+    float u = phi / (2.0 * PI) + 0.5;
+    float v = 0.5 - (theta / PI);
+
+    return vec2(u, v);
+}
+
+
 void main()
 {
-    // 1. Normalize the interpolated direction
     vec3 dir = normalize(vWorldDir);
 
-    // 2. Sample HDR texture
-    vec3 envColor = texture(skyboxTexture, dir).rgb;
+    vec2 uv = dirToEquirectUv(dir);
+    vec3 envColor = texture(skyboxTexture, uv).rgb;
 
-    // 3. Tone Mapping (Reinhard)
     envColor = envColor / (envColor + vec3(1.0));
-
-    // 4. Gamma Correction
     envColor = pow(envColor, vec3(1.0 / 2.2));
 
-    outColor = vec4(1.0, 0.0, 0.0, 1.0);
+    outColor = vec4(envColor, 1.0);
 }

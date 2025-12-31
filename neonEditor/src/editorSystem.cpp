@@ -22,12 +22,12 @@ namespace Neon::Editor
         auto& scene = Engine::getSceneManager().getCurrentScene();
 
         AssetManager& assetManager = Engine::getAssetManager();
-        const AssetHandle modelHandle = assetManager.loadAsset<Prefab>("models/testScene.glb");
+        const AssetHandle modelHandle = assetManager.loadAsset<Prefab>("models/monkey.glb");
         auto& model = assetManager.getAsset<Prefab>(modelHandle);
 
         ECS::Entity modelEntity = scene.import(model);
         modelEntity.get<Tag>().name = "Imported model";
-        modelEntity.get<Transform>().setScale(glm::vec3(0.05f));
+        modelEntity.get<Transform>().setScale(glm::vec3(1.0f));
 
         // Player/Camera entity
         ECS::Entity cameraEntity = scene.createEntity("Main Camera");

@@ -42,6 +42,7 @@ private:
     Rc<RHI::Device> m_device{};
     Rc<RHI::Window> m_window{};
 
+    Rc<RHI::Texture> m_imguiTexture{};
     Rc<RHI::TextureView> m_colorTextureView{};
     Rc<RHI::Sampler> m_colorTextureSampler{};
 

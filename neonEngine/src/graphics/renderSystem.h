@@ -18,7 +18,7 @@ namespace Neon
 
     struct MeshUniforms
     {
-        glm::mat4 model;
+        glm::mat4 model{};
         Primitive primitives[64]{};
     };
 
@@ -49,12 +49,6 @@ namespace Neon
         alignas(16) PointLightUniform pointLights[32]{};
     };
 
-    struct EquirectParamsUniforms
-    {
-        int faceIndex;
-        int outSize;
-    };
-
     class RenderSystem final : public System
     {
     public:
@@ -64,35 +58,30 @@ namespace Neon
         void event(Event *event) override;
     private:
         void createSkyboxRenderPipeline();
-        void createEquirectToCubeMapPipeline();
 
-        void renderMesh(ECS::Entity entity, const MeshRenderer& meshRenderer);
-        void renderSubMesh(const MeshRenderer &meshRenderer, int materialIndex);
+        void renderMesh(const Rc<RHI::CommandList>& cl, ECS::Entity entity, const MeshRenderer& meshRenderer);
+        void renderSubMesh(const Rc<RHI::CommandList>& cl, const MeshRenderer &meshRenderer, int materialIndex);
 
         AssetRef<Rc<RHI::Texture>> m_skybox;
         Rc<RHI::Sampler> m_skyboxSampler;
 
-        AssetRef<Rc<RHI::Texture>> getOrCreateCubeMap(AssetRef<Rc<RHI::Texture>> equirectTexture) const;
         Rc<RHI::TextureView> getOrCreateTextureView(const AssetRef<Rc<RHI::Texture>>& texture) const;
         Rc<RHI::TextureView> getOrCreateTextureView(const AssetRef<Rc<RHI::Texture>>& texture, const RHI::TextureViewDescription& viewDesc) const;
 
         mutable std::unordered_map<AssetHandle, Rc<RHI::TextureView>> m_textureViewCache;
-        mutable std::unordered_map<AssetHandle, AssetRef<Rc<RHI::Texture>>> m_cubeMapCache;
+        mutable std::unordered_map<AssetHandle, Rc<RHI::TextureView>> m_cubeMapCache;
 
         GraphicsSystem* m_graphicsSystem{};
 
         Rc<RHI::Device> m_device{};
         Rc<RHI::Window> m_window{};
-        Rc<RHI::CommandList> m_commandList{};
 
         Rc<RHI::Pipeline> m_currentScenePipeline{};
         Rc<RHI::Pipeline> m_skyboxPipeline{};
-        Rc<RHI::Pipeline> m_equirectToCubeMapPipeline{}; // Compute
 
         Rc<RHI::Buffer> m_cameraUniformBuffer{};
         Rc<RHI::Buffer> m_modelUniformBuffer{};
         Rc<RHI::Buffer> m_pointLightsUniformBuffer{};
-        Rc<RHI::Buffer> m_equirectParamsBuffer{};
 
         Rc<RHI::Buffer> m_screenQuadVertexBuffer{};
         Rc<RHI::Buffer> m_screenQuadIndexBuffer{};

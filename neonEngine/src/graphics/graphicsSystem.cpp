@@ -20,7 +20,7 @@ namespace Neon
 {
     GraphicsSystem::GraphicsSystem(const RHI::WindowCreationOptions &windowOptions)
     {
-        m_window = Box<RHI::Window>(RHI::Window::createWindow(windowOptions));
+        m_window = RHI::Window::createWindow(windowOptions);
     }
 
     void GraphicsSystem::updateSwapchainFramebuffers()

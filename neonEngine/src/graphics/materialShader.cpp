@@ -11,10 +11,11 @@ namespace Neon
         glm::vec2 uv;
     };
 
-    MaterialShader::MaterialShader(const AssetRef<Rc<RHI::Shader>> shader)
+    MaterialShader::MaterialShader(const MaterialDescription& description)
     {
+        name = description.name;
         device = Engine::getSystem<GraphicsSystem>()->getDevice();
-        const RHI::ShaderReflection reflection = shader.get()->getShaderReflection();
+        const RHI::ShaderReflection reflection = description.shader.get()->getShaderReflection();
         for(const auto& ub : reflection.uniformBlocks)
         {
             if(ub.name == "Properties")
@@ -25,19 +26,21 @@ namespace Neon
         for (const auto& mem : memberInfos)
             requiredSize = std::max(requiredSize, mem.offset + mem.size);
 
+        samplerInfos = reflection.samplers;
+
         if (cpuData.size() < requiredSize)
             cpuData.resize(requiredSize);
 
-        RHI::InputLayout vertexInputState{};
-        vertexInputState.addVertexBuffer<Vertex>(0);
-        vertexInputState.addVertexAttribute<glm::vec3>(0, 0); // Pos
-        vertexInputState.addVertexAttribute<glm::vec3>(0, 1); // Normal
-        vertexInputState.addVertexAttribute<glm::vec2>(0, 2); // UV
+        RHI::InputLayout inputLayout{};
+        inputLayout.addVertexBuffer<Vertex>(0);
+        inputLayout.addVertexAttribute<glm::vec3>(0, 0); // Pos
+        inputLayout.addVertexAttribute<glm::vec3>(0, 1); // Normal
+        inputLayout.addVertexAttribute<glm::vec2>(0, 2); // UV
 
         RHI::DepthState depthState{};
         depthState.hasDepthTarget   = true;
-        depthState.enableDepthTest  = true;
-        depthState.enableDepthWrite = true;
+        depthState.enableDepthTest  = description.depthTest;
+        depthState.enableDepthWrite = description.depthWrite;
 
         RHI::RasterizerState rasterizerState{};
         rasterizerState.cullMode = RHI::CullMode::None; // Usually Back, but None is safe for debugging
@@ -45,11 +48,15 @@ namespace Neon
         const RHI::RenderTargetsDescription targetsDesc{};
 
         RHI::BlendState blendState{};
-        blendState.enableBlend = true;
+        blendState.enableBlend = description.blendEnabled;
+        blendState.srcColorFactor = description.srcColorBlendFactor;
+        blendState.dstColorFactor = description.dstColorBlendFactor;
+        blendState.srcAlphaFactor = description.srcAlphaBlendFactor;
+        blendState.dstAlphaFactor = description.dstAlphaBlendFactor;
 
         RHI::GraphicsPipelineDescription pipelineDescription{};
-        pipelineDescription.shader             = shader.get();
-        pipelineDescription.inputLayout        = vertexInputState;
+        pipelineDescription.shader             = description.shader.get();
+        pipelineDescription.inputLayout        = inputLayout;
         pipelineDescription.targetsDescription = targetsDesc;
         pipelineDescription.depthState         = depthState;
         pipelineDescription.rasterizerState    = rasterizerState;
@@ -58,6 +65,10 @@ namespace Neon
         pipeline = device->createPipeline(pipelineDescription);
 
         propertiesBuffer = device->createUniformBuffer();
+
+        defaultTexture = Engine::getSystem<GraphicsSystem>()->getDefaultTexture();
+        RHI::SamplerDescription samplerDescription{};
+        defaultSampler = device->createSampler(samplerDescription);
     }
 
     bool MaterialShader::setTexture(std::string name, Rc<RHI::TextureView> texture)
@@ -124,9 +135,23 @@ namespace Neon
 
         commandList->setUniformBuffer("Properties", propertiesBuffer);
 
+        for(const auto& samplerInfo : samplerInfos)
+        {
+            if(!textures.contains(samplerInfo.name))
+                commandList->setTexture(samplerInfo.name, defaultTexture);
+
+            if(!samplers.contains(samplerInfo.name))
+                commandList->setSampler(samplerInfo.name, defaultSampler);
+        }
+
         for(const auto& [name, texture] : textures)
         {
             commandList->setTexture(name, texture);
+        }
+
+        for(const auto& [name, sampler] : samplers)
+        {
+            commandList->setSampler(name, sampler);
         }
     }
 
@@ -134,6 +159,31 @@ namespace Neon
     {
         AssetManager& assetManager = Engine::getAssetManager();
         const auto shaderHandle = assetManager.loadAsset<Rc<RHI::Shader>>("shaders/pbr.glsl");
-        return MaterialShader(shaderHandle);
+
+        MaterialDescription desc{};
+        desc.name = "PBR";
+        desc.shader = shaderHandle;
+        desc.cullMode = RHI::CullMode::Back;
+        desc.blendEnabled = false;
+        desc.depthTest = true;
+        desc.depthWrite = true;
+
+        return MaterialShader(desc);
+    }
+
+    MaterialShader MaterialShader::createEquirectangularSkybox()
+    {
+        AssetManager& assetManager = Engine::getAssetManager();
+        const auto shaderHandle = assetManager.loadAsset<Rc<RHI::Shader>>("shaders/skybox.glsl");
+
+        MaterialDescription desc{};
+        desc.name = "Skybox equirectangular";
+        desc.shader = shaderHandle;
+        desc.cullMode = RHI::CullMode::Front;
+        desc.blendEnabled = false;
+        desc.depthTest = false;
+        desc.depthWrite = false;
+
+        return MaterialShader(desc);
     }
 }
