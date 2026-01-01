@@ -22,18 +22,25 @@ namespace Neon
         return filePath;
     }
 
-    std::vector<AssetHandle> AssetManager::getAllAssetHandles()
+    uint32_t AssetManager::generateID()
+    {
+        {
+            return nextHandle++;
+        }
+    }
+
+    bool AssetManager::isValid(const AssetID id) const
+    {
+        return id > 0 && id < nextHandle;
+    }
+
+    std::vector<AssetID> AssetManager::getAllAssetIDs()
     {
         return assetHandles;
     }
 
-    std::string AssetManager::getName(const AssetHandle handle)
+    AssetMetadata AssetManager::getMetadata(const AssetID handle)
     {
-        return assets.at(handle).name;
-    }
-
-    std::type_index AssetManager::getType(const AssetHandle handle) const
-    {
-        return assets.at(handle).type;
+        return assetsMetadata.at(handle);
     }
 }

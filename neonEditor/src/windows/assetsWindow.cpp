@@ -4,9 +4,11 @@
 #include <imgui_internal.h>
 #include <util/file.h>
 
+#include "propertiesWindow.h"
 #include "asset/assetManager.h"
 #include "graphics/imGuiSystem.h"
 #include "graphics/loaders/prefabLoaderGLB.h"
+#include "../editorSystem.h"
 
 struct ImRect;
 
@@ -42,9 +44,9 @@ namespace Neon::Editor
         AssetManager& assetManager = Engine::getAssetManager();
 
         static ImGuiTextFilter assetFilter;
-        static AssetHandle selectedAssetId = 0;
+        static AssetID selectedAssetId = 0;
 
-        static AssetHandle hoveredAssetId = 0;
+        static AssetID hoveredAssetId = 0;
         static double hoverStartTime = 0.0;
 
         ImGui::Begin("Assets");
@@ -61,7 +63,7 @@ namespace Neon::Editor
             consumeFileDropInRect(dropRect);
         }
 
-        const auto assetHandles = assetManager.getAllAssetHandles();
+        const auto assetHandles = assetManager.getAllAssetIDs();
         if (assetHandles.empty())
         {
             ImGui::TextDisabled("No assets found.");
@@ -74,7 +76,7 @@ namespace Neon::Editor
         constexpr float tileSize = 96.0f;
 
         const float textHeight = ImGui::GetTextLineHeight();
-        const float spacingY = 6.0f;
+        constexpr float spacingY = 6.0f;
         const float tileHeight = tileSize + spacingY + textHeight + 6.0f;
 
         const float availX = ImGui::GetContentRegionAvail().x;
@@ -89,16 +91,17 @@ namespace Neon::Editor
 
         if (ImGui::BeginTable("##assetGridTable", columns, ImGuiTableFlags_SizingFixedFit))
         {
-            for (AssetHandle assetId : assetHandles)
+            for (AssetID assetId : assetHandles)
             {
-                const std::string assetName = assetManager.getName(assetId);
+                const AssetMetadata assetMetadata = assetManager.getMetadata(assetId);
+                const std::string assetName = assetMetadata.name;
                 if (!assetFilter.PassFilter(assetName.c_str()))
                 {
                     continue;
                 }
 
                 ImGui::TableNextColumn();
-                ImGui::PushID(static_cast<size_t>(assetId));
+                ImGui::PushID(static_cast<int>(static_cast<size_t>(assetId)));
 
                 const bool isSelected = (selectedAssetId == assetId);
 
@@ -106,10 +109,17 @@ namespace Neon::Editor
 
                 const bool isHovered = ImGui::IsItemHovered();
                 const bool isClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
+                const bool isReleased = ImGui::IsMouseReleased(ImGuiMouseButton_Left);
 
                 if (isClicked)
                 {
                     selectedAssetId = assetId;
+                }
+
+                if(isReleased && isHovered && !ImGui::GetDragDropPayload())
+                {
+                    PropertiesWindow& propertiesWindow = Engine::getSystem<EditorSystem>()->propertiesWindow;
+                    propertiesWindow.view(assetId);
                 }
 
                 const ImVec2 rectMin = ImGui::GetItemRectMin();
@@ -123,8 +133,8 @@ namespace Neon::Editor
                 drawList->AddRectFilled(rectMin, rectMax, bgCol, 4.0f);
                 drawList->AddRect(rectMin, rectMax, borderCol, 4.0f);
 
-                const ImVec2 imgMin = ImVec2(rectMin.x + 3.0f, rectMin.y + 3.0f);
-                const ImVec2 imgMax = ImVec2(imgMin.x + tileSize - 6.0f, imgMin.y + tileSize - 6.0f);
+                const auto imgMin = ImVec2(rectMin.x + 3.0f, rectMin.y + 3.0f);
+                const auto imgMax = ImVec2(imgMin.x + tileSize - 6.0f, imgMin.y + tileSize - 6.0f);
 
                 // ImTextureID previewTex = assetManager.getPreviewTexture(assetId);
                 // if (previewTex != nullptr)

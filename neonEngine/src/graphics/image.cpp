@@ -1,7 +1,5 @@
 #include "image.h"
 
-#include "asset/assetHandle.h"
-
 namespace Neon
 {
     Image::Image(const Rc<RHI::Texture>& texture, const Rc<RHI::Sampler>& sampler)

@@ -2,6 +2,7 @@
 
 #include <imgui.h>
 
+#include "propertiesWindow.h"
 #include "core/engine.h"
 #include "core/sceneManager.h"
 #include "core/components/parentComponent.h"
@@ -9,11 +10,13 @@
 #include "graphics/components/camera.h"
 #include "graphics/components/pointLight.h"
 #include "imgui/imGuiExtensions.h"
+#include "../editorSystem.h"
 
 namespace Neon::Editor
 {
     void SceneGraphWindow::render()
     {
+        PropertiesWindow& propertiesWindow = Engine::getSystem<EditorSystem>()->propertiesWindow;
         ImGui::Begin("Scene Graph");
         Scene& scene = Engine::getSceneManager().getCurrentScene();
 
@@ -55,7 +58,7 @@ namespace Neon::Editor
 
         if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0) && !ImGui::IsAnyItemHovered())
         {
-            m_selected = std::nullopt;
+            propertiesWindow.stopViewing();
         }
 
         buildChildrenMap();
@@ -67,17 +70,11 @@ namespace Neon::Editor
 
         if(m_pendingDelete.has_value())
         {
-            if(m_selected == m_pendingDelete)
-                m_selected = std::nullopt;
+            propertiesWindow.stopViewing();
             scene.getRegistry().destroy(m_pendingDelete.value());
             m_pendingDelete = std::nullopt;
         }
         ImGui::End();
-    }
-
-    std::optional<ECS::Entity> SceneGraphWindow::getSelectedEntity()
-    {
-        return m_selected;
     }
 
     void SceneGraphWindow::buildChildrenMap()
@@ -132,11 +129,6 @@ namespace Neon::Editor
             flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
         }
 
-        if (m_selected == e)
-        {
-            flags |= ImGuiTreeNodeFlags_Selected;
-        }
-
         ImVec2 framePadding = ImGui::GetStyle().FramePadding;
         framePadding.x = 2.0f;
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, framePadding);
@@ -163,7 +155,8 @@ namespace Neon::Editor
         }
         else if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
         {
-            m_selected = e;
+            PropertiesWindow& propertiesWindow = Engine::getSystem<EditorSystem>()->propertiesWindow;
+            propertiesWindow.view(e);
         }
 
         if (hasChildren)

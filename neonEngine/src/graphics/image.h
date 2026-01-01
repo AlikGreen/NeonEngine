@@ -1,7 +1,6 @@
 #pragma once
 #include "sampler.h"
 #include "texture.h"
-#include "asset/assetHandle.h"
 #include "asset/assetRef.h"
 
 namespace Neon

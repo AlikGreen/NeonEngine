@@ -2,7 +2,7 @@
 #include <imgui_internal.h>
 #include <vector>
 
-#include "asset/assetHandle.h"
+#include "asset/assetManager.h"
 
 namespace Neon::Editor
 {
@@ -13,7 +13,7 @@ public:
     void dropFile(std::string filepath);
 private:
     std::vector<std::string> droppedPaths;
-    AssetHandle hoveredAssetId = 0;
+    AssetID hoveredAssetId = 0;
     double hoverStartTime = 0.0;
 
     void consumeFileDropInRect(const ImRect &rect);

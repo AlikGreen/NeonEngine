@@ -16,47 +16,76 @@ namespace Neon::Editor
     void PropertiesWindow::render()
     {
         ImGui::Begin("Properties");
-        SceneGraphWindow sceneGraphWindow = Engine::getSystem<EditorSystem>()->sceneGraphWindow;
+        if(m_latestViewedType == LastSelected::Entity && m_latestEntity.has_value())
+            drawEntity(m_latestEntity.value());
 
-        std::optional<ECS::Entity> optEntity = sceneGraphWindow.getSelectedEntity();
+        if(m_latestViewedType == LastSelected::Asset && m_latestAsset.has_value())
+            drawAsset(m_latestAsset.value());
 
-        if(!optEntity.has_value())
-        {
-            ImGui::End();
-            return;
-        }
+        ImGui::End();
+    }
 
-        const ECS::Entity selected = optEntity.value();
+    void PropertiesWindow::view(ECS::Entity entity)
+    {
+        m_latestViewedType = LastSelected::Entity;
+        m_latestEntity = entity;
+    }
 
+    void PropertiesWindow::view(const AssetID asset)
+    {
+        m_latestViewedType = LastSelected::Asset;
+        m_latestAsset = asset;
+    }
+
+    void PropertiesWindow::stopViewing()
+    {
+        m_latestViewedType = LastSelected::None;
+        m_latestAsset = std::nullopt;
+        m_latestEntity = std::nullopt;
+    }
+
+    void PropertiesWindow::drawEntity(const ECS::Entity entity)
+    {
         ImGui::Spacing();
-        if (selected.has<Tag>())
+        if (entity.has<Tag>())
         {
             drawComponentSpacing();
-            drawComponent<Tag>(selected);
+            drawComponent<Tag>(entity);
         }
-        if (selected.has<Transform>())
+        if (entity.has<Transform>())
         {
             drawComponentSpacing();
-            drawComponent<Transform>(selected);
+            drawComponent<Transform>(entity);
         }
-        if (selected.has<Camera>())
+        if (entity.has<Camera>())
         {
             drawComponentSpacing();
-            drawComponent<Camera>(selected);
+            drawComponent<Camera>(entity);
         }
-        if (selected.has<PointLight>())
+        if (entity.has<PointLight>())
         {
             drawComponentSpacing();
-            drawComponent<PointLight>(selected);
+            drawComponent<PointLight>(entity);
         }
-        if (selected.has<MeshRenderer>())
+        if (entity.has<MeshRenderer>())
         {
             drawComponentSpacing();
-            drawComponent<MeshRenderer>(selected);
+            drawComponent<MeshRenderer>(entity);
         }
 
         drawComponentSpacing();
-        ImGui::End();
+    }
+
+    void PropertiesWindow::drawAsset(const AssetID asset)
+    {
+        AssetManager& assetManager = Engine::getAssetManager();
+        ImGui::PushFont(ImGuiSystem::headingFont);
+        const AssetMetadata metadata = assetManager.getMetadata(asset);
+        ImGui::TextUnformatted(metadata.name.c_str());
+        ImGui::PopFont();
+
+        if(metadata.type == typeid(Mesh))
+            drawAssetType<Mesh>(asset);
     }
 
     void PropertiesWindow::drawComponentSpacing()
@@ -164,10 +193,6 @@ namespace Neon::Editor
             return;
         }
 
-        grid.nextRow("Match Window Size");
-        ImGui::Checkbox("##value", &camera.matchWindowSize);
-        grid.endRow();
-
         grid.nextRow("Background");
         ImGui::ColorEdit4("##value", &camera.bgColor.x);
         grid.endRow();
@@ -263,5 +288,17 @@ namespace Neon::Editor
         grid.nextRow("Material");
         ImGui::TextUnformatted(material ? "<Assigned>" : "<None>");
         grid.endRow();
+    }
+
+    template<>
+    void PropertiesWindow::drawAssetType<Mesh>(const AssetID asset)
+    {
+        AssetManager& assetManager = Engine::getAssetManager();
+        Mesh& mesh = assetManager.getAsset<Mesh>(asset);
+
+        drawComponentSpacing();
+
+        ImGui::Text("Vectex count: %ld", mesh.getVertexCount());
+        ImGui::Text("Index count: %ld", mesh.getIndexCount());
     }
 }

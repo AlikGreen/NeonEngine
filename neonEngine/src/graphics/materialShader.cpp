@@ -126,14 +126,15 @@ namespace Neon
 
     void MaterialShader::bindUniforms(const Rc<RHI::CommandList>& commandList)
     {
-        if(dirty)
+        if(dirty && !cpuData.empty())
         {
             commandList->reserveBuffer(propertiesBuffer, cpuData.size());
             commandList->updateBuffer(propertiesBuffer, cpuData);
             dirty = false;
         }
 
-        commandList->setUniformBuffer("Properties", propertiesBuffer);
+        if(propertiesBuffer != nullptr && !cpuData.empty())
+            commandList->setUniformBuffer("Properties", propertiesBuffer);
 
         for(const auto& samplerInfo : samplerInfos)
         {

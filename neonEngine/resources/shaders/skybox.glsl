@@ -1,5 +1,8 @@
 #type vertex
-layout(location = 0) in vec2 inPosition;
+layout(location = 0) in vec3 inPosition;
+layout(location = 1) in vec3 inNormal;
+layout(location = 2) in vec2 inUV;
+
 layout(location = 0) out vec3 vWorldDir;
 
 layout(std140, binding = 0) uniform CameraUniforms
@@ -10,13 +13,13 @@ layout(std140, binding = 0) uniform CameraUniforms
 
 void main()
 {
-    gl_Position = vec4(inPosition, 0.0, 1.0);
+    gl_Position = vec4(inPosition, 1.0);
 
 
     mat4 invProj = inverse(camera.projMatrix);
     mat3 viewRot = mat3(camera.viewMatrix);
     mat3 invViewRot = transpose(viewRot);
-    vec4 viewPos = invProj * vec4(inPosition, 1.0, 1.0);
+    vec4 viewPos = invProj * vec4(inPosition.xy, 1.0, 1.0);
 
     vWorldDir = invViewRot * viewPos.xyz;
 }

@@ -57,19 +57,14 @@ namespace Neon
         void render() override;
         void event(Event *event) override;
     private:
-        void createSkyboxRenderPipeline();
-
         void renderMesh(const Rc<RHI::CommandList>& cl, ECS::Entity entity, const MeshRenderer& meshRenderer);
         void renderSubMesh(const Rc<RHI::CommandList>& cl, const MeshRenderer &meshRenderer, int materialIndex);
-
-        AssetRef<Rc<RHI::Texture>> m_skybox;
-        Rc<RHI::Sampler> m_skyboxSampler;
 
         Rc<RHI::TextureView> getOrCreateTextureView(const AssetRef<Rc<RHI::Texture>>& texture) const;
         Rc<RHI::TextureView> getOrCreateTextureView(const AssetRef<Rc<RHI::Texture>>& texture, const RHI::TextureViewDescription& viewDesc) const;
 
-        mutable std::unordered_map<AssetHandle, Rc<RHI::TextureView>> m_textureViewCache;
-        mutable std::unordered_map<AssetHandle, Rc<RHI::TextureView>> m_cubeMapCache;
+        mutable std::unordered_map<AssetID, Rc<RHI::TextureView>> m_textureViewCache;
+        mutable std::unordered_map<AssetID, Rc<RHI::TextureView>> m_cubeMapCache;
 
         GraphicsSystem* m_graphicsSystem{};
 
@@ -77,13 +72,11 @@ namespace Neon
         Rc<RHI::Window> m_window{};
 
         Rc<RHI::Pipeline> m_currentScenePipeline{};
-        Rc<RHI::Pipeline> m_skyboxPipeline{};
 
         Rc<RHI::Buffer> m_cameraUniformBuffer{};
         Rc<RHI::Buffer> m_modelUniformBuffer{};
         Rc<RHI::Buffer> m_pointLightsUniformBuffer{};
 
-        Rc<RHI::Buffer> m_screenQuadVertexBuffer{};
-        Rc<RHI::Buffer> m_screenQuadIndexBuffer{};
+        Mesh m_screenMesh;
     };
 }

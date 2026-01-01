@@ -35,10 +35,6 @@ namespace Neon
         samplerDesc.wrapMode.y = RHI::TextureWrap::ClampToEdge;
         samplerDesc.wrapMode.z = RHI::TextureWrap::ClampToEdge;
 
-        m_skyboxSampler = m_device->createSampler(samplerDesc);
-
-        createSkyboxRenderPipeline();
-
         // Use a temporary command list for initialization logic
         const Rc<RHI::CommandList> initCmdList = m_device->createCommandList();
 
@@ -46,15 +42,14 @@ namespace Neon
         m_modelUniformBuffer       = m_device->createUniformBuffer();
         m_pointLightsUniformBuffer = m_device->createUniformBuffer();
 
-        m_screenQuadVertexBuffer = m_device->createVertexBuffer();
-        m_screenQuadIndexBuffer  = m_device->createIndexBuffer();
+        m_screenMesh = Mesh();
 
-        const std::vector<glm::vec2> quadPositions =
+        const std::vector screenVertices =
         {
-            {-1, -1 },
-            { 1, -1 },
-            { 1,  1 },
-            {-1,  1 }
+            Vertex { {-1, -1, 0 }, { }, { 0, 0} },
+            Vertex { { 1, -1, 0 }, { }, { 1, 0} },
+            Vertex { { 1,  1, 0 }, { }, { 1, 1} },
+            Vertex { {-1,  1, 0 }, { }, { 0, 1} },
         };
 
         const std::vector<uint32_t> quadIndices =
@@ -62,6 +57,12 @@ namespace Neon
             0, 1, 2,
             0, 2, 3
         };
+
+        m_screenMesh.setVertices(screenVertices);
+        m_screenMesh.setIndices(quadIndices);
+
+        m_screenMesh.apply();
+
 
         DebugUniforms debugUniforms{};
         debugUniforms.debugUvs     = false;
@@ -73,16 +74,7 @@ namespace Neon
         initCmdList->reserveBuffer(m_modelUniformBuffer      , sizeof(MeshUniforms));
         initCmdList->reserveBuffer(m_pointLightsUniformBuffer, sizeof(PointLightUniforms));
 
-        initCmdList->reserveBuffer(m_screenQuadVertexBuffer, quadPositions.size() * sizeof(glm::vec2));
-        initCmdList->updateBuffer(m_screenQuadVertexBuffer, quadPositions);
-
-        initCmdList->reserveBuffer(m_screenQuadIndexBuffer, quadIndices.size() * sizeof(uint32_t));
-        initCmdList->updateBuffer(m_screenQuadIndexBuffer, quadIndices);
-
         m_device->submit(initCmdList);
-
-        AssetHandle skyboxAssetHandle = Engine::getAssetManager().loadAsset<Image>("textures/skybox.hdr");
-        m_skybox = Engine::getAssetManager().getAsset<Image>(skyboxAssetHandle).texture;
     }
 
     void RenderSystem::postStartup()
@@ -116,7 +108,7 @@ namespace Neon
         const Rc<RHI::Framebuffer> framebuffer = camera.getFramebuffer();
         cl->setFramebuffer(framebuffer);
 
-        cl->clearColorTarget(0, {0.0f, 0.0f, 0.0f, 1.0f});
+        cl->clearColorTarget(0, {camera.bgColor.x, camera.bgColor.y, camera.bgColor.z, 1.0f});
         cl->clearDepthStencil(1.0f);
 
         const glm::mat4 flip = glm::scale(glm::mat4(1.0f), glm::vec3(1, 1, -1));
@@ -129,18 +121,25 @@ namespace Neon
 
         cl->updateBuffer(m_cameraUniformBuffer, cameraMatrices);
 
-        m_currentScenePipeline = m_skyboxPipeline;
-        cl->setPipeline(m_currentScenePipeline);
+        const AssetRef<MaterialShader> material = camera.getSkyboxMaterial();
 
-        const Rc<RHI::TextureView> skyTexture = getOrCreateTextureView(m_skybox);
+        if(material)
+        {
+            const Rc<RHI::Pipeline> matPipeline = material->getPipeline();
+            if(matPipeline != m_currentScenePipeline)
+            {
+                m_currentScenePipeline = matPipeline;
+                cl->setPipeline(m_currentScenePipeline);
+            }
 
-        cl->setSampler("skyboxTexture", m_skyboxSampler);
-        cl->setTexture("skyboxTexture", skyTexture);
-        cl->setUniformBuffer("CameraUniforms", m_cameraUniformBuffer);
+            cl->setUniformBuffer("CameraUniforms", m_cameraUniformBuffer);
 
-        cl->setVertexBuffer(0, m_screenQuadVertexBuffer);
-        cl->setIndexBuffer(m_screenQuadIndexBuffer, RHI::IndexFormat::UInt32);
-        cl->drawIndexed(6);
+            material->bindUniforms(cl);
+
+            cl->setVertexBuffer(0, m_screenMesh.getVertexBuffer());
+            cl->setIndexBuffer(m_screenMesh.getIndexBuffer(), RHI::IndexFormat::UInt32);
+            cl->drawIndexed(6);
+        }
 
         // --- 4. Render Scene ---
 
@@ -247,39 +246,6 @@ namespace Neon
         }
     }
 
-    void RenderSystem::createSkyboxRenderPipeline()
-    {
-        AssetManager& assetManager = Engine::getAssetManager();
-        const auto shaderHandle = assetManager.loadAsset<Rc<RHI::Shader>>("shaders/skybox.glsl");
-        const auto& shader = assetManager.getAsset<Rc<RHI::Shader>>(shaderHandle);
-
-        RHI::InputLayout vertexInputState{};
-        vertexInputState.addVertexBuffer<glm::vec2>(0);
-        vertexInputState.addVertexAttribute<glm::vec2>(0, 0);
-
-        RHI::DepthState depthState{};
-        depthState.hasDepthTarget  = false; // Skybox usually drawn first with no depth or last at max depth
-        depthState.enableDepthTest = false;
-
-        RHI::RasterizerState rasterizerState{};
-        rasterizerState.cullMode = RHI::CullMode::None;
-
-        const RHI::RenderTargetsDescription targetsDesc{};
-
-        RHI::BlendState blendState{};
-        blendState.enableBlend = false;
-
-        RHI::GraphicsPipelineDescription pipelineDescription{};
-        pipelineDescription.shader             = shader;
-        pipelineDescription.inputLayout        = vertexInputState;
-        pipelineDescription.targetsDescription = targetsDesc;
-        pipelineDescription.depthState         = depthState;
-        pipelineDescription.rasterizerState    = rasterizerState;
-        pipelineDescription.blendState         = blendState;
-
-        m_skyboxPipeline = m_device->createPipeline(pipelineDescription);
-    }
-
     Rc<RHI::TextureView> RenderSystem::getOrCreateTextureView(const AssetRef<Rc<RHI::Texture>>& texture) const
     {
         const RHI::TextureViewDescription viewDesc{ *texture };
@@ -290,11 +256,11 @@ namespace Neon
     {
         if(texture == nullptr) return nullptr;
 
-        if(m_textureViewCache.contains(texture.getHandle()))
-            return m_textureViewCache.at(texture.getHandle());
+        if(m_textureViewCache.contains(texture.getID()))
+            return m_textureViewCache.at(texture.getID());
 
         Rc<RHI::TextureView> view = m_device->createTextureView(viewDesc);
-        m_textureViewCache.emplace(texture.getHandle(), view);
+        m_textureViewCache.emplace(texture.getID(), view);
 
         return view;
     }

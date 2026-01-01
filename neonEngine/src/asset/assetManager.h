@@ -1,6 +1,5 @@
 #pragma once
 
-#include "assetHandle.h"
 #include <filesystem>
 
 #include "assetDeserializer.h"
@@ -12,78 +11,33 @@
 namespace Neon
 {
 
+struct AssetMetadata
+{
+    std::string name;
+    std::type_index type;
+    std::filesystem::path physicalPath;
+};
+
+using AssetID = uint64_t;
+
+template<typename T>
+class AssetRef;
+
 class AssetManager
 {
 public:
     template<typename T>
-    AssetHandle loadAsset(const std::string& filepath, std::string name = "")
-    {
-        const std::filesystem::path fullPath = getFullPath(filepath);
-        if(pathAssetMap.contains(fullPath.string()))
-            return pathAssetMap.at(fullPath.string());
-
-        Debug::ensure(exists(fullPath), "File was not found\n{}", filepath);
-
-        if(name.empty())
-        {
-            name = fullPath.stem().string();
-        }
-        const auto typeIndex = std::type_index(typeid(T));
-
-        Debug::ensure(loaders.contains(typeIndex), "Cannot load object of type {}", typeid(T).name());
-
-        const std::string fileExtension = fullPath.extension().string();
-        Debug::ensure(loaders.at(typeIndex).contains(fileExtension), "Cannot load files with {} extension", fileExtension);
-
-        const auto assetLoader = loaders.at(typeIndex).at(fileExtension).get();
-        void* asset = assetLoader->load(fullPath.string());
-
-        AssetHandle handle = AssetHandle::create();
-        assets.emplace(handle, AssetContainer { asset, typeIndex, name });
-        assetHandles.push_back(handle);
-        pathAssetMap.emplace(fullPath.string(), handle);
-
-        return handle;
-    }
-
+    AssetRef<T> loadAsset(const std::string& filepath, std::string name = "");
     template<typename T> // requires (!std::is_const_v<T>)
-    AssetHandle addAsset(T* asset, std::string name = "")
-    {
-        const auto typeIndex = std::type_index(typeid(T));
-
-        if(name.empty())
-        {
-            name = typeIndex.name();
-        }
-
-        AssetHandle handle = AssetHandle::create();
-        assets.emplace(handle, AssetContainer { asset, typeIndex, name});
-        assetHandles.push_back(handle);
-        return handle;
-    }
+    AssetRef<T> addAsset(T* asset, std::string name = "");
+    template<typename T>
+    AssetRef<T> addAsset(T asset, std::string name = "");
 
     template<typename T>
-    AssetHandle addAsset(T asset, std::string name = "")
+    T& getAsset(const AssetID assetHandle)
     {
-        const auto typeIndex = std::type_index(typeid(T));
-
-        if(name.empty())
-        {
-            name = typeIndex.name();
-        }
-
-        AssetHandle handle = AssetHandle::create();
-        T* heapAsset = new T(std::move(asset));  // Allocate on heap
-        assets.emplace(handle, AssetContainer { heapAsset, typeIndex, name});
-        assetHandles.push_back(handle);
-        return handle;
-    }
-
-    template<typename T>
-    T& getAsset(const AssetHandle& assetHandle)
-    {
-        Debug::ensure(assetHandle.isValid(), "Tried to get an asset that did not exist.");
-        return *static_cast<T*>(assets.at(assetHandle).asset);
+        Debug::ensure(isValid(assetHandle), "Tried to get an asset that did not exist.");
+        return *static_cast<T*>(assets.at(assetHandle));
     }
 
     template<typename SerializerType, typename AssetType, typename... Args> requires std::derived_from<SerializerType, AssetSerializer>
@@ -118,24 +72,22 @@ public:
         }
     }
 
-    std::vector<AssetHandle> getAllAssetHandles();
-    std::string getName(AssetHandle handle);
-    std::type_index getType(AssetHandle handle) const;
+    std::vector<AssetID> getAllAssetIDs();
+    AssetMetadata getMetadata(AssetID handle);
+    uint32_t generateID();
+    bool isValid(AssetID id) const;
 
     static std::string getFullPath(const std::string& filePath);
 private:
-    struct AssetContainer
-    {
-        void* asset;
-        std::type_index type;
-        std::string name;
-    };
+    AssetID nextHandle = 1;
 
     std::unordered_map<std::type_index, Box<AssetSerializer>> serializers;
     std::unordered_map<std::type_index, Box<AssetDeserializer>> deserializers;
     std::unordered_map<std::type_index, std::unordered_map<std::string, Rc<AssetLoader>>> loaders;
-    std::vector<AssetHandle> assetHandles;
-    std::unordered_map<std::string, AssetHandle> pathAssetMap;
-    std::unordered_map<AssetHandle, AssetContainer> assets;
+
+    std::vector<AssetID> assetHandles;
+    std::unordered_map<std::string, AssetID> pathAssetMap;
+    std::unordered_map<AssetID, void*> assets;
+    std::unordered_map<AssetID, AssetMetadata> assetsMetadata;
 };
 }

@@ -75,9 +75,9 @@ namespace Neon
         return success;
     }
 
-    std::vector<AssetHandle> PrefabLoaderGLB::processMaterials(const tinygltf::Model& model)
+    std::vector<AssetRef<MaterialShader>> PrefabLoaderGLB::processMaterials(const tinygltf::Model& model)
     {
-        std::vector<AssetHandle> materials;
+        std::vector<AssetRef<MaterialShader>> materials;
         materials.reserve(model.materials.size());
 
         for (const auto& material : model.materials)
@@ -88,7 +88,7 @@ namespace Neon
         return materials;
     }
 
-    void PrefabLoaderGLB::processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetHandle>& materials, const AssetRef<MaterialShader>& defaultMaterial)
+    void PrefabLoaderGLB::processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetRef<MaterialShader>>& materials, const AssetRef<MaterialShader>& defaultMaterial)
     {
         for (const auto& node : model.nodes)
         {
@@ -128,7 +128,7 @@ namespace Neon
         }
     }
 
-    void PrefabLoaderGLB::setupMeshRenderer(ECS::Entity& entity, const AssetHandle meshHandle, const tinygltf::Mesh& mesh, const AssetRef<MaterialShader>& defaultMaterial, const std::vector<AssetHandle>& materials)
+    void PrefabLoaderGLB::setupMeshRenderer(ECS::Entity& entity, const AssetRef<Mesh> meshHandle, const tinygltf::Mesh& mesh, const AssetRef<MaterialShader>& defaultMaterial, const std::vector<AssetRef<MaterialShader>>& materials)
     {
         auto& meshRenderer = entity.emplace<MeshRenderer>();
         meshRenderer.mesh = meshHandle;
@@ -147,7 +147,7 @@ namespace Neon
         }
     }
 
-    AssetHandle PrefabLoaderGLB::processMaterial(const tinygltf::Material& material, const tinygltf::Model& model)
+    AssetRef<MaterialShader> PrefabLoaderGLB::processMaterial(const tinygltf::Material& material, const tinygltf::Model& model)
     {
         auto mat = MaterialShader::createPBR();
         // mat.name = material.name;
@@ -304,11 +304,11 @@ namespace Neon
         return PixelFormat::R8G8B8A8Unorm;
     }
 
-    AssetHandle PrefabLoaderGLB::loadTexture(const tinygltf::Texture& texture, const tinygltf::Model& model, const bool isSrgb)
+    AssetRef<Image> PrefabLoaderGLB::loadTexture(const tinygltf::Texture& texture, const tinygltf::Model& model, const bool isSrgb)
     {
         if (texture.source < 0)
         {
-            return 0;
+            return nullptr;
         }
 
         const tinygltf::Image& image = model.images[texture.source];

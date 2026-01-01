@@ -1,7 +1,11 @@
 #pragma once
+#include <tiny_gltf.h>
+
+#include "asset/assetRef.h"
 #include "glm/glm.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
 #include "graphics/frustum.h"
+#include "graphics/materialShader.h"
 
 namespace Neon
 {
@@ -29,6 +33,9 @@ public:
     Frustum getFrustum(const glm::mat4 &view);
     [[nodiscard]] const glm::mat4& getProjectionMatrix();
 
+    void setSkyboxMaterial(AssetRef<MaterialShader> material);
+    [[nodiscard]] AssetRef<MaterialShader> getSkyboxMaterial() const;
+
     Rc<RHI::Framebuffer> getFramebuffer();
     Rc<RHI::TextureView> getDepthTexture();
     Rc<RHI::TextureView> getColorTexture();
@@ -51,6 +58,8 @@ private:
     Rc<RHI::Framebuffer> framebuffer;
     Rc<RHI::TextureView> colorView;
     Rc<RHI::TextureView> depthView;
+
+    AssetRef<MaterialShader> skyboxMaterial;
 
     void updateProjectionMatrix();
     void updateFramebuffer();

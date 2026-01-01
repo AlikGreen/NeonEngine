@@ -9,13 +9,11 @@ class SceneGraphWindow final
 {
 public:
     void render();
-    std::optional<ECS::Entity> getSelectedEntity();
 private:
     void buildChildrenMap();
 
     void drawEntityNode(ECS::Entity e);
 
-    std::optional<ECS::Entity> m_selected{};
     std::optional<ECS::Entity> m_pendingDelete{};
     std::unordered_map<ECS::Entity, std::vector<ECS::Entity>> m_childrenMap{};
     std::vector<ECS::Entity> m_rootEntities{};

@@ -1,14 +1,10 @@
 #include "editorSystem.h"
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include <imgui_internal.h>
 
 #include "core/components/tagComponent.h"
 #include "core/components/transformComponent.h"
-#include "glm/gtx/string_cast.hpp"
 #include "graphics/imGuiSystem.h"
 #include "graphics/events/dropFileEvent.h"
-#include "imgui/imGuiExtensions.h"
 #include "neonEngine/neonEngine.h"
 #include "windows/assetsWindow.h"
 #include "windows/propertiesWindow.h"
@@ -22,17 +18,26 @@ namespace Neon::Editor
         auto& scene = Engine::getSceneManager().getCurrentScene();
 
         AssetManager& assetManager = Engine::getAssetManager();
-        const AssetHandle modelHandle = assetManager.loadAsset<Prefab>("models/monkey.glb");
-        auto& model = assetManager.getAsset<Prefab>(modelHandle);
+        const AssetRef<Prefab> model = assetManager.loadAsset<Prefab>("models/monkey.glb");
 
-        ECS::Entity modelEntity = scene.import(model);
+        ECS::Entity modelEntity = scene.import(model.get());
         modelEntity.get<Tag>().name = "Imported model";
         modelEntity.get<Transform>().setScale(glm::vec3(1.0f));
+
+        const AssetRef<Image> skyboxAsset = Engine::getAssetManager().loadAsset<Image>("textures/skybox.hdr");
+        const AssetRef<Rc<RHI::Texture>> skyboxTexture = skyboxAsset->texture;
+        const auto skyboxTexViewDesc = RHI::TextureViewDescription(skyboxTexture.get());
+        const Rc<RHI::TextureView> skyboxTextureView = Engine::getSystem<GraphicsSystem>()->getDevice()->createTextureView(skyboxTexViewDesc);
+
+        MaterialShader skyboxMaterial = MaterialShader::createEquirectangularSkybox();
+        skyboxMaterial.setTexture("skyboxTexture", skyboxTextureView);
+        const AssetRef<MaterialShader> skyboxMaterialAsset = assetManager.addAsset<MaterialShader>(skyboxMaterial);
 
         // Player/Camera entity
         ECS::Entity cameraEntity = scene.createEntity("Main Camera");
         auto& camera = cameraEntity.emplace<Camera>();
         camera.matchWindowSize = false;
+        camera.setSkyboxMaterial(skyboxMaterialAsset);
         auto& camTransform = cameraEntity.get<Transform>();
         camTransform.setPosition({0, 0, 0});
 

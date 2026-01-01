@@ -47,6 +47,8 @@ namespace Neon
 
         [[nodiscard]] Rc<RHI::Buffer> getVertexBuffer();
         [[nodiscard]] Rc<RHI::Buffer> getIndexBuffer();
+        [[nodiscard]] size_t getVertexCount() const;
+        [[nodiscard]] size_t getIndexCount() const;
 
         void setReadable(bool readable);
     private:
@@ -63,5 +65,8 @@ namespace Neon
 
         Rc<RHI::Buffer> vertexBuffer = nullptr;
         Rc<RHI::Buffer> indexBuffer = nullptr;
+
+        size_t vertexCount = 0;
+        size_t indexCount = 0;
     };
 }

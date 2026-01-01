@@ -50,12 +50,14 @@ namespace Neon
 
     void Mesh::setVertices(const std::vector<Vertex> &vertices)
     {
+        vertexCount = vertices.size();
         this->vertices = vertices;
         verticesDirty = true;
     }
 
     void Mesh::setIndices(const std::vector<uint32_t> &indices)
     {
+        indexCount = indices.size();
         this->indices = indices;
         indicesDirty = true;
     }
@@ -109,6 +111,16 @@ namespace Neon
             apply();
         }
         return indexBuffer;
+    }
+
+    size_t Mesh::getVertexCount() const
+    {
+        return vertexCount;
+    }
+
+    size_t Mesh::getIndexCount() const
+    {
+        return indexCount;
     }
 
     void Mesh::setReadable(const bool readable)

@@ -16,7 +16,20 @@ class PropertiesWindow final
 {
 public:
     void render();
+    void view(ECS::Entity entity);
+    void view(AssetID asset);
+    void stopViewing();
 private:
+    enum class LastSelected { None, Asset, Entity };
+    void drawEntity(ECS::Entity entity);
+    void drawAsset(AssetID asset);
+
+    template<typename T>
+    void drawAssetType(AssetID asset)
+    {
+        ;
+    }
+
     template<typename T>
     void drawComponent(const ECS::Entity entity)
     {
@@ -27,8 +40,10 @@ private:
     static void drawComponentSpacing();
     static void drawComponentTitle(const char *text);
 
+    LastSelected m_latestViewedType = LastSelected::None;
     std::string m_renameString;
-    std::optional<ECS::Entity> m_entityLastFrame;
+    std::optional<ECS::Entity> m_latestEntity;
+    std::optional<AssetID> m_latestAsset;
 };
 
 template<> void PropertiesWindow::drawComponent<Transform>(ECS::Entity entity);
@@ -36,4 +51,6 @@ template<> void PropertiesWindow::drawComponent<Tag>(ECS::Entity entity);
 template<> void PropertiesWindow::drawComponent<Camera>(ECS::Entity entity);
 template<> void PropertiesWindow::drawComponent<PointLight>(ECS::Entity entity);
 template<> void PropertiesWindow::drawComponent<MeshRenderer>(ECS::Entity entity);
+
+template<> void PropertiesWindow::drawAssetType<Mesh>(AssetID asset);
 }

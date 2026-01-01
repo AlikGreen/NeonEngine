@@ -96,6 +96,16 @@ namespace Neon
         return projectionMatrix;
     }
 
+    void Camera::setSkyboxMaterial(const AssetRef<MaterialShader> material)
+    {
+        skyboxMaterial = material;
+    }
+
+    AssetRef<MaterialShader> Camera::getSkyboxMaterial() const
+    {
+        return skyboxMaterial;
+    }
+
     Rc<RHI::Framebuffer> Camera::getFramebuffer()
     {
         if(fbDirty)
