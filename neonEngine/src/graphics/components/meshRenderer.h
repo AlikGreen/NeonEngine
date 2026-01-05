@@ -1,7 +1,7 @@
 #pragma once
 #include "asset/assetRef.h"
-#include "graphics/materialShader.h"
-#include "graphics/mesh.h"
+#include "graphics/assets/materialShader.h"
+#include "graphics/assets/mesh.h"
 
 namespace Neon
 {
@@ -10,7 +10,7 @@ struct MeshRenderer
     std::vector<AssetRef<MaterialShader>> materials{};
     AssetRef<Mesh> mesh{};
 
-    void setMaterial(const AssetRef<MaterialShader> material)
+    void setMaterial(const AssetRef<MaterialShader>& material)
     {
         if(materials.empty())
             materials.push_back(material);

@@ -1,15 +1,16 @@
 #include "editorSystem.h"
 
 
+#include "audio/components/audioSource.h"
 #include "core/components/tagComponent.h"
 #include "core/components/transformComponent.h"
+#include "graphics/image.h"
 #include "graphics/imGuiSystem.h"
 #include "graphics/events/dropFileEvent.h"
 #include "neonEngine/neonEngine.h"
 #include "windows/assetsWindow.h"
 #include "windows/propertiesWindow.h"
 #include "windows/sceneGraphWindow.h"
-#include "windows/viewportWindow.h"
 
 namespace Neon::Editor
 {
@@ -18,15 +19,16 @@ namespace Neon::Editor
         auto& scene = Engine::getSceneManager().getCurrentScene();
 
         AssetManager& assetManager = Engine::getAssetManager();
-        const AssetRef<Prefab> model = assetManager.loadAsset<Prefab>("models/monkey.glb");
+        auto model = assetManager.import<Prefab>("models/monkey.glb");
 
         ECS::Entity modelEntity = scene.import(model.get());
         modelEntity.get<Tag>().name = "Imported model";
         modelEntity.get<Transform>().setScale(glm::vec3(1.0f));
 
-        const AssetRef<Image> skyboxAsset = Engine::getAssetManager().loadAsset<Image>("textures/skybox.hdr");
-        const AssetRef<Rc<RHI::Texture>> skyboxTexture = skyboxAsset->texture;
-        const auto skyboxTexViewDesc = RHI::TextureViewDescription(skyboxTexture.get());
+
+        auto skyboxData =  assetManager.loadUnmanaged<TextureData>("textures/skybox.hdr");
+        const Rc<RHI::Texture> skyboxTexture = assetManager.addAsset(Image(*skyboxData.release()), "Skybox Image")->texture;
+        const auto skyboxTexViewDesc = RHI::TextureViewDescription(skyboxTexture);
         const Rc<RHI::TextureView> skyboxTextureView = Engine::getSystem<GraphicsSystem>()->getDevice()->createTextureView(skyboxTexViewDesc);
 
         MaterialShader skyboxMaterial = MaterialShader::createEquirectangularSkybox();
@@ -36,8 +38,8 @@ namespace Neon::Editor
         // Player/Camera entity
         ECS::Entity cameraEntity = scene.createEntity("Main Camera");
         auto& camera = cameraEntity.emplace<Camera>();
-        camera.matchWindowSize = false;
-        camera.setSkyboxMaterial(skyboxMaterialAsset);
+        camera.skyboxMaterial = skyboxMaterialAsset;
+        camera.renderTarget = Engine::getSystem<GraphicsSystem>()->createRenderTarget(800, 600);
         auto& camTransform = cameraEntity.get<Transform>();
         camTransform.setPosition({0, 0, 0});
 
@@ -51,6 +53,18 @@ namespace Neon::Editor
         pointLight.power = 10.0f;
         pointLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
 
+        // const AssetRef<AudioClip> music = assetManager.loadAsset<AudioClip>("music.mp3");
+        // ECS::Entity speakerEntity = scene.createEntity("Speaker");
+        // auto& audioSource = speakerEntity.emplace<AudioSource>();
+        // audioSource.clip = music;
+        // audioSource.loop = true;
+        // audioSource.play();
+
+        registerComponent<MeshRenderer>("Mesh Renderer");
+        registerComponent<PointLight>("Point Light");
+        registerComponent<Camera>("Camera");
+
+
         auto* imGuiSystem = Engine::getSystem<ImGuiSystem>();
 
         imGuiSystem->shouldDrawDockSpace = true;
@@ -61,9 +75,13 @@ namespace Neon::Editor
         {
             viewportWindow.render();
             sceneGraphWindow.render();
-            propertiesWindow.render();
             assetsWindow.render();
+            propertiesWindow.render();
+            editorViewport.render();
         });
+
+        auto data = assetManager.serialize();
+        assetManager.deserialize(data);
     }
 
     void EditorSystem::update()
@@ -77,5 +95,10 @@ namespace Neon::Editor
         {
             assetsWindow.dropFile(windowEvent->getPath());
         }
+    }
+
+    std::vector<ComponentInfo> EditorSystem::getComponents()
+    {
+        return registeredComponents;
     }
 }

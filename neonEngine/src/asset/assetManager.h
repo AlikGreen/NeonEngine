@@ -2,8 +2,8 @@
 
 #include <filesystem>
 
-#include "assetDeserializer.h"
-#include "assetLoader.h"
+#include "assetID.h"
+#include "assetImporter.h"
 #include "assetSerializer.h"
 #include "debug.h"
 #include "log.h"
@@ -18,8 +18,6 @@ struct AssetMetadata
     std::filesystem::path physicalPath;
 };
 
-using AssetID = uint64_t;
-
 template<typename T>
 class AssetRef;
 
@@ -27,17 +25,27 @@ class AssetManager
 {
 public:
     template<typename T>
-    AssetRef<T> loadAsset(const std::string& filepath, std::string name = "");
-    template<typename T> // requires (!std::is_const_v<T>)
     AssetRef<T> addAsset(T* asset, std::string name = "");
     template<typename T>
     AssetRef<T> addAsset(T asset, std::string name = "");
+    template<typename T>
+    AssetRef<T> import(const std::string& filepath);
+    template<typename T>
+    AssetRef<T> getAsset(AssetID assetHandle);
 
     template<typename T>
-    T& getAsset(const AssetID assetHandle)
+    Box<T> loadUnmanaged(const std::string& filepath)
     {
-        Debug::ensure(isValid(assetHandle), "Tried to get an asset that did not exist.");
-        return *static_cast<T*>(assets.at(assetHandle));
+        const std::filesystem::path fullPath = getFullPath(filepath);
+
+        Debug::ensure(exists(fullPath), "File was not found\n{}", filepath);
+
+        Debug::ensure(importers.contains(typeid(T)), "Cannot load object of type {}", typeid(T).name());
+
+        const auto assetLoader = importers.at(typeid(T)).get();
+        T* asset = static_cast<T*>(assetLoader->load(fullPath.string()));
+
+        return Box<T>(asset);
     }
 
     template<typename SerializerType, typename AssetType, typename... Args> requires std::derived_from<SerializerType, AssetSerializer>
@@ -49,44 +57,40 @@ public:
         serializers.emplace(typeIndex, serializer);
     }
 
-    template<typename DeserializerType, typename AssetType, typename... Args> requires std::derived_from<DeserializerType, AssetDeserializer>
-    void registerDeserializer(Args&&... args)
-    {
-        Box<DeserializerType> deserializer = makeBox<DeserializerType>(std::forward<Args>(args)...);
-        auto typeIndex = std::type_index(typeid(AssetType));
-        deserializers.emplace(typeIndex, deserializer);
-    }
-
-    template<typename LoaderType, typename AssetType, typename... Args> requires std::derived_from<LoaderType, AssetLoader>
-    void registerLoader(const std::vector<std::string>& extensions, Args&&... args)
+    template<typename LoaderType, typename AssetType, typename... Args> requires std::derived_from<LoaderType, AssetImporter>
+    void registerImporter(Args&&... args)
     {
         Rc<LoaderType> loader = makeBox<LoaderType>(std::forward<Args>(args)...);
 
-        auto typeIndex = std::type_index(typeid(AssetType));
-        if(!loaders.contains(typeIndex))
-            loaders.emplace(typeIndex, std::unordered_map<std::string, Rc<AssetLoader>>());
-
-        for(std::string extension : extensions)
-        {
-            loaders.at(typeIndex).emplace(extension, loader);
-        }
+        importers.emplace(typeid(AssetType), loader);
     }
+
+    std::stringstream serialize();
+    void deserialize(std::stringstream& stream);
 
     std::vector<AssetID> getAllAssetIDs();
     AssetMetadata getMetadata(AssetID handle);
-    uint32_t generateID();
+    AssetID generateID();
     bool isValid(AssetID id) const;
 
     static std::string getFullPath(const std::string& filePath);
 private:
-    AssetID nextHandle = 1;
+    template <typename T>
+    friend class AssetRef;
+
+    template<typename T>
+    T& getAssetRef(const AssetID id)
+    {
+        Debug::ensure(id.isValid(), "Invalid AssetID");
+        return *static_cast<T*>(assets.at(id));
+    }
+
+    uint64_t nextHandle = 1;
 
     std::unordered_map<std::type_index, Box<AssetSerializer>> serializers;
-    std::unordered_map<std::type_index, Box<AssetDeserializer>> deserializers;
-    std::unordered_map<std::type_index, std::unordered_map<std::string, Rc<AssetLoader>>> loaders;
+    std::unordered_map<std::type_index, Rc<AssetImporter>> importers;
 
     std::vector<AssetID> assetHandles;
-    std::unordered_map<std::string, AssetID> pathAssetMap;
     std::unordered_map<AssetID, void*> assets;
     std::unordered_map<AssetID, AssetMetadata> assetsMetadata;
 };

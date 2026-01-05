@@ -1,8 +1,7 @@
 #include "engine.h"
 
-#include <graphics/loaders/imageLoader.h>
-#include <graphics/loaders/prefabLoaderGLB.h>
-#include <graphics/loaders/shaderLoader.h>
+#include <audio/audioClipImporter.h>
+
 
 #include "coreSystem.h"
 #include "graphics/renderSystem.h"
@@ -11,6 +10,9 @@
 #include "sceneManager.h"
 #include "audio/audioManager.h"
 #include "asset/assetManager.h"
+#include "graphics/importers/glbPrefabImporter.h"
+#include "graphics/importers/shaderImporter.h"
+#include "graphics/importers/textureImporter.h"
 
 namespace Neon
 {
@@ -34,9 +36,10 @@ namespace Neon
         audioManager = makeBox<AudioManager>();
         sceneManager = makeBox<SceneManager>();
 
-        getAssetManager().registerLoader<PrefabLoaderGLB, Prefab>({".glb", ".bin", ".gltf"});
-        getAssetManager().registerLoader<ImageLoader, Image>({".png", ".jpg", ".jpeg", ".bmp", ".hdr", ".ppm"});
-        getAssetManager().registerLoader<ShaderLoader, Rc<RHI::Shader>>({".glsl", ".shader"});
+        getAssetManager().registerImporter<GLBPrefabImporter, Prefab>();
+        getAssetManager().registerImporter<TextureImporter, TextureData>();
+        getAssetManager().registerImporter<ShaderImporter, Rc<RHI::Shader>>();
+        getAssetManager().registerImporter<AudioClipImporter, AudioClip>();
     }
 
     void Engine::quit()

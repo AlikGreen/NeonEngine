@@ -13,7 +13,7 @@ public:
     void dropFile(std::string filepath);
 private:
     std::vector<std::string> droppedPaths;
-    AssetID hoveredAssetId = 0;
+    AssetID hoveredAssetId = AssetID::invalid();
     double hoverStartTime = 0.0;
 
     void consumeFileDropInRect(const ImRect &rect);

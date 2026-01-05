@@ -108,7 +108,7 @@ namespace Neon
 
         Rc<RHI::Texture> texture = m_device->createTexture(desc);
 
-        float pixel[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        uint8_t pixel[4] = {255, 255, 255, 255};
 
         Rc<RHI::CommandList> cl = m_device->createCommandList();
 
@@ -251,5 +251,10 @@ namespace Neon
         commandList->drawIndexed(6);
 
         m_device->submit(commandList);
+    }
+
+    Rc<RenderTarget> GraphicsSystem::createRenderTarget(const uint32_t width, const uint32_t height, const bool useDepth) const
+    {
+        return Rc<RenderTarget>(new RenderTarget(m_device, width, height, useDepth));
     }
 }

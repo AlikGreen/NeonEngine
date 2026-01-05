@@ -44,7 +44,7 @@ namespace Neon::Editor
         m_latestEntity = std::nullopt;
     }
 
-    void PropertiesWindow::drawEntity(const ECS::Entity entity)
+    void PropertiesWindow::drawEntity(ECS::Entity entity)
     {
         ImGui::Spacing();
         if (entity.has<Tag>())
@@ -74,6 +74,28 @@ namespace Neon::Editor
         }
 
         drawComponentSpacing();
+
+        const float width = ImGui::GetContentRegionAvail().x;
+        if (ImGui::Button("Add Component", ImVec2(width, 0)))
+        {
+            ImGui::OpenPopup("componentPopup");
+        }
+
+        auto* editorSystem = Engine::getSystem<EditorSystem>();
+
+        if (ImGui::BeginPopup("componentPopup"))
+        {
+            for(const auto& component : editorSystem->getComponents())
+            {
+                if(ImGui::Button(component.name.c_str()))
+                {
+                    component.emplaceCallback(entity);
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+
+            ImGui::EndPopup();
+        }
     }
 
     void PropertiesWindow::drawAsset(const AssetID asset)
@@ -221,25 +243,14 @@ namespace Neon::Editor
         }
         grid.endRow();
 
-        if (!camera.matchWindowSize)
+        float aspectRatio = camera.getAspectRatio();
+        grid.nextRow("Aspect");
+        if (ImGui::DragFloat("##value", &aspectRatio, 0.01f, 1, 16384))
         {
-            int width = static_cast<int>(camera.getWidth());
-            int height = static_cast<int>(camera.getHeight());
-
-            grid.nextRow("Width");
-            if (ImGui::DragInt("##value", &width, 1.0f, 1, 16384))
-            {
-                camera.setWidth(static_cast<uint32_t>(width));
-            }
-            grid.endRow();
-
-            grid.nextRow("Height");
-            if (ImGui::DragInt("##value", &height, 1.0f, 1, 16384))
-            {
-                camera.setHeight(static_cast<uint32_t>(height));
-            }
-            grid.endRow();
+            camera.setAspectRatio(aspectRatio);
         }
+        grid.endRow();
+
     }
 
     template<>
@@ -294,11 +305,11 @@ namespace Neon::Editor
     void PropertiesWindow::drawAssetType<Mesh>(const AssetID asset)
     {
         AssetManager& assetManager = Engine::getAssetManager();
-        Mesh& mesh = assetManager.getAsset<Mesh>(asset);
+        AssetRef<Mesh> mesh = assetManager.getAsset<Mesh>(asset);
 
         drawComponentSpacing();
 
-        ImGui::Text("Vectex count: %ld", mesh.getVertexCount());
-        ImGui::Text("Index count: %ld", mesh.getIndexCount());
+        ImGui::Text("Vectex count: %ld", mesh->getVertexCount());
+        ImGui::Text("Index count: %ld", mesh->getIndexCount());
     }
 }

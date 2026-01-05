@@ -27,7 +27,7 @@ private:
     template<typename T>
     void drawAssetType(AssetID asset)
     {
-        ;
+
     }
 
     template<typename T>

@@ -53,24 +53,25 @@ namespace Neon
     {
     public:
         void preStartup() override;
-        void postStartup() override;
         void render() override;
         void event(Event *event) override;
     private:
+        void renderScene(ECS::Entity camEntity, Camera& camera);
         void renderMesh(const Rc<RHI::CommandList>& cl, ECS::Entity entity, const MeshRenderer& meshRenderer);
         void renderSubMesh(const Rc<RHI::CommandList>& cl, const MeshRenderer &meshRenderer, int materialIndex);
 
-        Rc<RHI::TextureView> getOrCreateTextureView(const AssetRef<Rc<RHI::Texture>>& texture) const;
-        Rc<RHI::TextureView> getOrCreateTextureView(const AssetRef<Rc<RHI::Texture>>& texture, const RHI::TextureViewDescription& viewDesc) const;
+        void updateFramebuffer();
 
-        mutable std::unordered_map<AssetID, Rc<RHI::TextureView>> m_textureViewCache;
-        mutable std::unordered_map<AssetID, Rc<RHI::TextureView>> m_cubeMapCache;
+        Rc<RHI::Framebuffer> getOrCreateCameraFramebuffer(const Rc<RenderTarget> &target) const;
+
+        mutable std::unordered_map<Rc<RenderTarget>, Rc<RHI::Framebuffer>> m_cameraFramebufferCache;
 
         GraphicsSystem* m_graphicsSystem{};
 
         Rc<RHI::Device> m_device{};
         Rc<RHI::Window> m_window{};
 
+        Rc<RHI::Framebuffer> m_framebuffer{};
         Rc<RHI::Pipeline> m_currentScenePipeline{};
 
         Rc<RHI::Buffer> m_cameraUniformBuffer{};

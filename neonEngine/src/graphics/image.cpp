@@ -1,12 +1,57 @@
 #include "image.h"
 
+#include "graphicsSystem.h"
+
 namespace Neon
 {
     Image::Image(const Rc<RHI::Texture>& texture, const Rc<RHI::Sampler>& sampler)
-    {
-        AssetManager& assetManager = Engine::getAssetManager();
+        : texture(texture), sampler(sampler)
+    {  }
 
-        this->texture = assetManager.addAsset(texture);
-        this->sampler = assetManager.addAsset(sampler);
+    RHI::PixelFormat getFormat(const RHI::PixelType type)
+    {
+        switch (type)
+        {
+            case RHI::PixelType::UnsignedByte:
+                return RHI::PixelFormat::R8G8B8A8Unorm;
+            case RHI::PixelType::Float:
+                return RHI::PixelFormat::R32G32B32A32Float;
+            default:
+                return RHI::PixelFormat::R8G8B8A8Unorm;
+        }
+    }
+
+    Image::Image(const TextureData &data, Rc<RHI::Sampler> sampler)
+    {
+        const Rc<RHI::Device> device = Engine::getSystem<GraphicsSystem>()->getDevice();
+        if(sampler == nullptr)
+        {
+            constexpr RHI::SamplerDescription samplerDesc;
+            sampler = device->createSampler(samplerDesc);
+        }
+
+        this->sampler = sampler;
+
+        RHI::TextureDescription texDesc{};
+        texDesc.width = data.width;
+        texDesc.height = data.height;
+        texDesc.format = getFormat(data.pixelType);
+
+        texture = device->createTexture(texDesc);
+
+        RHI::TextureUploadDescription uploadDesc{};
+
+        uploadDesc.data = data.data;
+        uploadDesc.pixelType = data.pixelType;
+        uploadDesc.pixelLayout = data.pixelLayout;
+        uploadDesc.width = data.width;
+        uploadDesc.height = data.height;
+
+        const auto cl = device->createCommandList();
+
+        cl->begin();
+        cl->updateTexture(texture, uploadDesc);
+
+        device->submit(cl);
     }
 }

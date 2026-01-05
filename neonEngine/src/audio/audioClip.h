@@ -1,14 +1,12 @@
 #pragma once
-#include "miniaudio.h"
 
 namespace Neon
 {
-class AudioClip
+struct AudioClip
 {
-public:
-
-private:
-   friend class AudioManager;
-   ma_decoder decoder = {};
+   void* data{};
+   uint64_t totalFrames = 0;
+   uint32_t channels = 0;
+   float sampleRate = 0;
 };
 }

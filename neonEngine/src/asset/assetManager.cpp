@@ -1,5 +1,7 @@
 #include "assetManager.h"
 
+#include <iostream>
+
 #include "core/engine.h"
 
 namespace Neon
@@ -22,16 +24,31 @@ namespace Neon
         return filePath;
     }
 
-    uint32_t AssetManager::generateID()
+    AssetID AssetManager::generateID()
     {
         {
-            return nextHandle++;
+            return AssetID(nextHandle++);
         }
     }
 
     bool AssetManager::isValid(const AssetID id) const
     {
-        return id > 0 && id < nextHandle;
+        return id.getId() > 0 && id.getId() < nextHandle;
+    }
+
+    std::stringstream AssetManager::serialize()
+    {
+        std::stringstream ss;
+        const std::string str = "hello____";
+        ss << str;
+        return ss;
+    }
+
+    void AssetManager::deserialize(std::stringstream& stream)
+    {
+        std::string str(9, '\0');
+        stream.read(&str[0], 9);
+        Log::info("Image deserialized: {}", str);
     }
 
     std::vector<AssetID> AssetManager::getAllAssetIDs()

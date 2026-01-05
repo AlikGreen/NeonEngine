@@ -1,5 +1,6 @@
 
 #include "editorSystem.h"
+#include "audio/audioSystem.h"
 #include "core/coreSystem.h"
 #include "core/engine.h"
 #include "graphics/imGuiSystem.h"
@@ -22,10 +23,10 @@ int main()
     Neon::Engine::initialize(config);
 
     Neon::Engine::registerSystem<Neon::CoreSystem>();
+    Neon::Engine::registerSystem<Neon::AudioSystem>();
     Neon::Engine::registerSystem<Neon::GraphicsSystem>(config.windowOptions);
     Neon::Engine::registerSystem<Neon::RenderSystem>();
     Neon::Engine::registerSystem<Neon::ImGuiSystem>();
-
     Neon::Engine::registerSystem<Neon::InputSystem>();
 
     Neon::Engine::registerSystem<Neon::Editor::EditorSystem>();

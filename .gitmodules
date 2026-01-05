@@ -7,9 +7,6 @@
 [submodule "neonEngine/dependencies/tinygltf"]
 	path = neonEngine/dependencies/tinygltf
 	url = https://github.com/syoyo/tinygltf.git
-[submodule "neonEngine/dependencies/miniaudio"]
-	path = neonEngine/dependencies/miniaudio
-	url = https://github.com/mackron/miniaudio.git
 [submodule "neonEngine/dependencies/entt"]
 	path = neonEngine/dependencies/entt
 	url = https://github.com/skypjack/entt.git
@@ -25,3 +22,12 @@
 [submodule "neonEngine/dependencies/neonecs"]
 	path = neonEngine/dependencies/neonecs
 	url = https://github.com/AlikGreen/NeonECS.git
+[submodule "neonEngine/dependencies/labsound"]
+	path = neonEngine/dependencies/labsound
+	url = https://github.com/LabSound/LabSound.git
+[submodule "neonEngine/dependencies/miniaudio"]
+	path = neonEngine/dependencies/miniaudio
+	url = https://github.com/mackron/miniaudio.git
+[submodule "neonEngine/dependencies/sail"]
+	path = neonEngine/dependencies/sail
+	url = https://github.com/HappySeaFox/sail.git

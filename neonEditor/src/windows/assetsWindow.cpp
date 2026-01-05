@@ -7,7 +7,6 @@
 #include "propertiesWindow.h"
 #include "asset/assetManager.h"
 #include "graphics/imGuiSystem.h"
-#include "graphics/loaders/prefabLoaderGLB.h"
 #include "../editorSystem.h"
 
 struct ImRect;
@@ -28,7 +27,7 @@ namespace Neon::Editor
 
                 if(ext == "glb")
                 {
-                    assetManager.loadAsset<PrefabLoaderGLB>(path);
+                    assetManager.import<Prefab>(path);
                     Log::info("Loaded Prefab {}", path);
                 }
 
@@ -44,9 +43,9 @@ namespace Neon::Editor
         AssetManager& assetManager = Engine::getAssetManager();
 
         static ImGuiTextFilter assetFilter;
-        static AssetID selectedAssetId = 0;
+        static AssetID selectedAssetId = AssetID::invalid();
 
-        static AssetID hoveredAssetId = 0;
+        static AssetID hoveredAssetId = AssetID::invalid();
         static double hoverStartTime = 0.0;
 
         ImGui::Begin("Assets");
@@ -174,7 +173,7 @@ namespace Neon::Editor
                 }
                 else if (hoveredAssetId == assetId)
                 {
-                    hoveredAssetId = 0;
+                    hoveredAssetId = AssetID::invalid();
                 }
 
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))

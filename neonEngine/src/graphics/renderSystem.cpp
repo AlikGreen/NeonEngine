@@ -4,8 +4,8 @@
 #include <neonRHI/neonRHI.h>
 
 #include "graphicsSystem.h"
-#include "materialShader.h"
-#include "mesh.h"
+#include "assets/materialShader.h"
+#include "assets/mesh.h"
 #include "asset/assetManager.h"
 #include "components/camera.h"
 #include "components/pointLight.h"
@@ -13,7 +13,7 @@
 #include "core/eventManager.h"
 #include "core/sceneManager.h"
 #include "core/components/transformComponent.h"
-#include "enums/imageAccess.h"
+
 #include "events/windowResizeEvent.h"
 #include "glad/glad.h"
 #include "glm/glm.hpp"
@@ -75,21 +75,8 @@ namespace Neon
         initCmdList->reserveBuffer(m_pointLightsUniformBuffer, sizeof(PointLightUniforms));
 
         m_device->submit(initCmdList);
-    }
 
-    void RenderSystem::postStartup()
-    {
-        auto& world = Engine::getSceneManager().getCurrentScene().getRegistry();
-        const auto cameras = world.view<Camera>();
-
-        for(auto [entity, camera] : cameras)
-        {
-            if(camera.matchWindowSize)
-            {
-                camera.setWidth(m_window->getWidth());
-                camera.setHeight(m_window->getHeight());
-            }
-        }
+        updateFramebuffer();
     }
 
     void RenderSystem::render()
@@ -101,11 +88,108 @@ namespace Neon
 
         auto [camEntity, camera, camTransform] = cameras.at(0);
 
+        renderScene(camEntity, camera);
+    }
+
+    void RenderSystem::renderMesh(const Rc<RHI::CommandList>& cl, const ECS::Entity entity, const MeshRenderer& meshRenderer)
+    {
+        const glm::mat4 modelMatrix = Transform::getWorldMatrix(entity);
+
+        MeshUniforms modelUniforms = { modelMatrix };
+
+        cl->updateBuffer(m_modelUniformBuffer, modelUniforms);
+
+        for(int i = 0; i < meshRenderer.materials.size(); i++)
+        {
+            renderSubMesh(cl, meshRenderer, i);
+        }
+    }
+
+    void RenderSystem::renderSubMesh(const Rc<RHI::CommandList>& cl, const MeshRenderer& meshRenderer, const int materialIndex)
+    {
+        if(meshRenderer.materials.size() <= materialIndex ||
+           meshRenderer.mesh->getPrimitives().size() <= materialIndex) return;
+
+        const AssetRef<MaterialShader> material = meshRenderer.materials[materialIndex];
+
+        const Rc<RHI::Pipeline> matPipeline = material->getPipeline();
+        if(matPipeline != m_currentScenePipeline)
+        {
+            m_currentScenePipeline = matPipeline;
+            cl->setPipeline(m_currentScenePipeline);
+        }
+
+
+        cl->setUniformBuffer("CameraUniforms", m_cameraUniformBuffer);
+        cl->setUniformBuffer("PointLightUniforms", m_pointLightsUniformBuffer);
+        cl->setUniformBuffer("ModelUniforms", m_modelUniformBuffer);
+
+        material->bindUniforms(cl);
+
+        const Primitive primitive = meshRenderer.mesh->getPrimitives().at(materialIndex);
+
+        cl->setVertexBuffer(0, meshRenderer.mesh->getVertexBuffer());
+        cl->setIndexBuffer(meshRenderer.mesh->getIndexBuffer(), RHI::IndexFormat::UInt32);
+        cl->drawIndexed(primitive.indexCount, 1, primitive.indexStart);
+    }
+
+    void RenderSystem::updateFramebuffer()
+    {
+        const uint32_t width = m_window->getWidth();
+        const uint32_t height = m_window->getHeight();
+
+        if(m_framebuffer != nullptr && width == m_framebuffer->getWidth() && height == m_framebuffer->getHeight())
+            return;
+
+        const RHI::TextureDescription depthDesc = RHI::TextureDescription::Texture2D(
+                        width,
+                        height,
+                        RHI::PixelFormat::D32FloatS8Uint,
+                        RHI::TextureUsage::DepthStencilTarget);
+
+        const Rc<RHI::Texture> depthTex = m_device->createTexture(depthDesc);
+
+        const auto depthViewDesc = RHI::TextureViewDescription(depthTex);
+        const Rc<RHI::TextureView> depthView = m_device->createTextureView(depthViewDesc);
+
+        const RHI::TextureDescription colDesc = RHI::TextureDescription::Texture2D(
+                width,
+                height,
+                RHI::PixelFormat::R8G8B8A8Unorm,
+                RHI::TextureUsage::ColorTarget);
+
+        const Rc<RHI::Texture> colTex = m_device->createTexture(colDesc);
+
+        const auto colViewDesc = RHI::TextureViewDescription(colTex);
+        const Rc<RHI::TextureView> colorView = m_device->createTextureView(colViewDesc);
+
+        const auto fbDesc = RHI::FramebufferDescription(depthView, colorView);
+        m_framebuffer = m_device->createFramebuffer(fbDesc);
+    }
+
+    void RenderSystem::event(Event *event)
+    {
+        if(dynamic_cast<WindowResizeEvent*>(event))
+        {
+            updateFramebuffer();
+        }
+    }
+
+    void RenderSystem::renderScene(ECS::Entity camEntity, Camera &camera)
+    {
+        auto& registry = Engine::getSceneManager().getCurrentScene().getRegistry();
+
         const Rc<RHI::CommandList> cl = m_device->createCommandList();
 
         cl->begin();
 
-        const Rc<RHI::Framebuffer> framebuffer = camera.getFramebuffer();
+        Rc<RHI::Framebuffer> framebuffer;
+
+        if(camera.renderTarget == nullptr)
+            framebuffer = m_framebuffer;
+        else
+            framebuffer = getOrCreateCameraFramebuffer(camera.renderTarget);
+
         cl->setFramebuffer(framebuffer);
 
         cl->clearColorTarget(0, {camera.bgColor.x, camera.bgColor.y, camera.bgColor.z, 1.0f});
@@ -121,7 +205,7 @@ namespace Neon
 
         cl->updateBuffer(m_cameraUniformBuffer, cameraMatrices);
 
-        const AssetRef<MaterialShader> material = camera.getSkyboxMaterial();
+        const AssetRef<MaterialShader> material = camera.skyboxMaterial;
 
         if(material)
         {
@@ -186,82 +270,25 @@ namespace Neon
         m_device->submit(cl);
     }
 
-    void RenderSystem::renderMesh(const Rc<RHI::CommandList>& cl, const ECS::Entity entity, const MeshRenderer& meshRenderer)
+    Rc<RHI::Framebuffer> RenderSystem::getOrCreateCameraFramebuffer(const Rc<RenderTarget> &target) const
     {
-        const glm::mat4 modelMatrix = Transform::getWorldMatrix(entity);
-
-        MeshUniforms modelUniforms = { modelMatrix };
-
-        cl->updateBuffer(m_modelUniformBuffer, modelUniforms);
-
-        for(int i = 0; i < meshRenderer.materials.size(); i++)
+        if(m_cameraFramebufferCache.contains(target))
         {
-            renderSubMesh(cl, meshRenderer, i);
-        }
-    }
+            const auto& fb  = m_cameraFramebufferCache.at(target);
 
-    void RenderSystem::renderSubMesh(const Rc<RHI::CommandList>& cl, const MeshRenderer& meshRenderer, const int materialIndex)
-    {
-        if(meshRenderer.materials.size() <= materialIndex ||
-           meshRenderer.mesh->getPrimitives().size() <= materialIndex) return;
-
-        const AssetRef<MaterialShader> material = meshRenderer.materials[materialIndex];
-
-        const Rc<RHI::Pipeline> matPipeline = material->getPipeline();
-        if(matPipeline != m_currentScenePipeline)
-        {
-            m_currentScenePipeline = matPipeline;
-            cl->setPipeline(m_currentScenePipeline);
+            if(fb->getWidth() == target->getWidth() && fb->getHeight() == target->getHeight())
+                return fb;
         }
 
+        RHI::FramebufferDescription fbDesc{};
 
-        cl->setUniformBuffer("CameraUniforms", m_cameraUniformBuffer);
-        cl->setUniformBuffer("PointLightUniforms", m_pointLightsUniformBuffer);
-        cl->setUniformBuffer("ModelUniforms", m_modelUniformBuffer);
+        fbDesc.colorTargets.push_back(target->getColorAttachment());
+        if(target->getDepthAttachment() != nullptr)
+            fbDesc.depthTarget = target->getDepthAttachment();
 
-        material->bindUniforms(cl);
+        Rc<RHI::Framebuffer> framebuffer = m_device->createFramebuffer(fbDesc);
 
-        const Primitive primitive = meshRenderer.mesh->getPrimitives().at(materialIndex);
-
-        cl->setVertexBuffer(0, meshRenderer.mesh->getVertexBuffer());
-        cl->setIndexBuffer(meshRenderer.mesh->getIndexBuffer(), RHI::IndexFormat::UInt32);
-        cl->drawIndexed(primitive.indexCount, 1, primitive.indexStart);
-    }
-
-    void RenderSystem::event(Event *event)
-    {
-        if(const auto resize = dynamic_cast<WindowResizeEvent*>(event))
-        {
-            auto& world = Engine::getSceneManager().getCurrentScene().getRegistry();
-            const auto cameras = world.view<Camera>();
-
-            for(auto [entity, camera] : cameras)
-            {
-                if(camera.matchWindowSize)
-                {
-                    camera.setWidth(resize->width);
-                    camera.setHeight(resize->height);
-                }
-            }
-        }
-    }
-
-    Rc<RHI::TextureView> RenderSystem::getOrCreateTextureView(const AssetRef<Rc<RHI::Texture>>& texture) const
-    {
-        const RHI::TextureViewDescription viewDesc{ *texture };
-        return getOrCreateTextureView(texture, viewDesc);
-    }
-
-    Rc<RHI::TextureView> RenderSystem::getOrCreateTextureView(const AssetRef<Rc<RHI::Texture>>& texture, const RHI::TextureViewDescription& viewDesc) const
-    {
-        if(texture == nullptr) return nullptr;
-
-        if(m_textureViewCache.contains(texture.getID()))
-            return m_textureViewCache.at(texture.getID());
-
-        Rc<RHI::TextureView> view = m_device->createTextureView(viewDesc);
-        m_textureViewCache.emplace(texture.getID(), view);
-
-        return view;
+        m_cameraFramebufferCache[target] = framebuffer;
+        return framebuffer;
     }
 }

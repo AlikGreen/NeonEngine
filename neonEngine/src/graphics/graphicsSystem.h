@@ -1,5 +1,6 @@
 #pragma once
 #include "device.h"
+#include "renderTarget.h"
 #include "core/system.h"
 #include "descriptions/windowCreationOptions.h"
 
@@ -17,6 +18,8 @@ public:
     void shutdown() override;
 
     void drawTexture(const Rc<RHI::TextureView> &texture, const Rc<RHI::Sampler> &sampler) const;
+
+    [[nodiscard]] Rc<RenderTarget> createRenderTarget(uint32_t width, uint32_t height, bool useDepth = true) const;
 
     [[nodiscard]] Rc<RHI::TextureView> getDefaultTexture() { return m_defaultTexture; }
     [[nodiscard]] Rc<RHI::Device> getDevice() const { return m_device; }

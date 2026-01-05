@@ -2,6 +2,10 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/labsound" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/labsound/third_party/libnyquist" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/labsound/third_party/libsamplerate" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/labsound/third_party/miniaudio" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/miniaudio" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonecs" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonecs/dependencies/neonCore" vcs="Git" />
@@ -9,6 +13,7 @@
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/glfw" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/glm" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/imgui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/imguizmo" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/neonCore" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/neonLog" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/neonLog/dependencies/spdlog" vcs="Git" />
@@ -18,6 +23,7 @@
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/rapidyaml/ext/c4core/src/c4/ext/debugbreak" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/rapidyaml/ext/c4core/src/c4/ext/fast_float" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/spirv-cross" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/sail" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/tinygltf" vcs="Git" />
   </component>
 </project>

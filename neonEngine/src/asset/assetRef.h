@@ -9,9 +9,8 @@ template <typename T>
 class AssetRef
 {
 public:
-    AssetRef() : cachedAsset(nullptr), id(0)         {  };
-    AssetRef(AssetID id) : cachedAsset(nullptr), id(id) {  };
-    AssetRef(T* asset) : cachedAsset(asset)      {  } // NOLINT(*-explicit-constructor)
+    AssetRef() : assetManager(nullptr), cachedAsset(nullptr), id(0) {  };
+    AssetRef(std::nullptr_t) : assetManager(nullptr), cachedAsset(nullptr), id(0) { }
 
     T* operator->() const
     {
@@ -48,24 +47,28 @@ public:
 
     operator bool() const
     {
-        return id != 0;
+        return id.isValid();
     }
 private:
     friend class AssetManager;
+
+    AssetRef(AssetManager* assetManager, const AssetID id) : assetManager(assetManager), cachedAsset(nullptr), id(id) {  };
+    AssetRef(AssetManager* assetManager, T* asset) : assetManager(assetManager), cachedAsset(asset)      {  } // NOLINT(*-explicit-constructor)
+
     void updateCachedAsset() const
     {
-        AssetManager& assetManger = Engine::getAssetManager();
-        if (cachedAsset == nullptr && assetManger.isValid(id))
+        if (cachedAsset == nullptr && assetManager != nullptr && assetManager->isValid(id))
         {
-            cachedAsset = &assetManger.getAsset<T>(id);
+            cachedAsset = &assetManager->getAssetRef<T>(id);
         }
     }
 
+    AssetManager* assetManager;
     mutable T* cachedAsset = nullptr;
     AssetID id{};
 };
 
-template<typename T> // requires (!std::is_const_v<T>)
+template<typename T>
 AssetRef<T> AssetManager::addAsset(T* asset, std::string name)
 {
     const auto typeIndex = std::type_index(typeid(T));
@@ -80,7 +83,7 @@ AssetRef<T> AssetManager::addAsset(T* asset, std::string name)
     assetsMetadata.emplace(handle, AssetMetadata { name, typeIndex, "" });
 
     assetHandles.push_back(handle);
-    return handle;
+    return AssetRef<T>(this, handle);
 }
 
 template<typename T>
@@ -99,38 +102,36 @@ AssetRef<T> AssetManager::addAsset(T asset, std::string name)
     assetsMetadata.emplace(handle, AssetMetadata { name, typeIndex, "" });
 
     assetHandles.push_back(handle);
-    return handle;
+    return AssetRef<T>(this, handle);
 }
 
 template<typename T>
-AssetRef<T> AssetManager::loadAsset(const std::string& filepath, std::string name)
+AssetRef<T> AssetManager::import(const std::string& filepath)
 {
     const std::filesystem::path fullPath = getFullPath(filepath);
-    if(pathAssetMap.contains(fullPath.string()))
-        return pathAssetMap.at(fullPath.string());
 
     Debug::ensure(exists(fullPath), "File was not found\n{}", filepath);
 
-    if(name.empty())
-    {
-        name = fullPath.stem().string();
-    }
     const auto typeIndex = std::type_index(typeid(T));
 
-    Debug::ensure(loaders.contains(typeIndex), "Cannot load object of type {}", typeid(T).name());
+    Debug::ensure(importers.contains(typeIndex), "Cannot load object of type {}", typeid(T).name());
 
-    const std::string fileExtension = fullPath.extension().string();
-    Debug::ensure(loaders.at(typeIndex).contains(fileExtension), "Cannot load files with {} extension", fileExtension);
-
-    const auto assetLoader = loaders.at(typeIndex).at(fileExtension).get();
-    void* asset = assetLoader->load(fullPath.string());
+    const std::string name = fullPath.stem().string();
+    const auto assetLoader = importers.at(typeIndex).get();
+    T* asset = static_cast<T*>(assetLoader->load(fullPath.string()));
 
     AssetID handle = generateID();
     assets.emplace(handle, asset);
-    assetsMetadata.emplace(handle, AssetMetadata { name, typeIndex, fullPath });
-    assetHandles.push_back(handle);
-    pathAssetMap.emplace(fullPath.string(), handle);
+    assetsMetadata.emplace(handle, AssetMetadata { name, typeIndex, filepath });
 
-    return handle;
+    assetHandles.push_back(handle);
+    return AssetRef<T>(this, handle);
+}
+
+template<typename T>
+AssetRef<T> AssetManager::getAsset(const AssetID assetHandle)
+{
+    Debug::ensure(isValid(assetHandle), "Tried to get an asset that did not exist.");
+    return AssetRef<T>(this, static_cast<T*>(assets.at(assetHandle)));
 }
 }
