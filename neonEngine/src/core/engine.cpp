@@ -10,9 +10,10 @@
 #include "sceneManager.h"
 #include "audio/audioManager.h"
 #include "asset/assetManager.h"
-#include "graphics/importers/glbPrefabImporter.h"
+#include "graphics/importers/glbSceneImporter.h"
 #include "graphics/importers/shaderImporter.h"
 #include "graphics/importers/textureImporter.h"
+#include "core/serializers/sceneSerializer.h"
 
 namespace Neon
 {
@@ -36,10 +37,12 @@ namespace Neon
         audioManager = makeBox<AudioManager>();
         sceneManager = makeBox<SceneManager>();
 
-        getAssetManager().registerImporter<GLBPrefabImporter, Prefab>();
+        getAssetManager().registerImporter<GLBSceneImporter, Scene>();
         getAssetManager().registerImporter<TextureImporter, TextureData>();
         getAssetManager().registerImporter<ShaderImporter, Rc<RHI::Shader>>();
         getAssetManager().registerImporter<AudioClipImporter, AudioClip>();
+
+        getAssetManager().registerSerializer<SceneSerializer, Scene>();
     }
 
     void Engine::quit()

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #include "assetManager.h"
 #include "core/engine.h"
 
@@ -10,7 +12,7 @@ class AssetRef
 {
 public:
     AssetRef() : assetManager(nullptr), cachedAsset(nullptr), id(0) {  };
-    AssetRef(std::nullptr_t) : assetManager(nullptr), cachedAsset(nullptr), id(0) { }
+    AssetRef(T* asset) : assetManager(nullptr), cachedAsset(asset)      {  }
 
     T* operator->() const
     {
@@ -53,7 +55,6 @@ private:
     friend class AssetManager;
 
     AssetRef(AssetManager* assetManager, const AssetID id) : assetManager(assetManager), cachedAsset(nullptr), id(id) {  };
-    AssetRef(AssetManager* assetManager, T* asset) : assetManager(assetManager), cachedAsset(asset)      {  } // NOLINT(*-explicit-constructor)
 
     void updateCachedAsset() const
     {
@@ -132,6 +133,27 @@ template<typename T>
 AssetRef<T> AssetManager::getAsset(const AssetID assetHandle)
 {
     Debug::ensure(isValid(assetHandle), "Tried to get an asset that did not exist.");
-    return AssetRef<T>(this, static_cast<T*>(assets.at(assetHandle)));
+    return AssetRef<T>(this, assetHandle);
+}
+
+template<typename T>
+AssetStream AssetManager::serialize(AssetRef<T> asset)
+{
+    Debug::ensure(serializers.contains(typeid(T)), "Tried to serialize that did not have a serializer registered for.");
+
+    const Box<AssetSerializer>& serializer = serializers.at(typeid(T));
+    AssetStream stream;
+    serializer->serialize(stream, *this, &asset.get());
+    return stream;
+}
+
+template<typename T>
+AssetRef<T> AssetManager::deserialize(AssetStream& assetStream)
+{
+    Debug::ensure(serializers.contains(typeid(T)), "Tried to deserialize that did not have a serializer registered for.");
+
+    const Box<AssetSerializer>& serializer = serializers.at(typeid(T));
+    T* asset = static_cast<T*>(serializer->deserialize(assetStream, *this));
+    return addAsset(asset);
 }
 }

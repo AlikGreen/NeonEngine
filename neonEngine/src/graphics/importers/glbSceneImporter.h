@@ -1,15 +1,15 @@
 #pragma once
 #include <tiny_gltf.h>
 
-#include "core/prefab.h"
 #include "asset/assetImporter.h"
+#include "core/scene.h"
 #include "graphics/image.h"
 #include "graphics/assets/materialShader.h"
 #include "graphics/assets/mesh.h"
 
 namespace Neon
 {
-class GLBPrefabImporter final : public AssetImporter
+class GLBSceneImporter final : public AssetImporter
 {
 public:
     void* load(const std::string& filePath) override;
@@ -18,7 +18,7 @@ private:
 
     static bool loadModel(tinygltf::Model& model, const std::string& filePath);
     static std::vector<AssetRef<MaterialShader>> processMaterials(const tinygltf::Model& model);
-    static void processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetRef<MaterialShader>>& materials, const AssetRef<MaterialShader>& defaultMaterial);
+    static void processNodes(const tinygltf::Model& model, Scene& scene, const std::vector<AssetRef<MaterialShader>>& materials, const AssetRef<MaterialShader>& defaultMaterial);
 
     static void setupTransform(ECS::Entity& entity, const tinygltf::Node& node);
     static void setupMeshRenderer(ECS::Entity& entity, AssetRef<Mesh> meshHandle, const tinygltf::Mesh& mesh, const AssetRef<MaterialShader>& defaultMaterial, const std::vector<AssetRef<MaterialShader>>& materials);

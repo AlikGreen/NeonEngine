@@ -6,6 +6,7 @@
 #include "graphics/imGuiSystem.h"
 #include "graphics/renderSystem.h"
 #include "input/inputSystem.h"
+#include "scripting/scriptingSystem.h"
 #include "windows/assetsWindow.h"
 #include "windows/propertiesWindow.h"
 #include "windows/sceneGraphWindow.h"
@@ -28,6 +29,7 @@ int main()
     Neon::Engine::registerSystem<Neon::RenderSystem>();
     Neon::Engine::registerSystem<Neon::ImGuiSystem>();
     Neon::Engine::registerSystem<Neon::InputSystem>();
+    Neon::Engine::registerSystem<Neon::ScriptingSystem>();
 
     Neon::Engine::registerSystem<Neon::Editor::EditorSystem>();
 

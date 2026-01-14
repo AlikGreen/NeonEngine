@@ -15,7 +15,6 @@
 #include "core/components/transformComponent.h"
 
 #include "events/windowResizeEvent.h"
-#include "glad/glad.h"
 #include "glm/glm.hpp"
 #include "glm/gtx/dual_quaternion.hpp"
 
@@ -62,7 +61,6 @@ namespace Neon
         m_screenMesh.setIndices(quadIndices);
 
         m_screenMesh.apply();
-
 
         DebugUniforms debugUniforms{};
         debugUniforms.debugUvs     = false;

@@ -1,4 +1,4 @@
-#include "glbPrefabImporter.h"
+#include "glbSceneImporter.h"
 
 #include <tiny_gltf.h>
 
@@ -11,12 +11,13 @@
 #include <neonLog/neonLog.h>
 
 
+#include "core/scene.h"
 #include "core/components/transformComponent.h"
 #include "graphics/image.h"
 
 namespace Neon
 {
-    void* GLBPrefabImporter::load(const std::string& filePath)
+    void* GLBSceneImporter::load(const std::string& filePath)
     {
         tinygltf::Model model;
         if (!loadModel(model, filePath))
@@ -24,15 +25,14 @@ namespace Neon
             return nullptr;
         }
 
-        auto prefab = std::make_unique<Prefab>();
-        ECS::Entity rootEntity = prefab->scene.createEntity();
-        rootEntity.emplace<PrefabComponent>();
+        const auto scene = new Scene();
+        ECS::Entity rootEntity = scene->createEntity();
 
         const auto materials = processMaterials(model);
         const AssetRef<MaterialShader> defaultMaterial = Engine::getAssetManager().addAsset(MaterialShader::createPBR(), "Default Material");
-        processNodes(model, *prefab, materials, defaultMaterial);
+        processNodes(model, *scene, materials, defaultMaterial);
 
-        return prefab.release();
+        return scene;
     }
 
     bool isGlbFile(std::filesystem::path const& path)
@@ -51,7 +51,7 @@ namespace Neon
             && magic[3] == 'F';
     }
 
-    bool GLBPrefabImporter::loadModel(tinygltf::Model& model, const std::string& filePath)
+    bool GLBSceneImporter::loadModel(tinygltf::Model& model, const std::string& filePath)
     {
         tinygltf::TinyGLTF loader;
         std::string err, warn;
@@ -75,7 +75,7 @@ namespace Neon
         return success;
     }
 
-    std::vector<AssetRef<MaterialShader>> GLBPrefabImporter::processMaterials(const tinygltf::Model& model)
+    std::vector<AssetRef<MaterialShader>> GLBSceneImporter::processMaterials(const tinygltf::Model& model)
     {
         std::vector<AssetRef<MaterialShader>> materials;
         materials.reserve(model.materials.size());
@@ -88,7 +88,7 @@ namespace Neon
         return materials;
     }
 
-    void GLBPrefabImporter::processNodes(const tinygltf::Model& model, Prefab& prefab, const std::vector<AssetRef<MaterialShader>>& materials, const AssetRef<MaterialShader>& defaultMaterial)
+    void GLBSceneImporter::processNodes(const tinygltf::Model& model, Scene& scene, const std::vector<AssetRef<MaterialShader>>& materials, const AssetRef<MaterialShader>& defaultMaterial)
     {
         for (const auto& node : model.nodes)
         {
@@ -99,14 +99,14 @@ namespace Neon
             if (!nMesh) continue;
 
             const auto meshHandle = Engine::getAssetManager().addAsset(nMesh, mesh.name);
-            ECS::Entity entity = prefab.scene.createEntity();
+            ECS::Entity entity = scene.createEntity();
 
             setupTransform(entity, node);
             setupMeshRenderer(entity, meshHandle, mesh, defaultMaterial, materials);
         }
     }
 
-    void GLBPrefabImporter::setupTransform(ECS::Entity& entity, const tinygltf::Node& node)
+    void GLBSceneImporter::setupTransform(ECS::Entity& entity, const tinygltf::Node& node)
     {
         auto& transform = entity.get<Transform>();
 
@@ -128,7 +128,7 @@ namespace Neon
         }
     }
 
-    void GLBPrefabImporter::setupMeshRenderer(ECS::Entity& entity, const AssetRef<Mesh> meshHandle, const tinygltf::Mesh& mesh, const AssetRef<MaterialShader>& defaultMaterial, const std::vector<AssetRef<MaterialShader>>& materials)
+    void GLBSceneImporter::setupMeshRenderer(ECS::Entity& entity, const AssetRef<Mesh> meshHandle, const tinygltf::Mesh& mesh, const AssetRef<MaterialShader>& defaultMaterial, const std::vector<AssetRef<MaterialShader>>& materials)
     {
         auto& meshRenderer = entity.emplace<MeshRenderer>();
         meshRenderer.mesh = meshHandle;
@@ -147,7 +147,7 @@ namespace Neon
         }
     }
 
-    AssetRef<MaterialShader> GLBPrefabImporter::processMaterial(const tinygltf::Material& material, const tinygltf::Model& model)
+    AssetRef<MaterialShader> GLBSceneImporter::processMaterial(const tinygltf::Material& material, const tinygltf::Model& model)
     {
         auto mat = MaterialShader::createPBR();
         // mat.name = material.name;
@@ -159,7 +159,7 @@ namespace Neon
         return Engine::getAssetManager().addAsset(mat, material.name);
     }
 
-    void GLBPrefabImporter::setupPBRProperties(MaterialShader& mat, const tinygltf::Material& material, const tinygltf::Model& model)
+    void GLBSceneImporter::setupPBRProperties(MaterialShader& mat, const tinygltf::Material& material, const tinygltf::Model& model)
     {
         const Rc<RHI::Device> device = Engine::getSystem<GraphicsSystem>()->getDevice();
         const auto& pbr = material.pbrMetallicRoughness;
@@ -169,7 +169,7 @@ namespace Neon
             const AssetRef<Image> imageRef = loadTexture(model.textures[pbr.baseColorTexture.index], model, true);
             Rc<RHI::TextureView> view = device->createTextureView(RHI::TextureViewDescription(imageRef->texture));
             mat.setTexture("albedoTexture", view);
-            mat.setSampler("albedoTexture", imageRef->sampler);
+            mat.setSampler("albedoSampler", imageRef->sampler);
         }
 
         const auto& baseColor = pbr.baseColorFactor;
@@ -182,11 +182,11 @@ namespace Neon
             const AssetRef<Image> imageRef = loadTexture(model.textures[pbr.metallicRoughnessTexture.index], model, false);
             Rc<RHI::TextureView> view = device->createTextureView(RHI::TextureViewDescription(imageRef->texture));
             mat.setTexture("metallicRoughnessTexture", view);
-            mat.setSampler("metallicRoughnessTexture", imageRef->sampler);
+            mat.setSampler("metallicRoughnessSampler", imageRef->sampler);
         }
     }
 
-    void GLBPrefabImporter::setupTextureProperties(MaterialShader& mat, const tinygltf::Material& material, const tinygltf::Model& model)
+    void GLBSceneImporter::setupTextureProperties(MaterialShader& mat, const tinygltf::Material& material, const tinygltf::Model& model)
     {
         const Rc<RHI::Device> device = Engine::getSystem<GraphicsSystem>()->getDevice();
 
@@ -195,7 +195,7 @@ namespace Neon
             const AssetRef<Image> imageRef = loadTexture(model.textures[material.normalTexture.index], model, false);
             Rc<RHI::TextureView> view = device->createTextureView(RHI::TextureViewDescription(imageRef->texture));
             mat.setTexture("normalTexture", view);
-            mat.setSampler("normalTexture", imageRef->sampler);
+            mat.setSampler("normalSampler", imageRef->sampler);
 
             // mat.setProperty("normalTextureStrength", static_cast<float>(material.normalTexture.scale));
         }
@@ -203,9 +203,9 @@ namespace Neon
         if (material.occlusionTexture.index >= 0)
         {
             const AssetRef<Image> imageRef = loadTexture(model.textures[material.occlusionTexture.index], model, false);
-            Rc<RHI::TextureView> view = device->createTextureView(RHI::TextureViewDescription(imageRef->texture));
+            const Rc<RHI::TextureView> view = device->createTextureView(RHI::TextureViewDescription(imageRef->texture));
             mat.setTexture("occlusionTexture", view);
-            mat.setSampler("occlusionTexture", imageRef->sampler);
+            mat.setSampler("occlusionSampler", imageRef->sampler);
 
             mat.setProperty("occlusionTextureStrength", static_cast<float>(material.occlusionTexture.strength));
         }
@@ -213,16 +213,16 @@ namespace Neon
         if (material.emissiveTexture.index >= 0)
         {
             const AssetRef<Image> imageRef = loadTexture(model.textures[material.emissiveTexture.index], model, false);
-            Rc<RHI::TextureView> view = device->createTextureView(RHI::TextureViewDescription(imageRef->texture));
+            const Rc<RHI::TextureView> view = device->createTextureView(RHI::TextureViewDescription(imageRef->texture));
             mat.setTexture("emissionTexture", view);
-            mat.setSampler("emissionTexture", imageRef->sampler);
+            mat.setSampler("emissionSampler", imageRef->sampler);
         }
 
         const auto& emission = material.emissiveFactor;
         // mat.setProperty("emission", glm::vec3(emission[0], emission[1], emission[2]));
     }
 
-    void GLBPrefabImporter::setupMaterialFlags(MaterialShader& mat, const tinygltf::Material& material)
+    void GLBSceneImporter::setupMaterialFlags(MaterialShader& mat, const tinygltf::Material& material)
     {
         // mat.setProperty("alphaCutoff", static_cast<float>(material.alphaCutoff));
         // mat.setProperty<int>("doubleSided", material.doubleSided);
@@ -304,7 +304,7 @@ namespace Neon
         return PixelFormat::R8G8B8A8Unorm;
     }
 
-    AssetRef<Image> GLBPrefabImporter::loadTexture(const tinygltf::Texture& texture, const tinygltf::Model& model, const bool isSrgb)
+    AssetRef<Image> GLBSceneImporter::loadTexture(const tinygltf::Texture& texture, const tinygltf::Model& model, const bool isSrgb)
     {
         if (texture.source < 0)
         {
@@ -352,7 +352,7 @@ namespace Neon
         return assetManager.addAsset(Image(tex, sampler), texture.name);
     }
 
-    Mesh* GLBPrefabImporter::createMesh(const tinygltf::Mesh& mesh, const tinygltf::Model& model)
+    Mesh* GLBSceneImporter::createMesh(const tinygltf::Mesh& mesh, const tinygltf::Model& model)
     {
         if (mesh.primitives.empty())
         {
@@ -413,7 +413,7 @@ namespace Neon
     }
 
 
-    std::vector<glm::vec3> GLBPrefabImporter::extractVertexPositions(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
+    std::vector<glm::vec3> GLBSceneImporter::extractVertexPositions(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
     {
         const auto it = primitive.attributes.find("POSITION");
         if (it == primitive.attributes.end())
@@ -438,7 +438,7 @@ namespace Neon
         return positions;
     }
 
-    std::vector<glm::vec3> GLBPrefabImporter::extractVertexNormals(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
+    std::vector<glm::vec3> GLBSceneImporter::extractVertexNormals(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
     {
         const auto it = primitive.attributes.find("NORMAL");
         if (it == primitive.attributes.end())
@@ -463,7 +463,7 @@ namespace Neon
         return normals;
     }
 
-    std::vector<glm::vec2> GLBPrefabImporter::extractVertexUVs(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
+    std::vector<glm::vec2> GLBSceneImporter::extractVertexUVs(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
     {
         const auto it = primitive.attributes.find("TEXCOORD_0");
         if (it == primitive.attributes.end())
@@ -488,7 +488,7 @@ namespace Neon
         return uvs;
     }
 
-    std::vector<uint32_t> GLBPrefabImporter::extractIndices(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
+    std::vector<uint32_t> GLBSceneImporter::extractIndices(const tinygltf::Primitive& primitive, const tinygltf::Model& model)
     {
         if (primitive.indices < 0)
         {
@@ -525,7 +525,7 @@ namespace Neon
     }
 
 
-    RHI::PixelType GLBPrefabImporter::tinyGltfGetPixelType(const tinygltf::Image &img)
+    RHI::PixelType GLBSceneImporter::tinyGltfGetPixelType(const tinygltf::Image &img)
     {
         switch (img.pixel_type)
         {

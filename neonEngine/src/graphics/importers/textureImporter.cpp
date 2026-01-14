@@ -2,6 +2,7 @@
 
 #include <stb_image.h>
 #include <filesystem>
+#include <algorithm>
 
 #include "debug.h"
 #include "graphics/assets/textureData.h"
@@ -19,7 +20,7 @@ namespace Neon
     void* TextureImporter::load(const std::string &filepath)
     {
         std::string ext = std::filesystem::path(filepath).extension().string();
-        std::ranges::transform(ext, ext.begin(), ::tolower);
+        std::ranges::transform(ext, ext.begin(), tolower);
 
         if (!ext.empty() && ext[0] == '.')
             ext = ext.substr(1);

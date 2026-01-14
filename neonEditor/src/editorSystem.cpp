@@ -19,7 +19,7 @@ namespace Neon::Editor
         auto& scene = Engine::getSceneManager().getCurrentScene();
 
         AssetManager& assetManager = Engine::getAssetManager();
-        auto model = assetManager.import<Prefab>("models/monkey.glb");
+        auto model = assetManager.import<Scene>("models/monkey.glb");
 
         ECS::Entity modelEntity = scene.import(model.get());
         modelEntity.get<Tag>().name = "Imported model";
@@ -27,7 +27,7 @@ namespace Neon::Editor
 
 
         auto skyboxData =  assetManager.loadUnmanaged<TextureData>("textures/skybox.hdr");
-        const Rc<RHI::Texture> skyboxTexture = assetManager.addAsset(Image(*skyboxData.release()), "Skybox Image")->texture;
+        const Rc<RHI::Texture> skyboxTexture = assetManager.addAsset(Image(skyboxData.release()), "Skybox Image")->texture;
         const auto skyboxTexViewDesc = RHI::TextureViewDescription(skyboxTexture);
         const Rc<RHI::TextureView> skyboxTextureView = Engine::getSystem<GraphicsSystem>()->getDevice()->createTextureView(skyboxTexViewDesc);
 
@@ -71,6 +71,8 @@ namespace Neon::Editor
         imGuiSystem->shouldDrawConsole = true;
         imGuiSystem->shouldDrawStats = true;
 
+        viewportWindow.init();
+
         imGuiSystem->addRenderCallback([this]()
         {
             viewportWindow.render();
@@ -80,8 +82,12 @@ namespace Neon::Editor
             editorViewport.render();
         });
 
-        auto data = assetManager.serialize();
-        assetManager.deserialize(data);
+        model->name = "monkey number 12";
+        Log::info("Original: {} ", model->name);
+        auto stream = assetManager.serialize(model);
+        stream.setCursorPos(0);
+        const AssetRef<Scene> deserialized = assetManager.deserialize<Scene>(stream);
+        Log::info("Prefab loaded: {} ", deserialized->name);
     }
 
     void EditorSystem::update()

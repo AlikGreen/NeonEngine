@@ -18,17 +18,26 @@ namespace Neon
         name = description.name;
         device = Engine::getSystem<GraphicsSystem>()->getDevice();
         const RHI::ShaderReflection reflection = description.shader.get()->getShaderReflection();
-        for(const auto& ub : reflection.uniformBlocks)
-        {
-            if(ub.name == "Properties")
-                memberInfos = ub.members;
-        }
 
         uint32_t requiredSize = 0;
-        for (const auto& mem : memberInfos)
-            requiredSize = std::max(requiredSize, mem.offset + mem.size);
 
-        samplerInfos = reflection.samplers;
+        for(const auto& resource : reflection.resources)
+        {
+            if(resource.type == RHI::ShaderReflection::ResourceType::ConstantBuffer &&  resource.name == "Properties")
+            {
+                for (const auto& mem : resource.members)
+                {
+                    memberInfos.push_back(mem);
+                    requiredSize = std::max(requiredSize, mem.offset + mem.size);
+                }
+            }
+
+            if(resource.type == RHI::ShaderReflection::ResourceType::Sampler)
+                samplerInfos.push_back(resource);
+            if(resource.type == RHI::ShaderReflection::ResourceType::Texture)
+                textureInfos.push_back(resource);
+        }
+
 
         if (cpuData.size() < requiredSize)
             cpuData.resize(requiredSize);
@@ -45,7 +54,7 @@ namespace Neon
         depthState.enableDepthWrite = description.depthWrite;
 
         RHI::RasterizerState rasterizerState{};
-        rasterizerState.cullMode = RHI::CullMode::None; // Usually Back, but None is safe for debugging
+        rasterizerState.cullMode = RHI::CullMode::Back;
 
         const RHI::RenderTargetsDescription targetsDesc{};
 
@@ -75,18 +84,18 @@ namespace Neon
 
     bool MaterialShader::setTexture(std::string name, Rc<RHI::TextureView> texture)
     {
-        bool containsSampler = false;
+        bool containsTexture = false;
 
-        for(const auto& samplerInfo : samplerInfos)
+        for(const auto& textureInfo : textureInfos)
         {
-            if(samplerInfo.name == name)
+            if(textureInfo.name == name)
             {
-                containsSampler = true;
+                containsTexture = true;
                 break;
             }
         }
 
-        if(!containsSampler || texture.get() == nullptr)
+        if(!containsTexture || texture.get() == nullptr)
             return false;
 
         if(textures.contains(name) && textures.at(name) == texture)
@@ -138,11 +147,14 @@ namespace Neon
         if(propertiesBuffer != nullptr && !cpuData.empty())
             commandList->setUniformBuffer("Properties", propertiesBuffer);
 
+        for(const auto& textureInfo : textureInfos)
+        {
+            if(!textures.contains(textureInfo.name))
+                commandList->setTexture(textureInfo.name, defaultTexture);
+        }
+
         for(const auto& samplerInfo : samplerInfos)
         {
-            if(!textures.contains(samplerInfo.name))
-                commandList->setTexture(samplerInfo.name, defaultTexture);
-
             if(!samplers.contains(samplerInfo.name))
                 commandList->setSampler(samplerInfo.name, defaultSampler);
         }
@@ -161,7 +173,7 @@ namespace Neon
     MaterialShader MaterialShader::createPBR()
     {
         AssetManager& assetManager = Engine::getAssetManager();
-        const auto shader = assetManager.import<Rc<RHI::Shader>>("shaders/pbr.glsl");
+        const auto shader = assetManager.import<Rc<RHI::Shader>>("shaders/pbr.slang");
 
         MaterialDescription desc{};
         desc.name = "PBR";
@@ -177,7 +189,7 @@ namespace Neon
     MaterialShader MaterialShader::createEquirectangularSkybox()
     {
         AssetManager& assetManager = Engine::getAssetManager();
-        const auto shader = assetManager.import<Rc<RHI::Shader>>("shaders/skybox.glsl");
+        const auto shader = assetManager.import<Rc<RHI::Shader>>("shaders/skybox.slang");
 
         MaterialDescription desc{};
         desc.name = "Skybox equirectangular";

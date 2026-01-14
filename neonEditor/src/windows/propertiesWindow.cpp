@@ -305,7 +305,7 @@ namespace Neon::Editor
     void PropertiesWindow::drawAssetType<Mesh>(const AssetID asset)
     {
         AssetManager& assetManager = Engine::getAssetManager();
-        AssetRef<Mesh> mesh = assetManager.getAsset<Mesh>(asset);
+        const AssetRef<Mesh> mesh = assetManager.getAsset<Mesh>(asset);
 
         drawComponentSpacing();
 

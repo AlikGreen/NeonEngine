@@ -39,8 +39,8 @@ namespace Neon
     struct PointLightUniform
     {
         glm::vec3 position;
-        float power;
-        glm::vec3 color;
+        alignas(16) float power;
+        alignas(16) glm::vec3 color;
     };
 
     struct PointLightUniforms

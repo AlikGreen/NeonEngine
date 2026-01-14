@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/engine.h"
-#include "core/prefab.h"
+#include "core/scene.h"
 
 #include "input/input.h"
 

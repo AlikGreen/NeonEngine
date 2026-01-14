@@ -1,6 +1,5 @@
 #include "scene.h"
 
-#include "prefab.h"
 #include "components/parentComponent.h"
 #include "components/tagComponent.h"
 #include "components/transformComponent.h"
@@ -24,11 +23,11 @@ namespace Neon
         return entity;
     }
 
-    ECS::Entity Scene::import(Prefab& prefab)
+    ECS::Entity Scene::import(Scene& scene)
     {
-        const std::vector<ECS::Entity> newEntities = registry.merge(prefab.scene.getRegistry());
+        const std::vector<ECS::Entity> newEntities = registry.merge(scene.getRegistry());
 
-        const ECS::Entity parent = createEntity(prefab.name);
+        const ECS::Entity parent = createEntity(scene.name);
 
         for(auto entity : newEntities)
         {

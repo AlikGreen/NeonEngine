@@ -29,7 +29,7 @@ public:
     requires std::is_trivially_copyable_v<T>
     bool setProperty(const std::string& name, T const& value, const Rc<RHI::CommandList>& updateCmd = nullptr)
     {
-        std::optional<RHI::ShaderUniformBlockMember> member = std::nullopt;
+        std::optional<RHI::ShaderReflection::Member> member = std::nullopt;
         for(const auto& mem : memberInfos)
         {
             if(mem.name == name)
@@ -63,7 +63,7 @@ public:
     requires std::is_trivially_copyable_v<T>
     std::optional<T> getProperty(const std::string& name) const
     {
-        std::optional<RHI::ShaderUniformBlockMember> member = std::nullopt;
+        std::optional<RHI::ShaderReflection::Member> member = std::nullopt;
         for(const auto& mem : memberInfos)
         {
             if(mem.name == name)
@@ -93,8 +93,9 @@ private:
 
     std::unordered_map<std::string, Rc<RHI::TextureView>> textures;
     std::unordered_map<std::string, Rc<RHI::Sampler>> samplers;
-    std::vector<RHI::ShaderUniformBlockMember> memberInfos;
-    std::vector<RHI::ShaderSampler> samplerInfos;
+    std::vector<RHI::ShaderReflection::Resource> samplerInfos;
+    std::vector<RHI::ShaderReflection::Resource> textureInfos;
+    std::vector<RHI::ShaderReflection::Member> memberInfos;
 
     bool dirty = true;
     std::vector<uint8_t> cpuData;

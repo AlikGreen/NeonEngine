@@ -13,7 +13,7 @@ class Image
 {
 public:
     Image(const Rc<RHI::Texture>& texture, const Rc<RHI::Sampler>& sampler);
-    Image(const TextureData &data, Rc<RHI::Sampler> sampler = nullptr);
+    Image(const AssetRef<TextureData> &data, Rc<RHI::Sampler> sampler = nullptr);
 
     Rc<RHI::Texture> texture;
     Rc<RHI::Sampler> sampler;

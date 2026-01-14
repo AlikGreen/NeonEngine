@@ -21,7 +21,7 @@ namespace Neon
         }
     }
 
-    Image::Image(const TextureData &data, Rc<RHI::Sampler> sampler)
+    Image::Image(const AssetRef<TextureData> &data, Rc<RHI::Sampler> sampler)
     {
         const Rc<RHI::Device> device = Engine::getSystem<GraphicsSystem>()->getDevice();
         if(sampler == nullptr)
@@ -33,19 +33,19 @@ namespace Neon
         this->sampler = sampler;
 
         RHI::TextureDescription texDesc{};
-        texDesc.width = data.width;
-        texDesc.height = data.height;
-        texDesc.format = getFormat(data.pixelType);
+        texDesc.width = data->width;
+        texDesc.height = data->height;
+        texDesc.format = getFormat(data->pixelType);
 
         texture = device->createTexture(texDesc);
 
         RHI::TextureUploadDescription uploadDesc{};
 
-        uploadDesc.data = data.data;
-        uploadDesc.pixelType = data.pixelType;
-        uploadDesc.pixelLayout = data.pixelLayout;
-        uploadDesc.width = data.width;
-        uploadDesc.height = data.height;
+        uploadDesc.data = data->data;
+        uploadDesc.pixelType = data->pixelType;
+        uploadDesc.pixelLayout = data->pixelLayout;
+        uploadDesc.width = data->width;
+        uploadDesc.height = data->height;
 
         const auto cl = device->createCommandList();
 

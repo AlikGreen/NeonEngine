@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <typeindex>
 
 #include "assetID.h"
 #include "assetImporter.h"
@@ -34,12 +35,17 @@ public:
     AssetRef<T> getAsset(AssetID assetHandle);
 
     template<typename T>
+    bool assetIsType(const AssetID assetID) const
+    {
+        return assetsMetadata.at(assetID).type == typeid(T);
+    }
+
+    template<typename T>
     Box<T> loadUnmanaged(const std::string& filepath)
     {
         const std::filesystem::path fullPath = getFullPath(filepath);
 
         Debug::ensure(exists(fullPath), "File was not found\n{}", filepath);
-
         Debug::ensure(importers.contains(typeid(T)), "Cannot load object of type {}", typeid(T).name());
 
         const auto assetLoader = importers.at(typeid(T)).get();
@@ -50,23 +56,25 @@ public:
 
     template<typename SerializerType, typename AssetType, typename... Args> requires std::derived_from<SerializerType, AssetSerializer>
     void registerSerializer(Args&&... args)
+    requires std::constructible_from<SerializerType, Args...>
     {
-        Box<SerializerType> serializer = makeBox<SerializerType>(std::forward<Args>(args)...);
-
-        auto typeIndex = std::type_index(typeid(AssetType));
-        serializers.emplace(typeIndex, serializer);
+        auto* serializer = new SerializerType(std::forward<Args>(args)...);
+        serializers.emplace(typeid(AssetType), Box<SerializerType>(serializer));
     }
 
     template<typename LoaderType, typename AssetType, typename... Args> requires std::derived_from<LoaderType, AssetImporter>
     void registerImporter(Args&&... args)
+    requires std::constructible_from<LoaderType, Args...>
     {
         Rc<LoaderType> loader = makeBox<LoaderType>(std::forward<Args>(args)...);
 
         importers.emplace(typeid(AssetType), loader);
     }
 
-    std::stringstream serialize();
-    void deserialize(std::stringstream& stream);
+    template<typename T>
+    AssetStream serialize(AssetRef<T> asset);
+    template<typename T>
+    AssetRef<T> deserialize(AssetStream& assetStream);
 
     std::vector<AssetID> getAllAssetIDs();
     AssetMetadata getMetadata(AssetID handle);

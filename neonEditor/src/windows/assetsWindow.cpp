@@ -8,6 +8,7 @@
 #include "asset/assetManager.h"
 #include "graphics/imGuiSystem.h"
 #include "../editorSystem.h"
+#include "core/scene.h"
 
 struct ImRect;
 
@@ -27,10 +28,9 @@ namespace Neon::Editor
 
                 if(ext == "glb")
                 {
-                    assetManager.import<Prefab>(path);
+                    assetManager.import<Scene>(path);
                     Log::info("Loaded Prefab {}", path);
                 }
-
             }
         }
 

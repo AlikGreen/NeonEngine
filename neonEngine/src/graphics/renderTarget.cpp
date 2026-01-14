@@ -2,10 +2,10 @@
 
 namespace Neon
 {
-    void RenderTarget::resize(const uint32_t w, const uint32_t h)
+    bool RenderTarget::resize(const uint32_t w, const uint32_t h)
     {
         if(m_width == w && m_height == h)
-            return;
+            return false;
 
         m_width = glm::max(w, 1u);
         m_height = glm::max(h, 1u);
@@ -22,6 +22,8 @@ namespace Neon
             const RHI::TextureViewDescription depthViewDesc(depthTex);
             m_depthAttachment = m_device->createTextureView(depthViewDesc);
         }
+
+        return true;
     }
 
     RenderTarget::RenderTarget(const Rc<RHI::Device> &device, const uint32_t w, const uint32_t h, const bool useDepth)

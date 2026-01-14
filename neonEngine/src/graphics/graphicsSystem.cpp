@@ -1,5 +1,6 @@
 #include "graphicsSystem.h"
 
+#include "shaderCompiler.h"
 #include "window.h"
 #include "core/engine.h"
 #include "core/eventManager.h"
@@ -64,7 +65,12 @@ namespace Neon
             0, 2, 3
         };
 
-        Rc<RHI::Shader> shader = m_device->createShaderFromSource(RHI::blitShaderSource);
+        RHI::ShaderCompileDescription compileDesc{};
+        compileDesc.path = "graphicsSystemBlitShader.slang";
+        compileDesc.source = RHI::blitShaderSource;
+        auto spirv = RHI::ShaderCompiler::compile(compileDesc);
+
+        Rc<RHI::Shader> shader = m_device->createShader(spirv);
         shader->compile();
 
         RHI::InputLayout vertexInputState{};
@@ -246,7 +252,7 @@ namespace Neon
         commandList->setVertexBuffer(0, m_vertexBuffer);
 
         commandList->setTexture("blitTexture", texture);
-        commandList->setSampler("blitTexture", sampler);
+        commandList->setSampler("blitSampler", sampler);
 
         commandList->drawIndexed(6);
 

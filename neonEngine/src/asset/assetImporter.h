@@ -1,5 +1,4 @@
 #pragma once
-#include "core/prefab.h"
 
 namespace Neon
 {

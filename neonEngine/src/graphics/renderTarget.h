@@ -7,7 +7,7 @@ namespace Neon
 class RenderTarget
 {
 public:
-    void resize(uint32_t w, uint32_t h);
+    bool resize(uint32_t w, uint32_t h);
 
     Rc<RHI::TextureView> getColorAttachment() { return m_colorAttachment; }
     Rc<RHI::TextureView> getDepthAttachment() { return m_depthAttachment; }
