@@ -2,6 +2,7 @@
 
 #include <imgui.h>
 
+#include "../editorCamera.h"
 #include "core/engine.h"
 #include "core/sceneManager.h"
 #include "core/components/transformComponent.h"
@@ -22,7 +23,7 @@ namespace Neon::Editor
         alignas(16) glm::vec4 gizmoPositions[64]{};
     };
 
-    void GameWindow::init()
+    void GameWindow::startup()
     {
         m_device = Engine::getSystem<GraphicsSystem>()->getDevice();
 
@@ -49,17 +50,22 @@ namespace Neon::Editor
         m_device->submit(cl);
     }
 
+    void GameWindow::update()
+    {
+
+    }
+
     void GameWindow::render()
     {
         ImGui::Begin("Game");
         auto& world = Engine::getSceneManager().getCurrentScene().getRegistry();
-        const auto cameras = world.view<Camera, Transform>();
+        const auto cameras = world.view<Camera, EditorCamera, Transform>();
 
         const ImVec2 avail = ImGui::GetContentRegionAvail();
 
         if(cameras.size() >= 1)
         {
-            auto [camEntity, camera, camTransform] = cameras.at(0);
+            auto [camEntity, camera, editorCamera, camTransform] = cameras.at(0);
             if(camera.renderTarget != nullptr)
             {
                 camera.setAspectRatio(static_cast<float>(avail.x) / static_cast<float>(avail.y));
@@ -90,7 +96,7 @@ namespace Neon::Editor
 
     }
 
-    void GameWindow::renderBillboards(const Transform& camTransform, Camera& camera)
+    void GameWindow::renderBillboards(const Transform& camTransform, Camera& camera) const
     {
         auto& registry = Engine::getSceneManager().getCurrentScene().getRegistry();
 

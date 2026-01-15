@@ -11,7 +11,7 @@ public:
     EventManager() = default;
 
     template<typename T, typename... Args>
-    requires(std::is_base_of_v<Event, T>)
+    requires std::is_base_of_v<Event, T> && std::is_constructible_v<T, Args...>
     void queueEvent(Args&&... args)
     {
         events.push_back(makeBox<T>(std::forward<Args>(args)...));

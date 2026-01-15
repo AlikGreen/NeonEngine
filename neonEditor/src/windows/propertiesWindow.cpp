@@ -2,6 +2,7 @@
 
 #include "sceneGraphWindow.h"
 #include "../editorSystem.h"
+#include "../events/inspectEvent.h"
 #include "core/engine.h"
 #include "core/components/tagComponent.h"
 #include "core/components/transformComponent.h"
@@ -16,35 +17,32 @@ namespace Neon::Editor
     void PropertiesWindow::render()
     {
         ImGui::Begin("Properties");
-        if(m_latestViewedType == LastSelected::Entity && m_latestEntity.has_value())
-            drawEntity(m_latestEntity.value());
 
-        if(m_latestViewedType == LastSelected::Asset && m_latestAsset.has_value())
-            drawAsset(m_latestAsset.value());
+        if(m_currentInspected.has_value())
+        {
+            if (const auto entity = std::get_if<ECS::Entity>(&m_currentInspected.value()))
+            {
+                drawEntity(*entity);
+            }
+            else if (const auto asset = std::get_if<AssetID>(&m_currentInspected.value()))
+            {
+                drawAsset(*asset);
+            }
+        }
 
         ImGui::End();
     }
 
-    void PropertiesWindow::view(ECS::Entity entity)
+    void PropertiesWindow::event(Event *event)
     {
-        m_latestViewedType = LastSelected::Entity;
-        m_latestEntity = entity;
+        if(const auto* inspectEvent = dynamic_cast<InspectEvent*>(event))
+        {
+            m_currentInspected = inspectEvent->inspected;
+        }
     }
 
-    void PropertiesWindow::view(const AssetID asset)
-    {
-        m_latestViewedType = LastSelected::Asset;
-        m_latestAsset = asset;
-    }
 
-    void PropertiesWindow::stopViewing()
-    {
-        m_latestViewedType = LastSelected::None;
-        m_latestAsset = std::nullopt;
-        m_latestEntity = std::nullopt;
-    }
-
-    void PropertiesWindow::drawEntity(ECS::Entity entity)
+    void PropertiesWindow::drawEntity(const ECS::Entity entity)
     {
         ImGui::Spacing();
         if (entity.has<Tag>())
@@ -108,6 +106,8 @@ namespace Neon::Editor
 
         if(metadata.type == typeid(Mesh))
             drawAssetType<Mesh>(asset);
+        if(metadata.type == typeid(MaterialShader))
+            drawAssetType<MaterialShader>(asset);
     }
 
     void PropertiesWindow::drawComponentSpacing()
@@ -154,10 +154,6 @@ namespace Neon::Editor
         drawComponentTitle("Transform");
 
         PropertyGrid grid("##TransformGrid");
-        if (!grid.isOpen())
-        {
-            return;
-        }
 
         glm::vec3 position = transform.getPosition();
         grid.nextRow("Position");
@@ -192,10 +188,6 @@ namespace Neon::Editor
         drawComponentTitle("Tag");
 
         PropertyGrid grid("##TagGrid");
-        if (!grid.isOpen())
-        {
-            return;
-        }
 
         grid.nextRow("Name");
         ImGui::InputText("##value", &tag.name);
@@ -210,10 +202,6 @@ namespace Neon::Editor
         drawComponentTitle("Camera");
 
         PropertyGrid grid("##CameraGrid");
-        if (!grid.isOpen())
-        {
-            return;
-        }
 
         grid.nextRow("Background");
         ImGui::ColorEdit4("##value", &camera.bgColor.x);
@@ -261,15 +249,10 @@ namespace Neon::Editor
         drawComponentTitle("Point Light");
 
         PropertyGrid grid("##PointLightGrid");
-        if (!grid.isOpen())
-        {
-            return;
-        }
 
         grid.nextRow("Color");
         if (ImGui::ColorEdit3("##value", &pointLight.color.x))
-        {
-        }
+        { }
         grid.endRow();
 
         grid.nextRow("Power");
@@ -285,10 +268,6 @@ namespace Neon::Editor
         drawComponentTitle("Mesh Renderer");
 
         PropertyGrid grid("##MeshRendererGrid");
-        if (!grid.isOpen())
-        {
-            return;
-        }
 
         grid.nextRow("Mesh");
         ImGui::TextUnformatted(meshRenderer.mesh ? "<Assigned>" : "<None>");
@@ -309,7 +288,47 @@ namespace Neon::Editor
 
         drawComponentSpacing();
 
-        ImGui::Text("Vectex count: %ld", mesh->getVertexCount());
+        ImGui::Text("Vertex count: %ld", mesh->getVertexCount());
         ImGui::Text("Index count: %ld", mesh->getIndexCount());
+    }
+
+    template<>
+    void PropertiesWindow::drawAssetType<MaterialShader>(const AssetID asset)
+    {
+        AssetManager& assetManager = Engine::getAssetManager();
+        const AssetRef<MaterialShader> mat = assetManager.getAsset<MaterialShader>(asset);
+
+        drawComponentSpacing();
+
+        PropertyGrid propGrid("##MaterialPropertiesGrid");
+        for(const RHI::ShaderReflection::Member& property : mat->getProperties())
+        {
+            propGrid.nextRow(property.name.c_str());
+            if(property.type == RHI::ShaderReflection::DataType::Float)
+            {
+                auto val = mat->getProperty<float>(property.name).value();
+                ImGui::DragFloat("##float", &val, 0.01f);
+                mat->setProperty(property.name, val);
+            }
+            else if(property.type == RHI::ShaderReflection::DataType::Float2)
+            {
+                auto vec2 = mat->getProperty<glm::vec2>(property.name).value();
+                ImGui::DragFloat2("", &vec2.x, 0.01f);
+                mat->setProperty(property.name, vec2);
+            }
+            else if(property.type == RHI::ShaderReflection::DataType::Float3)
+            {
+                auto vec3 = mat->getProperty<glm::vec3>(property.name).value();
+                ImGui::DragFloat3("", &vec3.x, 0.01f);
+                mat->setProperty(property.name, vec3);
+            }
+            else if(property.type == RHI::ShaderReflection::DataType::Float4)
+            {
+                auto vec4 = mat->getProperty<glm::vec4>(property.name).value();
+                ImGui::DragFloat4("", &vec4.x, 0.01f);
+                mat->setProperty(property.name, vec4);
+            }
+            propGrid.endRow();
+        }
     }
 }

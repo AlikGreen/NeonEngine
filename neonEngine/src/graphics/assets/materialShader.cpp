@@ -130,6 +130,21 @@ namespace Neon
         return true;
     }
 
+    std::vector<RHI::ShaderReflection::Resource> MaterialShader::getSamplers() const
+    {
+        return samplerInfos;
+    }
+
+    std::vector<RHI::ShaderReflection::Resource> MaterialShader::getTextures() const
+    {
+        return textureInfos;
+    }
+
+    std::vector<RHI::ShaderReflection::Member> MaterialShader::getProperties() const
+    {
+        return memberInfos;
+    }
+
     Rc<RHI::Pipeline> MaterialShader::getPipeline()
     {
         return pipeline;

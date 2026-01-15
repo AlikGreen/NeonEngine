@@ -1,6 +1,7 @@
 #include "editorSystem.h"
 
 
+#include "editorCamera.h"
 #include "audio/components/audioSource.h"
 #include "core/components/tagComponent.h"
 #include "core/components/transformComponent.h"
@@ -39,9 +40,17 @@ namespace Neon::Editor
         ECS::Entity cameraEntity = scene.createEntity("Main Camera");
         auto& camera = cameraEntity.emplace<Camera>();
         camera.skyboxMaterial = skyboxMaterialAsset;
-        camera.renderTarget = Engine::getSystem<GraphicsSystem>()->createRenderTarget(800, 600);
         auto& camTransform = cameraEntity.get<Transform>();
         camTransform.setPosition({0, 0, 0});
+
+        ECS::Entity editorCameraEntity = scene.createEntity("Editor Camera");
+        auto& editorCamera = editorCameraEntity.emplace<Camera>();
+        editorCamera.skyboxMaterial = skyboxMaterialAsset;
+        editorCamera.renderTarget = Engine::getSystem<GraphicsSystem>()->createRenderTarget(800, 600);
+        auto& editorCameraTransform = editorCameraEntity.get<Transform>();
+        editorCameraTransform.setPosition({0, 0, 0});
+        editorCameraEntity.emplace<EditorCamera>();
+
 
         // Light entity
         ECS::Entity lightEntity = scene.createEntity("Light");
@@ -71,15 +80,22 @@ namespace Neon::Editor
         imGuiSystem->shouldDrawConsole = true;
         imGuiSystem->shouldDrawStats = true;
 
-        viewportWindow.init();
+        editorWindows.push_back(makeBox<GameWindow>());
+        editorWindows.push_back(makeBox<AssetsWindow>());
+        editorWindows.push_back(makeBox<PropertiesWindow>());
+        editorWindows.push_back(makeBox<SceneGraphWindow>());
+
+        for(const auto& window : editorWindows)
+        {
+            window->startup();
+        }
 
         imGuiSystem->addRenderCallback([this]()
         {
-            viewportWindow.render();
-            sceneGraphWindow.render();
-            assetsWindow.render();
-            propertiesWindow.render();
-            editorViewport.render();
+            for(const auto& window : editorWindows)
+            {
+                window->render();
+            }
         });
 
         model->name = "monkey number 12";
@@ -92,14 +108,17 @@ namespace Neon::Editor
 
     void EditorSystem::update()
     {
-
+        for(const auto& window : editorWindows)
+        {
+            window->update();
+        }
     }
 
     void EditorSystem::event(Event* event)
     {
-        if(const auto* windowEvent = dynamic_cast<DropFileEvent*>(event))
+        for(const auto& window : editorWindows)
         {
-            assetsWindow.dropFile(windowEvent->getPath());
+            window->event(event);
         }
     }
 

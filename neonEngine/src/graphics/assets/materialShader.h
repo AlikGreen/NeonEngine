@@ -70,6 +70,9 @@ public:
                 member = mem;
         }
 
+        if(member == std::nullopt)
+            return std::nullopt;
+
         T out;
         memcpy(&out, cpuData.data() + member->offset, sizeof(T));
         return out;
@@ -77,6 +80,10 @@ public:
 
     bool setTexture(std::string name, Rc<RHI::TextureView> texture);
     bool setSampler(std::string name, Rc<RHI::Sampler> sampler);
+
+    std::vector<RHI::ShaderReflection::Resource> getSamplers() const;
+    std::vector<RHI::ShaderReflection::Resource> getTextures() const;
+    std::vector<RHI::ShaderReflection::Member> getProperties() const;
 
     Rc<RHI::Pipeline> getPipeline();
     void bindUniforms(const Rc<RHI::CommandList>& commandList);

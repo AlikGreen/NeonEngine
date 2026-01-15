@@ -2,14 +2,16 @@
 #include <imgui_internal.h>
 #include <vector>
 
+#include "editorWindow.h"
 #include "asset/assetManager.h"
 
 namespace Neon::Editor
 {
-class AssetsWindow final
+class AssetsWindow final : public EditorWindow
 {
 public:
-    void render();
+    void render() override;
+    void event(Event *event) override;
     void dropFile(std::string filepath);
 private:
     std::vector<std::string> droppedPaths;

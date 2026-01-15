@@ -3,12 +3,14 @@
 #include <unordered_set>
 #include <neonECS/neonECS.h>
 
+#include "editorWindow.h"
+
 namespace Neon::Editor
 {
-class SceneGraphWindow final
+class SceneGraphWindow final : public EditorWindow
 {
 public:
-    void render();
+    void render() override;
 private:
     void buildChildrenMap();
 

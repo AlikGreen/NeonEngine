@@ -8,7 +8,10 @@
 #include "asset/assetManager.h"
 #include "graphics/imGuiSystem.h"
 #include "../editorSystem.h"
+#include "../events/inspectEvent.h"
+#include "core/eventManager.h"
 #include "core/scene.h"
+#include "graphics/events/dropFileEvent.h"
 
 struct ImRect;
 
@@ -116,10 +119,7 @@ namespace Neon::Editor
                 }
 
                 if(isReleased && isHovered && !ImGui::GetDragDropPayload())
-                {
-                    PropertiesWindow& propertiesWindow = Engine::getSystem<EditorSystem>()->propertiesWindow;
-                    propertiesWindow.view(assetId);
-                }
+                    Engine::getEventManager().queueEvent<InspectEvent>(assetId);
 
                 const ImVec2 rectMin = ImGui::GetItemRectMin();
                 const ImVec2 rectMax = ImGui::GetItemRectMax();
@@ -204,10 +204,12 @@ namespace Neon::Editor
         ImGui::End();
     }
 
-
-    void AssetsWindow::dropFile(std::string filepath)
+    void AssetsWindow::event(Event *event)
     {
-        droppedPaths.emplace_back(filepath);
-        Log::info("Dropped file: {}", filepath);
+        if(const auto* windowEvent = dynamic_cast<DropFileEvent*>(event))
+        {
+            droppedPaths.emplace_back(windowEvent->getPath());
+            Log::info("Dropped file: {}", windowEvent->getPath());
+        }
     }
 }

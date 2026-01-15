@@ -2,7 +2,7 @@
 #include <imgui.h>
 #include <optional>
 
-#include "../../../neonEngine/dependencies/neonecs/src/entity.h"
+#include "editorWindow.h"
 #include "core/components/tagComponent.h"
 #include "core/components/transformComponent.h"
 #include "graphics/components/camera.h"
@@ -12,13 +12,11 @@
 
 namespace Neon::Editor
 {
-class PropertiesWindow final
+class PropertiesWindow final : public EditorWindow
 {
 public:
-    void render();
-    void view(ECS::Entity entity);
-    void view(AssetID asset);
-    void stopViewing();
+    void render() override;
+    void event(Event *event) override;
 private:
     enum class LastSelected { None, Asset, Entity };
     void drawEntity(ECS::Entity entity);
@@ -42,8 +40,7 @@ private:
 
     LastSelected m_latestViewedType = LastSelected::None;
     std::string m_renameString;
-    std::optional<ECS::Entity> m_latestEntity;
-    std::optional<AssetID> m_latestAsset;
+    std::optional<std::variant<ECS::Entity, AssetID>> m_currentInspected;
 };
 
 template<> void PropertiesWindow::drawComponent<Transform>(ECS::Entity entity);
@@ -53,4 +50,5 @@ template<> void PropertiesWindow::drawComponent<PointLight>(ECS::Entity entity);
 template<> void PropertiesWindow::drawComponent<MeshRenderer>(ECS::Entity entity);
 
 template<> void PropertiesWindow::drawAssetType<Mesh>(AssetID asset);
+template<> void PropertiesWindow::drawAssetType<MaterialShader>(AssetID asset);
 }

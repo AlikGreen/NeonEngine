@@ -11,12 +11,13 @@
 #include "graphics/components/pointLight.h"
 #include "imgui/imGuiExtensions.h"
 #include "../editorSystem.h"
+#include "core/eventManager.h"
+#include "../events/inspectEvent.h"
 
 namespace Neon::Editor
 {
     void SceneGraphWindow::render()
     {
-        PropertiesWindow& propertiesWindow = Engine::getSystem<EditorSystem>()->propertiesWindow;
         ImGui::Begin("Scene Graph");
         Scene& scene = Engine::getSceneManager().getCurrentScene();
 
@@ -56,11 +57,6 @@ namespace Neon::Editor
         ImGui::SetNextItemWidth(-FLT_MIN);
         ImGui::InputTextWithHint("##search", "Search...", &search);
 
-        if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0) && !ImGui::IsAnyItemHovered())
-        {
-            propertiesWindow.stopViewing();
-        }
-
         buildChildrenMap();
 
         for (const auto entity : m_rootEntities)
@@ -70,7 +66,6 @@ namespace Neon::Editor
 
         if(m_pendingDelete.has_value())
         {
-            propertiesWindow.stopViewing();
             scene.getRegistry().destroy(m_pendingDelete.value());
             m_pendingDelete = std::nullopt;
         }
@@ -154,10 +149,7 @@ namespace Neon::Editor
             ImGui::EndPopup();
         }
         else if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-        {
-            PropertiesWindow& propertiesWindow = Engine::getSystem<EditorSystem>()->propertiesWindow;
-            propertiesWindow.view(e);
-        }
+            Engine::getEventManager().queueEvent<InspectEvent>(e);
 
         if (hasChildren)
         {

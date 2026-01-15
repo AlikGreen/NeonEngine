@@ -27,14 +27,8 @@ namespace Neon::Editor
             registeredComponents.emplace_back(name, [](ECS::Entity entity){ entity.emplace<T>(); });
         }
         std::vector<ComponentInfo> getComponents();
-
-        EditorViewportWindow editorViewport{};
-        GameWindow viewportWindow{};
-        AssetsWindow assetsWindow{};
-        PropertiesWindow propertiesWindow{};
-        SceneGraphWindow sceneGraphWindow{};
-
     private:
         std::vector<ComponentInfo> registeredComponents{};
+        std::vector<Box<EditorWindow>> editorWindows{};
     };
 }
