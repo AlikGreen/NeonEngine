@@ -1,7 +1,6 @@
 #pragma once
 #include "core/system.h"
 #include "windows/assetsWindow.h"
-#include "windows/gameWindow.h"
 #include "windows/propertiesWindow.h"
 #include "windows/sceneGraphWindow.h"
 #include "windows/editorViewportWindow.h"

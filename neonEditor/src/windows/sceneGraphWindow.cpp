@@ -16,6 +16,16 @@
 
 namespace Neon::Editor
 {
+    void SceneGraphWindow::update()
+    {
+        Scene& scene = Engine::getSceneManager().getCurrentScene();
+        if(m_pendingDelete.has_value())
+        {
+            scene.getRegistry().destroy(m_pendingDelete.value());
+            m_pendingDelete = std::nullopt;
+        }
+    }
+
     void SceneGraphWindow::render()
     {
         ImGui::Begin("Scene Graph");
@@ -64,11 +74,6 @@ namespace Neon::Editor
             drawEntityNode(entity);
         }
 
-        if(m_pendingDelete.has_value())
-        {
-            scene.getRegistry().destroy(m_pendingDelete.value());
-            m_pendingDelete = std::nullopt;
-        }
         ImGui::End();
     }
 

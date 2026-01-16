@@ -185,6 +185,26 @@ namespace Neon
         }
     }
 
+    MaterialShader MaterialShader::createBillboard()
+    {
+        AssetManager& assetManager = Engine::getAssetManager();
+        const auto shader = assetManager.import<Rc<RHI::Shader>>("shaders/billboard.slang");
+
+        MaterialDescription desc{};
+        desc.name = "Billboard";
+        desc.shader = shader;
+        desc.cullMode = RHI::CullMode::Back;
+        desc.blendEnabled = true;
+        desc.srcColorBlendFactor = RHI::BlendFactor::SrcAlpha;
+        desc.dstColorBlendFactor = RHI::BlendFactor::InvSrcAlpha;
+        desc.srcAlphaBlendFactor = RHI::BlendFactor::One;
+        desc.dstAlphaBlendFactor = RHI::BlendFactor::InvSrcAlpha;
+        desc.depthTest = false;
+        desc.depthWrite = false;
+
+        return MaterialShader(desc);
+    }
+
     MaterialShader MaterialShader::createPBR()
     {
         AssetManager& assetManager = Engine::getAssetManager();

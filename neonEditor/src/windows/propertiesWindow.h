@@ -39,7 +39,8 @@ private:
     static void drawComponentTitle(const char *text);
 
     LastSelected m_latestViewedType = LastSelected::None;
-    std::string m_renameString;
+    std::string m_renameString{};
+    std::string m_componentSearchString{};
     std::optional<std::variant<ECS::Entity, AssetID>> m_currentInspected;
 };
 

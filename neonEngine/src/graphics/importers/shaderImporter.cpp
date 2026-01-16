@@ -15,7 +15,7 @@ namespace Neon
 
         RHI::ShaderCompileDescription compileDesc{};
         compileDesc.path = filepath;
-        compileDesc.source = File::readFileText(filepath.c_str());
+        compileDesc.source = File::read(filepath).value();
         compileDesc.includePaths.push_back(dir);
 
         auto spirv = RHI::ShaderCompiler::compile(compileDesc);

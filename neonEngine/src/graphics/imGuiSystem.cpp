@@ -137,8 +137,6 @@ namespace Neon
             callback();
         }
 
-        ImGui::ShowDemoWindow();
-
         m_imGuiController->endFrame();
 
         const Rc<RHI::Texture> imGuiTexture = m_imGuiController->getFramebufferTexture();;

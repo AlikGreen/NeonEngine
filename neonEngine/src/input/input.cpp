@@ -6,6 +6,7 @@
 namespace Neon
 {
     std::unordered_map<KeyCode, KeyState> Input::keyStates{};
+    std::unordered_map<MouseButton, KeyState> Input::mouseButtonStates{};
     glm::vec2 Input::mousePosition{};
     glm::vec2 Input::mouseDelta{};
 
@@ -22,6 +23,21 @@ namespace Neon
     bool Input::isKeyPressed(const KeyCode key)
     {
         return keyStates[key].pressed;
+    }
+
+    bool Input::isButtonHeld(const MouseButton btn)
+    {
+        return mouseButtonStates[btn].held;
+    }
+
+    bool Input::isButtonReleased(const MouseButton btn)
+    {
+        return mouseButtonStates[btn].released;
+    }
+
+    bool Input::isButtonPressed(const MouseButton btn)
+    {
+        return mouseButtonStates[btn].pressed;
     }
 
     glm::vec2 Input::getMousePosition()

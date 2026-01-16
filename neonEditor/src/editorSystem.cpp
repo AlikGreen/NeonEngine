@@ -13,6 +13,8 @@
 #include "windows/propertiesWindow.h"
 #include "windows/sceneGraphWindow.h"
 
+#include <neonCore/neonCore.h>
+
 namespace Neon::Editor
 {
     void EditorSystem::startup()
@@ -80,7 +82,7 @@ namespace Neon::Editor
         imGuiSystem->shouldDrawConsole = true;
         imGuiSystem->shouldDrawStats = true;
 
-        editorWindows.push_back(makeBox<GameWindow>());
+        editorWindows.push_back(makeBox<EditorViewportWindow>());
         editorWindows.push_back(makeBox<AssetsWindow>());
         editorWindows.push_back(makeBox<PropertiesWindow>());
         editorWindows.push_back(makeBox<SceneGraphWindow>());

@@ -63,17 +63,17 @@ SamplerState emmisionSampler;
 [shader("vertex")]
 VertexOutput vertexMain(VertexInput input)
 {
-VertexOutput output;
+    VertexOutput output;
 
-output.vNormal = input.inNormal;
-output.vUV = input.inUV;
+    output.vNormal = input.inNormal;
+    output.vUV = input.inUV;
 
-float4 fragPos = mul(matrix, float4(input.inPosition, 1.0));
-output.vFragPos = fragPos.xyz;
+    float4 fragPos = mul(matrix, float4(input.inPosition, 1.0));
+    output.vFragPos = fragPos.xyz;
 
-output.position = mul(projMatrix, mul(viewMatrix, fragPos));
+    output.position = mul(projMatrix, mul(viewMatrix, fragPos));
 
-return output;
+    return output;
 }
 
 [shader("fragment")]
@@ -82,18 +82,18 @@ float4 fragmentMain(VertexOutput inV) : SV_Target
     float3 diffuseLight = float3(0.0, 0.0, 0.0);
 
     for (int i = 0; i < count; ++i)
-{
-    PointLight light = lights[i];
-    float dist = length(inV.vFragPos - light.position);
-    float3 lightDir = light.position - inV.vFragPos;
+    {
+        PointLight light = lights[i];
+        float dist = length(inV.vFragPos - light.position);
+        float3 lightDir = light.position - inV.vFragPos;
 
-    diffuseLight += light.color * (1.0 / dist) * light.power * dot(lightDir, inV.vNormal);
-}
+        diffuseLight += light.color * (1.0 / dist) * light.power * dot(lightDir, inV.vNormal);
+    }
 
-diffuseLight = max(diffuseLight, float3(0.2, 0.2, 0.2));
+    diffuseLight = max(diffuseLight, float3(0.2, 0.2, 0.2));
 
-float4 albedo = matAlbedo;
-albedo *= albedoTexture.Sample(albedoSampler, inV.vUV);
+    float4 albedo = matAlbedo;
+    albedo *= albedoTexture.Sample(albedoSampler, inV.vUV);
 
-return albedo * float4(diffuseLight, 1.0);
+    return albedo * float4(diffuseLight, 1.0);
 }

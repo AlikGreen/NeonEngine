@@ -12,8 +12,39 @@
 #include "imgui/imGuiExtensions.h"
 #include "../util/propertyGrid.h"
 
+#include <neonCore/neonCore.h>
+
+#include "core/sceneManager.h"
+
 namespace Neon::Editor
 {
+    int levenshteinDistance(const std::string& a, const std::string& b)
+    {
+        std::string source(a), target(b);
+        for (char& c : source) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        for (char& c : target) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+
+        if (source.size() < target.size()) source.swap(target);
+        int n = static_cast<int>(source.size()), m = static_cast<int>(target.size());
+        std::vector<int> row(m + 1);
+        for (int j = 0; j <= m; ++j) row[j] = j;
+
+        for (int i = 1; i <= n; ++i)
+        {
+            int prevDiag = row[0];
+            row[0] = i;
+            for (int j = 1; j <= m; ++j)
+            {
+                const int temp = row[j];
+                const int cost = (source[i - 1] == target[j - 1]) ? 0 : 1;
+                row[j] = std::min(std::min(temp + 1, row[j - 1] + 1), prevDiag + cost);
+                prevDiag = temp;
+            }
+        }
+
+        return row[m];
+    }
+
     void PropertiesWindow::render()
     {
         ImGui::Begin("Properties");
@@ -44,6 +75,9 @@ namespace Neon::Editor
 
     void PropertiesWindow::drawEntity(const ECS::Entity entity)
     {
+        const auto& registry = Engine::getSceneManager().getCurrentScene().getRegistry();
+        if(!registry.isValid(entity)) return;
+
         ImGui::Spacing();
         if (entity.has<Tag>())
         {
@@ -73,19 +107,31 @@ namespace Neon::Editor
 
         drawComponentSpacing();
 
-        const float width = ImGui::GetContentRegionAvail().x;
-        if (ImGui::Button("Add Component", ImVec2(width, 0)))
+        const float addCompBtnWidth = ImGui::GetContentRegionAvail().x;
+        ImGui::PushFont(ImGuiSystem::subheadingFont);
+        if (ImGui::Button("Add Component", ImVec2(addCompBtnWidth, 0)))
         {
             ImGui::OpenPopup("componentPopup");
         }
+        ImGui::PopFont();
 
         auto* editorSystem = Engine::getSystem<EditorSystem>();
 
+        const auto popupPos = ImVec2(ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y);
+        ImGui::SetNextWindowPos(popupPos);
+        ImGui::SetNextWindowSize(ImVec2(addCompBtnWidth, 0.0f), ImGuiCond_Always);
+
         if (ImGui::BeginPopup("componentPopup"))
         {
+            ImGui::InputText("##compSearch", &m_componentSearchString);
+            const float compBtnWidth = ImGui::GetContentRegionAvail().x;
+
             for(const auto& component : editorSystem->getComponents())
             {
-                if(ImGui::Button(component.name.c_str()))
+                if(!m_componentSearchString.empty() && Str::levenshtein(Str::lower(m_componentSearchString), Str::lower(component.name)) > 3 && !component.name.contains(m_componentSearchString))
+                    continue;
+
+                if(ImGui::Button(component.name.c_str(), ImVec2(compBtnWidth, 0)))
                 {
                     component.emplaceCallback(entity);
                     ImGui::CloseCurrentPopup();

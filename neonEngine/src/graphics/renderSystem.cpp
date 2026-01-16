@@ -82,11 +82,10 @@ namespace Neon
         auto& registry = Engine::getSceneManager().getCurrentScene().getRegistry();
         const auto cameras = registry.view<Camera, Transform>();
 
-        if(cameras.size() < 1) return;
-
-        auto [camEntity, camera, camTransform] = cameras.at(0);
-
-        renderScene(camEntity, camera);
+        for(auto [camEntity, camera, camTransform] : cameras)
+        {
+            renderScene(camEntity, camera);
+        }
     }
 
     void RenderSystem::renderMesh(const Rc<RHI::CommandList>& cl, const ECS::Entity entity, const MeshRenderer& meshRenderer)
@@ -175,6 +174,7 @@ namespace Neon
 
     void RenderSystem::renderScene(ECS::Entity camEntity, Camera &camera)
     {
+        m_currentScenePipeline = nullptr;
         auto& registry = Engine::getSceneManager().getCurrentScene().getRegistry();
 
         const Rc<RHI::CommandList> cl = m_device->createCommandList();

@@ -27,7 +27,7 @@ public:
 
     template<typename T>
     requires std::is_trivially_copyable_v<T>
-    bool setProperty(const std::string& name, T const& value, const Rc<RHI::CommandList>& updateCmd = nullptr)
+    bool setProperty(const std::string& name, T const& value)
     {
         std::optional<RHI::ShaderReflection::Member> member = std::nullopt;
         for(const auto& mem : memberInfos)
@@ -88,6 +88,7 @@ public:
     Rc<RHI::Pipeline> getPipeline();
     void bindUniforms(const Rc<RHI::CommandList>& commandList);
 
+    static MaterialShader createBillboard();
     static MaterialShader createPBR();
     static MaterialShader createEquirectangularSkybox();
 private:

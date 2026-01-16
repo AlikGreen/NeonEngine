@@ -27,9 +27,9 @@ namespace Neon::Editor
 
             if (rect.Contains(p))
             {
-                std::string ext = File::getFileExtension(path);
+                std::string ext = Path::extension(path);
 
-                if(ext == "glb")
+                if(ext == ".glb")
                 {
                     assetManager.import<Scene>(path);
                     Log::info("Loaded Prefab {}", path);

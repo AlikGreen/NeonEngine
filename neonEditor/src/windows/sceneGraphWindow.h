@@ -10,6 +10,7 @@ namespace Neon::Editor
 class SceneGraphWindow final : public EditorWindow
 {
 public:
+    void update() override;
     void render() override;
 private:
     void buildChildrenMap();

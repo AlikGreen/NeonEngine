@@ -28,6 +28,8 @@ namespace Neon
         int w, h, channels;
         void *pixels{};
 
+        stbi_set_flip_vertically_on_load(true);
+
         if (ext == "exr" || ext == "hdr")
             pixels = stbi_loadf(filepath.c_str(), &w, &h, &channels, 4);
         else
