@@ -86,7 +86,7 @@ float2 dirToEquirectUv(float3 dir)
     dir = normalize(dir);
 
     float phi = atan2(dir.z, dir.x);
-    float theta = asin(clamp(dir.y, -1.0, 1.0));
+    float theta = asin(clamp(-dir.y, -1.0, 1.0));
 
     float u = phi / (2.0 * PI) + 0.5;
     float v = 0.5 - (theta / PI);
