@@ -2,7 +2,6 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/coral" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/miniaudio" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonecs" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonecs/dependencies/neonCore" vcs="Git" />
@@ -21,6 +20,5 @@
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/rapidyaml/ext/c4core/src/c4/ext/fast_float" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/neonrhi/dependencies/spirv-cross" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/neonEngine/dependencies/tinygltf" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/neonEngine/sdk/modules/neon" vcs="Git" />
   </component>
 </project>
