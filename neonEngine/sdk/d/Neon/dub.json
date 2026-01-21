@@ -1,0 +1,9 @@
+{
+    "authors": ["alikg"],
+    "copyright": "Copyright © 2026, alikg",
+    "description": "A minimal D application.",
+    "license": "MIT",
+    "name": "neon",
+    "targetType": "dynamicLibrary",
+    "targetPath": "bin"
+}

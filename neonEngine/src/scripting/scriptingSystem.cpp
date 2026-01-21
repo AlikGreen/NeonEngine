@@ -7,6 +7,10 @@
 
 #include "core/engine.h"
 #include "core/sceneManager.h"
+#include "core/components/tagComponent.h"
+#include "core/components/transformComponent.h"
+#include "graphics/components/camera.h"
+#include "graphics/components/meshRenderer.h"
 #include "input/input.h"
 #include "timers/scopeTimer.h"
 
@@ -19,27 +23,6 @@ namespace Neon
         const void* components;
     };
 
-    using IsKeyFn = bool(*)(int);
-    using GetRegistryFn = ECS::Registry*(*)();
-    using RegisterTypeFn = void(*)(ECS::Registry*, size_t, size_t, size_t);
-    using ViewIterNextFn = RegistryComponentPack*(*)(ECS::ViewBase*);
-    using GetViewFn = ECS::ViewBase*(*)(ECS::Registry*, size_t*, size_t);
-    using CreateEntityFn = size_t(*)(ECS::Registry*);
-    using EmplaceComponentFn = void(*)(ECS::Registry*, size_t, size_t, void*);
-
-    struct Callbacks
-    {
-        IsKeyFn is_key_held;
-        IsKeyFn is_key_pressed;
-        IsKeyFn is_key_released;
-
-        RegisterTypeFn register_type;
-        GetRegistryFn get_registry;
-        ViewIterNextFn view_iter_next;
-        GetViewFn get_view;
-        CreateEntityFn create_entity;
-        EmplaceComponentFn emplace_component;
-    };
 
     // V lang interop api
     extern "C"
@@ -69,18 +52,31 @@ namespace Neon
             return &Engine::getSceneManager().getCurrentScene().getRegistry();
         }
 
-        RegistryComponentPack* native_viewIterNext(ECS::ViewBase* viewPtr)
+        RegistryComponentPack* native_getViewAt(ECS::ViewBase* viewPtr, size_t index)
         {
-            if (!viewPtr) return nullptr;
-            auto* view = dynamic_cast<ECS::TypeErasedView*>(viewPtr);
-            if(!view->next())
+            if (!viewPtr)
+            {
+                Log::error("viewPtr is null\n");
                 return nullptr;
+            }
 
-            const ECS::TypeErasedView::ComponentPack& pack = view->current();  // Reference, not copy
+            const auto* view = dynamic_cast<ECS::TypeErasedView*>(viewPtr);
+            if (!view)
+            {
+                Log::error("dynamic_cast failed\n");
+                return nullptr;
+            }
 
+            if(index >= view->size())
+            {
+                Log::error("index greater than view size\n");
+                return nullptr;
+            }
+
+            const ECS::TypeErasedView::ComponentPack pack = view->at(index);
             auto* registryPack = new RegistryComponentPack();
             registryPack->entityId = pack.entityId;
-            registryPack->components = pack.components.data();  // Now safe - points to m_cachedPack
+            registryPack->components = pack.components.data();
             registryPack->componentCount = pack.components.size();
 
             return registryPack;
@@ -98,68 +94,118 @@ namespace Neon
             return reg->createEntity().getId();
         }
 
-        void native_emplaceComponent(ECS::Registry* reg, size_t entity, size_t componentType, void* data)
+        size_t native_getViewSize(ECS::ViewBase* viewPtr)
+        {
+            return dynamic_cast<ECS::TypeErasedView*>(viewPtr)->size();
+        }
+
+        void* native_emplaceComponent(ECS::Registry* reg, size_t entity, size_t componentType, void* data)
         {
             ECS::StorageBase& storage = reg->storageTypeErased(componentType);
-            storage.emplaceOpaquePtr(entity, data);
+            return storage.emplaceOpaquePtr(entity, data);
+        }
+
+        size_t native_getCppTypeHash(const char* typeName)
+        {
+            // Convert C++ type name to hash_code
+            // You need to map string names to actual type_info
+            const std::string name(typeName);
+
+            if (name == "Transform")
+                return typeid(Transform).hash_code();
+            if (name == "Camera")
+                return typeid(Camera).hash_code();
+            if (name == "MeshRenderer")
+                return typeid(MeshRenderer).hash_code();
+            if (name == "Tag")
+                return typeid(Tag).hash_code();
+
+            Log::error("Unknown native component type: " + name);
+            return 0;
+        }
+
+        const char* native_tagGetName(void* tag)
+        {
+            return static_cast<Tag*>(tag)->name.c_str();
+        }
+
+        void native_tagSetName(void* tag, const char* name)
+        {
+            Log::info("Tag set: {}", name);
+            static_cast<Tag*>(tag)->name = name;
         }
     }
 
+    using TagGetName = const char*(*)(void*);
+    using TagSetName = void(*)(void*, const char*);
+
+    struct TagCallbacks
+    {
+        TagGetName getName = native_tagGetName;
+        TagSetName setName = native_tagSetName;
+    };
+
+    using RegistryRegisterTypeFn = void(*)(ECS::Registry*, size_t, size_t, size_t);
+    using RegistryGetViewFn = ECS::ViewBase*(*)(ECS::Registry*, size_t*, size_t);
+    using RegistryCreateEntityFn = size_t(*)(ECS::Registry*);
+    using RegistryEmplaceComponentFn = void*(*)(ECS::Registry*, size_t, size_t, void*);
+    using GetCppTypeHash = size_t(*)(const char*);
+
+    using ViewGetAtFn = RegistryComponentPack*(*)(ECS::ViewBase*, size_t);
+    using ViewGetSizeFn = size_t(*)(ECS::ViewBase*);
+
+    struct RegistryCallbacks
+    {
+        GetCppTypeHash getCppTypeHash = native_getCppTypeHash;
+
+        RegistryRegisterTypeFn registerType = native_registerType;
+        RegistryGetViewFn getView = native_getView;
+        RegistryCreateEntityFn createEntity = native_createEntity;
+        RegistryEmplaceComponentFn emplaceComponent = native_emplaceComponent;
+
+        ViewGetAtFn viewGetAt = native_getViewAt;
+        ViewGetSizeFn viewGetSize = native_getViewSize;
+    };
+
+    using IsKeyFn = bool(*)(int);
+
+    struct InputCallbacks
+    {
+        IsKeyFn isKeyHeld = native_isKeyHeld;
+        IsKeyFn isKeyPressed = native_isKeyPressed;
+        IsKeyFn isKeyReleased = native_isKeyReleased;
+    };
+
+    using GetRegistryFn = ECS::Registry*(*)();
+
+    struct Callbacks
+    {
+        GetRegistryFn getRegistry = native_getRegistry;
+
+        InputCallbacks* inputCallbacks = new InputCallbacks();
+        RegistryCallbacks* registryCallbacks = new RegistryCallbacks();
+        TagCallbacks* tagCallbacks = new TagCallbacks();
+    };
+
     void ScriptingSystem::startup()
     {
-        int result = 0;
+        auto& registry = Engine::getSceneManager().getCurrentScene().getRegistry();
+        registry.registerType<Transform>();
+        registry.registerType<Camera>();
+        registry.registerType<Tag>();
+        registry.registerType<MeshRenderer>();
 
         {
-            Debug::ScopeTimer<std::chrono::milliseconds> timer("V script compilation");
+            Debug::ScopeTimer<std::chrono::milliseconds> timer("script load");
+            const char* dllPath = R"(C:\Users\alikg\CLionProjects\NeonEngine\neonEngine\sdk\d\Neon\bin\neon.dll)";
+            m_scriptLib = LoadLibraryA(dllPath);
+            Debug::ensure(m_scriptLib != nullptr, "Unable to load script library");
 
-            std::string basePath = "C:/Users/alikg/CLionProjects/NeonEngine";
-            std::string vExe     = Path::join(basePath, "neonEngine/dependencies/v/bin/windows/v.exe");
-            std::string scriptDir   = Path::join(basePath, "neonEngine/sdk/modules/neon");
-
-            std::stringstream cmd;
-
-            cmd << vExe;
-
-            cmd << " -enable-globals";
-            cmd << " -shared";
-            cmd << " -g";
-            cmd << " -cc tcc"; // -prod for optimization / gcc
-            cmd << " -d no_backtrace";
-            cmd << " -o scripts.dll";
-
-            cmd << " " << scriptDir;
-
-            result = std::system(cmd.str().c_str());
-        }
-
-        Debug::ensure(result == 0, "Failed to compile script");
-
-        if (result == 0)
-            Log::info("V compilation successful!");
-        else
-            Log::error("Error compiling V script!");
-
-        {
-            Debug::ScopeTimer<std::chrono::milliseconds> timer("V script load");
-            m_scriptLib = LoadLibraryA("scripts.dll");
-            if (!m_scriptLib) return;
-
-
-            std::function vFnRegisterCbs = getFunction<void, void*>("native_register_callbacks");
+            const std::function vFnRegisterCbs = getFunction<void, void*>("native_registerCallbacks");
             m_vFnUpdate = getFunction<void>("native_update");
+            Debug::ensure(m_vFnUpdate != nullptr, "Can't find native native_update");
 
             auto* cbs = new Callbacks();
-            cbs->is_key_held = native_isKeyHeld;
-            cbs->is_key_pressed = native_isKeyPressed;
-            cbs->is_key_released = native_isKeyReleased;
-
-            cbs->register_type = native_registerType;
-            cbs->get_registry = native_getRegistry;
-            cbs->view_iter_next = native_viewIterNext;
-            cbs->get_view = native_getView;
-            cbs->create_entity = native_createEntity;
-            cbs->emplace_component = native_emplaceComponent;
-
             vFnRegisterCbs(cbs);
         }
     }

@@ -24,11 +24,15 @@ private:
 
         if (rawAddr == nullptr)
         {
-            Log::error("Failed to find function '{}'", name);
+            DWORD error = GetLastError();
+            Log::error("Failed to find function '{}' - Error: {}", name, error);
             return nullptr;
         }
 
-        return reinterpret_cast<FunctionPtr>(rawAddr);
+        Log::info("Found function '{}' at address: {:p}", name, (void*)rawAddr);
+
+        FunctionPtr funcPtr = reinterpret_cast<FunctionPtr>(rawAddr);
+        return std::function<Res(ArgTypes...)>(funcPtr);
     }
 
     HMODULE m_scriptLib = nullptr;
