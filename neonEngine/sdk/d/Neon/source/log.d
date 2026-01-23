@@ -1,9 +1,10 @@
 import std.stdio;
+import std.format;
 
 class Log
 {
-    static void info(string text)
+    public static void info(T...)(string fmt, T args)
     {
-        writeln(text);
+        writefln(fmt.format(args));
     }
 }

@@ -15,8 +15,7 @@ namespace Neon
 
     struct EngineConfig
     {
-        std::string engineResourcesPath;
-        std::string gameResourcesPath;
+        std::vector<std::string> resourcePaths{};
         RHI::WindowCreationOptions windowOptions;
     };
 

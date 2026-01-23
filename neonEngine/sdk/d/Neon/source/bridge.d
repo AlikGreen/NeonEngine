@@ -4,68 +4,103 @@ import std.algorithm;
 
 import log;
 import input;
-import registry;
+import scene;
+import system;
+import scene_management;
 
-alias GetRegistryFn = extern (C) void* function();
-
-struct Callbacks
+struct ScriptRuntimeInterface
 {
-    GetRegistryFn getRegistry = null;
-
-    InputCallbacks* inputCallbacks = null;
-    RegistryCallbacks* registryCallbacks = null;
-    TagCallbacks* tagCallbacks = null;
+    InputCallbacks input;
+    EcsCallbacks ecs;
+    SceneCallbacks scene;
+    ComponentsCallbacks components;
 }
 
-Callbacks g_callbacks;
-
-struct Position
-{
-    float x;
-    float y;
-}
-
-struct Velocity
-{
-    float x;
-    float y;
-}
+ScriptRuntimeInterface g_scriptRuntimeInterface;
 
 import core.runtime;
 
-version(Windows)
+version (Windows)
 {
     import core.sys.windows.dll;
-    
-    mixin SimpleDllMain;  // auto-initializes D runtime
+
+    mixin SimpleDllMain; // auto-initializes D runtime
 }
 
+alias UpdateDelegate = void function();
+private UpdateDelegate[] pendingUpdates;
 
+System[] discoveredSystems;
 
-extern (C) export void native_registerCallbacks(Callbacks* cbStruct)
+void discoverSystems()
 {
-    try 
+    auto sysTI = cast(TypeInfo_Class) typeid(System);
+
+    foreach (minfo; ModuleInfo)
     {
-        if (cbStruct == null)
+        foreach (ti; minfo.localClasses)
+        {
+            if (ti is null)
+            {
+                continue;
+            }
+
+            if (sysTI.isBaseOf(ti))
+            {
+                Object created;
+                try
+                {
+                    created = ti.create();
+                }
+                catch (Exception e)
+                {
+                    continue;
+                }
+
+                auto s = cast(System) created;
+                if (s !is null)
+                {
+                    discoveredSystems ~= s;
+                }
+            }
+        }
+    }
+}
+
+extern (C) export void native_registerCallbacks(ScriptRuntimeInterface* runtimeInterface)
+{
+    try
+    {
+        if (runtimeInterface == null)
         {
             writeln("cbStruct is NULL!");
             return;
         }
 
-        g_callbacks = *cbStruct;
+        g_scriptRuntimeInterface = *runtimeInterface;
+        Log.info("Callbacks size: %s", ScriptRuntimeInterface.sizeof);
 
-        Registry.setCallbacks(*g_callbacks.registryCallbacks);
-        Input.setCallbacks(*g_callbacks.inputCallbacks);
-        Tag.setCallbacks(*g_callbacks.tagCallbacks);
+        Scene.setCallbacks(g_scriptRuntimeInterface.ecs);
+        Input.setCallbacks(g_scriptRuntimeInterface.input);
+        NativeComponent.setCallbacks(g_scriptRuntimeInterface.components);
+        SceneManager.setCallbacks(g_scriptRuntimeInterface.scene);
+
+        discoverSystems();
+
+        foreach (system; discoveredSystems)
+        {
+            system.startup();
+        }
     }
-    catch (Throwable t) 
+    catch (Throwable t)
     {
         import std.stdio : stderr;
+
         stderr.writeln("=====================================");
         stderr.writeln("D SCRIPT ERROR:");
         stderr.writeln(t.msg);
         stderr.writeln("Stack trace:");
-        stderr.writeln(t.info); 
+        stderr.writeln(t.info);
         stderr.writeln("=====================================");
     }
 }
@@ -73,35 +108,23 @@ extern (C) export void native_registerCallbacks(Callbacks* cbStruct)
 extern (C) export void native_update()
 {
     import core.stdc.stdio : printf;
-    try 
+
+    try
     {
-        void* registryHandle = g_callbacks.getRegistry();
-        Registry registry = new Registry(registryHandle);
-        auto view = registry.view!(Transform, Camera)();
-
-        int count = 0;
-
-        foreach (entity, transform, camera; view)
+        foreach (system; discoveredSystems)
         {
-            if(count != 0) continue;
-            count++;
-
-            if(Input.isKeyHeld(KeyCode.w))
-            {
-                transform.position.z += 0.01f;
-                printf("[%d] entity_id: %zu\n", count, entity);
-                printf("Position: z=%f\n", transform.position.z);
-            }
+            system.update();
         }
     }
-    catch (Throwable t) 
+    catch (Throwable t)
     {
         import std.stdio : stderr;
+
         stderr.writeln("=====================================");
         stderr.writeln("D SCRIPT ERROR:");
         stderr.writeln(t.msg);
         stderr.writeln("Stack trace:");
-        stderr.writeln(t.info); 
+        stderr.writeln(t.info);
         stderr.writeln("=====================================");
     }
 }

@@ -15,28 +15,28 @@ public:
     void update() override;
     void shutdown() override;
 private:
-    template<typename Res, typename... ArgTypes>
-    std::function<Res(ArgTypes...)> getFunction(const char* name)
+    template<typename Res, typename... Args>
+    std::function<Res(Args...)> loadFunction(const char* symbolName)
     {
-        using FunctionPtr = Res(*)(ArgTypes...);
+        using FunctionPtr = Res(*)(Args...);
 
-        FARPROC rawAddr = GetProcAddress(m_scriptLib, name);
+        FARPROC rawAddr = GetProcAddress(m_runtimeHandle, symbolName);
 
         if (rawAddr == nullptr)
         {
             DWORD error = GetLastError();
-            Log::error("Failed to find function '{}' - Error: {}", name, error);
+            Log::error("Failed to find function '{}' - Error: {}", symbolName, error);
             return nullptr;
         }
 
-        Log::info("Found function '{}' at address: {:p}", name, (void*)rawAddr);
+        Log::info("Found function '{}' at address: {:p}", symbolName, reinterpret_cast<void*>(rawAddr));
 
-        FunctionPtr funcPtr = reinterpret_cast<FunctionPtr>(rawAddr);
-        return std::function<Res(ArgTypes...)>(funcPtr);
+        auto funcPtr = reinterpret_cast<FunctionPtr>(rawAddr);
+        return std::function<Res(Args...)>(funcPtr);
     }
 
-    HMODULE m_scriptLib = nullptr;
+    HMODULE m_runtimeHandle = nullptr;
 
-    std::function<void()> m_vFnUpdate = nullptr;
+    std::function<void()> m_updateCallback = nullptr;
 };
 }

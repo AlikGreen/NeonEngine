@@ -1,13 +1,12 @@
 module input;
 
-alias IsKeyFn = extern (C) bool function(int);
-
 struct InputCallbacks
 {
-    IsKeyFn isKeyHeld = null;
-    IsKeyFn isKeyPressed = null;
-    IsKeyFn isKeyReleased = null;
+    extern (C) bool function(int) isKeyHeld;
+    extern (C) bool function(int) isKeyPressed;
+    extern (C) bool function(int) isKeyReleased;
 }
+
 
 struct Input
 {

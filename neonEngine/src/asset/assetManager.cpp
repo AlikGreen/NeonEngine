@@ -8,17 +8,12 @@ namespace Neon
 {
     std::string AssetManager::getFullPath(const std::string &filePath)
     {
-        const std::array possiblePaths =
+        for (const auto& dir: Engine::getConfig().resourcePaths)
         {
-            std::filesystem::path(Engine::getConfig().gameResourcesPath)/filePath,
-            std::filesystem::path(Engine::getConfig().engineResourcesPath)/filePath,
-        };
-
-        for (const auto& path: possiblePaths)
-        {
-            if(exists(path))
+            auto filepath = std::filesystem::path(dir)/filePath;
+            if(exists(filepath))
             {
-                return path.string();
+                return filepath.string();
             }
         }
         return filePath;

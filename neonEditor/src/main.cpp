@@ -17,9 +17,11 @@ int main()
     Neon::EngineConfig config;
     config.windowOptions.title = "Sandbox App";
     config.windowOptions.vsync = false;
+    config.windowOptions.fullscreen = false;
 
-    config.engineResourcesPath = R"(C:\Users\alikg\CLionProjects\neonEngine\neonEngine\resources)";
-    config.gameResourcesPath = R"(C:\Users\alikg\CLionProjects\neonEngine\sandboxApp\resources)";
+    config.resourcePaths.emplace_back(R"(C:\Users\alikg\CLionProjects\neonEngine\neonEngine\resources)");
+    config.resourcePaths.emplace_back(R"(C:\Users\alikg\CLionProjects\neonEngine\neonEditor\resources)");
+    config.resourcePaths.emplace_back(R"(C:\Users\alikg\CLionProjects\neonEngine\sandboxApp\resources)"); // didnt want to copy the assets over
 
     Neon::Engine::initialize(config);
 
