@@ -33,7 +33,7 @@ namespace Neon
         {
             Debug::ScopeTimer<std::chrono::milliseconds> timer("Script runtime load");
 
-            const auto dllPath = R"(C:\Users\alikg\CLionProjects\NeonEngine\neonEngine\sdk\d\Neon\bin\neon.dll)";
+            const auto dllPath = R"(C:\Users\alikg\CLionProjects\NeonEngine\neonEngine\sdk\d\bin\neon.dll)";
 
             m_runtimeHandle = LoadLibraryA(dllPath);
 
@@ -41,6 +41,7 @@ namespace Neon
 
             // Load required functions from the runtime
             auto registerCallbacksFn = loadFunction<void, void*>("native_registerCallbacks");
+            auto loadDllFn = loadFunction<void, const char*>("native_loadLib");
             m_updateCallback = loadFunction<void>("native_update");
 
             Debug::ensure(m_updateCallback != nullptr, "Failed to find 'native_update' in script runtime");
@@ -49,6 +50,8 @@ namespace Neon
             Scripting::ScriptRuntimeInterface scriptInterface = Scripting::createRuntimeInterface();
             Log::info("Callbacks size: {}", sizeof(Scripting::ScriptRuntimeInterface));
             registerCallbacksFn(&scriptInterface);
+
+            loadDllFn(R"(C:\Users\alikg\CLionProjects\NeonEngine\neonEditor\resources\scripts\bin\neon_editor.dll)");
         }
     }
 

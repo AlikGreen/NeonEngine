@@ -4,7 +4,6 @@ import std.algorithm;
 
 import log;
 import input;
-import scene;
 import system;
 import scene_management;
 
@@ -23,7 +22,6 @@ import core.runtime;
 version (Windows)
 {
     import core.sys.windows.dll;
-
     mixin SimpleDllMain; // auto-initializes D runtime
 }
 
@@ -31,6 +29,8 @@ alias UpdateDelegate = void function();
 private UpdateDelegate[] pendingUpdates;
 
 System[] discoveredSystems;
+void*[] loadedLibs;
+
 
 void discoverSystems()
 {
@@ -41,27 +41,38 @@ void discoverSystems()
         foreach (ti; minfo.localClasses)
         {
             if (ti is null)
+                continue;
+
+            if (!sysTI.isBaseOf(ti))
+                continue;
+            
+            bool alreadyLoaded = false;
+            foreach (existing; discoveredSystems)
+            {
+                if (typeid(existing) == ti)
+                {
+                    alreadyLoaded = true;
+                    break;
+                }
+            }
+            
+            if (alreadyLoaded)
+                continue;
+            
+            Object created;
+            try
+            {
+                created = ti.create();
+            }
+            catch (Exception e)
             {
                 continue;
             }
 
-            if (sysTI.isBaseOf(ti))
+            auto s = cast(System) created;
+            if (s !is null)
             {
-                Object created;
-                try
-                {
-                    created = ti.create();
-                }
-                catch (Exception e)
-                {
-                    continue;
-                }
-
-                auto s = cast(System) created;
-                if (s !is null)
-                {
-                    discoveredSystems ~= s;
-                }
+                discoveredSystems ~= s;
             }
         }
     }
@@ -103,6 +114,50 @@ extern (C) export void native_registerCallbacks(ScriptRuntimeInterface* runtimeI
         stderr.writeln(t.info);
         stderr.writeln("=====================================");
     }
+}
+
+extern (C) export void native_loadLib(const(char)* cpath)
+{
+    import std.string : fromStringz;
+    import std.file : exists, isFile;
+    import std.path : absolutePath;
+    
+    string filepath = fromStringz(cpath).idup;
+    
+    // Check if file exists
+    if (!exists(filepath))
+    {
+        Log.info("ERROR: File does not exist: %s", filepath);
+        Log.info("  Absolute path would be: ", absolutePath(filepath));
+        return;
+    }
+    
+    if (!isFile(filepath))
+    {
+        Log.info("ERROR: Path exists but is not a file: ", filepath);
+        return;
+    }
+    
+    Log.info("File exists, attempting to load...");
+    
+    auto handle = Runtime.loadLibrary(filepath);
+    if (handle is null)
+    {
+        Log.info("ERROR: Failed to load library");
+        
+        version(Windows)
+        {
+            import core.sys.windows.windows;
+            auto err = GetLastError();
+            Log.info("  Windows error code: ", err);
+        }
+
+        return;
+    }
+    
+    Log.info("Successfully loaded library!");
+    loadedLibs ~= handle;
+    discoverSystems();
 }
 
 extern (C) export void native_update()

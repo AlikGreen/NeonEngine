@@ -1,6 +1,6 @@
-module scene_management;
-public import scene;
-import std.stdio;
+module scene_management.scene_manager;
+
+import scene_management.scene;
 
 private alias GetCurrentSceneFn = void* function();
 private alias GetRegistryFn = void* function(void*);

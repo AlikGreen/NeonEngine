@@ -1,4 +1,4 @@
-module components;
+module scene_management.components;
 public import math;
 
 

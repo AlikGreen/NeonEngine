@@ -1,7 +1,8 @@
-module scene;
+module scene_management.scene;
+
 import std.stdio;
 import std.traits;
-public import components;
+public import scene_management.components;
 
 struct EntityComponentData
 {

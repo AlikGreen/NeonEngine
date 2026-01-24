@@ -4,6 +4,7 @@
     "description": "A minimal D application.",
     "license": "MIT",
     "name": "neon",
+    "dflags-ldc": ["-link-defaultlib-shared"],
     "targetType": "dynamicLibrary",
     "targetPath": "bin"
 }
