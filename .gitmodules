@@ -25,3 +25,6 @@
 [submodule "neonEngine/dependencies/miniaudio"]
 	path = neonEngine/dependencies/miniaudio
 	url = https://github.com/mackron/miniaudio.git
+[submodule "neonEngine/dependencies/coral"]
+	path = neonEngine/dependencies/coral
+	url = https://github.com/AlikGreen/Coral.git
